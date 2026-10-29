@@ -105,6 +105,17 @@ KorWikiTabular(사전학습 코퍼스)와 EXAONE(모델)은 접근이 막혀 사
          (BM25)    (mT5 | 휴리스틱)  (tools)  └─retry──> propose_fallback(휴리스틱) ──> verify
 ```
 
+```mermaid
+flowchart LR
+  Q[질문] --> R[retrieve<br/>BM25 표·문단]
+  R --> P[propose<br/>mT5 프로그램 / 휴리스틱]
+  P --> T[tools<br/>cell_lookup · calculate]
+  T --> V[verify<br/>범위·일치·재계산·단위·기간·본문]
+  V -->|통과| A[답변 + 근거 셀/문장 + 계산식]
+  V -->|근거 없음·불일치| H[보류 + 사유]
+  V -.->|해석 불가·검증 실패 1회| F[propose_fallback<br/>휴리스틱] -.-> V
+```
+
 - **신뢰 경계**: 문서 텍스트·셀·질문은 데이터입니다. 모델 출력은 정규식 문법으로만 해석되고(`agent/program.py`), 셀 좌표는 범위 검사, 도구 인자는 pydantic 검증, 계산기는 숫자·사칙연산·괄호만 받는 AST 평가기입니다. 임의 코드 실행 경로가 없습니다(`tests/test_api.py::test_document_text_is_data_not_commands`).
 - **비동기 처리**: CPU 바운드 추론은 스레드 풀에서 실행하고 이벤트 루프는 상태 조회·정적 파일을 계속 처리합니다. 상태: `queued → running → done | failed | timeout`, 큐 초과 시 429.
 - **LangGraph를 쓴 이유**: 분기(검증 실패 → 보완 제안)가 있는 짧은 워크플로를 명시적 그래프로 두면 노드 경계가 곧 콘솔의 실행 추적 단계가 되고, 플래너(모델/휴리스틱/외부 엔진)를 바꿔 끼워도 그래프가 같습니다. `GET /v1/graph`가 Mermaid를 반환합니다.
@@ -261,7 +272,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | EXAONE 사용 | **미실행** — HF 차단·GPU 없음; 라이선스·조건 확인 | docs/experiments/exaone.md |
 | FastAPI + LangGraph + 도구 + 비동기 작업 | 완료 | 테스트 통과 |
 | 콘솔(데스크톱·모바일·상태·키보드) + E2E | 완료 | `docs/images/`, `e2e-*.json` |
-| Docker 이미지 | (채움) | |
+| Docker 이미지 | 완료(로컬 빌드·컨테이너 smoke) | `experiments/docker/smoke.json`; 이 환경에선 Docker Hub 429로 MCR 베이스 이미지 사용 |
 | GitHub Actions CI | **실행 못 함** — 푸시 권한 없음(워크플로 파일은 작성) | |
 | GitHub Pages 공개 배포 | **실행 못 함** — 같은 이유. 정적 빌드는 로컬 E2E로 검증 | |
 | gRPC | 미구현(불필요 판단) | §7 |

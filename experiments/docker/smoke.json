@@ -1,0 +1,8 @@
+{
+ "image": "tabletrace:ci",
+ "id_size": "0fa745ca8794 2.89GB",
+ "base_image": "mcr.microsoft.com/devcontainers/python:3.13-bookworm (Docker Hub/ECR returned 429 in this environment; CI uses python:3.13-slim)",
+ "built_at": "2026-10-29T09:09:01",
+ "build_notes": "docker build --network host --secret id=pipca,src=<proxy CA> because the session egress proxy re-signs TLS",
+ "smoke": "GET /v1/health, /v1/release, /v1/corpora; POST /v1/ask (ammonia critical pressure -> 11,300, cell r4c2); GET / (console)"
+}

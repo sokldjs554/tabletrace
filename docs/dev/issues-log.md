@@ -18,4 +18,6 @@
 | 14 | 콘솔 | 모바일에서 첫 진입 시 문서 자동 선택이 본문 탭으로 전환해 대표 질문이 안 보임 | 자동 선택과 사용자 선택을 구분 안 함 | `auto` 플래그 | E2E 모바일 통과 |
 | 15 | 콘솔 | favicon 404 콘솔 오류 | 아이콘 없음 | 인라인 SVG 아이콘 | E2E 오류 0 |
 | 16 | 운영 | 실험 파이프라인이 로그 디렉터리 부재로 시작 즉시 종료 | 리디렉션이 mkdir보다 먼저 | 디렉터리 선생성 | 프로세스 확인 |
-| 17 | Docker | 데몬 미실행 → `docker build` 실패; 기동 후 Docker Hub 429 | 컨테이너 환경 제한, 레지스트리 속도 제한 | `dockerd` 수동 기동, `BASE_IMAGE` 빌드 인자로 미러 지정 | (아래 결과 참조) |
+| 17 | Docker | 데몬 미실행 → `docker build` 실패; 기동 후 Docker Hub 429 | 컨테이너 환경 제한, 레지스트리 속도 제한 | `dockerd` 수동 기동, `BASE_IMAGE` 빌드 인자(MCR 미러), 컨테이너 안 pip의 프록시 CA 오류는 BuildKit 시크릿 `pipca`로 해결 | 이미지 786 MB 빌드, 컨테이너 smoke 통과(`experiments/docker/smoke.json`) |
+| 18 | 운영 | `pkill -f` 패턴이 자기 셸까지 종료(exit 144) 2회 | 패턴이 명령줄에 포함 | PID 지정 kill / `fuser -k` 사용 | — |
+| 19 | 서빙 | Docker 이미지가 Docker Hub·ECR에서 429(속도 제한) | 공용 egress IP | MCR 베이스 이미지로 우회(CI는 python:3.13-slim 유지) | 빌드 성공 |
