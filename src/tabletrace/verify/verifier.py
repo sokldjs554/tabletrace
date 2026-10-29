@@ -165,7 +165,10 @@ def resolve(question: str, table: Table | None, program: Program | None, retriev
         # the evidence cell is the answer (exact text), even if the proposal was a substring of it
         return Resolution("answered", cell_text, [c], None, Verdict(status="answered", checks=checks), trace)
 
-    # calculations
+    # calculations: a program that compares a cell with itself (diff r6c4, r6c4 -> 0) is degenerate
+    if len({c.cid for c in program.cells}) < len(program.cells):
+        checks.append(Check(name="distinct_cells", passed=False, detail=f"repeated cells in {program.op}: {[c.cid for c in program.cells]}"))
+        return abstain("invalid_program", "calculation over repeated cells")
     try:
         calc: Calculation = REGISTRY.call("calculate", table, {"op": program.op, "cells": [c.cid for c in program.cells]}, trace)
     except ToolError as e:

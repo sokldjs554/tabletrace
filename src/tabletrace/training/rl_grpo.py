@@ -51,7 +51,7 @@ def reward(raw: str, e: Example) -> tuple[float, dict]:
         return -1.0, info
     info["op"] = prog.op
     res = resolve(e.question, e.table, prog, context=e.context)
-    gold = resolve(e.question, e.table, e.gold, context=e.context)
+    gold = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context)
     info["abstained"] = res.status == "abstained"
     r = 0.0
     if gold.status == "answered":

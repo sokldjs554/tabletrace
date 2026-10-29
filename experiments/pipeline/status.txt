@@ -13,3 +13,21 @@
 [12:17:02] pipeline (re)started
 [12:17:02] stage-1 SFT finished
 [12:17:02] START eval_base_ko_test
+[12:23:12] OK    eval_base_ko_test
+[12:23:12] START eval_base_ko_custom
+[12:23:27] OK    eval_base_ko_custom
+[12:23:27] START eval_base_chem_custom
+[12:23:39] OK    eval_base_chem_custom
+[12:23:39] START eval_sft_ko_ko_test
+[12:28:51] OK    eval_sft_ko_ko_test
+[12:28:51] START eval_sft_ko_ko_custom
+[12:29:11] OK    eval_sft_ko_ko_custom
+[12:29:11] START sft_ko2
+[12:59:33] OK    sft_ko2
+[12:59:33] START eval_sft_ko2_ko_test
+[13:04:26] OK    eval_sft_ko2_ko_test
+[13:04:26] START eval_sft_ko2_ko_custom
+[13:04:46] OK    eval_sft_ko2_ko_custom
+[13:04:46] START eval_sft_ko2_chem_custom
+[13:05:05] OK    eval_sft_ko2_chem_custom
+[13:05:05] START sft_chem

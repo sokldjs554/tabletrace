@@ -97,3 +97,9 @@ def test_lookup_evidence_repair_when_citation_is_wrong(medal_table):
     # ambiguous (13 appears twice) -> still blocked
     r = resolve("q", medal_table, parse("op: lookup ; cells: r0c0 ; answer: 13", "t_medal"))
     assert r.status == "abstained" and r.verdict.reason == "verification_failed"
+
+
+def test_degenerate_calculation_is_rejected(medal_table):
+    r = resolve("q", medal_table, parse("op: diff ; cells: r2c5, r2c5 ; answer: 0", "t_medal"))
+    assert r.status == "abstained" and r.verdict.reason == "invalid_program"
+    assert any(c.name == "distinct_cells" and not c.passed for c in r.verdict.checks)

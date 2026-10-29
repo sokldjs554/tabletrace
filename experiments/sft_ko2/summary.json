@@ -1,0 +1,67 @@
+{
+ "args": {
+  "model": "experiments/sft_ko/model",
+  "train": [
+   "data/ko/stage2_train.jsonl"
+  ],
+  "dev": [
+   "data/ko/dev.jsonl",
+   "data/ko/synthetic_dev.jsonl",
+   "data/ko/text_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl",
+   "data/ko/text_documents_train.jsonl",
+   "data/ko/text_documents_dev.jsonl"
+  ],
+  "out": "experiments/sft_ko2/model",
+  "epochs": 1.0,
+  "bs": 8,
+  "grad_accum": 1,
+  "lr": 0.00015,
+  "warmup": 0.05,
+  "max_in": 512,
+  "max_out": 64,
+  "max_steps": 0,
+  "max_train": 0,
+  "eval_bs": 8,
+  "seed": 0,
+  "threads": 4,
+  "log_every": 10
+ },
+ "n_train": 1542,
+ "n_train_dropped_truncated": 58,
+ "n_dev": 345,
+ "steps_per_epoch": 193,
+ "total_steps": 193,
+ "params": 300176768,
+ "hardware": {
+  "cpu": "x86_64",
+  "threads": 4,
+  "cuda": false,
+  "ram_gb": 16.9
+ },
+ "torch": "2.15.0+cu132",
+ "started": "2026-10-29T12:29:18",
+ "train_sources": {
+  "korquad_text": 700,
+  "korwikitq": 562,
+  "synthetic": 280
+ },
+ "finished": "2026-10-29T12:59:31",
+ "wall_s": 1812.6,
+ "steps": 193,
+ "epochs_done": 1,
+ "dev_history": [
+  {
+   "n": 345,
+   "program_exact": 0.14202898550724638,
+   "verified_em": 0.2927536231884058,
+   "parse_fail": 0.002898550724637681,
+   "epoch": 1,
+   "step": 193,
+   "elapsed_s": 1807.4
+  }
+ ],
+ "best_dev_verified_em": 0.2927536231884058
+}

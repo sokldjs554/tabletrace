@@ -1,0 +1,66 @@
+{
+ "run": "experiments/eval/sft_ko2_ko_test",
+ "n": 699,
+ "n_answerable": 572,
+ "pred_status_answerable": {
+  "answered": 452,
+  "abstained": 120
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 71,
+  "not_in_document": 16,
+  "invalid_program": 33
+ },
+ "raw_correct_but_blocked": 9,
+ "evidence_repaired": 262,
+ "lookup_citation": {
+  "n": 446,
+  "row_correct": 0.807,
+  "col_correct": 0.361,
+  "both_correct": 0.285
+ },
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   495
+  ],
+  [
+   "lookup->diff",
+   44
+  ],
+  [
+   "abstain->lookup",
+   44
+  ],
+  [
+   "diff->diff",
+   36
+  ],
+  [
+   "diff->lookup",
+   24
+  ],
+  [
+   "sum->diff",
+   15
+  ],
+  [
+   "avg->diff",
+   15
+  ],
+  [
+   "sum->lookup",
+   10
+  ]
+ ],
+ "by_source_verified": {
+  "korwikitq": {
+   "n": 539,
+   "verified_em": 0.353
+  },
+  "synthetic": {
+   "n": 160,
+   "verified_em": 0.15
+  }
+ }
+}

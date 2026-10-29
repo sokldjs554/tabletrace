@@ -64,7 +64,7 @@ def main() -> None:
     rows = []
     rec_by_qid = {r["qid"]: r for r in recs}
     for e, (prog, raw, _n, ms) in zip(examples, plans, strict=True):
-        gold_res = resolve(e.question, e.table, e.gold, context=e.context)
+        gold_res = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context)
         res = resolve(e.question, e.table, prog, context=e.context)
         alts = rec_by_qid[e.qid].get("alt_answers") or []
         gold_cells = [c.cid for c in e.gold.cells]

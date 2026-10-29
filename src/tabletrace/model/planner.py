@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 from tabletrace.agent.program import ProgramParseError, parse
-from tabletrace.model.serialize import build_input, fit_rows
+from tabletrace.model.serialize import build_input, choose_context_and_rows
 from tabletrace.schema import Program, Table
 
 
@@ -29,9 +29,7 @@ class NeuralPlanner:
         self.model_id = Path(model_dir).name + (":int8" if quantize else "")
 
     def inputs_for(self, question: str, table: Table, context: str | None) -> tuple[str, int]:
-        n = fit_rows(self.tok, question, table, context, self.max_in)
-        if n < 2 and context:
-            context, n = None, fit_rows(self.tok, question, table, None, self.max_in)
+        context, n = choose_context_and_rows(self.tok, question, table, context, self.max_in)
         return build_input(question, table, context, max_rows=n), n
 
     def generate(self, texts: list[str], **gen_kwargs) -> list[str]:

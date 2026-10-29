@@ -1,0 +1,61 @@
+{
+ "run": "experiments/eval/sft_ko2_chem_custom",
+ "n": 32,
+ "n_answerable": 20,
+ "pred_status_answerable": {
+  "abstained": 15,
+  "answered": 5
+ },
+ "abstain_reason_answerable": {
+  "invalid_program": 12,
+  "verification_failed": 3
+ },
+ "raw_correct_but_blocked": 2,
+ "evidence_repaired": 1,
+ "lookup_citation": {
+  "n": 5,
+  "row_correct": 0.6,
+  "col_correct": 0.2,
+  "both_correct": 0.0
+ },
+ "op_confusion_top": [
+  [
+   "lookup->diff",
+   8
+  ],
+  [
+   "text->lookup",
+   6
+  ],
+  [
+   "lookup->lookup",
+   5
+  ],
+  [
+   "diff->diff",
+   3
+  ],
+  [
+   "abstain->lookup",
+   3
+  ],
+  [
+   "abstain->diff",
+   2
+  ],
+  [
+   "ratio->diff",
+   1
+  ],
+  [
+   "text->diff",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 32,
+   "verified_em": 0.188
+  }
+ }
+}

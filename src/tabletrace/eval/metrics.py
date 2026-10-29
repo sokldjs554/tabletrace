@@ -52,6 +52,7 @@ def summarize(rows: list[dict]) -> dict:
         "parse_fail_rate": rate(rows, "parse_fail"),
         "verifier_corrections": rate(answerable, "verifier_changed"),  # verifier replaced/blocked the proposal
         "truncated_gold_rate": rate(rows, "truncated_gold"),
+        "verified_em_untruncated": rate([r for r in rows if not r["truncated_gold"]], "verified_correct"),
         "mean_ms_per_example": round(sum(r.get("ms", 0) for r in rows) / n, 1) if n else None,
     }
     pa = [r for r in rows if r["pred_abstained"]]

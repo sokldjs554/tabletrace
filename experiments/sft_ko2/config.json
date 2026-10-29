@@ -42,7 +42,7 @@
   "ram_gb": 16.9
  },
  "torch": "2.15.0+cu132",
- "started": "2026-10-29T10:26:37",
+ "started": "2026-10-29T12:29:18",
  "train_sources": {
   "korquad_text": 700,
   "korwikitq": 562,

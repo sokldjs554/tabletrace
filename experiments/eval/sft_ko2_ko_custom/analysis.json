@@ -1,0 +1,61 @@
+{
+ "run": "experiments/eval/sft_ko2_ko_custom",
+ "n": 30,
+ "n_answerable": 21,
+ "pred_status_answerable": {
+  "answered": 16,
+  "abstained": 5
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 2,
+  "not_in_document": 3
+ },
+ "raw_correct_but_blocked": 2,
+ "evidence_repaired": 0,
+ "lookup_citation": {
+  "n": 4,
+  "row_correct": 1.0,
+  "col_correct": 0.25,
+  "both_correct": 0.25
+ },
+ "op_confusion_top": [
+  [
+   "lookup->diff",
+   7
+  ],
+  [
+   "lookup->lookup",
+   6
+  ],
+  [
+   "diff->diff",
+   3
+  ],
+  [
+   "text->diff",
+   3
+  ],
+  [
+   "abstain->diff",
+   3
+  ],
+  [
+   "text->lookup",
+   3
+  ],
+  [
+   "avg->diff",
+   2
+  ],
+  [
+   "abstain->lookup",
+   2
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 30,
+   "verified_em": 0.133
+  }
+ }
+}

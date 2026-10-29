@@ -35,3 +35,18 @@ def fit_rows(tokenizer, question: str, table: Table, context: str | None, max_to
         else:
             hi = mid - 1
     return lo
+
+
+def choose_context_and_rows(tokenizer, question: str, table: Table, context: str | None, max_tokens: int,
+                            context_steps: tuple[int, ...] = (300, 150, 0)) -> tuple[str | None, int]:
+    """Prefer showing the whole table: shrink the passage (300 -> 150 -> none chars) before cutting rows.
+    Returns (context actually used, rows kept)."""
+    best: tuple[str | None, int] | None = None
+    for limit in context_steps:
+        ctx = (context[:limit] if (context and limit) else None)
+        n = fit_rows(tokenizer, question, table, ctx, max_tokens)
+        if n >= table.n_rows:
+            return ctx, n
+        if best is None or n > best[1]:
+            best = (ctx, n)
+    return best if best is not None else (None, 0)

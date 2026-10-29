@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from tabletrace.agent.program import serialize
-from tabletrace.model.serialize import build_input, fit_rows
+from tabletrace.model.serialize import build_input, choose_context_and_rows
 from tabletrace.schema import CellRef, Document, Program, Table
 
 CONTEXT_CHARS = 300
@@ -25,6 +25,8 @@ class Example:
     target_text: str
     truncated_gold: bool   # a gold cell row was cut by the row budget
     rows_kept: int
+    table_full: Table | None = None      # untruncated table (gold resolution, metrics)
+    context_full: str | None = None      # untruncated passage text
 
 
 def load_docs(*corpus_files: Path) -> dict[str, Document]:
@@ -46,12 +48,19 @@ def gold_program(rec: dict, table_id: str) -> Program:
     return Program(op=rec["op"], cells=cells, answer=rec.get("answer"))
 
 
-def context_for(doc: Document, rec: dict) -> str | None:
+def context_for(doc: Document, rec: dict, limit: int | None = CONTEXT_CHARS) -> str | None:
+    """Passage text shown to the model (first `limit` chars). For custom cases that name a passage
+    (`context_passage`), that passage is used; otherwise the document's first passage."""
+    text = None
     if rec.get("context"):
-        return rec["context"][:CONTEXT_CHARS]
-    if doc.passages:
-        return doc.passages[0].text[:CONTEXT_CHARS]
-    return None
+        text = rec["context"]
+    elif rec.get("context_passage"):
+        text = next((p.text for p in doc.passages if p.id == rec["context_passage"]), None)
+    if text is None and doc.passages:
+        text = doc.passages[0].text
+    if text is None:
+        return None
+    return text[:limit] if limit else text
 
 
 def build_examples(records: list[dict], docs: dict[str, Document], tokenizer, max_in: int = 512,
@@ -60,11 +69,8 @@ def build_examples(records: list[dict], docs: dict[str, Document], tokenizer, ma
     for rec in records:
         doc = docs[rec["doc_id"]]
         table = doc.table(rec["table_id"])
-        ctx = context_for(doc, rec)
-        n = fit_rows(tokenizer, rec["question"], table, ctx, max_in)
-        if n < table.n_rows and n < 2 and ctx:
-            ctx = None
-            n = fit_rows(tokenizer, rec["question"], table, None, max_in)
+        ctx_full = context_for(doc, rec, limit=None)
+        ctx, n = choose_context_and_rows(tokenizer, rec["question"], table, ctx_full, max_in)
         gold = gold_program(rec, table.id)
         truncated = any(c.row >= n for c in gold.cells)
         if truncated and drop_truncated_gold:
@@ -74,7 +80,7 @@ def build_examples(records: list[dict], docs: dict[str, Document], tokenizer, ma
             qid=rec["qid"], question=rec["question"], table=shown, context=ctx, gold=gold,
             gold_answer=rec.get("answer"), source=rec.get("source", "?"),
             input_text=build_input(rec["question"], table, ctx, max_rows=n), target_text=serialize(gold),
-            truncated_gold=truncated, rows_kept=n,
+            truncated_gold=truncated, rows_kept=n, table_full=table, context_full=ctx_full,
         ))
     return out
 
