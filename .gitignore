@@ -21,3 +21,5 @@ experiments/**/model/
 _site/
 data/ko/stage2_train.jsonl
 data/chem/stage_train.jsonl
+experiments/pipeline/*.log
+experiments/pipeline/nohup.log
