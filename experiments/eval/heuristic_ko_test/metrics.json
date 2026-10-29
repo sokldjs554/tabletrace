@@ -10,10 +10,10 @@
    "data/ko/documents.jsonl"
   ],
   "n": 699,
-  "wall_s": 4.8,
+  "wall_s": 4.9,
   "hardware": "x86_64",
   "label": null,
-  "finished": "2026-10-29T08:38:57",
+  "finished": "2026-10-29T12:17:02",
   "quantize": false
  },
  "metrics": {
@@ -26,6 +26,8 @@
   "answer_em_answerable": 0.3479,
   "raw_answer_em_answerable": 0.2395,
   "evidence_cells_exact": 0.3479,
+  "evidence_cells_exact_raw": 0.3479,
+  "evidence_repaired_rate": 0.0,
   "evidence_cells_overlap": 0.3689,
   "op_acc": 0.5651,
   "lookup_em": 0.2802,
@@ -38,7 +40,7 @@
   "parse_fail_rate": 0.0,
   "verifier_corrections": 0.0052,
   "truncated_gold_rate": 0.1102,
-  "mean_ms_per_example": 6.8,
+  "mean_ms_per_example": 6.9,
   "by_source": {
    "korwikitq": {
     "n": 539,

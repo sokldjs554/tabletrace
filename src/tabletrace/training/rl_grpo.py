@@ -59,7 +59,7 @@ def reward(raw: str, e: Example) -> tuple[float, dict]:
             ok = answer_match(res.answer, gold.answer)
             info["correct"] = ok
             r += 1.0 if ok else 0.0
-            gc, pc = {c.cid for c in e.gold.cells}, {c.cid for c in res.cells}
+            gc, pc = {c.cid for c in e.gold.cells}, {c.cid for c in prog.cells}   # the planner's own citation
             if gc and pc == gc:
                 r += 0.5
             elif gc and pc & gc:
@@ -68,7 +68,7 @@ def reward(raw: str, e: Example) -> tuple[float, dict]:
                 r += 0.5 if ok else 0.25
             r += 0.2 if prog.op == e.gold.op else 0.0
             # the verifier accepted the cell but the model's own answer text did not match it
-            if any(c.name == "answer_matches_cell" and not c.passed for c in res.verdict.checks):
+            if any(c.name in ("answer_matches_cell", "evidence_repaired") and not c.passed for c in res.verdict.checks):
                 r -= 0.3
         else:
             r -= 0.3

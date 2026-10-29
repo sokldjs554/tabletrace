@@ -12,7 +12,7 @@
   "wall_s": 0.0,
   "hardware": "x86_64",
   "label": null,
-  "finished": "2026-10-29T08:38:49",
+  "finished": "2026-10-29T12:16:53",
   "quantize": false
  },
  "metrics": {
@@ -25,8 +25,10 @@
   "answer_em_answerable": 0.65,
   "raw_answer_em_answerable": 0.55,
   "evidence_cells_exact": 0.75,
+  "evidence_cells_exact_raw": 0.75,
+  "evidence_repaired_rate": 0.0,
   "evidence_cells_overlap": 0.8,
-  "op_acc": 0.6562,
+  "op_acc": 0.6875,
   "lookup_em": 0.8462,
   "calc_em": 0.2857,
   "calc_result_correct": 0.2857,
@@ -37,7 +39,7 @@
   "parse_fail_rate": 0.0,
   "verifier_corrections": 0.0,
   "truncated_gold_rate": 0.0,
-  "mean_ms_per_example": 0.3,
+  "mean_ms_per_example": 0.4,
   "by_source": {
    "custom": {
     "n": 32,

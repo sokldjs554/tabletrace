@@ -39,6 +39,7 @@ class AgentState(TypedDict, total=False):
     retrieval: dict
     program: Program | None
     raw_output: str | None
+    planner_info: dict          # must be declared: LangGraph drops state keys missing from the schema
     attempts: int
     resolution: Resolution | None
     trace: list[TraceStep]

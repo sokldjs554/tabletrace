@@ -32,11 +32,11 @@ def eval_table(suffix: str, title: str) -> str:
         if not m:
             continue
         mm = m["metrics"]
-        rows.append(f"| {name} | {mm['n']} | **{pct(mm['verified_em'])}** | {pct(mm['raw_answer_em_answerable'])} | {pct(mm['lookup_em'])} | {pct(mm['calc_em'])} | {pct(mm['evidence_cells_exact'])} | {pct(mm['abstain_recall'])} | {pct(mm['false_abstain_rate'])} | {pct(mm['parse_fail_rate'])} | {mm['mean_ms_per_example']:.0f} |")
+        rows.append(f"| {name} | {mm['n']} | **{pct(mm['verified_em'])}** | {pct(mm['raw_answer_em_answerable'])} | {pct(mm['lookup_em'])} | {pct(mm['calc_em'])} | {pct(mm['evidence_cells_exact'])} | {pct(mm.get('evidence_cells_exact_raw'))} | {pct(mm['abstain_recall'])} | {pct(mm['false_abstain_rate'])} | {pct(mm['parse_fail_rate'])} | {mm['mean_ms_per_example']:.0f} |")
     if not rows:
         return f"_{title}: 산출물 없음_\n"
-    head = ("| 플래너 / 모델 | n | verified EM % | raw EM % (답 있는 문항) | lookup EM % | calc EM % | 근거 셀 일치 % | 보류 재현율 % | 오보류율 % | 파싱 실패 % | ms/예제 |\n"
-            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n")
+    head = ("| 플래너 / 모델 | n | verified EM % | raw EM % (답 있는 문항) | lookup EM % | calc EM % | 근거 셀 일치 %(최종) | 근거 셀 일치 %(모델 인용) | 보류 재현율 % | 오보류율 % | 파싱 실패 % | ms/예제 |\n"
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n")
     return f"**{title}**\n\n{head}" + "\n".join(rows) + "\n"
 
 

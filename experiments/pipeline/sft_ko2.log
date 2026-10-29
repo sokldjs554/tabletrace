@@ -1,0 +1,8 @@
+Loading weights:   0%|          | 0/190 [00:00<?, ?it/s]Loading weights: 100%|██████████| 190/190 [00:00<00:00, 3197.46it/s]
+[transformers] The tied weights mapping and config for this model specifies to tie shared.weight to lm_head.weight, but both are present in the checkpoints with different values, so we will NOT tie them. You should update the config with `tie_word_embeddings=False` to silence this warning.
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (3536 > 1024). Running this sequence through the model will result in indexing errors
+{'step': 1, 'epoch': 0.005, 'loss': 1.4851, 'lr': 3.333333333333333e-05, 'elapsed_s': 14.8, 'rss_gb': 6.18}
+{'step': 10, 'epoch': 0.052, 'loss': 0.7566, 'lr': 0.00014918478260869564, 'elapsed_s': 92.9, 'rss_gb': 7.96}
+{'step': 20, 'epoch': 0.104, 'loss': 0.4711, 'lr': 0.00014103260869565215, 'elapsed_s': 165.4, 'rss_gb': 8.13}
+{'step': 30, 'epoch': 0.155, 'loss': 0.438, 'lr': 0.0001328804347826087, 'elapsed_s': 237.8, 'rss_gb': 8.34}
+{'step': 40, 'epoch': 0.207, 'loss': 0.3901, 'lr': 0.0001247282608695652, 'elapsed_s': 309.5, 'rss_gb': 8.29}

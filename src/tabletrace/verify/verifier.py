@@ -2,7 +2,9 @@
 
 Given a question, the selected table and a proposed Program, the verifier
 1. range-checks every cell,
-2. for `lookup` confirms the answer is literally the evidence cell (the cell wins on conflict),
+2. for `lookup` confirms the answer is literally the evidence cell (the cell wins on conflict; if the cited
+   cell is wrong but exactly one other cell holds the answer text, that cell becomes the evidence and the
+   repair is recorded),
 3. for calculations re-executes the restricted calculator and compares with the proposed number,
 4. checks units and periods, and
 5. decides answered / abstained with an explicit reason.
@@ -150,7 +152,15 @@ def resolve(question: str, table: Table | None, program: Program | None, retriev
                             detail=("answer equals cell" if same else
                                     f"proposed {proposed!r} != cell {cell_text!r}; cell text used")))
         if not same and not contained and proposed:
-            # the model named a value that is not in its own evidence -> do not trust it
+            # The cited cell does not support the answer. Before giving up, look for the answer text in
+            # the table: if exactly one cell carries it, that cell is the real evidence and the citation
+            # was wrong (recorded as a failed `evidence_repaired` check so the UI and metrics show it).
+            found = REGISTRY.call("cell_find", table, {"text": proposed, "exact": True}, trace)
+            if len(found) == 1 and len(normalize_text(proposed)) >= 2:
+                c2 = found[0]
+                checks.append(Check(name="evidence_repaired", passed=False,
+                                    detail=f"model cited {c.cid}; the answer text is in {c2.cid} (used as evidence)"))
+                return Resolution("answered", table.cell(c2.row, c2.col), [c2], None, Verdict(status="answered", checks=checks), trace)
             return abstain("verification_failed", f"proposed answer {proposed!r} is not supported by cell {c.cid}")
         # the evidence cell is the answer (exact text), even if the proposal was a substring of it
         return Resolution("answered", cell_text, [c], None, Verdict(status="answered", checks=checks), trace)

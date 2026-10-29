@@ -69,6 +69,7 @@ def main() -> None:
         alts = rec_by_qid[e.qid].get("alt_answers") or []
         gold_cells = [c.cid for c in e.gold.cells]
         pred_cells = [c.cid for c in res.cells]
+        raw_cells = [c.cid for c in prog.cells] if prog else []
         golds = [gold_res.answer, *alts]
         verified_correct = (res.status == gold_res.status) and (gold_res.status == "abstained" or any(answer_match(res.answer, g) for g in golds))
         raw_correct = gold_res.status == "answered" and prog is not None and prog.op != "abstain" and any(answer_match(prog.answer, g) for g in golds)
@@ -82,6 +83,8 @@ def main() -> None:
             "pred_status": res.status, "pred_answer": res.answer, "pred_cells": pred_cells,
             "pred_reason": res.verdict.reason, "verified_correct": verified_correct, "raw_correct": raw_correct,
             "cells_exact": cells_match(pred_cells, gold_cells) if gold_cells else (e.gold.op == "text" and bool(res.spans)),
+            "cells_exact_raw": cells_match(raw_cells, gold_cells) if gold_cells else (e.gold.op == "text" and bool(res.spans)),
+            "evidence_repaired": any(c.name == "evidence_repaired" for c in res.verdict.checks),
             "cells_overlap": bool(set(pred_cells) & set(gold_cells)) if gold_cells else (e.gold.op == "text" and bool(res.spans)),
             "op_correct": (prog.op if prog else None) == e.gold.op,
             "calc_correct": (res.calculation is not None and gold_res.calculation is not None and abs(res.calculation.result - gold_res.calculation.result) < 1e-6),

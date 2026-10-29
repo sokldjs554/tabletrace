@@ -87,3 +87,13 @@ def test_lookup_short_numeric_fragment_is_not_supported(medal_table):
     r = resolve("q", t, parse("op: lookup ; cells: r0c1 ; answer: 최규하", "t_medal"))
     assert r.status == "answered" and r.answer == "최규하(崔圭夏)"
     assert any(c.name == "answer_matches_cell" and not c.passed for c in r.verdict.checks)
+
+
+def test_lookup_evidence_repair_when_citation_is_wrong(medal_table):
+    # the model names the right value but cites the wrong cell: the unique matching cell becomes the evidence
+    r = resolve("러시아의 합계는?", medal_table, parse("op: lookup ; cells: r2c1 ; answer: 60", "t_medal"))
+    assert r.status == "answered" and r.answer == "60" and [c.cid for c in r.cells] == ["r2c5"]
+    assert any(c.name == "evidence_repaired" and not c.passed for c in r.verdict.checks)
+    # ambiguous (13 appears twice) -> still blocked
+    r = resolve("q", medal_table, parse("op: lookup ; cells: r0c0 ; answer: 13", "t_medal"))
+    assert r.status == "abstained" and r.verdict.reason == "verification_failed"

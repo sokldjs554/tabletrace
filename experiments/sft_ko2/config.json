@@ -1,0 +1,51 @@
+{
+ "args": {
+  "model": "experiments/sft_ko/model",
+  "train": [
+   "data/ko/stage2_train.jsonl"
+  ],
+  "dev": [
+   "data/ko/dev.jsonl",
+   "data/ko/synthetic_dev.jsonl",
+   "data/ko/text_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl",
+   "data/ko/text_documents_train.jsonl",
+   "data/ko/text_documents_dev.jsonl"
+  ],
+  "out": "experiments/sft_ko2/model",
+  "epochs": 1.0,
+  "bs": 8,
+  "grad_accum": 1,
+  "lr": 0.00015,
+  "warmup": 0.05,
+  "max_in": 512,
+  "max_out": 64,
+  "max_steps": 0,
+  "max_train": 0,
+  "eval_bs": 8,
+  "seed": 0,
+  "threads": 4,
+  "log_every": 10
+ },
+ "n_train": 1542,
+ "n_train_dropped_truncated": 58,
+ "n_dev": 345,
+ "steps_per_epoch": 193,
+ "total_steps": 193,
+ "params": 300176768,
+ "hardware": {
+  "cpu": "x86_64",
+  "threads": 4,
+  "cuda": false,
+  "ram_gb": 16.9
+ },
+ "torch": "2.15.0+cu132",
+ "started": "2026-10-29T10:26:37",
+ "train_sources": {
+  "korquad_text": 700,
+  "korwikitq": 562,
+  "synthetic": 280
+ }
+}

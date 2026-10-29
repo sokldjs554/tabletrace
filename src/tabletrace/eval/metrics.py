@@ -37,7 +37,9 @@ def summarize(rows: list[dict]) -> dict:
         "verified_em": rate(rows, "verified_correct"),              # final answer/abstain decision correct, all items
         "answer_em_answerable": rate(answerable, "verified_correct"),
         "raw_answer_em_answerable": rate(answerable, "raw_correct"),  # planner's own answer before verification
-        "evidence_cells_exact": rate(answerable, "cells_exact"),
+        "evidence_cells_exact": rate(answerable, "cells_exact"),          # final evidence (after repair)
+        "evidence_cells_exact_raw": rate(answerable, "cells_exact_raw"),  # cells the planner itself cited
+        "evidence_repaired_rate": rate(answerable, "evidence_repaired"),
         "evidence_cells_overlap": rate(answerable, "cells_overlap"),
         "op_acc": rate(rows, "op_correct"),
         "lookup_em": rate(lookup, "verified_correct"),
