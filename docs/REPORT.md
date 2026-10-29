@@ -166,11 +166,22 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 
 ## 14. 실행하지 못한 작업과 이유
 
-(채움)
+| 작업 | 이유 | 준비된 것 |
+|---|---|---|
+| tabletrace / chartwire 원격 푸시 | 두 저장소 모두 `Claude doesn't have GitHub access … for your organization`(403). GitHub API 경유(MCP)도 403 | 로컬 커밋 이력(`/home/user/tabletrace`), 번들(`/home/user/chartwire/tabletrace-history.bundle`), chartwire 체크아웃 안 복사본(`tabletrace/`), 지정 브랜치에 로컬 스냅샷 커밋 |
+| GitHub Actions 실행·결과 확인 | 푸시 불가 | `ci.yml`(린트·테스트·데이터·수치·Docker smoke), `pages.yml` — 같은 명령을 로컬에서 실행해 통과시킴 |
+| GitHub Pages 공개 배포 | 푸시 불가 + 배포 플랫폼 차단 | 정적 빌드 스크립트 + 로컬 Playwright E2E(저장된 결과 모드) 통과 |
+| EXAONE 다운로드·튜닝·서빙 | huggingface.co 차단, GPU 없음 | 라이선스·버전 확인(docs/experiments/exaone.md), LoRA SFT 스크립트, vLLM/SGLang 스크립트 |
+| 멀티 GPU 실측 | GPU 없음 | 파이프라인 병렬 코드(CPU 2프로세스 검증), GPU 명령·예상 자원 |
+| vLLM/SGLang 실행 | GPU 없음 | 클라이언트·스크립트·벤치, 모의 서버 테스트 |
+| 채용 공고·LG 논문 페이지 원문 확인 | lgresearch.ai 차단 | 사용자 제공 역량 목록 기준, KorWikiTQ README 초록 |
+| 외부 API(OpenAI 등) 사용 | 호스트 차단 | 사용 안 함 — 비용 0 |
+
+비용이 발생한 실행은 없다. GPU·유료 API 승인이 필요한 작업은 docs/experiments/exaone.md·parallel.md에 예상 자원·비용을 적었다.
 
 ## 15. 남은 한계
 
-(채움)
+README §11과 같다. 요약: (1) 300M 모델·CPU 단일 환경의 수치, (2) 512 토큰 행 예산, (3) 연산 종류 제한·단위 환산 없음, (4) 템플릿 합성 데이터의 분포 편향, (5) 수작업 평가 표본 30·32, (6) 본문 답변은 정확 부분 문자열만, (7) BM25 전용 검색, (8) RL은 60 step 예비 실험, (9) 서빙 엔진·멀티 GPU 실측 없음, (10) 공개 배포 미실행. 실험 후 확인한 구체적 실패 유형은 §5–§7의 표 아래에 적는다.
 
 ## 16. 데모를 직접 확인하는 순서
 
