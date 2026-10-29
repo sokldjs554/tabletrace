@@ -145,6 +145,8 @@ def main() -> None:
             proc.terminate()
     # the intentional too-short question returns 422 by design; browsers log that as a console error
     report["console_errors"] = [e for e in report["console_errors"] if "favicon" not in e and "status of 422" not in e]
+    if tag == "static":  # the backend probe (v1/release) is expected to 404 on a static host
+        report["console_errors"] = [e for e in report["console_errors"] if "404" not in e]
     check("no browser console errors", not report["console_errors"], "; ".join(report["console_errors"][:3]))
     (out / f"e2e-{tag}.json").write_text(json.dumps(report, ensure_ascii=False, indent=1))
     failed = [c for c in report["checks"] if not c["ok"]]
