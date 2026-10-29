@@ -119,15 +119,108 @@ KorWikiTabular(사전학습 코퍼스)와 EXAONE(모델)은 접근이 막혀 사
 
 ## 9. 모델 튜닝·강화학습 비교 결과
 
-(실험이 끝나는 대로 이 절과 `console/data/research.json`을 같은 산출물에서 채웁니다. 원본: `experiments/eval/*/metrics.json`, `experiments/*/summary.json`.)
+아래 표는 `scripts/render_results.py`가 `experiments/` 산출물에서 생성합니다(손으로 적은 숫자 없음). 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, **GPU 없음**. 표본이 작은 수작업 평가(30·32문항)는 참고치입니다.
+
+### 9.1 한국어 표 QA
+
+<!-- results:ko:start -->
+**한국어 표 QA — 독립 test (원본 539 + 합성 160)**
+
+| 플래너 / 모델 | n | verified EM % | raw EM % (답 있는 문항) | lookup EM % | calc EM % | 근거 셀 일치 % | 보류 재현율 % | 오보류율 % | 파싱 실패 % | ms/예제 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 휴리스틱 기준선 | 699 | **40.5** | 23.9 | 28.0 | 74.7 | 34.8 | 66.1 | 42.8 | 0.0 | 7 |
+
+**한국어 표 QA — 수작업 30문항**
+
+| 플래너 / 모델 | n | verified EM % | raw EM % (답 있는 문항) | lookup EM % | calc EM % | 근거 셀 일치 % | 보류 재현율 % | 오보류율 % | 파싱 실패 % | ms/예제 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 휴리스틱 기준선 | 30 | **53.3** | 19.1 | 36.4 | 50.0 | 42.9 | 77.8 | 42.9 | 0.0 | 127 |
+
+**한국어 수작업 — 범주별 verified EM % (n)**
+
+| 범주 | 휴리스틱 기준선 |
+|---|---:|
+| abstain | 100.0 (5) |
+| calc | 83.3 (6) |
+| cell | 44.4 (9) |
+| text_table | 20.0 (5) |
+| unit_period | 20.0 (5) |
+
+
+<!-- results:ko:end -->
+
+### 9.2 영어 화학 문서
+
+<!-- results:chem:start -->
+**영어 화학 문서 — 수작업 32문항 (test 분할 문서)**
+
+| 플래너 / 모델 | n | verified EM % | raw EM % (답 있는 문항) | lookup EM % | calc EM % | 근거 셀 일치 % | 보류 재현율 % | 오보류율 % | 파싱 실패 % | ms/예제 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 휴리스틱 기준선 | 32 | **68.8** | 55.0 | 84.6 | 28.6 | 75.0 | 75.0 | 15.0 | 0.0 | 0 |
+
+_영어 화학 — 합성 dev 80문항(템플릿, 참고용): 산출물 없음_
+
+**화학 수작업 — 범주별 verified EM % (n)**
+
+| 범주 | 휴리스틱 기준선 |
+|---|---:|
+| abstain | 100.0 (5) |
+| calc | 28.6 (7) |
+| cell | 80.0 (10) |
+| text_table | 66.7 (6) |
+| unit_period | 75.0 (4) |
+
+
+<!-- results:chem:end -->
+
+### 9.3 학습 실행
+
+<!-- results:training:start -->
+| 실행 | 학습 예제/프롬프트 | 스텝 | 소요 (CPU 4스레드) | best dev verified EM % | dev 추이 % |
+|---|---:|---:|---:|---:|---|
+| SFT stage1 (ko 표) | 3431 | 858 | (미완료) | – | – |
+
+<!-- results:training:end -->
+
+### 9.4 강화학습(GRPO 방식) 보상 추이와 보상 해킹 점검
+
+<!-- results:rl:start -->
+_RL 로그 없음_
+
+<!-- results:rl:end -->
 
 ## 10. 추론 최적화·멀티 GPU 실험 결과
 
-(§9와 같이 채웁니다. 원본: `experiments/bench/*.json`.)
+### 10.1 추론 최적화 (CPU 실측)
+
+<!-- results:bench:start -->
+_추론 벤치 산출물 없음_
+
+<!-- results:bench:end -->
+
+### 10.2 멀티 GPU Model Parallelism — 2-스테이지 파이프라인 (CPU 2프로세스 기능 검증)
+
+<!-- results:pp:start -->
+_파이프라인 병렬 산출물 없음_
+
+<!-- results:pp:end -->
+
+GPU 실행 명령·예상 자원은 [docs/experiments/parallel.md](docs/experiments/parallel.md), vLLM/SGLang 준비 상태는 [docs/experiments/serving.md](docs/experiments/serving.md).
 
 ## 11. 실패 사례와 한계
 
-(§9와 같이 채웁니다.)
+구체적인 실패 문항은 각 평가의 `predictions.jsonl`에서 `verified_correct: false`를 찾으면 됩니다(모델 원문 출력, 예측 셀, 검사 결과가 함께 있습니다). 실험 뒤에 확인한 대표 사례는 [docs/REPORT.md §15](docs/REPORT.md)에 적었습니다.
+
+구조적 한계:
+
+- **모델 크기·환경**: GPU가 없어 mT5-small(300M)만 CPU로 학습했습니다. EXAONE 등 수십억 파라미터 모델과의 비교는 하지 못했습니다. 모든 수치는 이 한 환경(4 vCPU)의 값입니다.
+- **입력 예산 512 토큰**: 큰 표는 뒤 행이 잘립니다(test에서 정답 행이 잘린 비율은 `truncated_gold_rate`로 보고). 긴 표·다중 표 질문은 다루지 않습니다.
+- **연산 범위**: 두 셀 간 차·합·평균·비율·증감률과 셀/문장 조회만 지원합니다. argmax, 조건 집계, 단위 환산(원↔억원, kPa↔atm)은 도구에 없어서 보류하거나 셀 값을 그대로 답합니다.
+- **합성 데이터**: 계산·보류 학습 예제는 템플릿 문장이라 표현이 단조롭고, 실제 사용자 질문과 분포가 다릅니다. 그래서 수작업 평가를 따로 두었지만 30·32문항은 작은 표본입니다.
+- **본문 근거**: 본문 답변은 "정확한 부분 문자열"로만 검증합니다. 의역·추론이 필요한 답은 맞아도 보류됩니다.
+- **검색**: BM25만 사용합니다. 의미 검색(임베딩)은 없습니다. 문서가 지정되지 않은 열린 검색은 표가 1,140개뿐인 코퍼스에서만 검증했습니다.
+- **강화학습**: 60 step 예비 실험입니다. 보상은 검증기가 정의하므로 검증기의 허점이 곧 보상 허점이 됩니다(실제로 숫자 부분 문자열 허점을 하나 찾아 고쳤습니다).
+- **서빙·병렬**: vLLM/SGLang과 멀티 GPU는 코드·명령만 준비했고 실측이 없습니다.
 
 ## 12. 로컬 실행
 
@@ -154,4 +247,21 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 
 ## 14. 실제 수행한 것과 하지 못한 것
 
-(최종 보고서 [docs/REPORT.md](docs/REPORT.md)의 대조표와 같은 내용을 요약해 채웁니다.)
+| 항목 | 상태 | 비고 |
+|---|---|---|
+| 한국어 표 QA 데이터 재분할·합성·수작업 평가 | 완료 | `data/ko/`, 누수 0 검사 |
+| 영어 화학 문서 코퍼스·합성·수작업 평가 | 완료 | `data/chem/` |
+| mT5-small 변환(GCS TF → PyTorch) | 완료 | 검증 기록 `models/*/CONVERSION.md`, docs/dev/issues-log.md |
+| 한국어 SFT 2단계 | 완료 | §9.1, §9.3 |
+| 화학 SFT (튜닝 전후 비교) | 완료 | §9.2 |
+| GRPO 방식 RL 예비 실험 | 완료(예비) | §9.4 |
+| 추론 최적화 실측(fp32/int8/배치/KV 캐시) | 완료(CPU) | §10.1 |
+| 멀티 GPU Model Parallelism | **구현 후 미실행(GPU)** — CPU 2프로세스 기능 검증만 | §10.2 |
+| vLLM / SGLang 서빙 | **구현 후 미실행(GPU)** — 모의 서버 테스트 | docs/experiments/serving.md |
+| EXAONE 사용 | **미실행** — HF 차단·GPU 없음; 라이선스·조건 확인 | docs/experiments/exaone.md |
+| FastAPI + LangGraph + 도구 + 비동기 작업 | 완료 | 테스트 통과 |
+| 콘솔(데스크톱·모바일·상태·키보드) + E2E | 완료 | `docs/images/`, `e2e-*.json` |
+| Docker 이미지 | (채움) | |
+| GitHub Actions CI | **실행 못 함** — 푸시 권한 없음(워크플로 파일은 작성) | |
+| GitHub Pages 공개 배포 | **실행 못 함** — 같은 이유. 정적 빌드는 로컬 E2E로 검증 | |
+| gRPC | 미구현(불필요 판단) | §7 |

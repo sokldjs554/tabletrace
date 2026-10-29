@@ -17,6 +17,10 @@ KO_TEST="data/ko/test.jsonl data/ko/synthetic_test.jsonl"
 while [ ! -f experiments/sft_ko/summary.json ]; do sleep 60; done
 echo "[$(date -u +%H:%M:%S)] stage-1 SFT finished" | tee -a "$STATUS"
 
+run eval_base_ko_test     python -m tabletrace.eval.run --planner neural --model models/mt5-small-base --corpus $KO_CORPUS --data $KO_TEST --out experiments/eval/base_ko_test --threads 4 --label "untuned mT5-small"
+run eval_base_ko_custom   python -m tabletrace.eval.run --planner neural --model models/mt5-small-base --corpus $KO_CORPUS --data data/ko/custom_eval.jsonl --out experiments/eval/base_ko_custom --threads 4
+run eval_base_chem_custom python -m tabletrace.eval.run --planner neural --model models/mt5-small-base --corpus data/chem/documents.jsonl --data data/chem/custom_eval.jsonl --out experiments/eval/base_chem_custom --threads 4
+
 run eval_sft_ko_ko_test   python -m tabletrace.eval.run --planner neural --model experiments/sft_ko/model --corpus $KO_CORPUS --data $KO_TEST --out experiments/eval/sft_ko_ko_test --threads 4
 run eval_sft_ko_ko_custom python -m tabletrace.eval.run --planner neural --model experiments/sft_ko/model --corpus $KO_CORPUS --data data/ko/custom_eval.jsonl --out experiments/eval/sft_ko_ko_custom --threads 4
 
