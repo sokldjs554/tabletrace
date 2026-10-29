@@ -28,7 +28,7 @@ def eval_row(name: str, key: str) -> list | None:
         return None
     mm = m["metrics"]
     return [name, mm["n"], pct(mm["verified_em"]), pct(mm["lookup_em"]), pct(mm["calc_em"]), pct(mm["evidence_cells_exact"]),
-            pct(mm["abstain_recall"]), pct(mm["false_abstain_rate"]), pct(mm["parse_fail_rate"]), f"{mm['mean_ms_per_example']:.0f}"]
+            pct(mm.get("evidence_cells_exact_raw")), pct(mm["abstain_recall"]), pct(mm["false_abstain_rate"]), pct(mm["parse_fail_rate"]), f"{mm['mean_ms_per_example']:.0f}"]
 
 
 def main() -> None:
@@ -38,7 +38,7 @@ def main() -> None:
         commit = "unknown"
     env = load(ROOT / "docs" / "research" / "environment.json") or {}
     sections = []
-    cols = ["플래너 / 모델", "n", "verified EM", "lookup EM", "calc EM", "근거 셀 일치", "보류 재현율", "오보류율", "파싱 실패", "ms/예제"]
+    cols = ["플래너 / 모델", "n", "verified EM", "lookup EM", "calc EM", "근거 셀 일치(최종)", "근거 셀 일치(모델 인용)", "보류 재현율", "오보류율", "파싱 실패", "ms/예제"]
     models = [("휴리스틱(어휘 겹침) 기준선", "heuristic"), ("mT5-small 기본(변환만)", "base"), ("SFT stage1(표)", "sft_ko"),
               ("SFT stage2(+본문)", "sft_ko2"), ("GRPO RL(stage2에서)", "rl_ko"), ("화학 SFT(stage2에서)", "sft_chem")]
     for title, suffix, desc in [("한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160)", "ko_test", "표가 학습 분할과 겹치지 않는 539문항(원 데이터, lookup) + 합성 160문항(계산·보류)."),

@@ -21,3 +21,6 @@
 | 17 | Docker | 데몬 미실행 → `docker build` 실패; 기동 후 Docker Hub 429 | 컨테이너 환경 제한, 레지스트리 속도 제한 | `dockerd` 수동 기동, `BASE_IMAGE` 빌드 인자(MCR 미러), 컨테이너 안 pip의 프록시 CA 오류는 BuildKit 시크릿 `pipca`로 해결 | 이미지 786 MB 빌드, 컨테이너 smoke 통과(`experiments/docker/smoke.json`) |
 | 18 | 운영 | `pkill -f` 패턴이 자기 셸까지 종료(exit 144) 2회 | 패턴이 명령줄에 포함 | PID 지정 kill / `fuser -k` 사용 | — |
 | 19 | 서빙 | Docker 이미지가 Docker Hub·ECR에서 429(속도 제한) | 공용 egress IP | MCR 베이스 이미지로 우회(CI는 python:3.13-slim 유지) | 빌드 성공 |
+| 20 | Agent | API 응답의 `planner.mode`가 모델 실행 시에도 항상 `heuristic`, 검증 실패 시 보완 제안 분기가 한 번도 실행되지 않음 | LangGraph가 `TypedDict` 상태 스키마에 없는 키(`planner_info`)를 버림 | 스키마에 키 선언 | 모델 테스트 `test_graph_with_neural_planner…` 통과(파이프라인 model_tests 단계) |
+| 21 | 운영 | 세션 워커 재시작으로 백그라운드 파이프라인(stage 2 학습 중)이 종료 | 프로세스가 워커에 묶임 | 완료 마커로 건너뛰는 재시작 가능 파이프라인으로 개조 후 재실행 | status.txt의 SKIP/OK 기록 |
+| 22 | 모델 | stage 1 SFT가 답 텍스트는 맞히지만(raw EM 30 %) 셀 좌표를 자주 틀려(lookup 인용 중 행 76 %·열 71 %·둘 다 58 %) 검증기가 답을 차단 → verified EM 20.7 % | 좌표 생성 능력 부족(작은 모델·CPU 2 epoch) | 검증기에 "근거 복구"(답 텍스트가 표의 유일한 셀이면 그 셀을 근거로, 실패 검사로 기록) 추가; 모델 인용 정확도는 별도 지표(`evidence_cells_exact_raw`)로 계속 보고 | 파이프라인 재평가 |

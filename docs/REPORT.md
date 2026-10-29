@@ -137,7 +137,17 @@ _파이프라인 병렬 산출물 없음_
 
 ## 10. 테스트와 반복 검증
 
-(채움)
+| 검증 | 방법 | 실행 횟수·결과 |
+|---|---|---|
+| 데이터 출처·라이선스 | 저장소 LICENSE/README 직접 확인, docs/research/datasets.md | 1회 기록 |
+| 데이터 분할·누수 | `scripts/check_data.py`(표·문서 공유 0, gold 자동 검수) | 빌드 때마다 실행, 마지막 실행 오류 0 |
+| 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성, 명령은 scripts/train/README.md | 파이프라인 재실행으로 동일 명령 반복 |
+| 단위·API 테스트 | `pytest -q tests` (숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델) | 개발 중 12회 이상 실행; 최종 (채움) |
+| 콘솔 E2E | Playwright 데스크톱/모바일 × 실시간/정적 | 실시간 3회(실패 2회 → 수정 → 16/16), 정적 2회(13/13), 모델 플래너로 재실행 (채움) |
+| Docker | 로컬 빌드 + 컨테이너 smoke(health/release/ask/console) | 빌드 5회 시도(데몬·429·CA 문제) → 성공 1회, smoke 통과 |
+| 학습 전후 비교 | 동일 test·custom 세트에서 base/SFT1/SFT2/RL/chem 평가 | §5–§7 |
+| 추론 최적화·병렬 | bench 스크립트 실측(CPU), 파이프라인 병렬 CPU 2프로세스 출력 동일성(smoke 1회 + 본 실행) | §8–§9 |
+| 반복 수정 | docs/dev/issues-log.md 22건: 발견 → 수정 → 재검증 기록 | — |
 
 ## 11. UI 조사와 디자인 반영
 
