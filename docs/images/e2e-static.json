@@ -1,0 +1,74 @@
+{
+ "mode": "static",
+ "checks": [
+  {
+   "name": "desktop: mode badge",
+   "ok": true,
+   "detail": "저장된 실행 결과 · heuristic · 2026-10-29 08:43 UTC · commit 3541e72"
+  },
+  {
+   "name": "desktop: document + examples rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: first example produced a result",
+   "ok": true,
+   "detail": "저장된 결과 · 기록 2026-10-29 08:43 UTC · 15 ms"
+  },
+  {
+   "name": "desktop: evidence highlighted in table",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: abstain example shows 답변 보류",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: research view renders",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: mode badge",
+   "ok": true,
+   "detail": "저장된 실행 결과 · heuristic · 2026-10-29 08:43 UTC · commit 3541e72"
+  },
+  {
+   "name": "mobile: document + examples rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: first example produced a result",
+   "ok": true,
+   "detail": "저장된 결과 · 기록 2026-10-29 08:43 UTC · 15 ms"
+  },
+  {
+   "name": "mobile: evidence highlighted in table",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: abstain example shows 답변 보류",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: research view renders",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "no browser console errors",
+   "ok": false,
+   "detail": "Failed to load resource: the server responded with a status of 404 (File not found); Failed to load resource: the server responded with a status of 404 (File not found)"
+  }
+ ],
+ "console_errors": [
+  "Failed to load resource: the server responded with a status of 404 (File not found)",
+  "Failed to load resource: the server responded with a status of 404 (File not found)"
+ ]
+}

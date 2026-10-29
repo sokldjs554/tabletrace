@@ -1,0 +1,20 @@
+services:
+  api:
+    build:
+      context: .
+      args:
+        WITH_MODEL: "${WITH_MODEL:-0}"
+    image: tabletrace:local
+    ports: ["8000:8000"]
+    environment:
+      TABLETRACE_PLANNER: ${TABLETRACE_PLANNER:-auto}
+      TABLETRACE_MODEL_DIR: ${TABLETRACE_MODEL_DIR:-models/mt5-small-tabletrace}
+      TABLETRACE_MAX_CONCURRENT_JOBS: ${TABLETRACE_MAX_CONCURRENT_JOBS:-2}
+      TABLETRACE_JOB_TIMEOUT_S: ${TABLETRACE_JOB_TIMEOUT_S:-60}
+    volumes:
+      - ./models:/app/models:ro          # fine-tuned weights (not in git); planner falls back to heuristic if absent
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/v1/health', timeout=3).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 5

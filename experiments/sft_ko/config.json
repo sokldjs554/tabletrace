@@ -1,0 +1,46 @@
+{
+ "args": {
+  "model": "models/mt5-small-base",
+  "train": [
+   "data/ko/train.jsonl",
+   "data/ko/synthetic_train.jsonl"
+  ],
+  "dev": [
+   "data/ko/dev.jsonl",
+   "data/ko/synthetic_dev.jsonl"
+  ],
+  "corpus": "data/ko/documents.jsonl",
+  "out": "experiments/sft_ko/model",
+  "epochs": 2.0,
+  "bs": 8,
+  "grad_accum": 1,
+  "lr": 0.0003,
+  "warmup": 0.05,
+  "max_in": 512,
+  "max_out": 64,
+  "max_steps": 0,
+  "max_train": 0,
+  "eval_bs": 8,
+  "seed": 0,
+  "threads": 4,
+  "log_every": 10
+ },
+ "n_train": 3431,
+ "n_train_dropped_truncated": 223,
+ "n_dev": 245,
+ "steps_per_epoch": 429,
+ "total_steps": 858,
+ "params": 300176768,
+ "hardware": {
+  "cpu": "x86_64",
+  "threads": 4,
+  "cuda": false,
+  "ram_gb": 16.9
+ },
+ "torch": "2.15.0+cu132",
+ "started": "2026-10-29T08:16:54",
+ "train_sources": {
+  "korwikitq": 2551,
+  "synthetic": 880
+ }
+}

@@ -1,0 +1,88 @@
+{
+ "mode": "live",
+ "checks": [
+  {
+   "name": "desktop: mode badge",
+   "ok": true,
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (3541e72)"
+  },
+  {
+   "name": "desktop: document + examples rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: first example produced a result",
+   "ok": true,
+   "detail": "완료 · 12 ms · 작업 a771879d3cee"
+  },
+  {
+   "name": "desktop: evidence highlighted in table",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: abstain example shows 답변 보류",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: too-short question shows an error",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: typed question executed",
+   "ok": true,
+   "detail": "완료 · 13 ms · 작업 2143e1f3b9fe"
+  },
+  {
+   "name": "desktop: chemistry example produced a result",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: research view renders",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: mode badge",
+   "ok": true,
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (3541e72)"
+  },
+  {
+   "name": "mobile: document + examples rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: first example produced a result",
+   "ok": true,
+   "detail": "완료 · 14 ms · 작업 efe46b4a3916"
+  },
+  {
+   "name": "mobile: evidence highlighted in table",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: abstain example shows 답변 보류",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: research view renders",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "no browser console errors",
+   "ok": false,
+   "detail": "Failed to load resource: the server responded with a status of 422 (Unprocessable Content)"
+  }
+ ],
+ "console_errors": [
+  "Failed to load resource: the server responded with a status of 422 (Unprocessable Content)"
+ ]
+}

@@ -1,0 +1,41 @@
+name: pages
+# Publishes the static console (recorded runs + research results) to GitHub Pages.
+# Only runs in the tabletrace repository on main; the chartwire session branch never deploys.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    if: github.repository == 'sokldjs554/tabletrace'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build static site
+        run: python scripts/build_static_site.py --out _site --commit ${GITHUB_SHA::7}
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    if: github.repository == 'sokldjs554/tabletrace'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+# large artifacts: raw data, model weights, checkpoints
+data/raw/
+models/
+experiments/**/checkpoints/
+experiments/**/*.pt
+experiments/**/*.safetensors
+*.npz
+.env
+node_modules/
+/tmp/
+data/ko/text_*.jsonl
+experiments/**/model/
+_site/

@@ -1,0 +1,5610 @@
+{
+ "generated_at": "2026-10-29 08:43 UTC",
+ "commit": "3541e72",
+ "version": "0.1.0",
+ "planner": "heuristic",
+ "model_id": null,
+ "hardware": "4 vCPU Intel Xeon 2.10GHz, no GPU (session container)",
+ "runs": [
+  {
+   "id": "ko_custom_01",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_29fbd6328d",
+   "table_id": "ko_29fbd6328d",
+   "category": "cell",
+   "label": "표의 특정 셀",
+   "question": "2018년 박스오피스에서 안시성의 관객수는 몇 명입니까?",
+   "result": {
+    "question": "2018년 박스오피스에서 안시성의 관객수는 몇 명입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_29fbd6328d",
+    "table_id": "ko_29fbd6328d",
+    "status": "answered",
+    "answer": "5,436,789",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 6,
+       "col": 4
+      }
+     ],
+     "answer": "5,436,789",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 6,
+      "col": 4
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 10x6"
+      },
+      {
+       "name": "period_consistent",
+       "passed": true,
+       "detail": "question ['2018'] vs evidence ['2018']"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r6c4 ; answer: 5,436,789"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "2018년 박스오피스에서 안시성의 관객수는 몇 명입니까?",
+       "doc_id": "doc_ko_29fbd6328d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_29fbd6328d",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "table",
+         "score": 18.693,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "순위 | 제목 | 개봉일자 | 매출액 (원) | 관객수 (명) | 비고"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_29fbd6328d_p0",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "passage",
+         "score": 14.999,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "2018년 대한민국 박스오피스 (11월 기준) 2018년 대한민국 내에서 개봉한 영화를 대상으로 한 대한민국 박스오피스 순위이다. 위쪽 순위와는 달리 2018년 1월 1일부터의 통계를 집계하며, 그 전의 통계는 삼지 않는다."
+        }
+       ],
+       "selected_table": "ko_29fbd6328d",
+       "context_passage": "doc_ko_29fbd6328d_p0"
+      },
+      "ms": 3.8874679994478356,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "2018년 박스오피스에서 안시성의 관객수는 몇 명입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r6c4 ; answer: 5,436,789",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 6,
+          "col": 4
+         }
+        ],
+        "answer": "5,436,789",
+        "reason": null
+       }
+      },
+      "ms": 1.371141000163334,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 6,
+       "col": 4
+      },
+      "output": {
+       "cell": "r6c4",
+       "text": "5,436,789",
+       "header": "관객수 (명)",
+       "row_label": "7",
+       "unit": "명"
+      },
+      "ms": 0.024571999347244855,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 10x6"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2018'] vs evidence ['2018']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.1502679997429368,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 14.821881999523612,
+    "error": null
+   },
+   "wall_s": 0.02
+  },
+  {
+   "id": "ko_custom_03",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_29fbd6328d",
+   "table_id": "ko_29fbd6328d",
+   "category": "calc",
+   "label": "두 셀의 차이",
+   "question": "신과함께: 인과 연과 어벤져스: 인피니티 워의 관객수 차이는 몇 명입니까?",
+   "result": {
+    "question": "신과함께: 인과 연과 어벤져스: 인피니티 워의 관객수 차이는 몇 명입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_29fbd6328d",
+    "table_id": "ko_29fbd6328d",
+    "status": "answered",
+    "answer": "1,062,201 명",
+    "program": {
+     "op": "diff",
+     "cells": [
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 0,
+       "col": 4
+      },
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 1,
+       "col": 4
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 0,
+      "col": 4
+     },
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 1,
+      "col": 4
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "diff",
+     "expression": "12274031.0 - 11211830.0",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "ko_29fbd6328d",
+        "row": 0,
+        "col": 4
+       },
+       "raw": "12,274,031",
+       "value": 12274031.0,
+       "unit": "명"
+      },
+      {
+       "cell": {
+        "table_id": "ko_29fbd6328d",
+        "row": 1,
+        "col": 4
+       },
+       "raw": "11,211,830",
+       "value": 11211830.0,
+       "unit": "명"
+      }
+     ],
+     "result": 1062201.0,
+     "unit": "명",
+     "formatted": "1,062,201 명"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 10x6"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "12274031.0 - 11211830.0 = 1,062,201 명"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['명']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: diff ; cells: r0c4, r1c4 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "신과함께: 인과 연과 어벤져스: 인피니티 워의 관객수 차이는 몇 명입니까?",
+       "doc_id": "doc_ko_29fbd6328d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_29fbd6328d",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "table",
+         "score": 28.315,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "순위 | 제목 | 개봉일자 | 매출액 (원) | 관객수 (명) | 비고"
+        }
+       ],
+       "passages": [],
+       "selected_table": "ko_29fbd6328d",
+       "context_passage": "doc_ko_29fbd6328d_p0"
+      },
+      "ms": 1.600909000444517,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "신과함께: 인과 연과 어벤져스: 인피니티 워의 관객수 차이는 몇 명입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: diff ; cells: r0c4, r1c4 ; answer: -",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 0,
+          "col": 4
+         },
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 1,
+          "col": 4
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 1.1622299998634844,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "diff",
+       "cells": [
+        "r0c4",
+        "r1c4"
+       ]
+      },
+      "output": {
+       "op": "diff",
+       "expression": "12274031.0 - 11211830.0",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "ko_29fbd6328d",
+          "row": 0,
+          "col": 4
+         },
+         "raw": "12,274,031",
+         "value": 12274031.0,
+         "unit": "명"
+        },
+        {
+         "cell": {
+          "table_id": "ko_29fbd6328d",
+          "row": 1,
+          "col": 4
+         },
+         "raw": "11,211,830",
+         "value": 11211830.0,
+         "unit": "명"
+        }
+       ],
+       "result": 1062201.0,
+       "unit": "명",
+       "formatted": "1,062,201 명"
+      },
+      "ms": 0.2533169999878737,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 10x6"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "12274031.0 - 11211830.0 = 1,062,201 명"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['명']"
+        }
+       ]
+      },
+      "ms": 0.3134640001007938,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 5.445482000141055,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_04",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_29fbd6328d",
+   "table_id": "ko_29fbd6328d",
+   "category": "calc",
+   "label": "두 셀의 합",
+   "question": "미션 임파서블: 폴아웃과 독전의 매출액 합계는 얼마입니까?",
+   "result": {
+    "question": "미션 임파서블: 폴아웃과 독전의 매출액 합계는 얼마입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_29fbd6328d",
+    "table_id": "ko_29fbd6328d",
+    "status": "answered",
+    "answer": "98,907,452,875 원",
+    "program": {
+     "op": "sum",
+     "cells": [
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 2,
+       "col": 3
+      },
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 9,
+       "col": 3
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 2,
+      "col": 3
+     },
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 9,
+      "col": 3
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "sum",
+     "expression": "55423761962.0 + 43483690913.0",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "ko_29fbd6328d",
+        "row": 2,
+        "col": 3
+       },
+       "raw": "55,423,761,962",
+       "value": 55423761962.0,
+       "unit": "원"
+      },
+      {
+       "cell": {
+        "table_id": "ko_29fbd6328d",
+        "row": 9,
+        "col": 3
+       },
+       "raw": "43,483,690,913",
+       "value": 43483690913.0,
+       "unit": "원"
+      }
+     ],
+     "result": 98907452875.0,
+     "unit": "원",
+     "formatted": "98,907,452,875 원"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 10x6"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "55423761962.0 + 43483690913.0 = 98,907,452,875 원"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['원']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: sum ; cells: r2c3, r9c3 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "미션 임파서블: 폴아웃과 독전의 매출액 합계는 얼마입니까?",
+       "doc_id": "doc_ko_29fbd6328d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_29fbd6328d",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "table",
+         "score": 13.322,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "순위 | 제목 | 개봉일자 | 매출액 (원) | 관객수 (명) | 비고"
+        }
+       ],
+       "passages": [],
+       "selected_table": "ko_29fbd6328d",
+       "context_passage": "doc_ko_29fbd6328d_p0"
+      },
+      "ms": 1.1810410005637095,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "미션 임파서블: 폴아웃과 독전의 매출액 합계는 얼마입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: sum ; cells: r2c3, r9c3 ; answer: -",
+       "parsed": {
+        "op": "sum",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 2,
+          "col": 3
+         },
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 9,
+          "col": 3
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 0.9880070001599961,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "sum",
+       "cells": [
+        "r2c3",
+        "r9c3"
+       ]
+      },
+      "output": {
+       "op": "sum",
+       "expression": "55423761962.0 + 43483690913.0",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "ko_29fbd6328d",
+          "row": 2,
+          "col": 3
+         },
+         "raw": "55,423,761,962",
+         "value": 55423761962.0,
+         "unit": "원"
+        },
+        {
+         "cell": {
+          "table_id": "ko_29fbd6328d",
+          "row": 9,
+          "col": 3
+         },
+         "raw": "43,483,690,913",
+         "value": 43483690913.0,
+         "unit": "원"
+        }
+       ],
+       "result": 98907452875.0,
+       "unit": "원",
+       "formatted": "98,907,452,875 원"
+      },
+      "ms": 0.10597299933579052,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 10x6"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "55423761962.0 + 43483690913.0 = 98,907,452,875 원"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['원']"
+        }
+       ]
+      },
+      "ms": 0.2209049998782575,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 8.702842000275268,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_07",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_29fbd6328d",
+   "table_id": "ko_29fbd6328d",
+   "category": "text_table",
+   "label": "본문에서 확인",
+   "question": "이 2018년 박스오피스 순위는 언제부터의 통계를 집계합니까?",
+   "result": {
+    "question": "이 2018년 박스오피스 순위는 언제부터의 통계를 집계합니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_29fbd6328d",
+    "table_id": "ko_29fbd6328d",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "not_in_document"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "not_in_document",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "이 2018년 박스오피스 순위는 언제부터의 통계를 집계합니까?",
+       "doc_id": "doc_ko_29fbd6328d"
+      },
+      "output": {
+       "tables": [],
+       "passages": [
+        {
+         "id": "doc_ko_29fbd6328d_p0",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "passage",
+         "score": 31.676,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "2018년 대한민국 박스오피스 (11월 기준) 2018년 대한민국 내에서 개봉한 영화를 대상으로 한 대한민국 박스오피스 순위이다. 위쪽 순위와는 달리 2018년 1월 1일부터의 통계를 집계하며, 그 전의 통계는 삼지 않는다."
+        }
+       ],
+       "selected_table": "ko_29fbd6328d",
+       "context_passage": "doc_ko_29fbd6328d_p0"
+      },
+      "ms": 2.384878999691864,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "이 2018년 박스오피스 순위는 언제부터의 통계를 집계합니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "not_in_document"
+       }
+      },
+      "ms": 0.940167999942787,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "not_in_document",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.02208700061601121,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 5.451682999591867,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_05",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_29fbd6328d",
+   "table_id": "ko_29fbd6328d",
+   "category": "unit_period",
+   "label": "단위 주의(원)",
+   "question": "안시성의 매출액은 몇 원입니까?",
+   "result": {
+    "question": "안시성의 매출액은 몇 원입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_29fbd6328d",
+    "table_id": "ko_29fbd6328d",
+    "status": "answered",
+    "answer": "46,314,721,026",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 6,
+       "col": 3
+      }
+     ],
+     "answer": "46,314,721,026",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 6,
+      "col": 3
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 10x6"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r6c3 ; answer: 46,314,721,026"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "안시성의 매출액은 몇 원입니까?",
+       "doc_id": "doc_ko_29fbd6328d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_29fbd6328d",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "table",
+         "score": 16.534,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "순위 | 제목 | 개봉일자 | 매출액 (원) | 관객수 (명) | 비고"
+        }
+       ],
+       "passages": [],
+       "selected_table": "ko_29fbd6328d",
+       "context_passage": "doc_ko_29fbd6328d_p0"
+      },
+      "ms": 0.7835830001567956,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "안시성의 매출액은 몇 원입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r6c3 ; answer: 46,314,721,026",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 6,
+          "col": 3
+         }
+        ],
+        "answer": "46,314,721,026",
+        "reason": null
+       }
+      },
+      "ms": 0.6183969999256078,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 6,
+       "col": 3
+      },
+      "output": {
+       "cell": "r6c3",
+       "text": "46,314,721,026",
+       "header": "매출액 (원)",
+       "row_label": "7",
+       "unit": "원"
+      },
+      "ms": 0.020838000637013465,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 10x6"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.06774600024073152,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.3233730000574724,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "ko_custom_06",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_29fbd6328d",
+   "table_id": "ko_29fbd6328d",
+   "category": "unit_period",
+   "label": "기간 주의(2017 개봉)",
+   "question": "2017년 12월에 개봉한 영화 중 2018년 박스오피스 순위가 더 높은 영화는 무엇입니까?",
+   "result": {
+    "question": "2017년 12월에 개봉한 영화 중 2018년 박스오피스 순위가 더 높은 영화는 무엇입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_29fbd6328d",
+    "table_id": "ko_29fbd6328d",
+    "status": "answered",
+    "answer": "5",
+    "program": {
+     "op": "diff",
+     "cells": [
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 8,
+       "col": 0
+      },
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 3,
+       "col": 0
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 8,
+      "col": 0
+     },
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 3,
+      "col": 0
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "diff",
+     "expression": "9.0 - 4.0",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "ko_29fbd6328d",
+        "row": 8,
+        "col": 0
+       },
+       "raw": "9",
+       "value": 9.0,
+       "unit": null
+      },
+      {
+       "cell": {
+        "table_id": "ko_29fbd6328d",
+        "row": 3,
+        "col": 0
+       },
+       "raw": "4",
+       "value": 4.0,
+       "unit": null
+      }
+     ],
+     "result": 5.0,
+     "unit": null,
+     "formatted": "5"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 10x6"
+      },
+      {
+       "name": "period_consistent",
+       "passed": true,
+       "detail": "question ['2017', '2018'] vs evidence ['1987', '2017', '2018']"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "9.0 - 4.0 = 5"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['None']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: diff ; cells: r8c0, r3c0 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "2017년 12월에 개봉한 영화 중 2018년 박스오피스 순위가 더 높은 영화는 무엇입니까?",
+       "doc_id": "doc_ko_29fbd6328d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_29fbd6328d",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "table",
+         "score": 20.503,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "순위 | 제목 | 개봉일자 | 매출액 (원) | 관객수 (명) | 비고"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_29fbd6328d_p0",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "passage",
+         "score": 33.169,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "2018년 대한민국 박스오피스 (11월 기준) 2018년 대한민국 내에서 개봉한 영화를 대상으로 한 대한민국 박스오피스 순위이다. 위쪽 순위와는 달리 2018년 1월 1일부터의 통계를 집계하며, 그 전의 통계는 삼지 않는다."
+        }
+       ],
+       "selected_table": "ko_29fbd6328d",
+       "context_passage": "doc_ko_29fbd6328d_p0"
+      },
+      "ms": 3.3897590001288336,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "2017년 12월에 개봉한 영화 중 2018년 박스오피스 순위가 더 높은 영화는 무엇입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: diff ; cells: r8c0, r3c0 ; answer: -",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 8,
+          "col": 0
+         },
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 3,
+          "col": 0
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 0.9653460001572967,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "diff",
+       "cells": [
+        "r8c0",
+        "r3c0"
+       ]
+      },
+      "output": {
+       "op": "diff",
+       "expression": "9.0 - 4.0",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "ko_29fbd6328d",
+          "row": 8,
+          "col": 0
+         },
+         "raw": "9",
+         "value": 9.0,
+         "unit": null
+        },
+        {
+         "cell": {
+          "table_id": "ko_29fbd6328d",
+          "row": 3,
+          "col": 0
+         },
+         "raw": "4",
+         "value": 4.0,
+         "unit": null
+        }
+       ],
+       "result": 5.0,
+       "unit": null,
+       "formatted": "5"
+      },
+      "ms": 1.5171450004345388,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 10x6"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2017', '2018'] vs evidence ['1987', '2017', '2018']"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "9.0 - 4.0 = 5"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['None']"
+        }
+       ]
+      },
+      "ms": 1.5824819993213168,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 7.8293079996001325,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_08",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_29fbd6328d",
+   "table_id": "ko_29fbd6328d",
+   "category": "abstain",
+   "label": "문서에 없음 → 보류",
+   "question": "2018년 박스오피스에서 보헤미안 랩소디의 관객수는 몇 명입니까?",
+   "result": {
+    "question": "2018년 박스오피스에서 보헤미안 랩소디의 관객수는 몇 명입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_29fbd6328d",
+    "table_id": "ko_29fbd6328d",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "not_in_document"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "not_in_document",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "2018년 박스오피스에서 보헤미안 랩소디의 관객수는 몇 명입니까?",
+       "doc_id": "doc_ko_29fbd6328d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_29fbd6328d",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "table",
+         "score": 11.844,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "순위 | 제목 | 개봉일자 | 매출액 (원) | 관객수 (명) | 비고"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_29fbd6328d_p0",
+         "doc_id": "doc_ko_29fbd6328d",
+         "kind": "passage",
+         "score": 14.999,
+         "title": "2018년 한국영화 박스 오피스",
+         "snippet": "2018년 대한민국 박스오피스 (11월 기준) 2018년 대한민국 내에서 개봉한 영화를 대상으로 한 대한민국 박스오피스 순위이다. 위쪽 순위와는 달리 2018년 1월 1일부터의 통계를 집계하며, 그 전의 통계는 삼지 않는다."
+        }
+       ],
+       "selected_table": "ko_29fbd6328d",
+       "context_passage": "doc_ko_29fbd6328d_p0"
+      },
+      "ms": 1.9689250002556946,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "2018년 박스오피스에서 보헤미안 랩소디의 관객수는 몇 명입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "not_in_document"
+       }
+      },
+      "ms": 0.91480999981286,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "not_in_document",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.021905999346927274,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 4.712670000117214,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_10",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_8bcc6a21a4",
+   "table_id": "ko_8bcc6a21a4",
+   "category": "calc",
+   "label": "두 셀의 차이(km)",
+   "question": "빛가람장성로는 목포대교보다 총연장이 몇 km 더 깁니까?",
+   "result": {
+    "question": "빛가람장성로는 목포대교보다 총연장이 몇 km 더 깁니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_8bcc6a21a4",
+    "table_id": "ko_8bcc6a21a4",
+    "status": "answered",
+    "answer": "15.68 km",
+    "program": {
+     "op": "diff",
+     "cells": [
+      {
+       "table_id": "ko_8bcc6a21a4",
+       "row": 2,
+       "col": 3
+      },
+      {
+       "table_id": "ko_8bcc6a21a4",
+       "row": 0,
+       "col": 3
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "ko_8bcc6a21a4",
+      "row": 2,
+      "col": 3
+     },
+     {
+      "table_id": "ko_8bcc6a21a4",
+      "row": 0,
+      "col": 3
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "diff",
+     "expression": "19.5 - 3.82",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "ko_8bcc6a21a4",
+        "row": 2,
+        "col": 3
+       },
+       "raw": "19.5",
+       "value": 19.5,
+       "unit": "km"
+      },
+      {
+       "cell": {
+        "table_id": "ko_8bcc6a21a4",
+        "row": 0,
+        "col": 3
+       },
+       "raw": "3.82",
+       "value": 3.82,
+       "unit": "km"
+      }
+     ],
+     "result": 15.68,
+     "unit": "km",
+     "formatted": "15.68 km"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 5x6"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "19.5 - 3.82 = 15.68 km"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['km']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: diff ; cells: r2c3, r0c3 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "빛가람장성로는 목포대교보다 총연장이 몇 km 더 깁니까?",
+       "doc_id": "doc_ko_8bcc6a21a4"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_8bcc6a21a4",
+         "doc_id": "doc_ko_8bcc6a21a4",
+         "kind": "table",
+         "score": 26.677,
+         "title": "국도 1호 자동차 전용도로 구간",
+         "snippet": "도로명 | 시점 | 종점 | 총연장(km) | 차로수 | 지정일"
+        }
+       ],
+       "passages": [],
+       "selected_table": "ko_8bcc6a21a4",
+       "context_passage": "doc_ko_8bcc6a21a4_p0"
+      },
+      "ms": 1.4043720002518967,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "빛가람장성로는 목포대교보다 총연장이 몇 km 더 깁니까?",
+       "table_id": "ko_8bcc6a21a4",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: diff ; cells: r2c3, r0c3 ; answer: -",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "ko_8bcc6a21a4",
+          "row": 2,
+          "col": 3
+         },
+         {
+          "table_id": "ko_8bcc6a21a4",
+          "row": 0,
+          "col": 3
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 0.7774410005367827,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "diff",
+       "cells": [
+        "r2c3",
+        "r0c3"
+       ]
+      },
+      "output": {
+       "op": "diff",
+       "expression": "19.5 - 3.82",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "ko_8bcc6a21a4",
+          "row": 2,
+          "col": 3
+         },
+         "raw": "19.5",
+         "value": 19.5,
+         "unit": "km"
+        },
+        {
+         "cell": {
+          "table_id": "ko_8bcc6a21a4",
+          "row": 0,
+          "col": 3
+         },
+         "raw": "3.82",
+         "value": 3.82,
+         "unit": "km"
+        }
+       ],
+       "result": 15.68,
+       "unit": "km",
+       "formatted": "15.68 km"
+      },
+      "ms": 0.14390500018635066,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 5x6"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "19.5 - 3.82 = 15.68 km"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['km']"
+        }
+       ]
+      },
+      "ms": 0.1872610000646091,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 4.250713999681466,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "ko_custom_12",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_8bcc6a21a4",
+   "table_id": "ko_8bcc6a21a4",
+   "category": "text_table",
+   "label": "본문에서 확인",
+   "question": "국도 1호 자동차 전용도로 구간에서 이륜자동차 중 통행이 가능한 것은 무엇에 한합니까?",
+   "result": {
+    "question": "국도 1호 자동차 전용도로 구간에서 이륜자동차 중 통행이 가능한 것은 무엇에 한합니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_8bcc6a21a4",
+    "table_id": "ko_8bcc6a21a4",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "ambiguous_question"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "ambiguous_question",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "국도 1호 자동차 전용도로 구간에서 이륜자동차 중 통행이 가능한 것은 무엇에 한합니까?",
+       "doc_id": "doc_ko_8bcc6a21a4"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_8bcc6a21a4",
+         "doc_id": "doc_ko_8bcc6a21a4",
+         "kind": "table",
+         "score": 32.916,
+         "title": "국도 1호 자동차 전용도로 구간",
+         "snippet": "도로명 | 시점 | 종점 | 총연장(km) | 차로수 | 지정일"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_8bcc6a21a4_p0",
+         "doc_id": "doc_ko_8bcc6a21a4",
+         "kind": "passage",
+         "score": 57.289,
+         "title": "국도 1호 자동차 전용도로 구간",
+         "snippet": "아래 구간은 국토교통부에서 지정한 자동차 전용도로 구간이므로 보행자, 자전거 등은 통행할 수 없다. 이륜자동차 (모터사이클 혹은 오토바이)는 긴급자동차 (싸이카 및 소방용 모터사이클 등)에 한해 통행이 가능하며, 그 밖의 이륜자동차와 경운기, 우마차, 트랙터, 손수레는 통행할 수 없다."
+        }
+       ],
+       "selected_table": "ko_8bcc6a21a4",
+       "context_passage": "doc_ko_8bcc6a21a4_p0"
+      },
+      "ms": 2.752263999354909,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "국도 1호 자동차 전용도로 구간에서 이륜자동차 중 통행이 가능한 것은 무엇에 한합니까?",
+       "table_id": "ko_8bcc6a21a4",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "ambiguous_question"
+       }
+      },
+      "ms": 0.9908480005833553,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "ambiguous_question",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.021052999727544375,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 5.598789999567089,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_13",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_8bcc6a21a4",
+   "table_id": "ko_8bcc6a21a4",
+   "category": "abstain",
+   "label": "열이 없음 → 보류",
+   "question": "서부간선도로의 제한속도는 얼마입니까?",
+   "result": {
+    "question": "서부간선도로의 제한속도는 얼마입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_8bcc6a21a4",
+    "table_id": "ko_8bcc6a21a4",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "ambiguous_question"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "ambiguous_question",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "서부간선도로의 제한속도는 얼마입니까?",
+       "doc_id": "doc_ko_8bcc6a21a4"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_8bcc6a21a4",
+         "doc_id": "doc_ko_8bcc6a21a4",
+         "kind": "table",
+         "score": 6.775,
+         "title": "국도 1호 자동차 전용도로 구간",
+         "snippet": "도로명 | 시점 | 종점 | 총연장(km) | 차로수 | 지정일"
+        }
+       ],
+       "passages": [],
+       "selected_table": "ko_8bcc6a21a4",
+       "context_passage": "doc_ko_8bcc6a21a4_p0"
+      },
+      "ms": 0.9959850003724569,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "서부간선도로의 제한속도는 얼마입니까?",
+       "table_id": "ko_8bcc6a21a4",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "ambiguous_question"
+       }
+      },
+      "ms": 0.704895000126271,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "ambiguous_question",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.020168999981251545,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.583198999876913,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "ko_custom_15",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_bc793b6a0d",
+   "table_id": "ko_bc793b6a0d",
+   "category": "cell",
+   "label": "표의 특정 셀",
+   "question": "2015년판 앨저넌에게 꽃을 제3화의 연출은 누구입니까?",
+   "result": {
+    "question": "2015년판 앨저넌에게 꽃을 제3화의 연출은 누구입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_bc793b6a0d",
+    "table_id": "ko_bc793b6a0d",
+    "status": "answered",
+    "answer": "제1화",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_bc793b6a0d",
+       "row": 0,
+       "col": 0
+      }
+     ],
+     "answer": "제1화",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "ko_bc793b6a0d",
+      "row": 0,
+      "col": 0
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 10x5"
+      },
+      {
+       "name": "period_consistent",
+       "passed": true,
+       "detail": "question ['2015'] vs evidence ['2015']"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r0c0 ; answer: 제1화"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "2015년판 앨저넌에게 꽃을 제3화의 연출은 누구입니까?",
+       "doc_id": "doc_ko_bc793b6a0d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_bc793b6a0d",
+         "doc_id": "doc_ko_bc793b6a0d",
+         "kind": "table",
+         "score": 30.788,
+         "title": "앨저넌에게 꽃을 드라마 2015년판",
+         "snippet": "각 화 | 방송일 | 부제 | 연출 | 시청률"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_bc793b6a0d_p0",
+         "doc_id": "doc_ko_bc793b6a0d",
+         "kind": "passage",
+         "score": 20.854,
+         "title": "앨저넌에게 꽃을 드라마 2015년판",
+         "snippet": "소설을 원작으로 한 드라마가 칸사이 TV에서 제작되어, 2002년 10월 8일부터 12월 17일까지 후지 TV 계열 〈화요 22시 시간대〉에서 방송되었다. 전 11회. 평균 시청률 11.1%. 소설을 원작으로 한 드라마가 2015년 4월 10일부터 6월 12일까지 TBS 계열 〈금요드라"
+        }
+       ],
+       "selected_table": "ko_bc793b6a0d",
+       "context_passage": "doc_ko_bc793b6a0d_p0"
+      },
+      "ms": 2.888054999857559,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "2015년판 앨저넌에게 꽃을 제3화의 연출은 누구입니까?",
+       "table_id": "ko_bc793b6a0d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r0c0 ; answer: 제1화",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_bc793b6a0d",
+          "row": 0,
+          "col": 0
+         }
+        ],
+        "answer": "제1화",
+        "reason": null
+       }
+      },
+      "ms": 0.9500559999651159,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 0,
+       "col": 0
+      },
+      "output": {
+       "cell": "r0c0",
+       "text": "제1화",
+       "header": "각 화",
+       "row_label": "제1화",
+       "unit": null
+      },
+      "ms": 0.017933999515662435,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 10x5"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2015'] vs evidence ['2015']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.07258300047396915,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 5.7581790006224765,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_16",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_bc793b6a0d",
+   "table_id": "ko_bc793b6a0d",
+   "category": "calc",
+   "label": "시청률 차이(%p)",
+   "question": "2015년판 앨저넌에게 꽃을 제1화와 최종화의 시청률 차이는 몇 %p입니까?",
+   "result": {
+    "question": "2015년판 앨저넌에게 꽃을 제1화와 최종화의 시청률 차이는 몇 %p입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_bc793b6a0d",
+    "table_id": "ko_bc793b6a0d",
+    "status": "answered",
+    "answer": "4.3 %",
+    "program": {
+     "op": "diff",
+     "cells": [
+      {
+       "table_id": "ko_bc793b6a0d",
+       "row": 0,
+       "col": 4
+      },
+      {
+       "table_id": "ko_bc793b6a0d",
+       "row": 9,
+       "col": 4
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "ko_bc793b6a0d",
+      "row": 0,
+      "col": 4
+     },
+     {
+      "table_id": "ko_bc793b6a0d",
+      "row": 9,
+      "col": 4
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "diff",
+     "expression": "11.5 - 7.2",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "ko_bc793b6a0d",
+        "row": 0,
+        "col": 4
+       },
+       "raw": "11.5%",
+       "value": 11.5,
+       "unit": "%"
+      },
+      {
+       "cell": {
+        "table_id": "ko_bc793b6a0d",
+        "row": 9,
+        "col": 4
+       },
+       "raw": "7.2%",
+       "value": 7.2,
+       "unit": "%"
+      }
+     ],
+     "result": 4.3,
+     "unit": "%",
+     "formatted": "4.3 %"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 10x5"
+      },
+      {
+       "name": "period_consistent",
+       "passed": true,
+       "detail": "question ['2015'] vs evidence ['2015']"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "11.5 - 7.2 = 4.3 %"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['%']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: diff ; cells: r0c4, r9c4 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "2015년판 앨저넌에게 꽃을 제1화와 최종화의 시청률 차이는 몇 %p입니까?",
+       "doc_id": "doc_ko_bc793b6a0d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_bc793b6a0d",
+         "doc_id": "doc_ko_bc793b6a0d",
+         "kind": "table",
+         "score": 35.038,
+         "title": "앨저넌에게 꽃을 드라마 2015년판",
+         "snippet": "각 화 | 방송일 | 부제 | 연출 | 시청률"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_bc793b6a0d_p0",
+         "doc_id": "doc_ko_bc793b6a0d",
+         "kind": "passage",
+         "score": 24.769,
+         "title": "앨저넌에게 꽃을 드라마 2015년판",
+         "snippet": "소설을 원작으로 한 드라마가 칸사이 TV에서 제작되어, 2002년 10월 8일부터 12월 17일까지 후지 TV 계열 〈화요 22시 시간대〉에서 방송되었다. 전 11회. 평균 시청률 11.1%. 소설을 원작으로 한 드라마가 2015년 4월 10일부터 6월 12일까지 TBS 계열 〈금요드라"
+        }
+       ],
+       "selected_table": "ko_bc793b6a0d",
+       "context_passage": "doc_ko_bc793b6a0d_p0"
+      },
+      "ms": 9.393663999617274,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "2015년판 앨저넌에게 꽃을 제1화와 최종화의 시청률 차이는 몇 %p입니까?",
+       "table_id": "ko_bc793b6a0d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: diff ; cells: r0c4, r9c4 ; answer: -",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "ko_bc793b6a0d",
+          "row": 0,
+          "col": 4
+         },
+         {
+          "table_id": "ko_bc793b6a0d",
+          "row": 9,
+          "col": 4
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 1.8908169995484059,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "diff",
+       "cells": [
+        "r0c4",
+        "r9c4"
+       ]
+      },
+      "output": {
+       "op": "diff",
+       "expression": "11.5 - 7.2",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "ko_bc793b6a0d",
+          "row": 0,
+          "col": 4
+         },
+         "raw": "11.5%",
+         "value": 11.5,
+         "unit": "%"
+        },
+        {
+         "cell": {
+          "table_id": "ko_bc793b6a0d",
+          "row": 9,
+          "col": 4
+         },
+         "raw": "7.2%",
+         "value": 7.2,
+         "unit": "%"
+        }
+       ],
+       "result": 4.3,
+       "unit": "%",
+       "formatted": "4.3 %"
+      },
+      "ms": 0.1506870003140648,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 10x5"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2015'] vs evidence ['2015']"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "11.5 - 7.2 = 4.3 %"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['%']"
+        }
+       ]
+      },
+      "ms": 0.21220500002527842,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 13.44930100003694,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_17",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_bc793b6a0d",
+   "table_id": "ko_bc793b6a0d",
+   "category": "unit_period",
+   "label": "기간 주의(2002년판은 본문)",
+   "question": "2002년판 앨저넌에게 꽃을 드라마의 평균 시청률은 얼마입니까?",
+   "result": {
+    "question": "2002년판 앨저넌에게 꽃을 드라마의 평균 시청률은 얼마입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_bc793b6a0d",
+    "table_id": "ko_bc793b6a0d",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "not_in_document"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "not_in_document",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "2002년판 앨저넌에게 꽃을 드라마의 평균 시청률은 얼마입니까?",
+       "doc_id": "doc_ko_bc793b6a0d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_bc793b6a0d",
+         "doc_id": "doc_ko_bc793b6a0d",
+         "kind": "table",
+         "score": 18.765,
+         "title": "앨저넌에게 꽃을 드라마 2015년판",
+         "snippet": "각 화 | 방송일 | 부제 | 연출 | 시청률"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_bc793b6a0d_p0",
+         "doc_id": "doc_ko_bc793b6a0d",
+         "kind": "passage",
+         "score": 34.46,
+         "title": "앨저넌에게 꽃을 드라마 2015년판",
+         "snippet": "소설을 원작으로 한 드라마가 칸사이 TV에서 제작되어, 2002년 10월 8일부터 12월 17일까지 후지 TV 계열 〈화요 22시 시간대〉에서 방송되었다. 전 11회. 평균 시청률 11.1%. 소설을 원작으로 한 드라마가 2015년 4월 10일부터 6월 12일까지 TBS 계열 〈금요드라"
+        }
+       ],
+       "selected_table": "ko_bc793b6a0d",
+       "context_passage": "doc_ko_bc793b6a0d_p0"
+      },
+      "ms": 2.053860000160057,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "2002년판 앨저넌에게 꽃을 드라마의 평균 시청률은 얼마입니까?",
+       "table_id": "ko_bc793b6a0d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "not_in_document"
+       }
+      },
+      "ms": 1.116348999858019,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "not_in_document",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.019887999769707676,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 5.022269000619417,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_19",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_bc793b6a0d",
+   "table_id": "ko_bc793b6a0d",
+   "category": "abstain",
+   "label": "시청자 수 없음 → 보류",
+   "question": "2015년판 앨저넌에게 꽃을 제5화의 시청자 수는 몇 명입니까?",
+   "result": {
+    "question": "2015년판 앨저넌에게 꽃을 제5화의 시청자 수는 몇 명입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_bc793b6a0d",
+    "table_id": "ko_bc793b6a0d",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "ambiguous_question"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "ambiguous_question",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "2015년판 앨저넌에게 꽃을 제5화의 시청자 수는 몇 명입니까?",
+       "doc_id": "doc_ko_bc793b6a0d"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_bc793b6a0d",
+         "doc_id": "doc_ko_bc793b6a0d",
+         "kind": "table",
+         "score": 17.43,
+         "title": "앨저넌에게 꽃을 드라마 2015년판",
+         "snippet": "각 화 | 방송일 | 부제 | 연출 | 시청률"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_bc793b6a0d_p0",
+         "doc_id": "doc_ko_bc793b6a0d",
+         "kind": "passage",
+         "score": 20.854,
+         "title": "앨저넌에게 꽃을 드라마 2015년판",
+         "snippet": "소설을 원작으로 한 드라마가 칸사이 TV에서 제작되어, 2002년 10월 8일부터 12월 17일까지 후지 TV 계열 〈화요 22시 시간대〉에서 방송되었다. 전 11회. 평균 시청률 11.1%. 소설을 원작으로 한 드라마가 2015년 4월 10일부터 6월 12일까지 TBS 계열 〈금요드라"
+        }
+       ],
+       "selected_table": "ko_bc793b6a0d",
+       "context_passage": "doc_ko_bc793b6a0d_p0"
+      },
+      "ms": 2.529759000026388,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "2015년판 앨저넌에게 꽃을 제5화의 시청자 수는 몇 명입니까?",
+       "table_id": "ko_bc793b6a0d",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "ambiguous_question"
+       }
+      },
+      "ms": 0.895889000275929,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "ambiguous_question",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.019514000086928718,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 5.267320000712061,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_25",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_f85ee50b20",
+   "table_id": "ko_f85ee50b20",
+   "category": "cell",
+   "label": "표의 특정 셀",
+   "question": "조선민주주의인민공화국 헌법상 국가원수 중 김영남의 임기 시작일은 언제입니까?",
+   "result": {
+    "question": "조선민주주의인민공화국 헌법상 국가원수 중 김영남의 임기 시작일은 언제입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_f85ee50b20",
+    "table_id": "ko_f85ee50b20",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "ambiguous_question"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "ambiguous_question",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "조선민주주의인민공화국 헌법상 국가원수 중 김영남의 임기 시작일은 언제입니까?",
+       "doc_id": "doc_ko_f85ee50b20"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "ko_f85ee50b20",
+         "doc_id": "doc_ko_f85ee50b20",
+         "kind": "table",
+         "score": 36.683,
+         "title": "조선민주주의인민공화국의 국가원수 헌법상의 국가원수",
+         "snippet": "대수 | 사진 | 이름 | 국가원수 자격 직책 | 임기 시작 | 임기 종료 | 비고"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_ko_f85ee50b20_p0",
+         "doc_id": "doc_ko_f85ee50b20",
+         "kind": "passage",
+         "score": 30.22,
+         "title": "조선민주주의인민공화국의 국가원수 헌법상의 국가원수",
+         "snippet": "역대 조선민주주의인민공화국의 헌법상의 원수들 1994년 7월 8일 김일성이 사망하였지만 주석직은 계속 유지되면서 김정일 국방위원회 위원장이 유훈통치(遺訓統治)를 하다가 1998년 9월 5일 사회주의헌법이 개정 되면서 김일성 주석이 공화국의 영원한 주석으로 추대되었고 국가원수는 최고인민회"
+        }
+       ],
+       "selected_table": "ko_f85ee50b20",
+       "context_passage": "doc_ko_f85ee50b20_p0"
+      },
+      "ms": 2.7736499996535713,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "조선민주주의인민공화국 헌법상 국가원수 중 김영남의 임기 시작일은 언제입니까?",
+       "table_id": "ko_f85ee50b20",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "ambiguous_question"
+       }
+      },
+      "ms": 1.215375000356289,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "ambiguous_question",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.019484999938867986,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 5.833856999743148,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "ko_custom_26",
+   "corpus": "ko_tables",
+   "doc_id": "doc_ko_f85ee50b20",
+   "table_id": "ko_f85ee50b20",
+   "category": "text_table",
+   "label": "본문에서 확인",
+   "question": "김일성 주석이 사망한 날짜는 언제입니까?",
+   "result": {
+    "question": "김일성 주석이 사망한 날짜는 언제입니까?",
+    "corpus": "ko_tables",
+    "doc_id": "doc_ko_f85ee50b20",
+    "table_id": "ko_f85ee50b20",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "not_in_document"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "not_in_document",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "김일성 주석이 사망한 날짜는 언제입니까?",
+       "doc_id": "doc_ko_f85ee50b20"
+      },
+      "output": {
+       "tables": [],
+       "passages": [
+        {
+         "id": "doc_ko_f85ee50b20_p0",
+         "doc_id": "doc_ko_f85ee50b20",
+         "kind": "passage",
+         "score": 12.742,
+         "title": "조선민주주의인민공화국의 국가원수 헌법상의 국가원수",
+         "snippet": "역대 조선민주주의인민공화국의 헌법상의 원수들 1994년 7월 8일 김일성이 사망하였지만 주석직은 계속 유지되면서 김정일 국방위원회 위원장이 유훈통치(遺訓統治)를 하다가 1998년 9월 5일 사회주의헌법이 개정 되면서 김일성 주석이 공화국의 영원한 주석으로 추대되었고 국가원수는 최고인민회"
+        }
+       ],
+       "selected_table": "ko_f85ee50b20",
+       "context_passage": "doc_ko_f85ee50b20_p0"
+      },
+      "ms": 1.7788069999369327,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "김일성 주석이 사망한 날짜는 언제입니까?",
+       "table_id": "ko_f85ee50b20",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "not_in_document"
+       }
+      },
+      "ms": 0.8901930004867609,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "not_in_document",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.02030100040428806,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 8.911990000342485,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "chem_custom_01",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68759",
+   "table_id": "chem_m68759_t0",
+   "category": "cell",
+   "label": "Substance constant",
+   "question": "What is the van der Waals constant b for CO2?",
+   "result": {
+    "question": "What is the van der Waals constant b for CO2?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68759",
+    "table_id": "chem_m68759_t0",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "ambiguous_question"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "ambiguous_question",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "What is the van der Waals constant b for CO2?",
+       "doc_id": "doc_m68759"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68759_t0",
+         "doc_id": "doc_m68759",
+         "kind": "table",
+         "score": 26.361,
+         "title": "Values of van der Waals Constants for Some Common Gases",
+         "snippet": "Gas | a (L2 atm/mol2) | b (L/mol)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68759_p10",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 25.39,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "Comparison of Ideal Gas Law and van der Waals Equation A 4.25-L flask contains 3.46 mol CO2 at 229 °C. Calculate the pressure of this sample of CO2:"
+        },
+        {
+         "id": "doc_m68759_p6",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 20.371,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "There are several different equations that better approximate gas behavior than does the ideal gas law. The first, and simplest, of these was developed by the D"
+        },
+        {
+         "id": "doc_m68759_p15",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 19.506,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "(a) 46.562 atm; (b) 46.594 atm; (c) The van der Waals equation takes into account the volume of the gas molecules themselves as well as intermolecular attractio"
+        }
+       ],
+       "selected_table": "chem_m68759_t0",
+       "context_passage": "doc_m68759_p10"
+      },
+      "ms": 0.9432080005353782,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "What is the van der Waals constant b for CO2?",
+       "table_id": "chem_m68759_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "ambiguous_question"
+       }
+      },
+      "ms": 0.3943530000469764,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "ambiguous_question",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.03292499968665652,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 4.536373000519234,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "chem_custom_02",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68759",
+   "table_id": "chem_m68759_t0",
+   "category": "calc",
+   "label": "Difference with unit",
+   "question": "How much larger is the van der Waals constant b of CCl4 than that of He?",
+   "result": {
+    "question": "How much larger is the van der Waals constant b of CCl4 than that of He?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68759",
+    "table_id": "chem_m68759_t0",
+    "status": "answered",
+    "answer": "-0.1146 L/mol",
+    "program": {
+     "op": "diff",
+     "cells": [
+      {
+       "table_id": "chem_m68759_t0",
+       "row": 4,
+       "col": 2
+      },
+      {
+       "table_id": "chem_m68759_t0",
+       "row": 5,
+       "col": 2
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68759_t0",
+      "row": 4,
+      "col": 2
+     },
+     {
+      "table_id": "chem_m68759_t0",
+      "row": 5,
+      "col": 2
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "diff",
+     "expression": "0.0237 - 0.1383",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "chem_m68759_t0",
+        "row": 4,
+        "col": 2
+       },
+       "raw": "0.0237",
+       "value": 0.0237,
+       "unit": "L/mol"
+      },
+      {
+       "cell": {
+        "table_id": "chem_m68759_t0",
+        "row": 5,
+        "col": 2
+       },
+       "raw": "0.1383",
+       "value": 0.1383,
+       "unit": "L/mol"
+      }
+     ],
+     "result": -0.11460000000000001,
+     "unit": "L/mol",
+     "formatted": "-0.1146 L/mol"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 6x3"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "0.0237 - 0.1383 = -0.1146 L/mol"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['L/mol']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: diff ; cells: r4c2, r5c2 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "How much larger is the van der Waals constant b of CCl4 than that of He?",
+       "doc_id": "doc_m68759"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68759_t0",
+         "doc_id": "doc_m68759",
+         "kind": "table",
+         "score": 31.95,
+         "title": "Values of van der Waals Constants for Some Common Gases",
+         "snippet": "Gas | a (L2 atm/mol2) | b (L/mol)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68759_p6",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 20.371,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "There are several different equations that better approximate gas behavior than does the ideal gas law. The first, and simplest, of these was developed by the D"
+        },
+        {
+         "id": "doc_m68759_p15",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 19.506,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "(a) 46.562 atm; (b) 46.594 atm; (c) The van der Waals equation takes into account the volume of the gas molecules themselves as well as intermolecular attractio"
+        },
+        {
+         "id": "doc_m68759_p7",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 19.235,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "The constant a corresponds to the strength of the attraction between molecules of a particular gas, and the constant b corresponds to the size of the molecules "
+        }
+       ],
+       "selected_table": "chem_m68759_t0",
+       "context_passage": "doc_m68759_p6"
+      },
+      "ms": 0.9533510001347167,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "How much larger is the van der Waals constant b of CCl4 than that of He?",
+       "table_id": "chem_m68759_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: diff ; cells: r4c2, r5c2 ; answer: -",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 4,
+          "col": 2
+         },
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 5,
+          "col": 2
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 0.5527319999600877,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "diff",
+       "cells": [
+        "r4c2",
+        "r5c2"
+       ]
+      },
+      "output": {
+       "op": "diff",
+       "expression": "0.0237 - 0.1383",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "chem_m68759_t0",
+          "row": 4,
+          "col": 2
+         },
+         "raw": "0.0237",
+         "value": 0.0237,
+         "unit": "L/mol"
+        },
+        {
+         "cell": {
+          "table_id": "chem_m68759_t0",
+          "row": 5,
+          "col": 2
+         },
+         "raw": "0.1383",
+         "value": 0.1383,
+         "unit": "L/mol"
+        }
+       ],
+       "result": -0.11460000000000001,
+       "unit": "L/mol",
+       "formatted": "-0.1146 L/mol"
+      },
+      "ms": 0.17224400016857544,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 6x3"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "0.0237 - 0.1383 = -0.1146 L/mol"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['L/mol']"
+        }
+       ]
+      },
+      "ms": 0.31562300046061864,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 5.012159000216343,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "chem_custom_04",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68759",
+   "table_id": "chem_m68759_t0",
+   "category": "text_table",
+   "label": "Condition from text",
+   "question": "In the worked example comparing the ideal gas law and the van der Waals equation, at what temperature does the 4.25-L flask contain 3.46 mol CO2?",
+   "result": {
+    "question": "In the worked example comparing the ideal gas law and the van der Waals equation, at what temperature does the 4.25-L flask contain 3.46 mol CO2?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68759",
+    "table_id": "chem_m68759_t0",
+    "status": "answered",
+    "answer": "3.59",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "chem_m68759_t0",
+       "row": 2,
+       "col": 1
+      }
+     ],
+     "answer": "3.59",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68759_t0",
+      "row": 2,
+      "col": 1
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 6x3"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r2c1 ; answer: 3.59"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "In the worked example comparing the ideal gas law and the van der Waals equation, at what temperature does the 4.25-L flask contain 3.46 mol CO2?",
+       "doc_id": "doc_m68759"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68759_t0",
+         "doc_id": "doc_m68759",
+         "kind": "table",
+         "score": 25.885,
+         "title": "Values of van der Waals Constants for Some Common Gases",
+         "snippet": "Gas | a (L2 atm/mol2) | b (L/mol)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68759_p10",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 71.886,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "Comparison of Ideal Gas Law and van der Waals Equation A 4.25-L flask contains 3.46 mol CO2 at 229 °C. Calculate the pressure of this sample of CO2:"
+        },
+        {
+         "id": "doc_m68759_p6",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 36.103,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "There are several different equations that better approximate gas behavior than does the ideal gas law. The first, and simplest, of these was developed by the D"
+        },
+        {
+         "id": "doc_m68759_p7",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 28.516,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "The constant a corresponds to the strength of the attraction between molecules of a particular gas, and the constant b corresponds to the size of the molecules "
+        }
+       ],
+       "selected_table": "chem_m68759_t0",
+       "context_passage": "doc_m68759_p10"
+      },
+      "ms": 4.2062749998876825,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "In the worked example comparing the ideal gas law and the van der Waals equation, at what temperature does the 4.25-L flask contain 3.46 mol CO2?",
+       "table_id": "chem_m68759_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r2c1 ; answer: 3.59",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 2,
+          "col": 1
+         }
+        ],
+        "answer": "3.59",
+        "reason": null
+       }
+      },
+      "ms": 0.5185449999771663,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 2,
+       "col": 1
+      },
+      "output": {
+       "cell": "r2c1",
+       "text": "3.59",
+       "header": "a (L2 atm/mol2)",
+       "row_label": "CO2",
+       "unit": null
+      },
+      "ms": 0.029261999770824332,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 6x3"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.16755999968154356,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 7.589054999698419,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "chem_custom_05",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68759",
+   "table_id": "chem_m68759_t0",
+   "category": "abstain",
+   "label": "Not in document → abstain",
+   "question": "What is the van der Waals constant a for argon?",
+   "result": {
+    "question": "What is the van der Waals constant a for argon?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68759",
+    "table_id": "chem_m68759_t0",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "ambiguous_question"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "ambiguous_question",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "What is the van der Waals constant a for argon?",
+       "doc_id": "doc_m68759"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68759_t0",
+         "doc_id": "doc_m68759",
+         "kind": "table",
+         "score": 23.126,
+         "title": "Values of van der Waals Constants for Some Common Gases",
+         "snippet": "Gas | a (L2 atm/mol2) | b (L/mol)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68759_p6",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 20.371,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "There are several different equations that better approximate gas behavior than does the ideal gas law. The first, and simplest, of these was developed by the D"
+        },
+        {
+         "id": "doc_m68759_p15",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 19.506,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "(a) 46.562 atm; (b) 46.594 atm; (c) The van der Waals equation takes into account the volume of the gas molecules themselves as well as intermolecular attractio"
+        },
+        {
+         "id": "doc_m68759_p7",
+         "doc_id": "doc_m68759",
+         "kind": "passage",
+         "score": 19.235,
+         "title": "Non-Ideal Gas Behavior",
+         "snippet": "The constant a corresponds to the strength of the attraction between molecules of a particular gas, and the constant b corresponds to the size of the molecules "
+        }
+       ],
+       "selected_table": "chem_m68759_t0",
+       "context_passage": "doc_m68759_p6"
+      },
+      "ms": 0.6170970000312082,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "What is the van der Waals constant a for argon?",
+       "table_id": "chem_m68759_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "ambiguous_question"
+       }
+      },
+      "ms": 0.41977199998655124,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "ambiguous_question",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.03287000072305091,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.8962930002526264,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_06",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68761",
+   "table_id": "chem_m68761_t0",
+   "category": "cell",
+   "label": "Boiling point",
+   "question": "What is the boiling point of bromine, Br2?",
+   "result": {
+    "question": "What is the boiling point of bromine, Br2?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68761",
+    "table_id": "chem_m68761_t0",
+    "status": "answered",
+    "answer": "332 K",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "chem_m68761_t0",
+       "row": 2,
+       "col": 4
+      }
+     ],
+     "answer": "332 K",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68761_t0",
+      "row": 2,
+      "col": 4
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 5x5"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r2c4 ; answer: 332 K"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "What is the boiling point of bromine, Br2?",
+       "doc_id": "doc_m68761"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68761_t0",
+         "doc_id": "doc_m68761",
+         "kind": "table",
+         "score": 17.249,
+         "title": "Melting and Boiling Points of the Halogens",
+         "snippet": "Halogen | Molar Mass | Atomic Radius | Melting Point | Boiling Point"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68761_p26",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 15.67,
+         "title": "Intermolecular Forces",
+         "snippet": "Check Your Learning Predict which will have the higher boiling point: ICl or Br2. Explain your reasoning."
+        },
+        {
+         "id": "doc_m68761_p27",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 12.841,
+         "title": "Intermolecular Forces",
+         "snippet": "ICl. ICl and Br2 have similar masses (~160 amu) and therefore experience similar London dispersion forces. ICl is polar and thus also exhibits dipole-dipole att"
+        },
+        {
+         "id": "doc_m68761_p34",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 11.59,
+         "title": "Intermolecular Forces",
+         "snippet": "Check Your Learning Ethane (CH3CH3) has a melting point of −183 °C and a boiling point of −89 °C. Predict the melting and boiling points for methylamine (CH3NH2"
+        }
+       ],
+       "selected_table": "chem_m68761_t0",
+       "context_passage": "doc_m68761_p26"
+      },
+      "ms": 0.5197800001042197,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "What is the boiling point of bromine, Br2?",
+       "table_id": "chem_m68761_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r2c4 ; answer: 332 K",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68761_t0",
+          "row": 2,
+          "col": 4
+         }
+        ],
+        "answer": "332 K",
+        "reason": null
+       }
+      },
+      "ms": 0.43873499998881016,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 2,
+       "col": 4
+      },
+      "output": {
+       "cell": "r2c4",
+       "text": "332 K",
+       "header": "Boiling Point",
+       "row_label": "bromine, Br2",
+       "unit": null
+      },
+      "ms": 0.028089999432268087,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x5"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.09341799977846676,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.5641859994939296,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_07",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68761",
+   "table_id": "chem_m68761_t0",
+   "category": "calc",
+   "label": "Difference (K)",
+   "question": "How much higher is the boiling point of iodine, I2, than that of chlorine, Cl2?",
+   "result": {
+    "question": "How much higher is the boiling point of iodine, I2, than that of chlorine, Cl2?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68761",
+    "table_id": "chem_m68761_t0",
+    "status": "answered",
+    "answer": "219 K",
+    "program": {
+     "op": "diff",
+     "cells": [
+      {
+       "table_id": "chem_m68761_t0",
+       "row": 3,
+       "col": 4
+      },
+      {
+       "table_id": "chem_m68761_t0",
+       "row": 1,
+       "col": 4
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68761_t0",
+      "row": 3,
+      "col": 4
+     },
+     {
+      "table_id": "chem_m68761_t0",
+      "row": 1,
+      "col": 4
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "diff",
+     "expression": "457.0 - 238.0",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "chem_m68761_t0",
+        "row": 3,
+        "col": 4
+       },
+       "raw": "457 K",
+       "value": 457.0,
+       "unit": "K"
+      },
+      {
+       "cell": {
+        "table_id": "chem_m68761_t0",
+        "row": 1,
+        "col": 4
+       },
+       "raw": "238 K",
+       "value": 238.0,
+       "unit": "K"
+      }
+     ],
+     "result": 219.0,
+     "unit": "K",
+     "formatted": "219 K"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 5x5"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "457.0 - 238.0 = 219 K"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['K']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: diff ; cells: r3c4, r1c4 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "How much higher is the boiling point of iodine, I2, than that of chlorine, Cl2?",
+       "doc_id": "doc_m68761"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68761_t0",
+         "doc_id": "doc_m68761",
+         "kind": "table",
+         "score": 22.588,
+         "title": "Melting and Boiling Points of the Halogens",
+         "snippet": "Halogen | Molar Mass | Atomic Radius | Melting Point | Boiling Point"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68761_p26",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 14.046,
+         "title": "Intermolecular Forces",
+         "snippet": "Check Your Learning Predict which will have the higher boiling point: ICl or Br2. Explain your reasoning."
+        },
+        {
+         "id": "doc_m68761_p16",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 13.929,
+         "title": "Intermolecular Forces",
+         "snippet": "C2H6 < C3H8 < C4H10. All of these compounds are nonpolar and only have London dispersion forces: the larger the molecule, the larger the dispersion forces and t"
+        },
+        {
+         "id": "doc_m68761_p24",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 13.781,
+         "title": "Intermolecular Forces",
+         "snippet": "Dipole-Dipole Forces and Their Effects Predict which will have the higher boiling point: N2 or CO. Explain your reasoning."
+        }
+       ],
+       "selected_table": "chem_m68761_t0",
+       "context_passage": "doc_m68761_p26"
+      },
+      "ms": 0.7337189999816474,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "How much higher is the boiling point of iodine, I2, than that of chlorine, Cl2?",
+       "table_id": "chem_m68761_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: diff ; cells: r3c4, r1c4 ; answer: -",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68761_t0",
+          "row": 3,
+          "col": 4
+         },
+         {
+          "table_id": "chem_m68761_t0",
+          "row": 1,
+          "col": 4
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 0.5435670000224491,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "diff",
+       "cells": [
+        "r3c4",
+        "r1c4"
+       ]
+      },
+      "output": {
+       "op": "diff",
+       "expression": "457.0 - 238.0",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "chem_m68761_t0",
+          "row": 3,
+          "col": 4
+         },
+         "raw": "457 K",
+         "value": 457.0,
+         "unit": "K"
+        },
+        {
+         "cell": {
+          "table_id": "chem_m68761_t0",
+          "row": 1,
+          "col": 4
+         },
+         "raw": "238 K",
+         "value": 238.0,
+         "unit": "K"
+        }
+       ],
+       "result": 219.0,
+       "unit": "K",
+       "formatted": "219 K"
+      },
+      "ms": 9.409986999344255,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 5x5"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "457.0 - 238.0 = 219 K"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['K']"
+        }
+       ]
+      },
+      "ms": 9.514857999420201,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 13.267185999211506,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "chem_custom_09",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68761",
+   "table_id": "chem_m68761_t0",
+   "category": "text_table",
+   "label": "Values from text",
+   "question": "What are the boiling points of n-pentane, isopentane, and neopentane?",
+   "result": {
+    "question": "What are the boiling points of n-pentane, isopentane, and neopentane?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68761",
+    "table_id": "chem_m68761_t0",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "not_in_document"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "not_in_document",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "What are the boiling points of n-pentane, isopentane, and neopentane?",
+       "doc_id": "doc_m68761"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68761_t0",
+         "doc_id": "doc_m68761",
+         "kind": "table",
+         "score": 10.316,
+         "title": "Melting and Boiling Points of the Halogens",
+         "snippet": "Halogen | Molar Mass | Atomic Radius | Melting Point | Boiling Point"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68761_p17",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 26.881,
+         "title": "Intermolecular Forces",
+         "snippet": "The shapes of molecules also affect the magnitudes of the dispersion forces between them. For example, boiling points for the isomers n-pentane, isopentane, and"
+        },
+        {
+         "id": "doc_m68761_p34",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 11.59,
+         "title": "Intermolecular Forces",
+         "snippet": "Check Your Learning Ethane (CH3CH3) has a melting point of −183 °C and a boiling point of −89 °C. Predict the melting and boiling points for methylamine (CH3NH2"
+        },
+        {
+         "id": "doc_m68761_p32",
+         "doc_id": "doc_m68761",
+         "kind": "passage",
+         "score": 11.529,
+         "title": "Intermolecular Forces",
+         "snippet": "Effect of Hydrogen Bonding on Boiling Points Consider the compounds dimethylether (CH3OCH3), ethanol (CH3CH2OH), and propane (CH3CH2CH3). Their boiling points, "
+        }
+       ],
+       "selected_table": "chem_m68761_t0",
+       "context_passage": "doc_m68761_p17"
+      },
+      "ms": 0.3679450001072837,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "What are the boiling points of n-pentane, isopentane, and neopentane?",
+       "table_id": "chem_m68761_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "not_in_document"
+       }
+      },
+      "ms": 1.0792879993459792,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "not_in_document",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.030418000278586987,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.8415529998019338,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_11",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68769",
+   "table_id": "chem_m68769_t0",
+   "category": "cell",
+   "label": "Critical pressure (kPa)",
+   "question": "What is the critical pressure of ammonia?",
+   "result": {
+    "question": "What is the critical pressure of ammonia?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68769",
+    "table_id": "chem_m68769_t0",
+    "status": "answered",
+    "answer": "11,300",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "chem_m68769_t0",
+       "row": 4,
+       "col": 2
+      }
+     ],
+     "answer": "11,300",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68769_t0",
+      "row": 4,
+      "col": 2
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 7x3"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r4c2 ; answer: 11,300"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "What is the critical pressure of ammonia?",
+       "doc_id": "doc_m68769"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68769_t0",
+         "doc_id": "doc_m68769",
+         "kind": "table",
+         "score": 14.92,
+         "title": "Phase Diagrams",
+         "snippet": "Substance | Critical Temperature (°C) | Critical Pressure (kPa)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68769_p22",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 14.231,
+         "title": "Phase Diagrams",
+         "snippet": "The critical temperature of ammonia is 405.5 K, which is higher than room temperature. The critical temperature of oxygen is below room temperature; thus oxygen"
+        },
+        {
+         "id": "doc_m68769_p16",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 11.24,
+         "title": "Phase Diagrams",
+         "snippet": "If we place a sample of water in a sealed container at 25 °C, remove the air, and let the vaporization-condensation equilibrium establish itself, we are left wi"
+        },
+        {
+         "id": "doc_m68769_p20",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 9.304,
+         "title": "Phase Diagrams",
+         "snippet": "SolutionOn the cool day, the temperature of the CO2 is below the critical temperature of CO2, 304 K or 31 °C, so liquid CO2 is present in the cylinder. On the h"
+        }
+       ],
+       "selected_table": "chem_m68769_t0",
+       "context_passage": "doc_m68769_p22"
+      },
+      "ms": 0.5043209994255449,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "What is the critical pressure of ammonia?",
+       "table_id": "chem_m68769_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r4c2 ; answer: 11,300",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 4,
+          "col": 2
+         }
+        ],
+        "answer": "11,300",
+        "reason": null
+       }
+      },
+      "ms": 0.23216099998535356,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 4,
+       "col": 2
+      },
+      "output": {
+       "cell": "r4c2",
+       "text": "11,300",
+       "header": "Critical Pressure (kPa)",
+       "row_label": "ammonia",
+       "unit": "kPa"
+      },
+      "ms": 0.02819400015141582,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 7x3"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.09337600022263359,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.242488000068988,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_13",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68769",
+   "table_id": "chem_m68769_t0",
+   "category": "calc",
+   "label": "Difference (°C)",
+   "question": "How much higher is the critical temperature of water than that of carbon dioxide?",
+   "result": {
+    "question": "How much higher is the critical temperature of water than that of carbon dioxide?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68769",
+    "table_id": "chem_m68769_t0",
+    "status": "answered",
+    "answer": "342.9 °C",
+    "program": {
+     "op": "diff",
+     "cells": [
+      {
+       "table_id": "chem_m68769_t0",
+       "row": 6,
+       "col": 1
+      },
+      {
+       "table_id": "chem_m68769_t0",
+       "row": 3,
+       "col": 1
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68769_t0",
+      "row": 6,
+      "col": 1
+     },
+     {
+      "table_id": "chem_m68769_t0",
+      "row": 3,
+      "col": 1
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "diff",
+     "expression": "374.0 - 31.1",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "chem_m68769_t0",
+        "row": 6,
+        "col": 1
+       },
+       "raw": "374.0",
+       "value": 374.0,
+       "unit": "°C"
+      },
+      {
+       "cell": {
+        "table_id": "chem_m68769_t0",
+        "row": 3,
+        "col": 1
+       },
+       "raw": "31.1",
+       "value": 31.1,
+       "unit": "°C"
+      }
+     ],
+     "result": 342.9,
+     "unit": "°C",
+     "formatted": "342.9 °C"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 7x3"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "374.0 - 31.1 = 342.9 °C"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['°C']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: diff ; cells: r6c1, r3c1 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "How much higher is the critical temperature of water than that of carbon dioxide?",
+       "doc_id": "doc_m68769"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68769_t0",
+         "doc_id": "doc_m68769",
+         "kind": "table",
+         "score": 20.156,
+         "title": "Phase Diagrams",
+         "snippet": "Substance | Critical Temperature (°C) | Critical Pressure (kPa)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68769_p22",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 18.727,
+         "title": "Phase Diagrams",
+         "snippet": "The critical temperature of ammonia is 405.5 K, which is higher than room temperature. The critical temperature of oxygen is below room temperature; thus oxygen"
+        },
+        {
+         "id": "doc_m68769_p11",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 16.394,
+         "title": "Phase Diagrams",
+         "snippet": "Consider the phase diagram for carbon dioxide shown in as another example. The solid-liquid curve exhibits a positive slope, indicating that the melting point f"
+        },
+        {
+         "id": "doc_m68769_p19",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 16.061,
+         "title": "Phase Diagrams",
+         "snippet": "The Critical Temperature of Carbon Dioxide If we shake a carbon dioxide fire extinguisher on a cool day (18 °C), we can hear liquid CO2 sloshing around inside t"
+        }
+       ],
+       "selected_table": "chem_m68769_t0",
+       "context_passage": "doc_m68769_p22"
+      },
+      "ms": 1.4041359991097124,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "How much higher is the critical temperature of water than that of carbon dioxide?",
+       "table_id": "chem_m68769_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: diff ; cells: r6c1, r3c1 ; answer: -",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 6,
+          "col": 1
+         },
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 3,
+          "col": 1
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 0.4491010004130658,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "diff",
+       "cells": [
+        "r6c1",
+        "r3c1"
+       ]
+      },
+      "output": {
+       "op": "diff",
+       "expression": "374.0 - 31.1",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "chem_m68769_t0",
+          "row": 6,
+          "col": 1
+         },
+         "raw": "374.0",
+         "value": 374.0,
+         "unit": "°C"
+        },
+        {
+         "cell": {
+          "table_id": "chem_m68769_t0",
+          "row": 3,
+          "col": 1
+         },
+         "raw": "31.1",
+         "value": 31.1,
+         "unit": "°C"
+        }
+       ],
+       "result": 342.9,
+       "unit": "°C",
+       "formatted": "342.9 °C"
+      },
+      "ms": 0.14273599936132086,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 7x3"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "374.0 - 31.1 = 342.9 °C"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['°C']"
+        }
+       ]
+      },
+      "ms": 0.2037069998550578,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 4.726656999991974,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "chem_custom_15",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68769",
+   "table_id": "chem_m68769_t0",
+   "category": "text_table",
+   "label": "Pressure from text",
+   "question": "In the phase diagram example, what pressure corresponds to the region labeled “ice” at −10 °C?",
+   "result": {
+    "question": "In the phase diagram example, what pressure corresponds to the region labeled “ice” at −10 °C?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68769",
+    "table_id": "chem_m68769_t0",
+    "status": "answered",
+    "answer": "374.0",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "chem_m68769_t0",
+       "row": 6,
+       "col": 1
+      }
+     ],
+     "answer": "374.0",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68769_t0",
+      "row": 6,
+      "col": 1
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 7x3"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r6c1 ; answer: 374.0"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "In the phase diagram example, what pressure corresponds to the region labeled “ice” at −10 °C?",
+       "doc_id": "doc_m68769"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68769_t0",
+         "doc_id": "doc_m68769",
+         "kind": "table",
+         "score": 12.392,
+         "title": "Phase Diagrams",
+         "snippet": "Substance | Critical Temperature (°C) | Critical Pressure (kPa)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68769_p2",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 34.139,
+         "title": "Phase Diagrams",
+         "snippet": "We can use the phase diagram to identify the physical state of a sample of water under specified conditions of pressure and temperature. For example, a pressure"
+        },
+        {
+         "id": "doc_m68769_p4",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 24.913,
+         "title": "Phase Diagrams",
+         "snippet": "The solid-vapor curve, labeled AB in , indicates the temperatures and pressures at which ice and water vapor are in equilibrium. These temperature-pressure data"
+        },
+        {
+         "id": "doc_m68769_p40",
+         "doc_id": "doc_m68769",
+         "kind": "passage",
+         "score": 20.584,
+         "title": "Phase Diagrams",
+         "snippet": "(a) On the phase diagram, label the gas and liquid regions."
+        }
+       ],
+       "selected_table": "chem_m68769_t0",
+       "context_passage": "doc_m68769_p2"
+      },
+      "ms": 1.3904060006098007,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "In the phase diagram example, what pressure corresponds to the region labeled “ice” at −10 °C?",
+       "table_id": "chem_m68769_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r6c1 ; answer: 374.0",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 6,
+          "col": 1
+         }
+        ],
+        "answer": "374.0",
+        "reason": null
+       }
+      },
+      "ms": 0.2662169999894104,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 6,
+       "col": 1
+      },
+      "output": {
+       "cell": "r6c1",
+       "text": "374.0",
+       "header": "Critical Temperature (°C)",
+       "row_label": "water",
+       "unit": "°C"
+      },
+      "ms": 0.01906000034068711,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 7x3"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.06580499939445872,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.5350360003576498,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_16",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68789",
+   "table_id": "chem_m68789_t0",
+   "category": "cell",
+   "label": "Rate in trial 4",
+   "question": "In the NO + O3 rate data, what is the rate Δ[NO2]/Δt in trial 4?",
+   "result": {
+    "question": "In the NO + O3 rate data, what is the rate Δ[NO2]/Δt in trial 4?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68789",
+    "table_id": "chem_m68789_t0",
+    "status": "answered",
+    "answer": "3.96 × 10−4",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "chem_m68789_t0",
+       "row": 3,
+       "col": 3
+      }
+     ],
+     "answer": "3.96 × 10−4",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68789_t0",
+      "row": 3,
+      "col": 3
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 5x4"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r3c3 ; answer: 3.96 × 10−4"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "In the NO + O3 rate data, what is the rate Δ[NO2]/Δt in trial 4?",
+       "doc_id": "doc_m68789"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68789_t0",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 16.419,
+         "title": "Rate Laws",
+         "snippet": "Trial | [NO] (mol/L) | [O3] (mol/L) | Δ[NO2]/Δt (mol L^−1 s^−1)"
+        },
+        {
+         "id": "chem_m68789_t2",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 10.406,
+         "title": "Rate Laws",
+         "snippet": "Trial | [NO] (mol/L) | [Cl2] (mol/L) | − Δ[NO]/Δt (mol L^−1 s^−1)"
+        },
+        {
+         "id": "chem_m68789_t3",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 7.597,
+         "title": "Rate Laws",
+         "snippet": "Trial | [OCl−] (mol/L) | [I−] (mol/L) | Initial Rate (mol/L/s)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68789_p25",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 31.019,
+         "title": "Rate Laws",
+         "snippet": "Determine the value of m from the data in which [NO] varies and [O3] is constant. In the last three experiments, [NO] varies while [O3] remains constant. When ["
+        },
+        {
+         "id": "doc_m68789_p26",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 28.332,
+         "title": "Rate Laws",
+         "snippet": "Determine the value of n from data in which [O3] varies and [NO] is constant. In the first three experiments, [NO] is constant and [O3] varies. The reaction rat"
+        },
+        {
+         "id": "doc_m68789_p34",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 21.309,
+         "title": "Rate Laws",
+         "snippet": "Determine the value of m from the data in which [NO] varies and [Cl2] is constant. Write the ratios with the subscripts x and y to indicate data from two differ"
+        }
+       ],
+       "selected_table": "chem_m68789_t0",
+       "context_passage": "doc_m68789_p25"
+      },
+      "ms": 0.9102780004468514,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "In the NO + O3 rate data, what is the rate Δ[NO2]/Δt in trial 4?",
+       "table_id": "chem_m68789_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r3c3 ; answer: 3.96 × 10−4",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68789_t0",
+          "row": 3,
+          "col": 3
+         }
+        ],
+        "answer": "3.96 × 10−4",
+        "reason": null
+       }
+      },
+      "ms": 0.37591500040434767,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 3,
+       "col": 3
+      },
+      "output": {
+       "cell": "r3c3",
+       "text": "3.96 × 10−4",
+       "header": "Δ[NO2]/Δt (mol L^−1 s^−1)",
+       "row_label": "4",
+       "unit": null
+      },
+      "ms": 0.018045000615529716,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x4"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.06630000007135095,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.5293969995109364,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_17",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68789",
+   "table_id": "chem_m68789_t0",
+   "category": "calc",
+   "label": "Ratio of rates",
+   "question": "By what factor does the rate Δ[NO2]/Δt increase from trial 1 to trial 2 in the NO + O3 data?",
+   "result": {
+    "question": "By what factor does the rate Δ[NO2]/Δt increase from trial 1 to trial 2 in the NO + O3 data?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68789",
+    "table_id": "chem_m68789_t0",
+    "status": "answered",
+    "answer": "-6.600e-05",
+    "program": {
+     "op": "diff",
+     "cells": [
+      {
+       "table_id": "chem_m68789_t0",
+       "row": 0,
+       "col": 3
+      },
+      {
+       "table_id": "chem_m68789_t0",
+       "row": 1,
+       "col": 3
+      }
+     ],
+     "answer": null,
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68789_t0",
+      "row": 0,
+      "col": 3
+     },
+     {
+      "table_id": "chem_m68789_t0",
+      "row": 1,
+      "col": 3
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": {
+     "op": "diff",
+     "expression": "6.6e-05 - 0.000132",
+     "inputs": [
+      {
+       "cell": {
+        "table_id": "chem_m68789_t0",
+        "row": 0,
+        "col": 3
+       },
+       "raw": "6.60 × 10−5",
+       "value": 6.6e-05,
+       "unit": null
+      },
+      {
+       "cell": {
+        "table_id": "chem_m68789_t0",
+        "row": 1,
+        "col": 3
+       },
+       "raw": "1.32 × 10−4",
+       "value": 0.000132,
+       "unit": null
+      }
+     ],
+     "result": -6.6e-05,
+     "unit": null,
+     "formatted": "-6.600e-05"
+    },
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "2 cell(s) in 5x4"
+      },
+      {
+       "name": "calculation",
+       "passed": true,
+       "detail": "6.6e-05 - 0.000132 = -6.600e-05"
+      },
+      {
+       "name": "units_consistent",
+       "passed": true,
+       "detail": "units ['None']"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: diff ; cells: r0c3, r1c3 ; answer: -"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "By what factor does the rate Δ[NO2]/Δt increase from trial 1 to trial 2 in the NO + O3 data?",
+       "doc_id": "doc_m68789"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68789_t0",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 15.975,
+         "title": "Rate Laws",
+         "snippet": "Trial | [NO] (mol/L) | [O3] (mol/L) | Δ[NO2]/Δt (mol L^−1 s^−1)"
+        },
+        {
+         "id": "chem_m68789_t2",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 13.289,
+         "title": "Rate Laws",
+         "snippet": "Trial | [NO] (mol/L) | [Cl2] (mol/L) | − Δ[NO]/Δt (mol L^−1 s^−1)"
+        },
+        {
+         "id": "chem_m68789_t3",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 10.046,
+         "title": "Rate Laws",
+         "snippet": "Trial | [OCl−] (mol/L) | [I−] (mol/L) | Initial Rate (mol/L/s)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68789_p26",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 35.76,
+         "title": "Rate Laws",
+         "snippet": "Determine the value of n from data in which [O3] varies and [NO] is constant. In the first three experiments, [NO] is constant and [O3] varies. The reaction rat"
+        },
+        {
+         "id": "doc_m68789_p25",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 29.855,
+         "title": "Rate Laws",
+         "snippet": "Determine the value of m from the data in which [NO] varies and [O3] is constant. In the last three experiments, [NO] varies while [O3] remains constant. When ["
+        },
+        {
+         "id": "doc_m68789_p34",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 21.309,
+         "title": "Rate Laws",
+         "snippet": "Determine the value of m from the data in which [NO] varies and [Cl2] is constant. Write the ratios with the subscripts x and y to indicate data from two differ"
+        }
+       ],
+       "selected_table": "chem_m68789_t0",
+       "context_passage": "doc_m68789_p26"
+      },
+      "ms": 1.4984129993536044,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "By what factor does the rate Δ[NO2]/Δt increase from trial 1 to trial 2 in the NO + O3 data?",
+       "table_id": "chem_m68789_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: diff ; cells: r0c3, r1c3 ; answer: -",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68789_t0",
+          "row": 0,
+          "col": 3
+         },
+         {
+          "table_id": "chem_m68789_t0",
+          "row": 1,
+          "col": 3
+         }
+        ],
+        "answer": null,
+        "reason": null
+       }
+      },
+      "ms": 0.369535000572796,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "calculate",
+      "input": {
+       "op": "diff",
+       "cells": [
+        "r0c3",
+        "r1c3"
+       ]
+      },
+      "output": {
+       "op": "diff",
+       "expression": "6.6e-05 - 0.000132",
+       "inputs": [
+        {
+         "cell": {
+          "table_id": "chem_m68789_t0",
+          "row": 0,
+          "col": 3
+         },
+         "raw": "6.60 × 10−5",
+         "value": 6.6e-05,
+         "unit": null
+        },
+        {
+         "cell": {
+          "table_id": "chem_m68789_t0",
+          "row": 1,
+          "col": 3
+         },
+         "raw": "1.32 × 10−4",
+         "value": 0.000132,
+         "unit": null
+        }
+       ],
+       "result": -6.6e-05,
+       "unit": null,
+       "formatted": "-6.600e-05"
+      },
+      "ms": 0.10952199954772368,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 5x4"
+        },
+        {
+         "name": "calculation",
+         "passed": true,
+         "detail": "6.6e-05 - 0.000132 = -6.600e-05"
+        },
+        {
+         "name": "units_consistent",
+         "passed": true,
+         "detail": "units ['None']"
+        }
+       ]
+      },
+      "ms": 0.15496800006076228,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 4.083460000401828,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_19",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68789",
+   "table_id": "chem_m68789_t0",
+   "category": "abstain",
+   "label": "Not in document → abstain",
+   "question": "What is the activation energy of the NO + O3 reaction?",
+   "result": {
+    "question": "What is the activation energy of the NO + O3 reaction?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68789",
+    "table_id": "chem_m68789_t0",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "not_in_document"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "not_in_document",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "What is the activation energy of the NO + O3 reaction?",
+       "doc_id": "doc_m68789"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68789_t0",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 5.937,
+         "title": "Rate Laws",
+         "snippet": "Trial | [NO] (mol/L) | [O3] (mol/L) | Δ[NO2]/Δt (mol L^−1 s^−1)"
+        },
+        {
+         "id": "chem_m68789_t4",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 4.354,
+         "title": "Rate Constant Units for Common Reaction Orders",
+         "snippet": "Overall Reaction Order (x) | Rate Constant Unit (Lx−1 mol1−x s−1)"
+        },
+        {
+         "id": "chem_m68789_t2",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 3.7,
+         "title": "Rate Laws",
+         "snippet": "Trial | [NO] (mol/L) | [Cl2] (mol/L) | − Δ[NO]/Δt (mol L^−1 s^−1)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68789_p26",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 14.816,
+         "title": "Rate Laws",
+         "snippet": "Determine the value of n from data in which [O3] varies and [NO] is constant. In the first three experiments, [NO] is constant and [O3] varies. The reaction rat"
+        },
+        {
+         "id": "doc_m68789_p65",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 13.703,
+         "title": "Rate Laws",
+         "snippet": "Regular flights of supersonic aircraft in the stratosphere are of concern because such aircraft produce nitric oxide, NO, as a byproduct in the exhaust of their"
+        },
+        {
+         "id": "doc_m68789_p25",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 12.791,
+         "title": "Rate Laws",
+         "snippet": "Determine the value of m from the data in which [NO] varies and [O3] is constant. In the last three experiments, [NO] varies while [O3] remains constant. When ["
+        }
+       ],
+       "selected_table": "chem_m68789_t0",
+       "context_passage": "doc_m68789_p26"
+      },
+      "ms": 1.8271349999849917,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "What is the activation energy of the NO + O3 reaction?",
+       "table_id": "chem_m68789_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "not_in_document"
+       }
+      },
+      "ms": 0.37147500006540213,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "not_in_document",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.032637000003887806,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 4.9028029998225975,
+    "error": null
+   },
+   "wall_s": 0.01
+  },
+  {
+   "id": "chem_custom_20",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68789",
+   "table_id": "chem_m68789_t0",
+   "category": "text_table",
+   "label": "Condition from text",
+   "question": "At what temperature were the rate data in the laboratory study determined?",
+   "result": {
+    "question": "At what temperature were the rate data in the laboratory study determined?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68789",
+    "table_id": "chem_m68789_t0",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "not_in_document"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "not_in_document",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "At what temperature were the rate data in the laboratory study determined?",
+       "doc_id": "doc_m68789"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68789_t5",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 3.254,
+         "title": "Rate Laws",
+         "snippet": "[NO] (mol/L) | [Cl2] (mol/L) | Rate (mol L−1 h−1)"
+        },
+        {
+         "id": "chem_m68789_t3",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 3.203,
+         "title": "Rate Laws",
+         "snippet": "Trial | [OCl−] (mol/L) | [I−] (mol/L) | Initial Rate (mol/L/s)"
+        },
+        {
+         "id": "chem_m68789_t4",
+         "doc_id": "doc_m68789",
+         "kind": "table",
+         "score": 3.186,
+         "title": "Rate Constant Units for Common Reaction Orders",
+         "snippet": "Overall Reaction Order (x) | Rate Constant Unit (Lx−1 mol1−x s−1)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68789_p21",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 22.046,
+         "title": "Rate Laws",
+         "snippet": "This reaction has been studied in the laboratory, and the following rate data were determined at 25 °C."
+        },
+        {
+         "id": "doc_m68789_p95",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 14.375,
+         "title": "Rate Laws",
+         "snippet": "The following data have been determined for the reaction: I^−+OCl^− ⟶ IO^−+Cl^−"
+        },
+        {
+         "id": "doc_m68789_p2",
+         "doc_id": "doc_m68789",
+         "kind": "passage",
+         "score": 10.911,
+         "title": "Rate Laws",
+         "snippet": "in which [A] and [B] represent the molar concentrations of reactants, and k is the rate constant, which is specific for a particular reaction at a particular te"
+        }
+       ],
+       "selected_table": "chem_m68789_t0",
+       "context_passage": "doc_m68789_p21"
+      },
+      "ms": 0.8378219999940484,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "At what temperature were the rate data in the laboratory study determined?",
+       "table_id": "chem_m68789_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "not_in_document"
+       }
+      },
+      "ms": 0.3515520002110861,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "not_in_document",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.02103099996020319,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 2.952333999928669,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_21",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68793",
+   "table_id": "chem_m68793_t0",
+   "category": "cell",
+   "label": "Rate constant at 645 K",
+   "question": "What is the rate constant k at 645 K in the Arrhenius example data?",
+   "result": {
+    "question": "What is the rate constant k at 645 K in the Arrhenius example data?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68793",
+    "table_id": "chem_m68793_t0",
+    "status": "answered",
+    "answer": "8.59 × 10−5",
+    "program": {
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "chem_m68793_t0",
+       "row": 2,
+       "col": 1
+      }
+     ],
+     "answer": "8.59 × 10−5",
+     "reason": null
+    },
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68793_t0",
+      "row": 2,
+      "col": 1
+     }
+    ],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "answered",
+     "reason": null,
+     "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 5x2"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: lookup ; cells: r2c1 ; answer: 8.59 × 10−5"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "What is the rate constant k at 645 K in the Arrhenius example data?",
+       "doc_id": "doc_m68793"
+      },
+      "output": {
+       "tables": [
+        {
+         "id": "chem_m68793_t2",
+         "doc_id": "doc_m68793",
+         "kind": "table",
+         "score": 5.132,
+         "title": "Collision Theory",
+         "snippet": "Temperature (K) | k (L mol−1 s−1)"
+        },
+        {
+         "id": "chem_m68793_t0",
+         "doc_id": "doc_m68793",
+         "kind": "table",
+         "score": 5.072,
+         "title": "Collision Theory",
+         "snippet": "T (K) | k (L/mol/s)"
+        }
+       ],
+       "passages": [
+        {
+         "id": "doc_m68793_p14",
+         "doc_id": "doc_m68793",
+         "kind": "passage",
+         "score": 15.924,
+         "title": "Collision Theory",
+         "snippet": "The Arrhenius equation relates the activation energy and the rate constant, k, for many chemical reactions:"
+        }
+       ],
+       "selected_table": "chem_m68793_t0",
+       "context_passage": "doc_m68793_p14"
+      },
+      "ms": 0.931167000089772,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "What is the rate constant k at 645 K in the Arrhenius example data?",
+       "table_id": "chem_m68793_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r2c1 ; answer: 8.59 × 10−5",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68793_t0",
+          "row": 2,
+          "col": 1
+         }
+        ],
+        "answer": "8.59 × 10−5",
+        "reason": null
+       }
+      },
+      "ms": 0.25574699975550175,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 2,
+       "col": 1
+      },
+      "output": {
+       "cell": "r2c1",
+       "text": "8.59 × 10−5",
+       "header": "k (L/mol/s)",
+       "row_label": "645",
+       "unit": "L/mol/s"
+      },
+      "ms": 0.017141999705927446,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "answered",
+       "reason": null,
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x2"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
+        }
+       ]
+      },
+      "ms": 0.06422799924621359,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 3.3647619993644184,
+    "error": null
+   },
+   "wall_s": 0.0
+  },
+  {
+   "id": "chem_custom_22",
+   "corpus": "chem_docs",
+   "doc_id": "doc_m68793",
+   "table_id": "chem_m68793_t0",
+   "category": "text_table",
+   "label": "Result from text",
+   "question": "What activation energy Ea results from the Arrhenius plot in the worked example?",
+   "result": {
+    "question": "What activation energy Ea results from the Arrhenius plot in the worked example?",
+    "corpus": "chem_docs",
+    "doc_id": "doc_m68793",
+    "table_id": "chem_m68793_t0",
+    "status": "abstained",
+    "answer": null,
+    "program": {
+     "op": "abstain",
+     "cells": [],
+     "answer": null,
+     "reason": "not_in_document"
+    },
+    "evidence_cells": [],
+    "evidence_spans": [],
+    "calculation": null,
+    "verdict": {
+     "status": "abstained",
+     "reason": "not_in_document",
+     "checks": [
+      {
+       "name": "abstain",
+       "passed": true,
+       "detail": "planner abstained"
+      }
+     ]
+    },
+    "planner": {
+     "mode": "heuristic",
+     "model_id": null,
+     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+    },
+    "trace": [
+     {
+      "step": "retrieve",
+      "tool": "bm25",
+      "input": {
+       "query": "What activation energy Ea results from the Arrhenius plot in the worked example?",
+       "doc_id": "doc_m68793"
+      },
+      "output": {
+       "tables": [],
+       "passages": [
+        {
+         "id": "doc_m68793_p14",
+         "doc_id": "doc_m68793",
+         "kind": "passage",
+         "score": 17.828,
+         "title": "Collision Theory",
+         "snippet": "The Arrhenius equation relates the activation energy and the rate constant, k, for many chemical reactions:"
+        },
+        {
+         "id": "doc_m68793_p30",
+         "doc_id": "doc_m68793",
+         "kind": "passage",
+         "score": 17.457,
+         "title": "Collision Theory",
+         "snippet": "Assuming the kinetics of this reaction are consistent with the Arrhenius equation, calculate the activation energy for this decomposition."
+        },
+        {
+         "id": "doc_m68793_p17",
+         "doc_id": "doc_m68793",
+         "kind": "passage",
+         "score": 16.729,
+         "title": "Collision Theory",
+         "snippet": "The exponential term, e−Ea/RT, describes the effect of activation energy on reaction rate. According to kinetic molecular theory (see chapter on gases), the tem"
+        }
+       ],
+       "selected_table": "chem_m68793_t0",
+       "context_passage": "doc_m68793_p14"
+      },
+      "ms": 1.339855999503925,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "What activation energy Ea results from the Arrhenius plot in the worked example?",
+       "table_id": "chem_m68793_t0",
+       "mode": "heuristic"
+      },
+      "output": {
+       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "parsed": {
+        "op": "abstain",
+        "cells": [],
+        "answer": null,
+        "reason": "not_in_document"
+       }
+      },
+      "ms": 0.3370419999555452,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "not_in_document",
+       "checks": [
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "planner abstained"
+        }
+       ]
+      },
+      "ms": 0.03142300010949839,
+      "status": "ok"
+     }
+    ],
+    "elapsed_ms": 4.0415359999315115,
+    "error": null
+   },
+   "wall_s": 0.0
+  }
+ ]
+}

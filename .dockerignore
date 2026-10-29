@@ -1,0 +1,10 @@
+.venv
+.git
+models
+data/raw
+data/ko/text_*.jsonl
+experiments/**/checkpoints
+**/__pycache__
+.pytest_cache
+.ruff_cache
+node_modules

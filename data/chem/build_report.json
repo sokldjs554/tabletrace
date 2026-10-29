@@ -1,0 +1,19 @@
+{
+ "modules_in_book": 149,
+ "documents_with_tables": 56,
+ "tables": 113,
+ "passages": 3780,
+ "table_exclusions": {
+  "no_header_row": 34,
+  "header_from_first_body_row": 28,
+  "ragged_or_small": 21,
+  "body_span": 9,
+  "header_span": 13,
+  "too_many_rows": 1
+ },
+ "split_sizes": {
+  "test": 11,
+  "dev": 5,
+  "train": 40
+ }
+}

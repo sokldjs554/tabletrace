@@ -1,0 +1,45 @@
+"""Latency/throughput benchmark against an OpenAI-compatible engine (vLLM / SGLang). Prepared, not run (no GPU)."""
+from __future__ import annotations
+
+import argparse
+import concurrent.futures as cf
+import json
+import statistics
+import time
+from pathlib import Path
+
+from tabletrace.service.engines import EnginePlanner
+from tabletrace.training.data import build_examples, load_docs, read_records
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--url", required=True)
+    ap.add_argument("--model", default="planner")
+    ap.add_argument("--corpus", nargs="+", default=["data/ko/documents.jsonl"])
+    ap.add_argument("--data", nargs="+", default=["data/ko/test.jsonl"])
+    ap.add_argument("--n", type=int, default=64)
+    ap.add_argument("--concurrency", type=int, default=8)
+    ap.add_argument("--out", default="experiments/bench/engine.json")
+    a = ap.parse_args()
+    planner = EnginePlanner(a.url, a.model)
+    from transformers import PreTrainedTokenizerFast
+
+    tok = PreTrainedTokenizerFast.from_pretrained("models/mt5-small-base")
+    docs = load_docs(*[Path(c) for c in a.corpus])
+    exs = build_examples(read_records([Path(p) for p in a.data])[: a.n], docs, tok, 512)
+    t0 = time.perf_counter()
+    with cf.ThreadPoolExecutor(a.concurrency) as pool:
+        res = list(pool.map(lambda e: planner.plan(e.question, e.table, e.context), exs))
+    wall = time.perf_counter() - t0
+    lat = sorted(r[3] for r in res)
+    out = {"url": a.url, "model": a.model, "n": len(exs), "concurrency": a.concurrency, "wall_s": round(wall, 2),
+           "throughput_req_per_s": round(len(exs) / wall, 3), "p50_ms": round(statistics.median(lat), 1), "p95_ms": round(lat[int(0.95 * len(lat)) - 1], 1),
+           "parse_ok_rate": round(sum(1 for r in res if r[0] is not None) / len(res), 3)}
+    Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(a.out).write_text(json.dumps(out, indent=1))
+    print(json.dumps(out))
+
+
+if __name__ == "__main__":
+    main()

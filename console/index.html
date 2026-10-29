@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TableTrace — 표·문서 근거 검증 워크벤치</title>
+<meta name="description" content="한국어 표와 영어 화학 문서를 읽고, 답변의 근거 셀·문장과 계산 과정을 검증하는 언어모델 연구 워크벤치">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 rx=%273%27 fill=%27%232b5c8a%27/%3E%3Cpath d=%27M3 5h10M3 8h10M3 11h6%27 stroke=%27%23fff%27 stroke-width=%271.6%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<header class="topbar">
+  <div class="brand">
+    <span class="wordmark">TableTrace</span>
+    <span class="tagline">표·문서 근거 검증 워크벤치</span>
+  </div>
+  <nav class="topnav" aria-label="주요 화면">
+    <a href="#workbench" data-view="workbench" class="navlink is-active">워크벤치</a>
+    <a href="#research" data-view="research" class="navlink">연구 결과</a>
+    <a href="#about" data-view="about" class="navlink">작동 방식</a>
+    <a id="apidocs" href="/docs" class="navlink" target="_blank" rel="noopener" hidden>API 문서</a>
+    <a id="repolink" href="https://github.com/sokldjs554/tabletrace" class="navlink" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <div class="modebadge" id="modebadge" role="status" aria-live="polite">
+    <span class="dot"></span><span id="modetext">백엔드 확인 중…</span>
+  </div>
+</header>
+
+<section class="intro" id="intro">
+  <div class="intro-text">
+    <strong>TableTrace는 답만 내놓지 않습니다.</strong> 질문을 받으면 관련 본문과 표를 검색하고, 모델이 <em>어느 셀·어느 문장·어떤 계산</em>으로 답하는지 제안하면, 제한된 도구가 그 계산을 다시 실행해 검증합니다. 근거가 부족하면 답변을 보류하고 이유를 보여 줍니다.
+  </div>
+  <ol class="steps" aria-label="사용 순서">
+    <li><b>1</b> 문서·표 선택</li>
+    <li><b>2</b> 질문 입력 또는 대표 질문 선택</li>
+    <li><b>3</b> 검색 · 모델 제안 · 도구 실행</li>
+    <li><b>4</b> 답변과 근거 셀·문장·계산식 검토</li>
+  </ol>
+  <button class="btn btn-quiet" id="introclose" aria-label="안내 닫기">닫기</button>
+</section>
+
+<div class="corpusbar">
+  <div class="seg" role="tablist" aria-label="코퍼스">
+    <button role="tab" class="segbtn is-active" data-corpus="ko_tables" aria-selected="true">한국어 표 <small>KorWikiTQ</small></button>
+    <button role="tab" class="segbtn" data-corpus="chem_docs" aria-selected="false">영어 화학 문서 <small>OpenStax Chemistry 2e</small></button>
+  </div>
+  <div class="mobiletabs" role="tablist" aria-label="화면 영역">
+    <button role="tab" class="mtab is-active" data-pane="left">문서</button>
+    <button role="tab" class="mtab" data-pane="center">본문·표</button>
+    <button role="tab" class="mtab" data-pane="right">질문·결과</button>
+  </div>
+  <div class="notice" id="recordednotice" hidden>
+    저장된 실행 결과를 보고 있습니다. 백엔드가 없으므로 새 질문은 실행되지 않고, 대표 질문의 기록된 결과만 열 수 있습니다.
+  </div>
+</div>
+
+<main id="main" class="layout" data-view="workbench">
+  <!-- ===== workbench ===== -->
+  <section class="view view-workbench" id="view-workbench">
+    <aside class="pane pane-left" id="pane-left" aria-label="문서 목록">
+      <div class="pane-head">
+        <h2>문서</h2>
+        <span class="count" id="doccount"></span>
+      </div>
+      <input type="search" id="docfilter" class="input" placeholder="제목으로 찾기" aria-label="문서 제목으로 찾기" autocomplete="off">
+      <ul class="doclist" id="doclist" role="listbox" aria-label="문서" tabindex="0"></ul>
+      <div class="pane-head"><h2>대표 질문</h2></div>
+      <div class="examples" id="examples"><p class="muted">문서를 고르면 그 문서의 대표 질문이 나옵니다.</p></div>
+    </aside>
+
+    <section class="pane pane-center" id="pane-center" aria-label="문서 보기">
+      <div class="empty" id="docempty">
+        <h2>왼쪽에서 문서를 고르세요</h2>
+        <p>한국어 표는 KorWikiTQ(위키백과 표+설명), 영어 화학 문서는 OpenStax <i>Chemistry 2e</i>의 본문과 실험 데이터 표입니다. 표의 각 셀에는 <code>r행c열</code> 좌표가 있어 답변의 근거를 정확히 가리킬 수 있습니다.</p>
+      </div>
+      <article class="doc" id="docview" hidden>
+        <header class="doc-head">
+          <h2 id="doctitle"></h2>
+          <p class="doc-meta" id="docmeta"></p>
+        </header>
+        <div class="doc-body" id="docbody"></div>
+      </article>
+    </section>
+
+    <aside class="pane pane-right" id="pane-right" aria-label="질문과 결과">
+      <div class="pane-head"><h2>질문</h2></div>
+      <form id="askform" class="askform" autocomplete="off">
+        <label for="question" class="sr-only">질문</label>
+        <textarea id="question" class="input question" rows="2" placeholder="문서를 고른 뒤 질문을 입력하세요 (Enter로 실행)" disabled></textarea>
+        <div class="askrow">
+          <label class="plannerlabel">플래너
+            <select id="planner" class="select" aria-label="플래너">
+              <option value="auto">자동(모델 → 보완)</option>
+              <option value="neural">신경망(mT5)</option>
+              <option value="heuristic">휴리스틱(어휘 겹침)</option>
+            </select>
+          </label>
+          <button type="submit" class="btn btn-primary" id="askbtn" disabled>실행</button>
+        </div>
+      </form>
+      <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+      <div class="errorbar" id="errorbar" role="alert" hidden></div>
+      <div class="result" id="result" hidden></div>
+      <div class="empty small" id="resultempty">
+        <p>결과가 여기에 표시됩니다: 답변 · 근거 셀/문장 · 계산식 · 검증 항목 · 실행 추적.</p>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ===== research ===== -->
+  <section class="view view-research" id="view-research" hidden>
+    <div class="research" id="research"><p class="muted">연구 결과를 불러오는 중…</p></div>
+  </section>
+
+  <!-- ===== about ===== -->
+  <section class="view view-about" id="view-about" hidden>
+    <div class="about">
+      <h2>작동 방식</h2>
+      <p>질문은 <b>LangGraph</b>로 짜인 그래프를 지납니다: <code>retrieve</code>(BM25로 표·문단 검색) → <code>propose</code>(mT5-small이 <code>op / cells / answer</code> 프로그램을 제안; 모델이 없으면 어휘 겹침 휴리스틱) → <code>tool</code>(셀 조회·제한 산술 계산) → <code>verify</code>(셀 범위·답-셀 일치·재계산·단위·기간 검사) → 답변 또는 보류. 모델 출력이 해석되지 않거나 검증에 실패하면 휴리스틱으로 한 번 더 제안합니다.</p>
+      <pre class="mermaid-src" id="graphsrc"></pre>
+      <h3>신뢰 경계</h3>
+      <ul>
+        <li>문서 본문·셀·질문은 <b>데이터</b>입니다. 어떤 문자열도 명령으로 해석되지 않고, 계산기는 숫자·사칙연산·괄호만 받는 AST 평가기입니다. 임의 코드 실행은 없습니다.</li>
+        <li>모델이 낸 셀 좌표는 표 범위를 검사하고, 답은 그 셀의 텍스트와 비교합니다. 셀에 없는 값을 답으로 내면 <b>검증 실패로 보류</b>합니다.</li>
+        <li>계산은 모델의 숫자가 아니라 도구가 다시 계산한 값을 씁니다. 단위가 다른 셀끼리는 계산을 거부합니다.</li>
+      </ul>
+      <h3>실시간 실행과 저장된 결과</h3>
+      <p>백엔드(FastAPI)가 연결되면 모든 질문이 실제로 실행되고 결과에 <span class="badge badge-live">실시간 실행</span>이 붙습니다. 공개 데모(GitHub Pages)는 정적 파일만 제공하므로 저장소의 모델로 미리 실행해 둔 결과를 <span class="badge badge-rec">저장된 실행 결과</span>로 보여 주며, 기록 시각·모델·커밋을 함께 표시합니다. 로컬에서 <code>docker compose up</code>으로 띄우면 같은 화면이 실시간으로 동작합니다.</p>
+    </div>
+  </section>
+</main>
+<footer class="foot">
+  <span id="footrelease"></span>
+  <span>데이터: KorWikiTQ (LG AI연구원, CC BY-SA 4.0) · OpenStax Chemistry 2e (CC BY-NC-SA 4.0)</span>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

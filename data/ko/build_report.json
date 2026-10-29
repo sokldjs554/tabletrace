@@ -1,0 +1,36 @@
+{
+ "input_examples": 69992,
+ "excluded": {
+  "table_too_large": 31864,
+  "table_too_long": 2098,
+  "answer_not_unique_cell": 421,
+  "empty_header": 1503,
+  "ragged_rows": 173
+ },
+ "tables_after_filter": 7294,
+ "tables_used": {
+  "train": 900,
+  "dev": 60,
+  "test": 180,
+  "unused": 6154
+ },
+ "test_examples": 539,
+ "dev_examples": 180,
+ "train_examples": 2694,
+ "kept_examples": 3413,
+ "leak_check_shared_tables": {
+  "test&train": 0,
+  "dev&test": 0,
+  "dev&train": 0
+ },
+ "params": {
+  "seed": 13,
+  "train_tables": 900,
+  "dev_tables": 60,
+  "test_tables": 180,
+  "max_q_per_table": 3,
+  "max_rows": 16,
+  "max_cols": 7,
+  "max_chars": 900
+ }
+}

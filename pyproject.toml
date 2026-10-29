@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tabletrace"
+version = "0.1.0"
+description = "한국어 표와 영어 화학 문서를 읽고, 답변의 근거와 계산 과정을 검증하는 언어모델 연구 워크벤치"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "sokldjs554" }]
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.3",
+  "httpx>=0.27",
+  "orjson>=3.10",
+  "psutil>=5.9",
+  "numpy>=1.26",
+  "kiwipiepy>=0.18",
+  "langgraph>=0.2",
+  "langchain-core>=0.3",
+]
+
+[project.optional-dependencies]
+model = [
+  "torch>=2.4",
+  "transformers>=4.45",
+  "sentencepiece>=0.2",
+  "safetensors>=0.4",
+  "accelerate>=0.30",
+  "peft>=0.12",
+]
+serve = ["vllm>=0.6"]          # GPU only; see docs/experiments/serving.md
+dev = [
+  "pytest>=8.2",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.5",
+  "playwright>=1.45",
+]
+
+[project.scripts]
+tabletrace = "tabletrace.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tabletrace = ["py.typed"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "ASYNC"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003", "B008", "SIM108", "RUF012"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/**" = ["SIM115", "E702", "E741", "F841"]
+"tests/**" = ["SIM115", "E741"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+  "model: needs the converted mT5 weights under models/",
+  "slow: long-running",
+]
+filterwarnings = ["ignore::DeprecationWarning"]

@@ -1,0 +1,155 @@
+{
+ "generated_at": "2026-10-29 08:48 UTC",
+ "commit": "3541e72",
+ "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없음.",
+ "sections": [
+  {
+   "title": "한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160)",
+   "description": "표가 학습 분할과 겹치지 않는 539문항(원 데이터, lookup) + 합성 160문항(계산·보류).",
+   "columns": [
+    "플래너 / 모델",
+    "n",
+    "verified EM",
+    "lookup EM",
+    "calc EM",
+    "근거 셀 일치",
+    "보류 재현율",
+    "오보류율",
+    "파싱 실패",
+    "ms/예제"
+   ],
+   "rows": [
+    [
+     "휴리스틱(어휘 겹침) 기준선",
+     699,
+     "40.5%",
+     "28.0%",
+     "74.7%",
+     "34.8%",
+     "66.1%",
+     "42.8%",
+     "0.0%",
+     "7"
+    ]
+   ],
+   "status": "prep",
+   "artifact": "experiments/eval/*_ko_test/metrics.json"
+  },
+  {
+   "title": "한국어 표 QA — 수작업 평가 30문항",
+   "description": "셀·계산·본문+표·단위/기간·보류 범주. 표본이 작아 참고치.",
+   "columns": [
+    "플래너 / 모델",
+    "n",
+    "verified EM",
+    "lookup EM",
+    "calc EM",
+    "근거 셀 일치",
+    "보류 재현율",
+    "오보류율",
+    "파싱 실패",
+    "ms/예제"
+   ],
+   "rows": [
+    [
+     "휴리스틱(어휘 겹침) 기준선",
+     30,
+     "53.3%",
+     "36.4%",
+     "50.0%",
+     "42.9%",
+     "77.8%",
+     "42.9%",
+     "0.0%",
+     "127"
+    ]
+   ],
+   "status": "prep",
+   "artifact": "experiments/eval/*_ko_custom/metrics.json",
+   "notes": [
+    "휴리스틱(어휘 겹침) 기준선: abstain 100.0% (n=5), calc 83.3% (n=6), cell 44.4% (n=9), text_table 20.0% (n=5), unit_period 20.0% (n=5)"
+   ]
+  },
+  {
+   "title": "영어 화학 문서 — 수작업 평가 32문항 (test 분할 문서)",
+   "description": "물질 상수·실험 조건·수치/단위·본문·보류 범주.",
+   "columns": [
+    "플래너 / 모델",
+    "n",
+    "verified EM",
+    "lookup EM",
+    "calc EM",
+    "근거 셀 일치",
+    "보류 재현율",
+    "오보류율",
+    "파싱 실패",
+    "ms/예제"
+   ],
+   "rows": [
+    [
+     "휴리스틱(어휘 겹침) 기준선",
+     32,
+     "68.8%",
+     "84.6%",
+     "28.6%",
+     "75.0%",
+     "75.0%",
+     "15.0%",
+     "0.0%",
+     "0"
+    ]
+   ],
+   "status": "prep",
+   "artifact": "experiments/eval/*_chem_custom/metrics.json",
+   "notes": [
+    "휴리스틱(어휘 겹침) 기준선: abstain 100.0% (n=5), calc 28.6% (n=7), cell 80.0% (n=10), text_table 66.7% (n=6), unit_period 75.0% (n=4)"
+   ]
+  },
+  {
+   "title": "학습 실행 기록",
+   "columns": [
+    "실행",
+    "학습 예제",
+    "스텝",
+    "소요",
+    "하드웨어",
+    "best dev verified EM",
+    "best step"
+   ],
+   "rows": [
+    [
+     "SFT stage1 (ko)",
+     3431,
+     "-",
+     "(진행 중)",
+     "4 threads CPU",
+     "-",
+     "-"
+    ]
+   ],
+   "status": "done",
+   "artifact": "experiments/*/summary.json, train_log.jsonl",
+   "conditions": {
+    "모델": "mT5-small 300M (gs://t5-data 체크포인트를 직접 변환)",
+    "최적화기": "AdamW, 선형 워밍업 5% + 선형 감쇠, clip 1.0",
+    "입력": "question + title + context(≤300자) + 표 직렬화 ≤512 토큰"
+   }
+  },
+  {
+   "title": "추론 최적화 (CPU 실측)",
+   "status": "prep",
+   "description": "src/tabletrace/bench/inference.py — fp32/int8/배치/KV 캐시 비교. 아직 실행 전."
+  },
+  {
+   "title": "멀티 GPU Model Parallelism",
+   "status": "prep",
+   "description": "src/tabletrace/bench/pipeline_parallel.py 준비, 실행 전."
+  },
+  {
+   "title": "vLLM / SGLang 서빙",
+   "status": "prep",
+   "description": "GPU가 없어 실행하지 못함. OpenAI 호환 클라이언트(EnginePlanner)·TP=2 서빙 스크립트·벤치 스크립트를 준비했고 모의 서버로 왕복 테스트했다(tests/test_engines.py).",
+   "artifact": "scripts/serving/*.sh, src/tabletrace/service/engines.py, docs/experiments/serving.md"
+  }
+ ]
+}

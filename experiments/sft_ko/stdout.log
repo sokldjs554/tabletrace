@@ -1,0 +1,27 @@
+Loading weights:   0%|          | 0/192 [00:00<?, ?it/s]Loading weights:  62%|██████▎   | 120/192 [00:00<00:00, 1189.20it/s]Loading weights: 100%|██████████| 192/192 [00:00<00:00, 1687.48it/s]
+[transformers] The tied weights mapping and config for this model specifies to tie shared.weight to lm_head.weight, but both are present in the checkpoints with different values, so we will NOT tie them. You should update the config with `tie_word_embeddings=False` to silence this warning.
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (3536 > 1024). Running this sequence through the model will result in indexing errors
+{'step': 1, 'epoch': 0.002, 'loss': 33.7287, 'lr': 1.4285714285714284e-05, 'elapsed_s': 21.4, 'rss_gb': 7.87}
+{'step': 10, 'epoch': 0.023, 'loss': 16.8946, 'lr': 7.857142857142857e-05, 'elapsed_s': 116.8, 'rss_gb': 9.41}
+{'step': 20, 'epoch': 0.047, 'loss': 14.2879, 'lr': 0.00015, 'elapsed_s': 202.5, 'rss_gb': 9.59}
+{'step': 30, 'epoch': 0.07, 'loss': 7.9718, 'lr': 0.00022142857142857142, 'elapsed_s': 283.3, 'rss_gb': 9.45}
+{'step': 40, 'epoch': 0.093, 'loss': 6.1271, 'lr': 0.00029285714285714283, 'elapsed_s': 363.7, 'rss_gb': 9.39}
+{'step': 50, 'epoch': 0.117, 'loss': 3.6355, 'lr': 0.00029705882352941177, 'elapsed_s': 457.9, 'rss_gb': 9.6}
+{'step': 60, 'epoch': 0.14, 'loss': 2.7957, 'lr': 0.0002933823529411764, 'elapsed_s': 549.6, 'rss_gb': 9.53}
+{'step': 70, 'epoch': 0.163, 'loss': 2.2351, 'lr': 0.00028970588235294116, 'elapsed_s': 660.9, 'rss_gb': 9.66}
+{'step': 80, 'epoch': 0.186, 'loss': 1.763, 'lr': 0.00028602941176470586, 'elapsed_s': 779.0, 'rss_gb': 9.78}
+{'step': 90, 'epoch': 0.21, 'loss': 1.0074, 'lr': 0.00028235294117647056, 'elapsed_s': 862.9, 'rss_gb': 9.79}
+{'step': 100, 'epoch': 0.233, 'loss': 1.3275, 'lr': 0.00027867647058823526, 'elapsed_s': 942.7, 'rss_gb': 9.89}
+{'step': 110, 'epoch': 0.256, 'loss': 0.975, 'lr': 0.00027499999999999996, 'elapsed_s': 1026.9, 'rss_gb': 9.73}
+{'step': 120, 'epoch': 0.28, 'loss': 0.9118, 'lr': 0.00027132352941176466, 'elapsed_s': 1121.8, 'rss_gb': 9.76}
+{'step': 130, 'epoch': 0.303, 'loss': 1.2437, 'lr': 0.0002676470588235294, 'elapsed_s': 1207.8, 'rss_gb': 9.9}
+{'step': 140, 'epoch': 0.326, 'loss': 0.9498, 'lr': 0.0002639705882352941, 'elapsed_s': 1282.7, 'rss_gb': 9.65}
+{'step': 150, 'epoch': 0.35, 'loss': 1.0194, 'lr': 0.0002602941176470588, 'elapsed_s': 1388.3, 'rss_gb': 9.9}
+{'step': 160, 'epoch': 0.373, 'loss': 0.7517, 'lr': 0.0002566176470588235, 'elapsed_s': 1469.4, 'rss_gb': 9.62}
+{'step': 170, 'epoch': 0.396, 'loss': 0.8286, 'lr': 0.0002529411764705882, 'elapsed_s': 1549.7, 'rss_gb': 9.63}
+{'step': 180, 'epoch': 0.42, 'loss': 0.7655, 'lr': 0.0002492647058823529, 'elapsed_s': 1636.4, 'rss_gb': 9.47}
+{'step': 190, 'epoch': 0.443, 'loss': 0.8167, 'lr': 0.0002455882352941176, 'elapsed_s': 1712.7, 'rss_gb': 9.46}
+{'step': 200, 'epoch': 0.466, 'loss': 0.6927, 'lr': 0.00024191176470588234, 'elapsed_s': 1801.1, 'rss_gb': 9.44}
+{'step': 210, 'epoch': 0.49, 'loss': 0.8344, 'lr': 0.000238235294117647, 'elapsed_s': 1893.4, 'rss_gb': 9.54}
+{'step': 220, 'epoch': 0.513, 'loss': 0.703, 'lr': 0.00023455882352941174, 'elapsed_s': 1997.1, 'rss_gb': 9.44}
+{'step': 230, 'epoch': 0.536, 'loss': 0.6637, 'lr': 0.00023088235294117646, 'elapsed_s': 2076.9, 'rss_gb': 9.44}
