@@ -1,0 +1,20 @@
+{
+ "train": {
+  "examples": 58221,
+  "unique_tables_by_url": 12030,
+  "unique_table_ids_by_qid_prefix": 13551,
+  "answer_is_cell_pct": 99.6,
+  "table_rows_median": 14,
+  "table_rows_max": 21
+ },
+ "dev": {
+  "examples": 11771,
+  "unique_tables_by_url": 2949,
+  "unique_table_ids_by_qid_prefix": 3033,
+  "answer_is_cell_pct": 99.5,
+  "table_rows_median": 13,
+  "table_rows_max": 21
+ },
+ "shared_tables_by_url": 1755,
+ "shared_tables_by_qid_prefix": 1554
+}

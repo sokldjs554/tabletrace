@@ -1,5 +1,5 @@
 {
- "run": "experiments/eval/sft_ko2_ko_custom",
+ "run": "experiments/eval/sft_ko2_ko_custom/",
  "n": 30,
  "n_answerable": 25,
  "pred_status_answerable": {
@@ -19,6 +19,15 @@
   "col_correct": 0.167,
   "both_correct": 0.167
  },
+ "abstain_breakdown": {
+  "n_gold_abstain": 5,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 1.0,
+  "abstained_via_invalid_program_recall": 0.6,
+  "abstained_via_verifier_recall": 0.4
+ },
+ "degenerate_calc_outputs": 16,
+ "degenerate_calc_rate": 0.5333,
  "op_confusion_top": [
   [
    "lookup->diff",

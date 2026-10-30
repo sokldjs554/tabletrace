@@ -1,5 +1,5 @@
 {
- "run": "experiments/eval/sft_ko_chem_custom",
+ "run": "experiments/eval/sft_ko_chem_custom/",
  "n": 32,
  "n_answerable": 27,
  "pred_status_answerable": {
@@ -18,6 +18,15 @@
   "col_correct": 0.25,
   "both_correct": 0.125
  },
+ "abstain_breakdown": {
+  "n_gold_abstain": 5,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 0.6,
+  "abstained_via_invalid_program_recall": 0.2,
+  "abstained_via_verifier_recall": 0.4
+ },
+ "degenerate_calc_outputs": 11,
+ "degenerate_calc_rate": 0.3438,
  "op_confusion_top": [
   [
    "lookup->lookup",

@@ -1,0 +1,75 @@
+{
+ "run": "experiments/eval/sft_chem_int8_ko_test/",
+ "n": 699,
+ "n_answerable": 649,
+ "pred_status_answerable": {
+  "answered": 290,
+  "abstained": 359
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 237,
+  "invalid_program": 98,
+  "not_in_document": 24
+ },
+ "raw_correct_but_blocked": 4,
+ "evidence_repaired": 212,
+ "lookup_citation": {
+  "n": 454,
+  "row_correct": 0.705,
+  "col_correct": 0.3,
+  "both_correct": 0.194
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 50,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 0.48,
+  "abstained_via_invalid_program_recall": 0.14,
+  "abstained_via_verifier_recall": 0.34
+ },
+ "degenerate_calc_outputs": 0,
+ "degenerate_calc_rate": 0.0,
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   454
+  ],
+  [
+   "lookup->None",
+   85
+  ],
+  [
+   "diff->lookup",
+   54
+  ],
+  [
+   "abstain->lookup",
+   43
+  ],
+  [
+   "avg->lookup",
+   22
+  ],
+  [
+   "sum->lookup",
+   21
+  ],
+  [
+   "abstain->None",
+   7
+  ],
+  [
+   "diff->None",
+   6
+  ]
+ ],
+ "by_source_verified": {
+  "korwikitq": {
+   "n": 539,
+   "verified_em": 0.186
+  },
+  "synthetic": {
+   "n": 160,
+   "verified_em": 0.15
+  }
+ }
+}

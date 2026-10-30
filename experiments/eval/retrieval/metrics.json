@@ -1,0 +1,32 @@
+{
+ "index_build_s": 11.1,
+ "ko_test_lookup": {
+  "n": 539,
+  "n_tables_searched": 1140,
+  "hit_at_1": 0.7996,
+  "hit_at_5": 0.9573,
+  "mrr_at_5": 0.8673
+ },
+ "ko_custom": {
+  "n": 30,
+  "n_tables_searched": 1140,
+  "hit_at_1": 0.8,
+  "hit_at_5": 0.9,
+  "mrr_at_5": 0.8389
+ },
+ "chem_custom": {
+  "n": 32,
+  "n_tables_searched": 113,
+  "hit_at_1": 0.6562,
+  "hit_at_5": 0.8125,
+  "mrr_at_5": 0.7135
+ },
+ "chem_passage_hit_at_3_within_doc": {
+  "n": 7,
+  "hit_at_3": 0.8571
+ },
+ "chem_passage_hit_at_3_all_docs": {
+  "n": 7,
+  "hit_at_3": 0.8571
+ }
+}

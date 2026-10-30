@@ -39,7 +39,34 @@ def fmt(v, mode: str | None = None) -> str:
     return str(v)
 
 
+MACRO = re.compile(r"\{\{(?P<file>[^|{}\s]+)\|(?P<key>[^|{}\s]+)(?:\|(?P<fmt>pct|int))?\}\}")
+
+
+def expand() -> int:
+    """Turn {{file|key|fmt}} macros written in README/REPORT prose into verified <!-- num --> markers."""
+    n = 0
+    for md in [ROOT / "README.md", ROOT / "docs" / "REPORT.md"]:
+        if not md.exists():
+            continue
+        text = md.read_text(encoding="utf-8")
+
+        def sub(m: re.Match) -> str:
+            nonlocal n
+            v = fmt(lookup(json.loads((ROOT / m.group("file")).read_text(encoding="utf-8")), m.group("key")), m.group("fmt"))
+            f_ = f":{m.group('fmt')}" if m.group("fmt") else ""
+            n += 1
+            return f"<!-- num:{m.group('file')}:{m.group('key')}{f_} -->{v}<!-- /num -->"
+
+        new = MACRO.sub(sub, text)
+        if new != text:
+            md.write_text(new, encoding="utf-8")
+    print(f"expanded {n} macros")
+    return 0
+
+
 def main() -> int:
+    if "--expand" in sys.argv:
+        return expand()
     fix = "--fix" in sys.argv
     bad = 0
     for md in [ROOT / "README.md", ROOT / "docs" / "REPORT.md"]:
@@ -71,6 +98,15 @@ def main() -> int:
             md.write_text(new, encoding="utf-8")
     n = sum(len(PAT.findall((ROOT / f).read_text(encoding="utf-8"))) for f in ["README.md", "docs/REPORT.md"] if (ROOT / f).exists())
     print(f"checked {n} numbers, {bad} mismatches{' (fixed)' if fix and bad else ''}")
+    if "--strict" in sys.argv:
+        leftovers = []
+        for md in [ROOT / "README.md", ROOT / "docs" / "REPORT.md"]:
+            if md.exists():
+                t = md.read_text(encoding="utf-8")
+                leftovers += [f"{md.name}: {tok}" for tok in ("(채움)", "@@PENDING", "{{") if tok in t]
+        if leftovers:
+            print("unfinished placeholders:", leftovers)
+            return 1
     if "--strict" in sys.argv and n == 0:
         print("no <!-- num:... --> markers found: nothing was checked")
         return 1

@@ -1,0 +1,51 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "model",
+  "data": [
+   "data/ko/text_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/text_documents_dev.jsonl"
+  ],
+  "n": 100,
+  "wall_s": 64.1,
+  "hardware": "x86_64",
+  "label": null,
+  "finished": "2026-10-30T06:57:35",
+  "quantize": false
+ },
+ "metrics": {
+  "n": 100,
+  "n_answerable": 100,
+  "n_gold_abstain": 0,
+  "n_calc": 100,
+  "n_lookup": 0,
+  "verified_em": 0.29,
+  "answer_em_answerable": 0.29,
+  "raw_answer_em_answerable": 0.29,
+  "evidence_cells_exact": 0.92,
+  "evidence_cells_exact_raw": 0.92,
+  "evidence_repaired_rate": 0.0,
+  "evidence_cells_overlap": 0.92,
+  "op_acc": 0.99,
+  "lookup_em": null,
+  "calc_em": 0.29,
+  "calc_result_correct": 0.0,
+  "unit_error_rate": null,
+  "abstain_recall": null,
+  "false_abstain_rate": 0.08,
+  "abstain_precision": 0.0,
+  "parse_fail_rate": 0.01,
+  "verifier_corrections": 0.07,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.29,
+  "mean_ms_per_example": 551.1,
+  "by_source": {
+   "korquad_text": {
+    "n": 100,
+    "verified_em": 0.29
+   }
+  }
+ }
+}

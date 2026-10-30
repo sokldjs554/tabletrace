@@ -35,6 +35,26 @@ def main(path: str) -> None:
             both += pr == gr and pc == gc
     out["lookup_citation"] = {"n": n, "row_correct": round(rowok / n, 3) if n else None, "col_correct": round(colok / n, 3) if n else None,
                               "both_correct": round(both / n, 3) if n else None}
+    # Abstention bookkeeping: the headline abstain_recall counts the FINAL status, so a degenerate program that the
+    # verifier rejects "abstains" too. Separate what the planner itself decided from what the verifier caught.
+    gold_ab = [r for r in rows if r["gold_status"] == "abstained"]
+    n_ab = len(gold_ab)
+    out["abstain_breakdown"] = {
+        "n_gold_abstain": n_ab,
+        "planner_chose_abstain_recall": round(sum(1 for r in gold_ab if r["pred_op"] == "abstain") / n_ab, 4) if n_ab else None,
+        "final_abstain_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained") / n_ab, 4) if n_ab else None,
+        "abstained_via_invalid_program_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained" and r["pred_op"] != "abstain" and r["pred_reason"] == "invalid_program") / n_ab, 4) if n_ab else None,
+        "abstained_via_verifier_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained" and r["pred_op"] != "abstain" and r["pred_reason"] not in ("invalid_program", None)) / n_ab, 4) if n_ab else None,
+    }
+    calc_ops = ("diff", "sum", "avg", "ratio", "pct_change")
+    degenerate = 0
+    for r in rows:
+        raw = r["raw_output"] or ""
+        if r["pred_op"] in calc_ops and "cells:" in raw:
+            cells = [c.strip() for c in raw.split("cells:")[1].split(";")[0].split(",") if c.strip()]
+            degenerate += len(set(cells)) < len(cells)
+    out["degenerate_calc_outputs"] = degenerate      # calculation programs that reuse the same cell
+    out["degenerate_calc_rate"] = round(degenerate / len(rows), 4)
     out["op_confusion_top"] = [[f"{g}->{p}", c] for (g, p), c in collections.Counter((r["gold_op"], r["pred_op"]) for r in rows).most_common(8)]
     out["by_source_verified"] = {}
     for src in sorted({r["source"] for r in rows}):
