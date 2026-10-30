@@ -21,6 +21,15 @@
 
   const state = { mode: null, corpus: "ko_tables", docs: [], doc: null, tableId: null, examples: [], recorded: null, release: null, busy: false, timer: null, lastEvidence: null };
 
+  // Recorded mode: runs are stored per planner ({planners: {neural: {...runs}, heuristic: {...runs}}}).
+  function recordedSet() {
+    const r = state.recorded; if (!r || !r.planners) return null;
+    let sel = $("#planner").value;
+    if (sel === "auto") sel = r.planners.neural ? "neural" : "heuristic";
+    if (!r.planners[sel]) sel = Object.keys(r.planners)[0];
+    return { key: sel, ...r.planners[sel] };
+  }
+
   async function fetchJSON(url, opts = {}, timeoutMs = 8000) {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -64,9 +73,11 @@
     } else if (state.recorded) {
       const r = state.recorded;
       b.className = "modebadge rec";
-      t.textContent = `저장된 실행 결과 · ${r.model_id || r.planner} · ${r.generated_at} · commit ${r.commit}`;
+      const avail = Object.entries(r.planners || {}).map(([k, v]) => (k === "neural" ? "모델 " + (v.model_id || "") : "휴리스틱")).join(" / ");
+      t.textContent = `저장된 실행 결과 · ${avail} · ${r.generated_at} · commit ${r.commit}`;
+      Array.from($("#planner").options).forEach((o) => { if (o.value !== "auto") o.disabled = !(r.planners && r.planners[o.value]); });
       $("#recordednotice").hidden = false;
-      $("#footrelease").textContent = `정적 데모: 결과는 ${r.generated_at}에 ${r.planner} 플래너(${r.model_id || "-"})로 실행해 저장한 것입니다.`;
+      $("#footrelease").textContent = `정적 데모: 결과는 ${r.generated_at}에 저장소의 플래너로 실제 실행해 저장한 것입니다(${avail}). 플래너 선택으로 두 결과를 비교할 수 있습니다.`;
     } else {
       b.className = "modebadge";
       t.textContent = "백엔드도 저장된 결과도 없음";
@@ -91,6 +102,7 @@
     });
     $("#askform").addEventListener("submit", (e) => { e.preventDefault(); ask($("#question").value.trim()); });
     $("#question").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#askform").requestSubmit(); } });
+    $("#planner").addEventListener("change", () => { if (state.mode === "recorded" && state.lastRecordedId) showRecorded(state.lastRecordedId); });
     window.addEventListener("hashchange", route);
     $$(".navlink[data-view]").forEach((a) => a.addEventListener("click", () => setTimeout(route, 0)));
   }
@@ -197,7 +209,8 @@
     if (!state.doc) { box.innerHTML = '<p class="muted">문서를 고르면 그 문서의 대표 질문이 나옵니다.</p>'; return; }
     let ex = state.examples.filter((x) => x.doc_id === state.doc.id);
     if (state.mode === "recorded" && state.recorded) {
-      const have = new Set(state.recorded.runs.map((r) => r.id));
+      const set = recordedSet();
+      const have = new Set(((set && set.runs) || []).map((r) => r.id));
       ex = ex.filter((x) => have.has(x.id));
     }
     box.innerHTML = ex.length ? ex.map((x) => `<button type="button" class="chip" data-ex="${esc(x.id)}"><span class="cat">${esc(CATS[x.category] || x.category)} · ${esc(x.label || "")}</span><br>${esc(x.question)}</button>`).join("")
@@ -246,11 +259,13 @@
   }
 
   function showRecorded(exId) {
-    const run = state.recorded.runs.find((r) => r.id === exId);
+    const set = recordedSet();
+    const run = set && set.runs.find((r) => r.id === exId);
     if (!run) return;
+    state.lastRecordedId = exId;
     $("#errorbar").hidden = true; $("#resultempty").hidden = true;
     setStatus(`저장된 결과 · 기록 ${state.recorded.generated_at} · ${fmtMs(run.result.elapsed_ms)}`, false);
-    renderResult(run.result, { kind: "recorded", at: state.recorded.generated_at, model: state.recorded.model_id, commit: state.recorded.commit });
+    renderResult(run.result, { kind: "recorded", at: state.recorded.generated_at, model: set.model_id, commit: state.recorded.commit, planner: set.key });
   }
 
   // ---------- result rendering ----------

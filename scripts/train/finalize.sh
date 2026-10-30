@@ -27,5 +27,20 @@ done
 for pair in "sft_ko2:experiments/sft_ko2/model" "sft_chem:experiments/sft_chem/model"; do
   key=${pair%%:*}; model=${pair#*:}; [ -f "$model/model.safetensors" ] && ev "${key}_chem_syndev" "$model" "$CH" data/chem/synthetic_dev.jsonl
 done
-python scripts/render_results.py && python scripts/build_research.py && python scripts/check_numbers.py
+CHROMIUM=${TT_CHROMIUM:-/opt/pw-browsers/chromium-1243/chrome-linux64/chrome}
+MODEL_FINAL=models/mt5-small-tabletrace
+if [ -f "$MODEL_FINAL/model.safetensors" ]; then
+  python scripts/make_recorded_runs.py --planners neural heuristic --model "$MODEL_FINAL" > experiments/pipeline/final_recorded.log 2>&1
+else
+  python scripts/make_recorded_runs.py --planners heuristic > experiments/pipeline/final_recorded.log 2>&1
+fi
+echo "[$(date -u +%H:%M:%S)] recorded runs: $(tail -1 experiments/pipeline/final_recorded.log)"
+python scripts/build_research.py > /dev/null && python scripts/render_results.py
+python scripts/build_static_site.py --out _site --commit "$(git rev-parse --short HEAD)" > /dev/null
+python scripts/console_screenshots.py --out docs/images --chromium "$CHROMIUM" --planner auto > experiments/pipeline/final_e2e_live.log 2>&1
+echo "[$(date -u +%H:%M:%S)] e2e live: $(tail -1 experiments/pipeline/final_e2e_live.log)"
+python scripts/console_screenshots.py --out docs/images --static _site --chromium "$CHROMIUM" > experiments/pipeline/final_e2e_static.log 2>&1
+echo "[$(date -u +%H:%M:%S)] e2e static: $(tail -1 experiments/pipeline/final_e2e_static.log)"
+rm -rf _site
+python scripts/check_numbers.py
 echo "[$(date -u +%H:%M:%S)] FINALIZE DONE"

@@ -104,16 +104,24 @@ def main() -> None:
                     ev.nth(0).click()
                     page.wait_for_timeout(500)
                     check(f"{label}: evidence highlighted in table", page.locator("td.is-evidence").count() >= 1)
-                # abstain example (the chip whose category label says 보류/abstain)
-                hold = page.locator(".chip", has_text="보류").first if page.locator(".chip", has_text="보류").count() else page.locator(".chip", has_text="abstain").first
+                # Abstain-state rendering. The neural planner often answers questions it should abstain on (a real
+                # model weakness measured in the evaluation), so this UI check switches to the heuristic planner,
+                # which abstains deterministically on the representative "no answer" questions.
                 if label == "mobile":
                     page.click(".mtab[data-pane='left']")
-                if hold.count():
-                    hold.click()
+                page.select_option("#planner", "heuristic")
+                hold = page.locator(".chip", has_text="보류") if page.locator(".chip", has_text="보류").count() else page.locator(".chip", has_text="abstain")
+                shown_hold = False
+                for i in range(hold.count()):
+                    hold.nth(i).click()
                     page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=120000)
                     page.wait_for_timeout(300)
-                    check(f"{label}: abstain example shows 답변 보류", page.locator(".badge-hold").count() > 0)
-                    page.screenshot(path=str(out / f"{tag}-{label}-04-abstain.png"), full_page=(label == "mobile"))
+                    if page.locator(".badge-hold").count() > 0:
+                        shown_hold = True
+                        break
+                check(f"{label}: abstain state renders 답변 보류 (heuristic planner)", shown_hold)
+                page.screenshot(path=str(out / f"{tag}-{label}-04-abstain.png"), full_page=(label == "mobile"))
+                page.select_option("#planner", "auto")
                 if tag == "live" and label == "desktop":
                     # typed question + keyboard submit + invalid input handling
                     page.fill("#question", "x")

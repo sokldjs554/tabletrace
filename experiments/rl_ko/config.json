@@ -1,0 +1,47 @@
+{
+ "args": {
+  "model": "experiments/sft_ko2/model",
+  "train": [
+   "data/ko/train.jsonl",
+   "data/ko/synthetic_train.jsonl"
+  ],
+  "dev": [
+   "data/ko/dev.jsonl",
+   "data/ko/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "out": "experiments/rl_ko/model",
+  "steps": 60,
+  "prompts_per_step": 4,
+  "group": 4,
+  "lr": 1e-05,
+  "beta": 0.02,
+  "temperature": 1.0,
+  "max_in": 512,
+  "max_out": 64,
+  "eval_every": 20,
+  "chunk": 8,
+  "seed": 0,
+  "threads": 4,
+  "max_dev": 0,
+  "kl_clamp": 10.0
+ },
+ "n_train_prompts": 3485,
+ "prompt_pools": {
+  "lookup": 2585,
+  "calc": 640,
+  "abstain": 260
+ },
+ "n_dev": 245,
+ "hardware": {
+  "cpu": "x86_64",
+  "threads": 4,
+  "cuda": false,
+  "ram_gb": 16.9
+ },
+ "torch": "2.15.0+cu132",
+ "started": "2026-10-30T05:12:14",
+ "algorithm": "GRPO-style group-normalised policy gradient, on-policy, k3 KL to SFT reference"
+}
