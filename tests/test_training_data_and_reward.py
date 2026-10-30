@@ -6,10 +6,10 @@ import pytest
 pytest.importorskip("torch")          # CI installs only the lightweight extras; these tests need the model extra
 pytest.importorskip("transformers")
 
-from tabletrace.agent.program import serialize  # noqa: E402
-from tabletrace.schema import Document, Source  # noqa: E402
-from tabletrace.training.data import build_examples  # noqa: E402
-from tabletrace.training.rl_grpo import reward  # noqa: E402
+from tabletrace.agent.program import serialize
+from tabletrace.schema import Document, Source
+from tabletrace.training.data import build_examples
+from tabletrace.training.rl_grpo import reward
 
 ROOT = Path(__file__).resolve().parents[1]
 

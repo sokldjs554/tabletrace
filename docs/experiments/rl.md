@@ -10,7 +10,7 @@
 
 - 보상이 결정적·검증 가능(정답 EM, 셀 일치, 계산 일치, 보류 적절성)하므로 보상 모델이 필요 없다.
 - 가치 함수(critic) 없이 같은 프롬프트의 샘플 그룹 평균을 베이스라인으로 쓰므로 300M 모델·CPU에서도 돌아간다.
-- TRL의 GRPOTrainer는 decoder-only 전용이라 encoder-decoder(mT5)에는 같은 수식을 직접 구현했다.
+- TRL의 GRPOTrainer는 causal LM 기준으로 알려져 있어 mT5(encoder-decoder)로 시험하지 않고 같은 수식을 직접 구현했다(TRL을 mT5에 적용해 보지는 않았다).
 
 ## 알고리즘 (실제 구현)
 

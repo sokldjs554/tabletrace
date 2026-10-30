@@ -124,7 +124,7 @@ flowchart LR
 
 ## 8. 데이터 분할과 평가 방법
 
-- **한국어**: KorWikiTQ 공개 train/dev는 표 {{data/ko/official_split_profile.json|shared_tables_by_url|int}}개를 공유합니다(직접 측정, `scripts/data/profile_korwikitq.py`). 그래서 URL+표 내용 해시로 **표 단위 재분할**(train 900 / dev 60 / test 180 표; 분할 간 공유 표 0, `data/ko/build_report.json`). 평가는 test 539문항(원본, lookup) + 합성 160(계산·보류) + 수작업 30(범주별).
+- **한국어**: KorWikiTQ 공개 train/dev는 표 <!-- num:data/ko/official_split_profile.json:shared_tables_by_url:int -->1,755<!-- /num -->개를 공유합니다(직접 측정, `scripts/data/profile_korwikitq.py`). 그래서 URL+표 내용 해시로 **표 단위 재분할**(train 900 / dev 60 / test 180 표; 분할 간 공유 표 0, `data/ko/build_report.json`). 평가는 test 539문항(원본, lookup) + 합성 160(계산·보류) + 수작업 30(범주별).
 - **영어 화학**: 모듈(문서) 단위 분할 train 40 / dev 5 / test 11. 수작업 평가 32문항은 모두 test 문서에서 작성.
 - **지표**(`eval/metrics.py`): verified EM(검증기를 거친 최종 답/보류가 정답과 일치), raw EM(모델 제안 자체), 근거 셀 정확 일치, 연산 정확도, 계산값 일치, 단위 오류율, 보류 재현율(답 없는 문항에서 보류), 오보류율(답 있는 문항에서 보류), 파싱 실패율.
 - **검수**: 수작업 사례는 작성 직후 스크립트가 셀 텍스트·계산기 결과·본문 포함 여부를 자동 확인(`scripts/check_data.py`, CI에서도 실행).
@@ -135,15 +135,15 @@ flowchart LR
 
 **결과 요약 — 좋은 소식과 나쁜 소식 모두**
 
-- ✅ **튜닝은 효과가 있었습니다.** 한국어 독립 test(699문항) verified EM이 미튜닝 {{experiments/eval/base_ko_test/metrics.json|metrics.verified_em|pct}}% → SFT {{experiments/eval/sft_ko_ko_test/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.verified_em|pct}}% → 화학 SFT 후 {{experiments/eval/sft_chem_ko_test/metrics.json|metrics.verified_em|pct}}%.
-- ✅ **원본 KorWikiTQ 539문항만 보면 모델이 어휘 겹침 기준선을 앞섭니다**: {{experiments/eval/sft_chem_ko_test/analysis.json|by_source_verified.korwikitq.verified_em|pct}}% 대 {{experiments/eval/heuristic_ko_test/analysis.json|by_source_verified.korwikitq.verified_em|pct}}%.
-- ❌ **전체 평가에서는 기준선({{experiments/eval/heuristic_ko_test/metrics.json|metrics.verified_em|pct}}%)을 넘지 못했습니다.** 합성 계산·보류 160문항에서 모델은 {{experiments/eval/sft_chem_ko_test/analysis.json|by_source_verified.synthetic.verified_em|pct}}%, 기준선은 {{experiments/eval/heuristic_ko_test/analysis.json|by_source_verified.synthetic.verified_em|pct}}%입니다. 다만 이 합성 문항은 기준선의 의도 패턴과 같은 사람이 쓴 템플릿이라 **독립적인 비교가 아닙니다**.
-- ❌ **약한 고리는 셀 열 좌표입니다**: 모델이 인용한 열이 맞는 비율 {{experiments/eval/sft_chem_ko_test/analysis.json|lookup_citation.col_correct|pct}}%(행은 {{experiments/eval/sft_chem_ko_test/analysis.json|lookup_citation.row_correct|pct}}%). 검증기의 "근거 복구"가 답 텍스트로 올바른 셀을 찾아 줘서 점수를 지탱합니다.
-- ❌ **본문+표 질문은 실패했습니다.** 모델이 평가에서 `op: text`를 한 번도 내지 않았습니다. 학습의 본문 답변 예제가 전부 빈 표와 함께여서 "표에 행이 없으면 text"라는 형식 지름길을 배웠습니다(학습 형식 입력에서는 100번 중 {{experiments/eval/sft_ko2_text_dev/analysis.json|op_confusion_top.0.1|int}}번 `op: text`).
-- ⚠️ **보류 재현율 지표는 그대로 믿으면 안 됩니다.** 답 없는 문항에서 모델이 직접 `op: abstain`을 낸 비율은 test 기준 SFT stage 2 {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.planner_chose_abstain_recall|pct}}%인데, 최종 상태가 "보류"인 비율은 {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.final_abstain_recall|pct}}%입니다. 차이는 해석 불가·퇴화 프로그램이나 검증 실패로 우연히 보류된 경우입니다(§11).
-- ⚠️ **영어 화학**: 합성 dev는 {{experiments/eval/sft_ko2_chem_syndev/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/sft_chem_chem_syndev/metrics.json|metrics.verified_em|pct}}%로 올랐지만 손으로 쓴 32문항은 {{experiments/eval/sft_ko2_chem_custom/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/sft_chem_chem_custom/metrics.json|metrics.verified_em|pct}}%(2문항 차이, 잡음 수준)이고 기준선은 {{experiments/eval/heuristic_chem_custom/metrics.json|metrics.verified_em|pct}}%입니다.
-- ⚠️ **int8 동적 양자화는 처리량을 {{experiments/bench/inference.json|results.0.throughput_ex_per_s}} → {{experiments/bench/inference.json|results.4.throughput_ex_per_s}} 예제/s로 올리지만** 한국어 test 정확도를 {{experiments/eval/sft_chem_ko_test/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/sft_chem_int8_ko_test/metrics.json|metrics.verified_em|pct}}%로 떨어뜨립니다.
-- 🔎 **강화학습**: ❌ **강화학습은 개선을 만들지 못했습니다(60 step 예비 실험).** 수정한 보상(v2)으로 학습한 정책의 독립 test verified EM은 SFT stage 2 {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/rl_ko_ko_test/metrics.json|metrics.verified_em|pct}}%로 같은 수준이고(1 표준오차 약 1.7%p), 오보류율은 {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.false_abstain_rate|pct}}% → {{experiments/eval/rl_ko_ko_test/metrics.json|metrics.false_abstain_rate|pct}}%로 나빠졌습니다. 정책 갱신은 실제로 수행됐고, 첫 보상(v1)의 편법을 로그에서 찾아 고친 것이 이 실험에서 얻은 것입니다(§9.4).
+- ✅ **튜닝은 효과가 있었습니다.** 한국어 독립 test(699문항) verified EM이 미튜닝 <!-- num:experiments/eval/base_ko_test/metrics.json:metrics.verified_em:pct -->7.1<!-- /num -->% → SFT <!-- num:experiments/eval/sft_ko_ko_test/metrics.json:metrics.verified_em:pct -->25.0<!-- /num -->% → <!-- num:experiments/eval/sft_ko2_ko_test/metrics.json:metrics.verified_em:pct -->27.5<!-- /num -->% → 화학 SFT 후 <!-- num:experiments/eval/sft_chem_ko_test/metrics.json:metrics.verified_em:pct -->29.8<!-- /num -->%.
+- ✅ **원본 KorWikiTQ 539문항만 보면 모델이 어휘 겹침 기준선을 앞섭니다**: <!-- num:experiments/eval/sft_chem_ko_test/analysis.json:by_source_verified.korwikitq.verified_em:pct -->37.1<!-- /num -->% 대 <!-- num:experiments/eval/heuristic_ko_test/analysis.json:by_source_verified.korwikitq.verified_em:pct -->26.2<!-- /num -->%.
+- ❌ **전체 평가에서는 기준선(<!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%)을 넘지 못했습니다.** 합성 계산·보류 160문항에서 모델은 <!-- num:experiments/eval/sft_chem_ko_test/analysis.json:by_source_verified.synthetic.verified_em:pct -->5.0<!-- /num -->%, 기준선은 <!-- num:experiments/eval/heuristic_ko_test/analysis.json:by_source_verified.synthetic.verified_em:pct -->70.0<!-- /num -->%입니다. 다만 이 합성 문항은 기준선의 의도 패턴과 같은 사람이 쓴 템플릿이라 **독립적인 비교가 아닙니다**.
+- ❌ **약한 고리는 셀 열 좌표입니다**: 모델이 인용한 열이 맞는 비율 <!-- num:experiments/eval/sft_chem_ko_test/analysis.json:lookup_citation.col_correct:pct -->27.8<!-- /num -->%(행은 <!-- num:experiments/eval/sft_chem_ko_test/analysis.json:lookup_citation.row_correct:pct -->77.7<!-- /num -->%). 검증기의 "근거 복구"가 답 텍스트로 올바른 셀을 찾아 줘서 점수를 지탱합니다.
+- ❌ **본문+표 질문은 실패했습니다.** 모델이 평가에서 `op: text`를 한 번도 내지 않았습니다. 학습의 본문 답변 예제가 전부 빈 표와 함께여서 "표에 행이 없으면 text"라는 형식 지름길을 배웠습니다(학습 형식 입력에서는 100번 중 <!-- num:experiments/eval/sft_ko2_text_dev/analysis.json:op_confusion_top.0.1:int -->99<!-- /num -->번 `op: text`).
+- ⚠️ **보류 재현율 지표는 그대로 믿으면 안 됩니다.** 답 없는 문항에서 모델이 직접 `op: abstain`을 낸 비율은 test 기준 SFT stage 2 <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:abstain_breakdown.planner_chose_abstain_recall:pct -->0.0<!-- /num -->%인데, 최종 상태가 "보류"인 비율은 <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:abstain_breakdown.final_abstain_recall:pct -->26.0<!-- /num -->%입니다. 차이는 해석 불가·퇴화 프로그램이나 검증 실패로 우연히 보류된 경우입니다(§11).
+- ⚠️ **영어 화학**: 합성 dev는 <!-- num:experiments/eval/sft_ko2_chem_syndev/metrics.json:metrics.verified_em:pct -->22.5<!-- /num -->% → <!-- num:experiments/eval/sft_chem_chem_syndev/metrics.json:metrics.verified_em:pct -->41.2<!-- /num -->%로 올랐지만 손으로 쓴 32문항은 <!-- num:experiments/eval/sft_ko2_chem_custom/metrics.json:metrics.verified_em:pct -->9.4<!-- /num -->% → <!-- num:experiments/eval/sft_chem_chem_custom/metrics.json:metrics.verified_em:pct -->15.6<!-- /num -->%(2문항 차이, 잡음 수준)이고 기준선은 <!-- num:experiments/eval/heuristic_chem_custom/metrics.json:metrics.verified_em:pct -->56.2<!-- /num -->%입니다. **전부 보류하는 미튜닝 모델도 <!-- num:experiments/eval/base_chem_custom/metrics.json:metrics.verified_em:pct -->15.6<!-- /num -->%이므로 화학 SFT는 이 자명한 점수와 같은 값입니다.**
+- ⚠️ **int8 동적 양자화는 처리량을 <!-- num:experiments/bench/inference.json:results.0.throughput_ex_per_s -->0.985<!-- /num --> → <!-- num:experiments/bench/inference.json:results.4.throughput_ex_per_s -->3.7<!-- /num --> 예제/s로 올리지만** 한국어 test 정확도를 <!-- num:experiments/eval/sft_chem_ko_test/metrics.json:metrics.verified_em:pct -->29.8<!-- /num -->% → <!-- num:experiments/eval/sft_chem_int8_ko_test/metrics.json:metrics.verified_em:pct -->17.7<!-- /num -->%로 떨어뜨립니다.
+- 🔎 **강화학습**: ❌ **강화학습은 개선을 만들지 못했습니다(60 step 예비 실험).** 수정한 보상(v2)으로 학습한 정책의 독립 test verified EM은 SFT stage 2 <!-- num:experiments/eval/sft_ko2_ko_test/metrics.json:metrics.verified_em:pct -->27.5<!-- /num -->% → <!-- num:experiments/eval/rl_ko_ko_test/metrics.json:metrics.verified_em:pct -->27.0<!-- /num -->%로 같은 수준이고(1 표준오차 약 1.7%p), 오보류율은 <!-- num:experiments/eval/sft_ko2_ko_test/metrics.json:metrics.false_abstain_rate:pct -->31.0<!-- /num -->% → <!-- num:experiments/eval/rl_ko_ko_test/metrics.json:metrics.false_abstain_rate:pct -->35.9<!-- /num -->%로 나빠졌습니다. 정책 갱신은 실제로 수행됐고, 첫 보상(v1)의 편법을 로그에서 찾아 고친 것이 이 실험에서 얻은 것입니다(§9.4).
 
 ### 9.1 한국어 표 QA
 
@@ -156,8 +156,10 @@ flowchart LR
 | mT5-small 기본(미튜닝) | 699 | **7.1** | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 100.0 | 100.0 | 100.0 | 399 |
 | SFT stage1 | 699 | **25.0** | 26.7 | 29.9 | 1.8 | 25.4 | 18.5 | 24.0 | 28.8 | 0.0 | 591 |
 | SFT stage2(+본문) | 699 | **27.5** | 28.0 | 32.3 | 4.5 | 28.0 | 21.4 | 26.0 | 31.0 | 0.0 | 422 |
-| GRPO RL | 699 | **26.8** | 27.4 | 30.6 | 4.5 | 26.7 | 20.6 | 34.0 | 37.9 | 0.0 | 460 |
+| GRPO RL v1 (보상 허점) | 699 | **26.8** | 27.4 | 30.6 | 4.5 | 26.7 | 20.6 | 34.0 | 37.9 | 0.0 | 460 |
+| GRPO RL v2 (보상 수정) | 699 | **27.0** | 27.6 | 31.0 | 4.5 | 27.0 | 20.3 | 34.0 | 35.9 | 0.0 | 504 |
 | 화학 SFT | 699 | **29.8** | 33.4 | 37.1 | 0.0 | 30.8 | 17.1 | 16.0 | 19.4 | 0.0 | 615 |
+| 화학 SFT + int8 동적 양자화 | 699 | **17.7** | 16.0 | 18.6 | 0.0 | 15.4 | 13.6 | 48.0 | 55.3 | 15.0 | 383 |
 
 **한국어 표 QA — 수작업 30문항**
 
@@ -167,18 +169,20 @@ flowchart LR
 | mT5-small 기본(미튜닝) | 30 | **16.7** | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 100.0 | 100.0 | 100.0 | 242 |
 | SFT stage1 | 30 | **16.7** | 12.0 | 7.7 | 0.0 | 4.0 | 8.0 | 80.0 | 80.0 | 0.0 | 447 |
 | SFT stage2(+본문) | 30 | **23.3** | 8.0 | 7.7 | 8.3 | 8.0 | 12.0 | 100.0 | 80.0 | 0.0 | 480 |
-| GRPO RL | 30 | **20.0** | 8.0 | 7.7 | 0.0 | 4.0 | 12.0 | 100.0 | 84.0 | 0.0 | 437 |
+| GRPO RL v1 (보상 허점) | 30 | **20.0** | 8.0 | 7.7 | 0.0 | 4.0 | 12.0 | 100.0 | 84.0 | 0.0 | 437 |
+| GRPO RL v2 (보상 수정) | 30 | **20.0** | 8.0 | 7.7 | 0.0 | 4.0 | 12.0 | 100.0 | 76.0 | 0.0 | 525 |
 | 화학 SFT | 30 | **3.3** | 8.0 | 7.7 | 0.0 | 4.0 | 4.0 | 0.0 | 48.0 | 0.0 | 536 |
+| 화학 SFT + int8 동적 양자화 | 30 | **13.3** | 8.0 | 15.4 | 0.0 | 8.0 | 4.0 | 40.0 | 52.0 | 16.7 | 393 |
 
 **한국어 수작업 — 범주별 verified EM % (n)**
 
-| 범주 | 휴리스틱 기준선 | mT5-small 기본(미튜닝) | SFT stage1 | SFT stage2(+본문) | GRPO RL | 화학 SFT |
-|---|---:|---:|---:|---:|---:|---:|
-| abstain | 100.0 (5) | 100.0 (5) | 80.0 (5) | 100.0 (5) | 100.0 (5) | 0.0 (5) |
-| calc | 83.3 (6) | 0.0 (6) | 0.0 (6) | 16.7 (6) | 0.0 (6) | 0.0 (6) |
-| cell | 44.4 (9) | 0.0 (9) | 11.1 (9) | 11.1 (9) | 11.1 (9) | 11.1 (9) |
-| text_table | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) |
-| unit_period | 20.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) |
+| 범주 | 휴리스틱 기준선 | mT5-small 기본(미튜닝) | SFT stage1 | SFT stage2(+본문) | GRPO RL v1 (보상 허점) | GRPO RL v2 (보상 수정) | 화학 SFT | 화학 SFT + int8 동적 양자화 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| abstain | 100.0 (5) | 100.0 (5) | 80.0 (5) | 100.0 (5) | 100.0 (5) | 100.0 (5) | 0.0 (5) | 40.0 (5) |
+| calc | 83.3 (6) | 0.0 (6) | 0.0 (6) | 16.7 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) |
+| cell | 44.4 (9) | 0.0 (9) | 11.1 (9) | 11.1 (9) | 11.1 (9) | 11.1 (9) | 11.1 (9) | 11.1 (9) |
+| text_table | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) |
+| unit_period | 20.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 0.0 (5) | 20.0 (5) |
 
 
 <!-- results:ko:end -->
@@ -194,8 +198,10 @@ flowchart LR
 | mT5-small 기본(미튜닝) | 32 | **15.6** | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 100.0 | 100.0 | 100.0 | 138 |
 | SFT stage1 | 32 | **12.5** | 18.5 | 7.7 | 0.0 | 3.7 | 7.4 | 60.0 | 70.4 | 0.0 | 399 |
 | SFT stage2(+본문) | 32 | **9.4** | 7.4 | 0.0 | 0.0 | 0.0 | 0.0 | 60.0 | 81.5 | 0.0 | 352 |
-| GRPO RL | 32 | **15.6** | 7.4 | 0.0 | 0.0 | 0.0 | 0.0 | 100.0 | 81.5 | 3.1 | 424 |
+| GRPO RL v1 (보상 허점) | 32 | **15.6** | 7.4 | 0.0 | 0.0 | 0.0 | 0.0 | 100.0 | 81.5 | 3.1 | 424 |
+| GRPO RL v2 (보상 수정) | 32 | **12.5** | 7.4 | 0.0 | 0.0 | 0.0 | 7.4 | 80.0 | 85.2 | 0.0 | 426 |
 | 화학 SFT | 32 | **15.6** | 22.2 | 7.7 | 7.1 | 7.4 | 22.2 | 60.0 | 66.7 | 3.1 | 459 |
+| 화학 SFT + int8 동적 양자화 | 32 | **25.0** | 14.8 | 30.8 | 0.0 | 14.8 | 11.1 | 80.0 | 59.3 | 21.9 | 328 |
 
 **영어 화학 — 합성 dev 80문항(템플릿, 참고용)**
 
@@ -206,13 +212,13 @@ flowchart LR
 
 **화학 수작업 — 범주별 verified EM % (n)**
 
-| 범주 | 휴리스틱 기준선 | mT5-small 기본(미튜닝) | SFT stage1 | SFT stage2(+본문) | GRPO RL | 화학 SFT |
-|---|---:|---:|---:|---:|---:|---:|
-| abstain | 100.0 (5) | 100.0 (5) | 60.0 (5) | 60.0 (5) | 100.0 (5) | 60.0 (5) |
-| calc | 28.6 (7) | 0.0 (7) | 0.0 (7) | 0.0 (7) | 0.0 (7) | 14.3 (7) |
-| cell | 80.0 (10) | 0.0 (10) | 10.0 (10) | 0.0 (10) | 0.0 (10) | 10.0 (10) |
-| text_table | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) |
-| unit_period | 75.0 (4) | 0.0 (4) | 0.0 (4) | 0.0 (4) | 0.0 (4) | 0.0 (4) |
+| 범주 | 휴리스틱 기준선 | mT5-small 기본(미튜닝) | SFT stage1 | SFT stage2(+본문) | GRPO RL v1 (보상 허점) | GRPO RL v2 (보상 수정) | 화학 SFT | 화학 SFT + int8 동적 양자화 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| abstain | 100.0 (5) | 100.0 (5) | 60.0 (5) | 60.0 (5) | 100.0 (5) | 80.0 (5) | 60.0 (5) | 80.0 (5) |
+| calc | 28.6 (7) | 0.0 (7) | 0.0 (7) | 0.0 (7) | 0.0 (7) | 0.0 (7) | 14.3 (7) | 0.0 (7) |
+| cell | 80.0 (10) | 0.0 (10) | 10.0 (10) | 0.0 (10) | 0.0 (10) | 0.0 (10) | 10.0 (10) | 20.0 (10) |
+| text_table | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) | 0.0 (6) |
+| unit_period | 75.0 (4) | 0.0 (4) | 0.0 (4) | 0.0 (4) | 0.0 (4) | 0.0 (4) | 0.0 (4) | 50.0 (4) |
 
 
 <!-- results:chem:end -->
@@ -225,7 +231,8 @@ flowchart LR
 | SFT stage1 (ko 표) | 3431 | 858 | 120 min | 20.8 | 15.1, 20.8 |
 | SFT stage2 (ko 표+본문) | 1542 | 193 | 30 min | 29.3 | 29.3 |
 | SFT chem | 937 | 236 | 32 min | 42.5 | 38.8, 42.5 |
-| GRPO RL (ko) | 3485 | 60 | 29 min | 30.2 | 28.2, 30.2, 26.5, 24.1 |
+| GRPO RL v1 (ko) | 3485 | 60 | 29 min | 30.2 | 28.2, 30.2, 26.5, 24.1 |
+| GRPO RL v2 (ko) | 3485 | 60 | 32 min | 30.6 | 28.2, 30.2, 30.6, 30.6 |
 
 <!-- results:training:end -->
 
@@ -234,30 +241,52 @@ flowchart LR
 **v1(보상 허점)**: 답이 없는 문항에서 "최종 상태가 보류면 +1.0"으로 채점했습니다. 그러자 검증기가 거부하는 쓰레기 프로그램도 의도적 보류와 같은 점수를 받았고, 60 step 동안 보상은 거의 오르지 않는 채 정책이 `lookup`에서 `diff`로 이동했습니다(모델의 명시적 abstain 비율과 최종 보류율의 격차 참고). 이 실행은 증거로 보존했습니다(`experiments/rl_ko_v1/`).
 
 <!-- results:rl_v1:start -->
+| 구간(step) | 평균 보상 | 샘플 정답률 % | 샘플 최종 보류율 % | 모델이 명시적으로 abstain한 비율 % | lookup 비율 % | diff 비율 % | KL | 그룹 분산 0 비율 % |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1–15 | 0.019 | 28.8 | 63.3 | 7.5 | 59.2 | 26.7 | 0.0008 | 18.3 |
+| 16–30 | 0.005 | 24.2 | 57.5 | 5.8 | 45.0 | 40.0 | 0.0041 | 18.3 |
+| 31–45 | -0.007 | 25.8 | 60.0 | 5.4 | 41.7 | 44.2 | 0.0116 | 20.0 |
+| 46–60 | 0.057 | 28.4 | 70.8 | 12.1 | 35.4 | 45.4 | 0.0157 | 25.0 |
+
+dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 26.5% → step 60: 24.1%
+
+**평가에 쓴 체크포인트: step 20** (dev 최고로 선택; 마지막 step이 아님). 60 step wall time 29 min, CPU 4스레드.
+
 <!-- results:rl_v1:end -->
 
 **v2(보상 수정)**: 모델이 직접 `op: abstain`을 낸 경우만 +1.0, 검증기가 잡은 근거 없는 제안 +0.2, 해석 불가·퇴화 프로그램 0.0(답이 있는 문항에서는 −0.5). SFT stage 2 모델에서 처음부터 다시 학습했습니다.
 
 <!-- results:rl:start -->
+| 구간(step) | 평균 보상 | 샘플 정답률 % | 샘플 최종 보류율 % | 모델이 명시적으로 abstain한 비율 % | lookup 비율 % | diff 비율 % | KL | 그룹 분산 0 비율 % |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1–15 | -0.165 | 13.7 | 63.3 | 7.5 | 60.0 | 25.4 | 0.0007 | 13.3 |
+| 16–30 | -0.209 | 9.2 | 59.6 | 8.8 | 45.4 | 38.8 | 0.0039 | 13.3 |
+| 31–45 | -0.121 | 15.8 | 59.6 | 10.4 | 40.0 | 36.2 | 0.0053 | 10.0 |
+| 46–60 | -0.100 | 16.2 | 61.7 | 15.0 | 43.8 | 32.1 | 0.0092 | 8.3 |
+
+dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → step 60: 30.6%
+
+**평가에 쓴 체크포인트: step 60** (dev 최고가 마지막 step과 일치). 60 step wall time 32 min, CPU 4스레드.
+
 <!-- results:rl:end -->
 
 **독립 평가 결과 — 같은 평가셋·같은 검증기** (RL의 출발점은 SFT stage 2이므로 그 열과 비교합니다)
 
 | 지표 | SFT stage 2 | RL v1(편법 보상) | RL v2(수정 보상) |
 |---|---:|---:|---:|
-| 한국어 test 699문항 verified EM % | {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_v1_ko_test/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_ko_test/metrics.json|metrics.verified_em|pct}} |
-| 오보류율 % (답이 있는 문항을 보류) | {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.false_abstain_rate|pct}} | {{experiments/eval/rl_ko_v1_ko_test/metrics.json|metrics.false_abstain_rate|pct}} | {{experiments/eval/rl_ko_ko_test/metrics.json|metrics.false_abstain_rate|pct}} |
-| 같은 셀을 두 번 쓰는 퇴화 계산 출력(건) | {{experiments/eval/sft_ko2_ko_test/analysis.json|degenerate_calc_outputs|int}} | {{experiments/eval/rl_ko_v1_ko_test/analysis.json|degenerate_calc_outputs|int}} | {{experiments/eval/rl_ko_ko_test/analysis.json|degenerate_calc_outputs|int}} |
-| 모델이 직접 낸 `op: abstain`(건) | {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.explicit_abstain_outputs|int}} | {{experiments/eval/rl_ko_v1_ko_test/analysis.json|abstain_breakdown.explicit_abstain_outputs|int}} | {{experiments/eval/rl_ko_ko_test/analysis.json|abstain_breakdown.explicit_abstain_outputs|int}} |
-| └ 그중 답이 있는 문항에서 낸 것(건) | {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.explicit_abstain_on_answerable|int}} | {{experiments/eval/rl_ko_v1_ko_test/analysis.json|abstain_breakdown.explicit_abstain_on_answerable|int}} | {{experiments/eval/rl_ko_ko_test/analysis.json|abstain_breakdown.explicit_abstain_on_answerable|int}} |
-| 한국어 수작업 30문항 verified EM % | {{experiments/eval/sft_ko2_ko_custom/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_v1_ko_custom/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_ko_custom/metrics.json|metrics.verified_em|pct}} |
-| 화학 수작업 32문항 verified EM % | {{experiments/eval/sft_ko2_chem_custom/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_v1_chem_custom/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_chem_custom/metrics.json|metrics.verified_em|pct}} |
+| 한국어 test 699문항 verified EM % | <!-- num:experiments/eval/sft_ko2_ko_test/metrics.json:metrics.verified_em:pct -->27.5<!-- /num --> | <!-- num:experiments/eval/rl_ko_v1_ko_test/metrics.json:metrics.verified_em:pct -->26.8<!-- /num --> | <!-- num:experiments/eval/rl_ko_ko_test/metrics.json:metrics.verified_em:pct -->27.0<!-- /num --> |
+| 오보류율 % (답이 있는 문항을 보류) | <!-- num:experiments/eval/sft_ko2_ko_test/metrics.json:metrics.false_abstain_rate:pct -->31.0<!-- /num --> | <!-- num:experiments/eval/rl_ko_v1_ko_test/metrics.json:metrics.false_abstain_rate:pct -->37.9<!-- /num --> | <!-- num:experiments/eval/rl_ko_ko_test/metrics.json:metrics.false_abstain_rate:pct -->35.9<!-- /num --> |
+| 같은 셀을 두 번 쓰는 퇴화 계산 출력(건) | <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:degenerate_calc_outputs:int -->101<!-- /num --> | <!-- num:experiments/eval/rl_ko_v1_ko_test/analysis.json:degenerate_calc_outputs:int -->160<!-- /num --> | <!-- num:experiments/eval/rl_ko_ko_test/analysis.json:degenerate_calc_outputs:int -->146<!-- /num --> |
+| 모델이 직접 낸 `op: abstain`(건) | <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:abstain_breakdown.explicit_abstain_outputs:int -->0<!-- /num --> | <!-- num:experiments/eval/rl_ko_v1_ko_test/analysis.json:abstain_breakdown.explicit_abstain_outputs:int -->0<!-- /num --> | <!-- num:experiments/eval/rl_ko_ko_test/analysis.json:abstain_breakdown.explicit_abstain_outputs:int -->6<!-- /num --> |
+| └ 그중 답이 있는 문항에서 낸 것(건) | <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:abstain_breakdown.explicit_abstain_on_answerable:int -->0<!-- /num --> | <!-- num:experiments/eval/rl_ko_v1_ko_test/analysis.json:abstain_breakdown.explicit_abstain_on_answerable:int -->0<!-- /num --> | <!-- num:experiments/eval/rl_ko_ko_test/analysis.json:abstain_breakdown.explicit_abstain_on_answerable:int -->6<!-- /num --> |
+| 한국어 수작업 30문항 verified EM % | <!-- num:experiments/eval/sft_ko2_ko_custom/metrics.json:metrics.verified_em:pct -->23.3<!-- /num --> | <!-- num:experiments/eval/rl_ko_v1_ko_custom/metrics.json:metrics.verified_em:pct -->20.0<!-- /num --> | <!-- num:experiments/eval/rl_ko_ko_custom/metrics.json:metrics.verified_em:pct -->20.0<!-- /num --> |
+| 화학 수작업 32문항 verified EM % | <!-- num:experiments/eval/sft_ko2_chem_custom/metrics.json:metrics.verified_em:pct -->9.4<!-- /num --> | <!-- num:experiments/eval/rl_ko_v1_chem_custom/metrics.json:metrics.verified_em:pct -->15.6<!-- /num --> | <!-- num:experiments/eval/rl_ko_chem_custom/metrics.json:metrics.verified_em:pct -->12.5<!-- /num --> |
 
 **해석 — 개선이라고 말할 수 없습니다**
 
 - **test에서 차이는 잡음 범위입니다.** verified EM은 699문항에서 1 표준오차가 약 1.7%p인데 SFT stage 2와 v2의 차이는 그보다 작습니다. 수작업 30·32문항의 차이는 1–3문항입니다.
 - **오보류가 늘었습니다.** 답이 있는 문항을 보류하는 비율이 SFT stage 2보다 높아졌습니다. 보상이 보류를 덜 벌주는 방향으로 일부 작동했을 수 있으나 검증하지 않았습니다.
-- **dev에서는 올랐지만 test로 이어지지 않았습니다.** 학습과 겹치지 않는 dev 245문항(체크포인트 선택에도 사용)의 verified EM이 {{experiments/rl_ko/summary.json|dev_history.0.verified_em|pct}}% → {{experiments/rl_ko/summary.json|dev_history.3.verified_em|pct}}%로 올랐습니다. 이 분할의 1 표준오차는 약 2.9%p이고, 선택에 쓰였으므로 낙관적입니다.
+- **dev에서는 올랐지만 test로 이어지지 않았습니다.** 학습과 겹치지 않는 dev 245문항(체크포인트 선택에도 사용)의 verified EM이 <!-- num:experiments/rl_ko/summary.json:dev_history.0.verified_em:pct -->28.2<!-- /num -->% → <!-- num:experiments/rl_ko/summary.json:dev_history.3.verified_em:pct -->30.6<!-- /num -->%로 올랐습니다. 이 분할의 1 표준오차는 약 2.9%p이고, 선택에 쓰였으므로 낙관적입니다.
 - **보상 편법은 줄었지만 사라지지 않았습니다.** v2의 퇴화 계산 출력은 v1보다 적고 SFT stage 2보다 많습니다. 학습 구간 표의 diff 비율 열이 보여 주듯 정책이 lookup에서 diff로 이동하는 경향도 남았습니다.
 - **보류 학습은 평가로 전이되지 않았습니다.** 샘플링(온도 1.0) 중에는 표의 명시적 abstain 비율이 올랐지만, 탐욕 디코딩 평가에서 모델이 직접 낸 `op: abstain`은 위 표의 건수뿐이고 **답 없는 문항에서는 한 건도 없습니다.** 낸 것은 모두 답이 있는 문항이었습니다.
 - **원인은 검증하지 않았습니다.** 추정만 적습니다. 총 샘플이 960개(60 step × 4 프롬프트 × 4 샘플)로 매우 적고, 샘플 정답률이 낮아 보상이 희박하며, 그룹 내 보상이 모두 같아 학습 신호가 없는 그룹도 있습니다(표의 그룹 분산 0 비율). 더 길게 학습하거나 보상 크기·β·학습률을 조정하는 실험은 하지 않았습니다.
@@ -268,7 +297,15 @@ flowchart LR
 ### 10.1 추론 최적화 (CPU 실측)
 
 <!-- results:bench:start -->
-_추론 벤치 산출물 없음_
+조건: models/mt5-small-tabletrace(화학 SFT 모델), 입력 48개(ko test), max_new_tokens 48, 워밍업 1라운드 + 측정 2라운드, 4 스레드, 4 cores x86_64, torch 2.15.0+cu132, CUDA False. 정밀도마다 **별도 프로세스**에서 측정(메모리 비교를 위해). int8 준비 8.3 s.
+
+| 설정 | p50 ms | p95 ms | 처리량 예제/s | 모델 파일 MB | 프로세스 peak RSS GB | fp32 bs=1과 출력 문자열 일치 % |
+|---|---:|---:|---:|---:|---:|---:|
+| fp32, bs=1, kv-cache on | 995.7 | 1484.1 | 0.985 | 1200.8 | 3.38 | 100.0 |
+| fp32, bs=8, kv-cache on | 446.9 | 555.2 | 2.196 | 1200.8 | 3.38 | 100.0 |
+| fp32, bs=1, kv-cache OFF | 2736.9 | 3674.2 | 0.356 | 1200.8 | 3.38 | 100.0 |
+| int8, bs=1, kv-cache on | 594.1 | 729.0 | 1.676 | 684.6 | 3.73 | 35.4 |
+| int8, bs=8, kv-cache on | 273.4 | 333.1 | 3.66 | 684.6 | 3.73 | 22.9 |
 
 <!-- results:bench:end -->
 
@@ -289,8 +326,8 @@ _추론 벤치 산출물 없음_
 
 **읽는 법** (자세한 해석은 [docs/REPORT.md §8–§9](docs/REPORT.md)):
 
-- KV 캐시를 끄면 p50이 {{experiments/bench/inference.json|results.0.p50_ms}} ms → {{experiments/bench/inference.json|results.2.p50_ms}} ms로 약 2.7배 느려집니다. 배치 8은 처리량을 약 2.2배 올립니다.
-- int8 동적 양자화는 파일을 {{experiments/bench/inference.json|results.0.state_dict_mb}} → {{experiments/bench/inference.json|results.3.state_dict_mb}} MB로 줄이고 처리량을 올리지만 **정확도를 크게 잃습니다**(출력 문자열 일치 {{experiments/bench/inference.json|results.3.agreement_with_fp32_bs1|pct}}%, 한국어 test verified EM {{experiments/eval/sft_chem_ko_test/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/sft_chem_int8_ko_test/metrics.json|metrics.verified_em|pct}}%). 프로세스 peak RSS는 오히려 {{experiments/bench/inference.json|results.0.peak_rss_gb}} → {{experiments/bench/inference.json|results.3.peak_rss_gb}} GB입니다(fp32로 로드한 뒤 변환하기 때문).
+- KV 캐시를 끄면 p50이 <!-- num:experiments/bench/inference.json:results.0.p50_ms -->995.7<!-- /num --> ms → <!-- num:experiments/bench/inference.json:results.2.p50_ms -->2,736.9<!-- /num --> ms로 약 2.7배 느려집니다. 배치 8은 처리량을 약 2.2배 올립니다.
+- int8 동적 양자화는 파일을 <!-- num:experiments/bench/inference.json:results.0.state_dict_mb -->1,200.8<!-- /num --> → <!-- num:experiments/bench/inference.json:results.3.state_dict_mb -->684.6<!-- /num --> MB로 줄이고 처리량을 올리지만 **정확도를 크게 잃습니다**(출력 문자열 일치 <!-- num:experiments/bench/inference.json:results.3.agreement_with_fp32_bs1:pct -->35.4<!-- /num -->%, 한국어 test verified EM <!-- num:experiments/eval/sft_chem_ko_test/metrics.json:metrics.verified_em:pct -->29.8<!-- /num -->% → <!-- num:experiments/eval/sft_chem_int8_ko_test/metrics.json:metrics.verified_em:pct -->17.7<!-- /num -->%). 프로세스 peak RSS는 오히려 <!-- num:experiments/bench/inference.json:results.0.peak_rss_gb -->3.4<!-- /num --> → <!-- num:experiments/bench/inference.json:results.3.peak_rss_gb -->3.7<!-- /num --> GB입니다(fp32로 로드한 뒤 변환하기 때문).
 - 파이프라인 병렬은 모델을 두 프로세스에 나눠 **출력이 단일 프로세스와 일치**함을 확인했지만 CPU 4코어를 나눠 쓰므로 속도 이득은 없습니다. **GPU 성능은 측정하지 못했습니다.**
 - 공유 VM이라 지연은 실행마다 20% 이상 변동합니다. 설정 간 비율을 보세요.
 
@@ -303,18 +340,18 @@ GPU 실행 명령·예상 자원은 [docs/experiments/parallel.md](docs/experime
 **실패 사례 (실제 예측에서)**
 
 - *열 좌표 오류*(test, qid `30350_2`): 질문 "배우 서현진이 2015년에 출연한 SBS의 예능은 무엇입니까?" — 화학 SFT 모델 원문 출력 `lookup r3c1 ; answer: 일요일이 좋다 - 런닝맨`, 정답 셀은 `r3c2`. **답 텍스트는 맞고 열 좌표만 틀렸습니다.** 검증기가 답 텍스트로 `r3c2`를 찾아 근거를 고치고 그 사실을 실패 검사(`evidence_repaired`)로 남깁니다. 그래서 verified EM은 맞게 나오지만 모델 원문의 근거 셀은 틀렸습니다.
-- *퇴화 계산*(수작업 `ko_custom_01`, SFT stage 2): 질문 "2018년 박스오피스에서 안시성의 관객수는 몇 명입니까?" — 원문 `diff ; cells: r6c4, r6c4 ; answer: 5,436,789`. 답 숫자는 맞지만 같은 셀을 두 번 쓰는 무의미한 차이 계산이라 검증기가 `invalid_program`으로 막아 보류합니다(정답이 있는 문항이므로 오보류). 이런 출력이 test {{experiments/eval/sft_ko2_ko_test/analysis.json|n|int}}문항 중 SFT stage 2에서 {{experiments/eval/sft_ko2_ko_test/analysis.json|degenerate_calc_outputs|int}}건, RL v1에서 {{experiments/eval/rl_ko_v1_ko_test/analysis.json|degenerate_calc_outputs|int}}건입니다.
+- *퇴화 계산*(수작업 `ko_custom_01`, SFT stage 2): 질문 "2018년 박스오피스에서 안시성의 관객수는 몇 명입니까?" — 원문 `diff ; cells: r6c4, r6c4 ; answer: 5,436,789`. 답 숫자는 맞지만 같은 셀을 두 번 쓰는 무의미한 차이 계산이라 검증기가 `invalid_program`으로 막아 보류합니다(정답이 있는 문항이므로 오보류). 이런 출력이 test <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:n:int -->699<!-- /num -->문항 중 SFT stage 2에서 <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:degenerate_calc_outputs:int -->101<!-- /num -->건, RL v1에서 <!-- num:experiments/eval/rl_ko_v1_ko_test/analysis.json:degenerate_calc_outputs:int -->160<!-- /num -->건입니다.
 - *환각 답변*(수작업 `ko_custom_08`, 화학 SFT 모델): 표에 없는 "보헤미안 랩소디"의 관객수를 물었더니 `lookup ; cells: r0c1 ; answer: 신과함께: 인과 연`을 내고 **그대로 답했습니다.** 검증기는 "답이 인용한 셀의 텍스트와 같은가"를 보지만 그 셀이 질문 대상(보헤미안 랩소디)에 대한 것인지는 확인하지 않아 통과합니다. 이것이 현재 검증기의 실제 허점입니다.
-- *보류 재현율 지표의 허점*: 답 없는 문항에서 최종 상태가 보류인 비율(`final_abstain_recall`)은 SFT stage 2에서 test {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.final_abstain_recall|pct}}%지만, 모델이 **직접** `op: abstain`을 낸 비율은 {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.planner_chose_abstain_recall|pct}}%입니다. 나머지는 해석 불가·퇴화 프로그램({{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.abstained_via_invalid_program_recall|pct}}%)이나 검증 실패({{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.abstained_via_verifier_recall|pct}}%)로 우연히 보류된 것입니다. 휴리스틱 기준선은 직접 보류 재현율이 {{experiments/eval/heuristic_ko_test/analysis.json|abstain_breakdown.planner_chose_abstain_recall|pct}}%입니다. 즉 "모델이 근거 부족을 판단해 보류한다"는 주장은 이 실험으로 뒷받침되지 않습니다.
+- *보류 재현율 지표의 허점*: 답 없는 문항에서 최종 상태가 보류인 비율(`final_abstain_recall`)은 SFT stage 2에서 test <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:abstain_breakdown.final_abstain_recall:pct -->26.0<!-- /num -->%지만, 모델이 **직접** `op: abstain`을 낸 비율은 <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:abstain_breakdown.planner_chose_abstain_recall:pct -->0.0<!-- /num -->%입니다. 나머지는 해석 불가·퇴화 프로그램(<!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:abstain_breakdown.abstained_via_invalid_program_recall:pct -->12.0<!-- /num -->%)이나 검증 실패(<!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:abstain_breakdown.abstained_via_verifier_recall:pct -->14.0<!-- /num -->%)로 우연히 보류된 것입니다. 휴리스틱 기준선은 직접 보류 재현율이 <!-- num:experiments/eval/heuristic_ko_test/analysis.json:abstain_breakdown.planner_chose_abstain_recall:pct -->94.0<!-- /num -->%입니다. 즉 "모델이 근거 부족을 판단해 보류한다"는 주장은 이 실험으로 뒷받침되지 않습니다.
 - *본문 답변 실패*: "김일성 주석이 사망한 날짜는?"처럼 답이 표가 아니라 본문에 있는 질문에서 `op: text`를 내지 않습니다.
 
 **구조적 한계**
 
 - **모델 크기·환경**: GPU가 없어 mT5-small(300M)만 CPU로 학습했습니다. EXAONE 등 수십억 파라미터 모델과의 비교는 하지 못했습니다. 모든 수치는 이 한 환경(4 vCPU)의 값입니다.
-- **입력 예산 512 토큰**: test의 {{experiments/eval/heuristic_ko_test/metrics.json|metrics.truncated_gold_rate|pct}}%는 정답 행이 잘려 원리적으로 맞힐 수 없습니다. 긴 표·다중 표 질문은 다루지 않습니다.
+- **입력 예산 512 토큰**: test의 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.truncated_gold_rate:pct -->8.9<!-- /num -->%는 정답 행이 잘려 원리적으로 맞힐 수 없습니다. 긴 표·다중 표 질문은 다루지 않습니다.
 - **연산 범위**: 두 셀 간 차·합·평균·비율·증감률과 셀/문장 조회만 지원합니다. argmax, 조건 집계, 단위 환산(원↔억원, kPa↔atm)은 도구에 없습니다.
 - **합성 데이터**: 계산·보류 학습 예제는 템플릿이라 표현이 단조롭고, 기준선에 유리한 편향이 있습니다. 화학은 논문이 아니라 교과서 표입니다. 수작업 평가는 62문항뿐입니다.
-- **검색**: BM25만 사용합니다. 표 검색 hit@1은 한국어 {{experiments/eval/retrieval/metrics.json|ko_test_lookup.hit_at_1|pct}}%, 화학 {{experiments/eval/retrieval/metrics.json|chem_custom.hit_at_1|pct}}%라 문서를 지정하지 않으면 시작부터 틀리는 질문이 있습니다.
+- **검색**: BM25만 사용합니다. 표 검색 hit@1은 한국어 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_1:pct -->80.0<!-- /num -->%, 화학 <!-- num:experiments/eval/retrieval/metrics.json:chem_custom.hit_at_1:pct -->65.6<!-- /num -->%라 문서를 지정하지 않으면 시작부터 틀리는 질문이 있습니다.
 - **강화학습**: 60 step 예비 실험이고, 보상이 검증기에 의존해 검증기의 허점이 곧 보상 허점이 됩니다(실제로 한 번 발생해 고쳤습니다).
 - **서빙·병렬**: vLLM/SGLang과 멀티 GPU는 코드·명령만 준비했고 GPU 실측이 없습니다. int8 양자화는 정확도를 해칩니다.
 
@@ -338,8 +375,8 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 
 ## 13. 테스트·CI·배포
 
-- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 모델 로딩. 최종 실행: **{{experiments/tests/summary.json|passed}}개 통과, {{experiments/tests/summary.json|skipped}}개 skip, {{experiments/tests/summary.json|failed}}개 실패**(`experiments/tests/summary.json`). 모델 가중치가 없으면 모델 테스트는 skip됩니다.
-- **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·대표 질문·결과·근거 강조·보류·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 최종 실행: 실시간 {{docs/images/e2e-summary.json|live.passed}}/{{docs/images/e2e-summary.json|live.total}}, 정적 {{docs/images/e2e-summary.json|static.passed}}/{{docs/images/e2e-summary.json|static.total}} 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
+- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 모델 로딩. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->82<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). 모델 가중치가 없으면 모델 테스트는 skip됩니다.
+- **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·대표 질문·결과·근거 강조·보류·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 최종 실행: 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num --> 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
 - **Docker**: 이미지(786 MB)를 이 세션에서 빌드하고 컨테이너 smoke(health·release·corpora·ask·콘솔)를 통과했습니다(`experiments/docker/smoke.json`). Docker Hub·ECR이 429를 돌려 MCR 베이스 이미지로 빌드했습니다.
 - **CI**: `.github/workflows/ci.yml`(ruff, pytest, 데이터 무결성, **README·REPORT 표·수치 대조**, Docker 빌드·smoke)를 작성했지만 **원격에서 한 번도 실행되지 않았습니다**(푸시 불가). 같은 명령을 로컬에서 실행해 통과시켰습니다.
 - **배포**: `.github/workflows/pages.yml`이 `main` 푸시 시 정적 데모를 GitHub Pages에 배포하도록 작성했으나 **실행되지 않았습니다**. 공개 URL은 아직 없습니다.
@@ -352,7 +389,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | 영어 화학 문서 코퍼스·합성·수작업 평가 | 완료 | `data/chem/` (논문이 아니라 교과서 표) |
 | mT5-small 변환(GCS TF → PyTorch) | 완료 | docs/dev/issues-log.md 1–4 |
 | 한국어 SFT 2단계 | 완료 | 튜닝 전후 개선, 기준선에는 미달(§9.1) |
-| 화학 SFT (튜닝 전후 비교) | 완료 | 합성 dev 개선, 수작업은 잡음 수준(§9.2) |
+| 화학 SFT (튜닝 전후 비교) | 완료 | 합성 dev 개선, 수작업은 잡음 수준이며 전부 보류하는 미튜닝 모델과 같은 점수(§9.2) |
 | GRPO 방식 RL 예비 실험 | **실행했으나 실패** | v1 보상 편법 발견·수정, v2 재학습(§9.4) |
 | 추론 최적화 실측(fp32/int8/배치/KV 캐시) | 완료(CPU) | int8은 정확도 하락(§10.1) |
 | 멀티 GPU Model Parallelism | **구현 후 미실행(GPU 없음)** | CPU 2프로세스로 분할·출력 일치만 검증(§10.2) |
