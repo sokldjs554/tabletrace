@@ -44,3 +44,21 @@ python -m tabletrace.bench.inference --model experiments/sft_chem/model --n 48 -
 python -m tabletrace.bench.pipeline_parallel --model experiments/sft_chem/model --single --n 16 --out experiments/bench/pp_single.json
 torchrun --nproc_per_node=2 -m tabletrace.bench.pipeline_parallel --model experiments/sft_chem/model --backend gloo --n 16 --out experiments/bench/pp_2stage.json
 ```
+
+## 2차 시도(1차에서 실패한 것을 고쳐 다시 돌림) — 재현 명령
+
+```bash
+# 본문 답변·근거 없음 예제를 "실제 표 옆에" 만든다(KorQuAD v1.0 필요: data/raw/korquad/; 파생 파일은 git에 올리지 않음)
+python scripts/data/build_text_v2.py all            # text2_train / text2_dev / text2_test
+python scripts/data/build_text_v2.py extra          # 화학 단계용 본문 예제 추가분
+
+bash scripts/train/sft_ko3.sh                        # stage 2 재학습 (stage 1 모델에서)
+bash scripts/train/sft_ko4.sh                        # 표 조회 보강 1 epoch
+# 화학 단계(+본문 550) → 평가 → RL v3 → 평가 → 최종 모델 선택 → int8 범위별 측정까지 순서대로
+bash scripts/train/resolve_pipeline.sh &             # 화학 단계와 평가
+bash scripts/train/resolve_pipeline_b.sh $!          # RL v3(120 step) 이후 (앞 스크립트가 화학 단계 평가를 마치면 이어받음)
+python scripts/paired_tests.py                       # 모델 간 쌍 비교(정확 검정)
+python scripts/render_results.py && python scripts/check_numbers.py --expand && python scripts/check_numbers.py --strict
+```
+
+모든 평가는 모델을 `--no-entity-check`로 한 번 돌리고, 저장된 원문 출력을 `--replay-from`으로 검증기 v2에 다시 통과시킵니다(`*_ec`). 같은 모델 출력으로 두 검증기를 비교하기 위해서입니다.

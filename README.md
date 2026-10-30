@@ -568,9 +568,11 @@ python3.11+ -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"            # 휴리스틱 플래너 + API + 콘솔 (torch 없음)
 pip install -e ".[model]"          # + PyTorch/Transformers (모델 플래너)
 python scripts/check_data.py       # 데이터 무결성
-pytest -q                          # 70+ 테스트(모델 없으면 모델 테스트 skip)
+pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->91<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
 tabletrace serve                   # http://127.0.0.1:8000  (모델이 models/mt5-small-tabletrace 에 있으면 자동 사용)
 ```
+
+서비스 설정(환경 변수 `TABLETRACE_*`): `PLANNER=auto|neural|heuristic`, `ENTITY_CHECK=0`(검증기 v2의 개체 일치 검사 끄기, 기본 켜짐), `QUANTIZE=1`과 `QUANTIZE_SCOPE=lm_head`(출력 층만 int8, §10.1).
 
 Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker compose up --build` (모델; `models/` 마운트). 환경 변수는 `.env.example`.
 
@@ -582,7 +584,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 - **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·대표 질문·결과·근거 강조·보류·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 최종 실행: 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num --> 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
 - **Docker**: 이미지(786 MB)를 이 세션에서 빌드하고 컨테이너 smoke(health·release·corpora·ask·콘솔)를 통과했습니다(`experiments/docker/smoke.json`). Docker Hub·ECR이 429를 돌려 MCR 베이스 이미지로 빌드했습니다.
 - **CI**: `.github/workflows/ci.yml`(ruff, pytest, 데이터 무결성, **README·REPORT 표·수치 대조**, Docker 빌드·smoke)를 작성했지만 **원격에서 한 번도 실행되지 않았습니다**(푸시 불가). 같은 명령을 로컬에서 실행해 통과시켰습니다.
-- **배포**: `.github/workflows/pages.yml`이 `main` 푸시 시 정적 데모를 GitHub Pages에 배포하도록 작성했으나 **실행되지 않았습니다**. 공개 URL은 아직 없습니다.
+- **배포**: `.github/workflows/pages.yml`이 `main` 푸시 시 정적 데모를 GitHub Pages에 배포하도록 작성했으나 **실행되지 않았습니다**. 공개 URL은 아직 없습니다. 대신 저장된 결과 데모를 단일 HTML(`scripts/build_artifact_page.py`)로 만들어 claude.ai Artifact에 올렸습니다(비공개 링크, 맨 위 "데모 상태" 참고).
 
 ## 14. 실제 수행한 것과 하지 못한 것
 

@@ -32,3 +32,9 @@
 - `verified_em`이 핵심. `raw_answer_em_answerable`과의 차이가 검증기의 기여(모델 답을 셀/계산값으로 교정하거나 차단).
 - `false_abstain_rate`가 높으면 지나치게 보수적, `abstain_recall`이 낮으면 근거 없는 답을 냄.
 - `truncated_gold_rate`: 512 토큰 예산 때문에 정답 행이 입력에서 잘린 비율(모델이 맞힐 수 없는 문항).
+
+## 2차 추가 평가
+
+- `text2_test`: 실제 표 옆에 본문 100문항 + 근거 없음 50문항(`scripts/data/build_text_v2.py`). 1차 모델은 `op: text`를 0문항에서 냈다. 지표: `analysis.json`의 `text_answers`(선택률·정답 수), `abstain_breakdown`(직접 보류 vs 검증기가 막은 보류), `selective`(답한 문항의 정밀도·오답 비율).
+- 검증기 v2(개체 일치 검사)와 v1의 비교는 같은 모델 출력을 `--replay-from`으로 다시 검증해 얻는다(`*_ec`). 정답 프로그램이 검사에 걸리는 비율(`gold_subject_fail_rate`)이 검사의 오탐률이다.
+- 모델 간 차이는 `scripts/paired_tests.py`의 문항별 쌍 비교(정확 부호 검정)로 읽는다. 699문항에서 몇 %p 차이는 표본 잡음 안에 있을 수 있다.
