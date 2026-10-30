@@ -23,3 +23,6 @@ data/ko/stage2_train.jsonl
 data/chem/stage_train.jsonl
 experiments/pipeline/*.log
 experiments/pipeline/nohup.log
+data/ko/text2_*.jsonl
+data/ko/stage3_train.jsonl
+data/chem/stage2_train.jsonl

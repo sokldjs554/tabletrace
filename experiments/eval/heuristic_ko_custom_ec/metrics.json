@@ -1,0 +1,77 @@
+{
+ "meta": {
+  "planner": "heuristic",
+  "model": "replay of experiments/eval/heuristic_ko_custom",
+  "data": [
+   "data/ko/custom_eval.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 30,
+  "wall_s": 5.0,
+  "hardware": "x86_64",
+  "label": "entity check (replay of heuristic_ko_custom)",
+  "entity_check": true,
+  "replay_from": "experiments/eval/heuristic_ko_custom",
+  "finished": "2026-10-30T09:36:21",
+  "quantize": false
+ },
+ "metrics": {
+  "n": 30,
+  "n_answerable": 25,
+  "n_gold_abstain": 5,
+  "n_calc": 12,
+  "n_lookup": 13,
+  "verified_em": 0.5,
+  "answer_em_answerable": 0.4,
+  "raw_answer_em_answerable": 0.2,
+  "evidence_cells_exact": 0.44,
+  "evidence_cells_exact_raw": 0.44,
+  "evidence_repaired_rate": 0.0,
+  "evidence_cells_overlap": 0.44,
+  "op_acc": 0.6,
+  "lookup_em": 0.3846,
+  "calc_em": 0.4167,
+  "calc_result_correct": 0.4167,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 1.0,
+  "false_abstain_rate": 0.4,
+  "abstain_precision": 0.3333,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.0,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.5,
+  "mean_ms_per_example": 133.1,
+  "by_source": {
+   "custom": {
+    "n": 30,
+    "verified_em": 0.5
+   }
+  },
+  "by_category": {
+   "abstain": {
+    "n": 5,
+    "verified_em": 1.0
+   },
+   "calc": {
+    "n": 6,
+    "verified_em": 0.8333
+   },
+   "cell": {
+    "n": 9,
+    "verified_em": 0.4444
+   },
+   "text_table": {
+    "n": 5,
+    "verified_em": 0.0
+   },
+   "unit_period": {
+    "n": 5,
+    "verified_em": 0.2
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": true
+ }
+}

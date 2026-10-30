@@ -103,3 +103,65 @@ def test_degenerate_calculation_is_rejected(medal_table):
     r = resolve("q", medal_table, parse("op: diff ; cells: r2c5, r2c5 ; answer: 0", "t_medal"))
     assert r.status == "abstained" and r.verdict.reason == "invalid_program"
     assert any(c.name == "distinct_cells" and not c.passed for c in r.verdict.checks)
+
+
+# --- subject check: the cited rows must be about what the question asks ------------------------------------------
+
+def test_subject_missing_from_table_is_not_in_document(medal_table):
+    # "캐나다" is not in the table; a lookup that cites some other country's row must not be answered
+    q = "2008년 하계 올림픽에서 캐나다가 획득한 메달은 몇 개입니까?"
+    p = parse("op: lookup ; cells: r2c5 ; answer: 60", "t_medal")
+    assert resolve(q, medal_table, p, entity_check=False).status == "answered"      # the old verifier let this through
+    r = resolve(q, medal_table, p)
+    assert r.status == "abstained" and r.verdict.reason == "not_in_document"
+    chk = next(c for c in r.verdict.checks if c.name == "subject_in_evidence")
+    assert not chk.passed and "캐나다" in chk.detail
+
+
+def test_subject_present_in_cited_row_passes(medal_table):
+    q = "러시아가 획득한 메달은 몇 개입니까?"
+    r = resolve(q, medal_table, parse("op: lookup ; cells: r2c5 ; answer: 60", "t_medal"))
+    assert r.status == "answered"
+    assert any(c.name == "subject_in_evidence" and c.passed for c in r.verdict.checks)
+
+
+def test_subject_in_other_row_means_wrong_row_cited(medal_table):
+    q = "러시아가 획득한 메달은 몇 개입니까?"
+    r = resolve(q, medal_table, parse("op: lookup ; cells: r0c5 ; answer: 100", "t_medal"))
+    assert r.status == "abstained" and r.verdict.reason == "verification_failed"
+
+
+def test_table_title_words_are_not_subjects(medal_table):
+    # "올림픽" names the table; it must neither satisfy nor trigger the check, so a question with no other
+    # proper noun is not blocked by it
+    q = "하계 올림픽에서 1위 국가의 금메달은 몇 개입니까?"
+    r = resolve(q, medal_table, parse("op: lookup ; cells: r0c2 ; answer: 48", "t_medal"))
+    assert r.status == "answered"
+
+
+def test_transliteration_variants_are_tolerated():
+    from tabletrace.schema import Table
+
+    t = Table(id="t", doc_id="d", title="출연 목록", header=["이름", "역할"], rows=[["자오위에", "센터"], ["김철수", "리더"]], lang="ko")
+    r = resolve("자오웨의 역할은 무엇입니까?", t, parse("op: lookup ; cells: r0c1 ; answer: 센터", "t"))
+    assert r.status == "answered"
+
+
+def test_gold_programs_bypass_the_check(medal_table):
+    q = "캐나다의 메달 수는?"
+    p = parse("op: lookup ; cells: r2c5 ; answer: 60", "t_medal")
+    assert resolve(q, medal_table, p, entity_check=False).status == "answered"
+
+
+def test_english_formula_subject():
+    from tabletrace.schema import Table
+
+    t = Table(id="t", doc_id="d", title="Critical constants", header=["Substance", "Tc (K)"],
+              rows=[["H2O", "647"], ["CO2", "304"]], lang="en")
+    ok = resolve("What is the critical temperature of CO2?", t, parse("op: lookup ; cells: r1c1 ; answer: 304", "t"))
+    assert ok.status == "answered"
+    bad = resolve("What is the critical temperature of NH3?", t, parse("op: lookup ; cells: r1c1 ; answer: 304", "t"))
+    assert bad.status == "abstained" and bad.verdict.reason == "not_in_document"
+    # topic and unit words alone never block an answer
+    topic = resolve("What is the temperature in Celsius for the Arrhenius data of water?", t, parse("op: lookup ; cells: r0c1 ; answer: 647", "t"))
+    assert topic.status == "answered"

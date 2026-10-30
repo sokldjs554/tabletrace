@@ -7,7 +7,8 @@ Given a question, the selected table and a proposed Program, the verifier
    repair is recorded),
 3. for calculations re-executes the restricted calculator and compares with the proposed number,
 4. checks units and periods, and
-5. decides answered / abstained with an explicit reason.
+5. checks that the *subject* of the question (proper-noun-like tokens) occurs in the cited rows, and
+6. decides answered / abstained with an explicit reason.
 
 Everything it decides is returned as `Check` records so the console can show *why*.
 """
@@ -17,6 +18,7 @@ import math
 import re
 from dataclasses import dataclass, field
 
+from tabletrace.retrieval.tokenize import entity_tokens
 from tabletrace.schema import (
     AbstainReason,
     Calculation,
@@ -90,8 +92,69 @@ def find_span(answer: str, context: str, passage_id: str = "context") -> Evidenc
     return EvidenceSpan(passage_id=passage_id, start=i, end=i + len(a), text=context[i:i + len(a)])
 
 
+def _compact(s: str) -> str:
+    import unicodedata
+
+    return re.sub(r"\s+", "", unicodedata.normalize("NFKC", s or "")).lower()
+
+
+def _mentions(text: str, e: str) -> bool:
+    """`e` occurs in `text` (both compacted), or at least half of its character bigrams do, which tolerates
+    transliteration and spelling variants ("자오웨" / "자오위에")."""
+    if e in text:
+        return True
+    grams = {e[i:i + 2] for i in range(len(e) - 1)}
+    if len(grams) < 2:
+        return False
+    return sum(g in text for g in grams) / len(grams) >= 0.5
+
+
+def subject_check(question: str, table: Table, cells: list[CellRef], context: str | None = None) -> tuple[Check | None, str | None]:
+    """Does what the question is about occur in the evidence?
+
+    Entity-like tokens of the question that already name the table or a column (title, caption, header) are not
+    subjects. If subjects remain, at least one must occur in a cited row or in the passage; otherwise the cited cell
+    answers some other question ("보헤미안 랩소디" asked of a table that lists other films). Returns (check, reason):
+    `reason` is None when the check passes or does not apply, `not_in_document` when no subject occurs anywhere in
+    the table, `verification_failed` when it occurs only in rows that were not cited.
+    """
+    ents = entity_tokens(question, table.lang)
+    if not ents or not cells:
+        return None, None
+    names = _compact(" ".join([table.title or "", table.caption or "", *table.header]))
+    subjects = [e for e in ents if _compact(e) not in names]
+    if not subjects:
+        return None, None
+    rows = sorted({c.row for c in cells})
+    evidence = _compact(" ".join(" ".join(table.rows[r]) for r in rows if r < table.n_rows) + " " + (context or ""))
+    hit = [e for e in subjects if _mentions(evidence, _compact(e))]
+    if hit:
+        return Check(name="subject_in_evidence", passed=True, detail=f"subject {hit} found in the cited rows"), None
+    whole = _compact(" ".join(" ".join(r) for r in table.rows))
+    elsewhere = [e for e in subjects if _mentions(whole, _compact(e))]
+    reason = "verification_failed" if elsewhere else "not_in_document"
+    detail = (f"subject {subjects} is not in the cited rows {rows}" + (f" (it is in other rows: {elsewhere})" if elsewhere else " or anywhere in the table"))
+    return Check(name="subject_in_evidence", passed=False, detail=detail), reason
+
+
 def resolve(question: str, table: Table | None, program: Program | None, retrieval_ok: bool = True,
-            context: str | None = None, passage_id: str = "context") -> Resolution:
+            context: str | None = None, passage_id: str = "context", entity_check: bool = True) -> Resolution:
+    """Verify a proposed program. `entity_check=False` reproduces the verifier before the subject check existed
+    (used for gold programs and for the "before" rows of the evaluation)."""
+    res = _resolve(question, table, program, retrieval_ok, context, passage_id)
+    if entity_check and res.status == "answered" and res.cells and table is not None:
+        chk, reason = subject_check(question, table, res.cells, context)
+        if chk is not None:
+            checks = [*res.verdict.checks, chk]
+            if reason is not None:
+                checks.append(Check(name="abstain", passed=True, detail="the question's subject is not in the evidence"))
+                return Resolution("abstained", None, [], None, Verdict(status="abstained", reason=reason, checks=checks), res.trace)
+            res = Resolution(res.status, res.answer, res.cells, res.calculation, Verdict(status="answered", checks=checks), res.trace, res.spans)
+    return res
+
+
+def _resolve(question: str, table: Table | None, program: Program | None, retrieval_ok: bool = True,
+             context: str | None = None, passage_id: str = "context") -> Resolution:
     checks: list[Check] = []
     trace: list[TraceStep] = []
 

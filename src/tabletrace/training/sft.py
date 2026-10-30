@@ -56,7 +56,7 @@ def evaluate(model, tok, examples, bs, max_in, max_out) -> dict:
                 parse_fail += 1
                 prog = None
             res = resolve(e.question, e.table, prog, context=e.context)
-            gold_res = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context)
+            gold_res = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=False)
             if res.status == gold_res.status and (res.answer or "").strip().lower() == (gold_res.answer or "").strip().lower():
                 ans_ok += 1
     model.train()

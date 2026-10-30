@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 
 from tabletrace.agent.heuristic import plan as heuristic_plan
-from tabletrace.agent.program import serialize
+from tabletrace.agent.program import ProgramParseError, parse, serialize
 from tabletrace.eval.metrics import answer_match, cells_match, summarize
 from tabletrace.training.data import build_examples, load_docs, read_records
 from tabletrace.verify.verifier import resolve
@@ -34,6 +34,8 @@ def main() -> None:
     ap.add_argument("--quantize", action="store_true")
     ap.add_argument("--threads", type=int, default=0)
     ap.add_argument("--label", default=None)
+    ap.add_argument("--no-entity-check", action="store_true", help="verifier without the subject check (the evaluation before it existed)")
+    ap.add_argument("--replay-from", default=None, help="eval dir whose predictions.jsonl raw outputs are re-verified (no model run)")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -49,7 +51,20 @@ def main() -> None:
     lang = next(iter(docs.values())).lang
     t0 = time.time()
     planner_id = "heuristic"
-    if a.planner == "neural":
+    if a.replay_from:
+        # Re-verify the stored raw planner outputs of an earlier run with the current verifier; no model is loaded.
+        with open(Path(a.replay_from) / "predictions.jsonl", encoding="utf-8") as fh:
+            old_rows = {r["qid"]: r for r in map(json.loads, fh)}
+        plans = []
+        for e in examples:
+            o = old_rows[e.qid]
+            try:
+                prog = parse(o["raw_output"], e.table.id)
+            except ProgramParseError:
+                prog = None
+            plans.append((prog, o["raw_output"], e.rows_kept, o["ms"]))
+        planner_id = f"replay of {a.replay_from}"
+    elif a.planner == "neural":
         from tabletrace.model.planner import NeuralPlanner
 
         planner = NeuralPlanner(a.model, max_in=a.max_in, threads=a.threads or None, quantize=a.quantize)
@@ -64,8 +79,11 @@ def main() -> None:
     rows = []
     rec_by_qid = {r["qid"]: r for r in recs}
     for e, (prog, raw, _n, ms) in zip(examples, plans, strict=True):
-        gold_res = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context)
-        res = resolve(e.question, e.table, prog, context=e.context)
+        gold_res = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=False)
+        res = resolve(e.question, e.table, prog, context=e.context, entity_check=not a.no_entity_check)
+        # what the subject check alone would do to the GOLD program: the abstention rate a perfect planner would suffer
+        gold_chk = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=True)
+        gold_subject_fail = gold_res.status == "answered" and gold_chk.status == "abstained"
         alts = rec_by_qid[e.qid].get("alt_answers") or []
         gold_cells = [c.cid for c in e.gold.cells]
         pred_cells = [c.cid for c in res.cells]
@@ -90,13 +108,16 @@ def main() -> None:
             "calc_correct": (res.calculation is not None and gold_res.calculation is not None and abs(res.calculation.result - gold_res.calculation.result) < 1e-6),
             "unit_error": unit_error, "pred_abstained": res.status == "abstained", "parse_fail": prog is None,
             "verifier_changed": (prog is not None and prog.op != "abstain" and (res.status == "abstained" or (prog.answer is not None and not answer_match(prog.answer, res.answer)))),
-            "truncated_gold": e.truncated_gold, "ms": ms,
+            "truncated_gold": e.truncated_gold, "ms": ms, "gold_subject_fail": gold_subject_fail,
             "checks": [c.model_dump() for c in res.verdict.checks],
         })
     metrics = summarize(rows)
+    answerable_rows = [r for r in rows if r["gold_status"] == "answered"]
+    metrics["gold_subject_fail_rate"] = round(sum(r["gold_subject_fail"] for r in answerable_rows) / len(answerable_rows), 4) if answerable_rows else None
+    metrics["entity_check"] = not a.no_entity_check
     meta = {"planner": a.planner, "model": planner_id, "data": a.data, "corpus": a.corpus, "n": len(rows),
             "wall_s": round(time.time() - t0, 1), "hardware": platform.processor() or platform.machine(),
-            "label": a.label, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize}
+            "label": a.label, "entity_check": not a.no_entity_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize}
     (out / "metrics.json").write_text(json.dumps({"meta": meta, "metrics": metrics}, ensure_ascii=False, indent=1))
     with open(out / "predictions.jsonl", "w", encoding="utf-8") as f:
         for r in rows:

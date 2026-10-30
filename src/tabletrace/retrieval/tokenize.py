@@ -46,3 +46,21 @@ def tokenize_en(text: str) -> list[str]:
 
 def tokenize(text: str, lang: str) -> list[str]:
     return tokenize_ko(text) if lang == "ko" else tokenize_en(text)
+
+
+# --- subject (entity) tokens: what the question is *about*, used by the verifier's subject check -------------
+_KO_ENTITY = {"NNP", "SL", "SH"}
+_EN_FORMULA = re.compile(r"(?<![A-Za-z0-9])(?:[A-Z][a-z]?\d*){2,}[+\-]?(?![A-Za-z0-9])|(?<![A-Za-z0-9])[A-Z][a-z]?\d+[+\-]?(?![A-Za-z0-9])")
+def entity_tokens(text: str, lang: str) -> list[str]:
+    """Proper-noun-like tokens of a question (Korean: Kiwi NNP/SL/SH of length >= 2; English: chemical formulas such as
+    CO2 / NaCl / NO2). Generic words and capitalised topic or unit words ("Arrhenius", "Celsius", "Earth") are
+    deliberately not included: paraphrases and topic words must not trigger an abstention. Consequently the
+    English check can only catch a missing *formula*, not a missing substance named in words."""
+    out: list[str] = []
+    if lang == "ko":
+        for t in _kiwi().tokenize(text or ""):
+            if t.tag in _KO_ENTITY and len(re.sub(r"\s+", "", t.form)) >= 2:
+                out.append(t.form)
+    else:
+        out += _EN_FORMULA.findall(text or "")
+    return list(dict.fromkeys(out))

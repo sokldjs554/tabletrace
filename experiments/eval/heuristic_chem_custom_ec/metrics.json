@@ -1,0 +1,77 @@
+{
+ "meta": {
+  "planner": "heuristic",
+  "model": "replay of experiments/eval/heuristic_chem_custom",
+  "data": [
+   "data/chem/custom_eval.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl"
+  ],
+  "n": 32,
+  "wall_s": 0.0,
+  "hardware": "x86_64",
+  "label": "entity check (replay of heuristic_chem_custom)",
+  "entity_check": true,
+  "replay_from": "experiments/eval/heuristic_chem_custom",
+  "finished": "2026-10-30T09:36:24",
+  "quantize": false
+ },
+ "metrics": {
+  "n": 32,
+  "n_answerable": 27,
+  "n_gold_abstain": 5,
+  "n_calc": 14,
+  "n_lookup": 13,
+  "verified_em": 0.5625,
+  "answer_em_answerable": 0.4815,
+  "raw_answer_em_answerable": 0.4074,
+  "evidence_cells_exact": 0.5556,
+  "evidence_cells_exact_raw": 0.5556,
+  "evidence_repaired_rate": 0.0,
+  "evidence_cells_overlap": 0.5926,
+  "op_acc": 0.6875,
+  "lookup_em": 0.8462,
+  "calc_em": 0.1429,
+  "calc_result_correct": 0.1429,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 1.0,
+  "false_abstain_rate": 0.2593,
+  "abstain_precision": 0.4167,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.0,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.5625,
+  "mean_ms_per_example": 0.4,
+  "by_source": {
+   "custom": {
+    "n": 32,
+    "verified_em": 0.5625
+   }
+  },
+  "by_category": {
+   "abstain": {
+    "n": 5,
+    "verified_em": 1.0
+   },
+   "calc": {
+    "n": 7,
+    "verified_em": 0.2857
+   },
+   "cell": {
+    "n": 10,
+    "verified_em": 0.8
+   },
+   "text_table": {
+    "n": 6,
+    "verified_em": 0.0
+   },
+   "unit_period": {
+    "n": 4,
+    "verified_em": 0.75
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": true
+ }
+}
