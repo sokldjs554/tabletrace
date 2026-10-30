@@ -165,3 +165,19 @@ def test_english_formula_subject():
     # topic and unit words alone never block an answer
     topic = resolve("What is the temperature in Celsius for the Arrhenius data of water?", t, parse("op: lookup ; cells: r0c1 ; answer: 647", "t"))
     assert topic.status == "answered"
+
+
+def test_column_check_moves_to_the_named_column_but_is_off_by_default():
+    from tabletrace.schema import Table
+
+    t = Table(id="t_m", doc_id="d_m", title="올림픽 메달 집계", header=["순위", "국가", "금메달", "은메달", "합계"],
+              rows=[["3", "러시아", "24", "13", "60"]], lang="ko")
+    q = "러시아가 획득한 금메달은 몇 개입니까?"                    # asks for 금메달 (c2); the model cited 합계 (c4)
+    p = parse("op: lookup ; cells: r0c4 ; answer: 60", "t_m")
+    assert resolve(q, t, p).answer == "60"                       # default: unchanged
+    r = resolve(q, t, p, column_check=True)
+    assert r.answer == "24" and [c.cid for c in r.cells] == ["r0c2"]
+    assert any(c.name == "column_repaired" and not c.passed for c in r.verdict.checks)
+    # the cited column is the named one: nothing to repair
+    ok = resolve("러시아의 합계는 몇 개입니까?", t, p, column_check=True)
+    assert ok.answer == "60" and not any(c.name == "column_repaired" for c in ok.verdict.checks)

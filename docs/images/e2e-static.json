@@ -4,7 +4,7 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 모델 mt5-small-tabletrace / 휴리스틱 · 2026-10-30 15:21 UTC · commit 9b9823b"
+   "detail": "저장된 실행 결과 · 모델 mt5-small-tabletrace / 휴리스틱 · 2026-10-30 15:29 UTC · commit e6f9d71"
   },
   {
    "name": "desktop: document + examples rendered",
@@ -14,7 +14,7 @@
   {
    "name": "desktop: first example produced a result",
    "ok": true,
-   "detail": "저장된 결과 · 기록 2026-10-30 15:21 UTC · 968 ms"
+   "detail": "저장된 결과 · 기록 2026-10-30 15:29 UTC · 1.05 s"
   },
   {
    "name": "desktop: evidence highlighted in table",
@@ -34,7 +34,7 @@
   {
    "name": "mobile: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 모델 mt5-small-tabletrace / 휴리스틱 · 2026-10-30 15:21 UTC · commit 9b9823b"
+   "detail": "저장된 실행 결과 · 모델 mt5-small-tabletrace / 휴리스틱 · 2026-10-30 15:29 UTC · commit e6f9d71"
   },
   {
    "name": "mobile: document + examples rendered",
@@ -44,7 +44,7 @@
   {
    "name": "mobile: first example produced a result",
    "ok": true,
-   "detail": "저장된 결과 · 기록 2026-10-30 15:21 UTC · 968 ms"
+   "detail": "저장된 결과 · 기록 2026-10-30 15:29 UTC · 1.05 s"
   },
   {
    "name": "mobile: evidence highlighted in table",

@@ -18,7 +18,7 @@ import math
 import re
 from dataclasses import dataclass, field
 
-from tabletrace.retrieval.tokenize import entity_tokens
+from tabletrace.retrieval.tokenize import entity_tokens, tokenize
 from tabletrace.schema import (
     AbstainReason,
     Calculation,
@@ -137,11 +137,39 @@ def subject_check(question: str, table: Table, cells: list[CellRef], context: st
     return Check(name="subject_in_evidence", passed=False, detail=detail), reason
 
 
+def header_column(question: str, table: Table, cited: int) -> int | None:
+    """The column the question names, when the cited column is not it.
+
+    A header "names" a column when its compact text occurs in the question ("관객수") or at least half of its content
+    tokens do. Returns the unique best-matching column that differs from `cited`, or None when the question names no
+    column, names the cited one, or the best match is a tie."""
+    qc = _compact(question)
+    q_tokens = set(tokenize(question, table.lang))
+    scores: dict[int, float] = {}
+    for j, h in enumerate(table.header):
+        hc = _compact(h)
+        if not hc:
+            continue
+        if len(hc) >= 2 and hc in qc:
+            scores[j] = 1.0
+            continue
+        ht = set(tokenize(h, table.lang))
+        if ht and len(ht & q_tokens) / len(ht) >= 0.5:
+            scores[j] = len(ht & q_tokens) / len(ht)
+    if not scores or cited in scores:
+        return None
+    best = max(scores.values())
+    winners = [j for j, v in scores.items() if v == best]
+    return winners[0] if len(winners) == 1 else None
+
+
 def resolve(question: str, table: Table | None, program: Program | None, retrieval_ok: bool = True,
-            context: str | None = None, passage_id: str = "context", entity_check: bool = True) -> Resolution:
+            context: str | None = None, passage_id: str = "context", entity_check: bool = True,
+            column_check: bool = False) -> Resolution:
     """Verify a proposed program. `entity_check=False` reproduces the verifier before the subject check existed
-    (used for gold programs and for the "before" rows of the evaluation)."""
-    res = _resolve(question, table, program, retrieval_ok, context, passage_id)
+    (used for gold programs and for the "before" rows of the evaluation). `column_check=True` additionally moves a
+    lookup to the column the question names when the model cited another column of the same row."""
+    res = _resolve(question, table, program, retrieval_ok, context, passage_id, column_check)
     if entity_check and res.status == "answered" and res.cells and table is not None:
         chk, reason = subject_check(question, table, res.cells, context)
         if chk is not None:
@@ -154,7 +182,7 @@ def resolve(question: str, table: Table | None, program: Program | None, retriev
 
 
 def _resolve(question: str, table: Table | None, program: Program | None, retrieval_ok: bool = True,
-             context: str | None = None, passage_id: str = "context") -> Resolution:
+             context: str | None = None, passage_id: str = "context", column_check: bool = False) -> Resolution:
     checks: list[Check] = []
     trace: list[TraceStep] = []
 
@@ -204,6 +232,13 @@ def _resolve(question: str, table: Table | None, program: Program | None, retrie
         cell_text = out["text"]
         if not cell_text.strip():
             return abstain("not_in_document", f"cell {c.cid} is empty")
+        if column_check:
+            j2 = header_column(question, table, c.col)
+            if j2 is not None and table.cell(c.row, j2).strip():
+                c3 = CellRef(table_id=table.id, row=c.row, col=j2)
+                checks.append(Check(name="column_repaired", passed=False,
+                                    detail=f"the question names column '{table.header[j2]}' but the model cited '{table.header[c.col]}' ({c.cid}); {c3.cid} used as evidence"))
+                return Resolution("answered", table.cell(c3.row, c3.col), [c3], None, Verdict(status="answered", checks=checks), trace)
         proposed = program.answer or ""
         same = normalize_text(proposed) == normalize_text(cell_text)
         # a proposal may be a *meaningful* part of the cell ("최규하" in "최규하(崔圭夏)"), but a short numeric

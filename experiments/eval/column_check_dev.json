@@ -1,0 +1,12 @@
+{
+ "n": 245,
+ "fired": 91,
+ "fixed": 14,
+ "broke": 9,
+ "both_right": 19,
+ "both_wrong": 49,
+ "verified_em_without": 0.3918,
+ "verified_em_with": 0.4122,
+ "adopted": false,
+ "reason": "net gain of a few questions, and it breaks answers whenever a header word in the question is a condition rather than the asked attribute"
+}

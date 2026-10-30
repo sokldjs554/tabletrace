@@ -36,6 +36,7 @@ def main() -> None:
     ap.add_argument("--threads", type=int, default=0)
     ap.add_argument("--label", default=None)
     ap.add_argument("--no-entity-check", action="store_true", help="verifier without the subject check (the evaluation before it existed)")
+    ap.add_argument("--column-check", action="store_true", help="verifier moves a lookup to the column the question names")
     ap.add_argument("--replay-from", default=None, help="eval dir whose predictions.jsonl raw outputs are re-verified (no model run)")
     a = ap.parse_args()
     out = Path(a.out)
@@ -82,7 +83,7 @@ def main() -> None:
     rec_by_qid = {r["qid"]: r for r in recs}
     for e, (prog, raw, _n, ms) in zip(examples, plans, strict=True):
         gold_res = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=False)
-        res = resolve(e.question, e.table, prog, context=e.context, entity_check=not a.no_entity_check)
+        res = resolve(e.question, e.table, prog, context=e.context, entity_check=not a.no_entity_check, column_check=a.column_check)
         # what the subject check alone would do to the GOLD program: the abstention rate a perfect planner would suffer
         gold_chk = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=True)
         gold_subject_fail = gold_res.status == "answered" and gold_chk.status == "abstained"
@@ -119,7 +120,7 @@ def main() -> None:
     metrics["entity_check"] = not a.no_entity_check
     meta = {"planner": a.planner, "model": planner_id, "data": a.data, "corpus": a.corpus, "n": len(rows),
             "wall_s": round(time.time() - t0, 1), "hardware": platform.processor() or platform.machine(),
-            "label": a.label, "entity_check": not a.no_entity_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None}
+            "label": a.label, "entity_check": not a.no_entity_check, "column_check": a.column_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None}
     (out / "metrics.json").write_text(json.dumps({"meta": meta, "metrics": metrics}, ensure_ascii=False, indent=1))
     with open(out / "predictions.jsonl", "w", encoding="utf-8") as f:
         for r in rows:

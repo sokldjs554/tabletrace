@@ -1,0 +1,62 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "model",
+  "data": [
+   "data/ko/dev.jsonl",
+   "data/ko/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 245,
+  "wall_s": 136.0,
+  "hardware": "x86_64",
+  "label": null,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-10-30T15:34:21",
+  "quantize": false,
+  "quantize_scope": null
+ },
+ "metrics": {
+  "n": 245,
+  "n_answerable": 225,
+  "n_gold_abstain": 20,
+  "n_calc": 45,
+  "n_lookup": 180,
+  "verified_em": 0.4041,
+  "answer_em_answerable": 0.3778,
+  "raw_answer_em_answerable": 0.3867,
+  "evidence_cells_exact": 0.3778,
+  "evidence_cells_exact_raw": 0.1822,
+  "evidence_repaired_rate": 0.4489,
+  "evidence_cells_overlap": 0.3911,
+  "op_acc": 0.6531,
+  "lookup_em": 0.4722,
+  "calc_em": 0.0,
+  "calc_result_correct": 0.0,
+  "unit_error_rate": null,
+  "abstain_recall": 0.7,
+  "false_abstain_rate": 0.2311,
+  "abstain_precision": 0.2121,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.1156,
+  "truncated_gold_rate": 0.0694,
+  "verified_em_untruncated": 0.4342,
+  "mean_ms_per_example": 509.7,
+  "by_source": {
+   "korwikitq": {
+    "n": 180,
+    "verified_em": 0.4722
+   },
+   "synthetic": {
+    "n": 65,
+    "verified_em": 0.2154
+   }
+  },
+  "gold_subject_fail_rate": 0.0444,
+  "entity_check": false
+ }
+}

@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-30 15:25 UTC",
- "commit": "62e909b",
+ "generated_at": "2026-10-30 15:29 UTC",
+ "commit": "e6f9d71",
  "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없음.",
  "sections": [
   {
