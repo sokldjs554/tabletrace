@@ -16,6 +16,9 @@ Reward (per sample; see `reward()`):
                    answer text != cell   -0.3 (verifier substituted the cell), abstained instead -0.3,
                    proposal blocked by verifier -0.3
   gold abstain:    abstained             +1.0, answered anyway (hallucination) -0.8
+Policy and reference are both run in eval mode (dropout off). Training mode would make the policy's
+log-probs differ from the reference's even at step 0 (KL of 1e2..1e6 in our first attempt, followed by NaN),
+and sampling is done from the same eval-mode policy so the update is on-policy.
 Usage:
   python -m tabletrace.training.rl_grpo --model experiments/sft_ko2/model --train data/ko/train.jsonl data/ko/synthetic_train.jsonl \
      --dev data/ko/dev.jsonl data/ko/synthetic_dev.jsonl --corpus data/ko/documents.jsonl --out experiments/rl_ko/model --steps 60
@@ -112,6 +115,8 @@ def main() -> None:
     ap.add_argument("--chunk", type=int, default=8, help="sequences per backward pass")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--threads", type=int, default=4)
+    ap.add_argument("--max-dev", type=int, default=0, help="limit dev examples (smoke tests)")
+    ap.add_argument("--kl-clamp", type=float, default=10.0, help="clamp of the log-ratio inside the k3 KL estimator")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
     random.seed(a.seed)
@@ -129,6 +134,8 @@ def main() -> None:
     docs = load_docs(*[Path(c) for c in a.corpus])
     train = build_examples(read_records([Path(p) for p in a.train]), docs, tok, a.max_in, drop_truncated_gold=True)
     dev = build_examples(read_records([Path(p) for p in a.dev]), docs, tok, a.max_in)
+    if a.max_dev:
+        dev = dev[: a.max_dev]
     # balance prompt sources so abstain / calc prompts are not drowned by lookups
     by_src: dict[str, list[Example]] = {}
     for e in train:
@@ -176,7 +183,7 @@ def main() -> None:
                 labels[i, eos[0, 0] + 1:] = -100
         in_ids = enc["input_ids"].repeat_interleave(a.group, 0)
         in_mask = enc["attention_mask"].repeat_interleave(a.group, 0)
-        policy.train()
+        policy.eval()   # dropout off: log-probs must equal the sampling distribution and the reference at step 0
         opt.zero_grad(set_to_none=True)
         total_tok = (labels != -100).sum().clamp(min=1).item()
         loss_sum = kl_sum = 0.0
@@ -189,19 +196,24 @@ def main() -> None:
             with torch.no_grad():
                 ref_logp, _ = seq_logprobs(ref, e_chunk, labels[sl], tok.pad_token_id)
             pg = -(adv[sl].unsqueeze(1) * logp * mask).sum() / total_tok
-            ratio = (ref_logp - logp)
+            ratio = (ref_logp - logp).clamp(-a.kl_clamp, a.kl_clamp)
             kl = ((ratio.exp() - ratio - 1) * mask).sum() / total_tok      # k3 estimator, per token
             loss = pg + a.beta * kl
             loss.backward()
             loss_sum += pg.item()
             kl_sum += kl.item()
-        torch.nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
-        opt.step()
+        gn = torch.nn.utils.clip_grad_norm_(policy.parameters(), 1.0)
+        skipped = not bool(torch.isfinite(gn))
+        if skipped:                       # never apply a non-finite update
+            opt.zero_grad(set_to_none=True)
+        else:
+            opt.step()
         ops = Counter(i["op"] for i in infos)
         rec = {"step": step, "reward_mean": round(R.mean().item(), 4), "reward_std": round(R.std().item(), 4),
                "frac_group_zero_std": round(float((R.std(1) == 0).float().mean()), 3), "pg_loss": round(loss_sum, 5), "kl": round(kl_sum, 5),
                "parse_ok": round(sum(i["parse_ok"] for i in infos) / len(infos), 3), "abstain_rate": round(sum(bool(i["abstained"]) for i in infos) / len(infos), 3),
                "correct_rate": round(sum(i["correct"] for i in infos) / len(infos), 3), "ops": dict(ops),
+               "grad_norm": round(float(gn), 4) if not skipped else None, "update_skipped": skipped,
                "prompt_kinds": [k for k in (kinds[(step * a.prompts_per_step + i) % len(kinds)] for i in range(a.prompts_per_step))],
                "elapsed_s": round(time.time() - t0, 1), "rss_gb": round(psutil.Process(os.getpid()).memory_info().rss / 1e9, 2)}
         log.write(json.dumps(rec, ensure_ascii=False) + "\n")

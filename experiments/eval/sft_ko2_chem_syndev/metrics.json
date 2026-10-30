@@ -1,0 +1,51 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "model",
+  "data": [
+   "data/chem/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl"
+  ],
+  "n": 80,
+  "wall_s": 39.5,
+  "hardware": "x86_64",
+  "label": null,
+  "finished": "2026-10-29T13:39:10",
+  "quantize": false
+ },
+ "metrics": {
+  "n": 80,
+  "n_answerable": 64,
+  "n_gold_abstain": 16,
+  "n_calc": 24,
+  "n_lookup": 40,
+  "verified_em": 0.225,
+  "answer_em_answerable": 0.1406,
+  "raw_answer_em_answerable": 0.2656,
+  "evidence_cells_exact": 0.1406,
+  "evidence_cells_exact_raw": 0.2344,
+  "evidence_repaired_rate": 0.3125,
+  "evidence_cells_overlap": 0.1719,
+  "op_acc": 0.425,
+  "lookup_em": 0.225,
+  "calc_em": 0.0,
+  "calc_result_correct": 0.0,
+  "unit_error_rate": null,
+  "abstain_recall": 0.5625,
+  "false_abstain_rate": 0.5781,
+  "abstain_precision": 0.1957,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.5781,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.225,
+  "mean_ms_per_example": 434.0,
+  "by_source": {
+   "synthetic": {
+    "n": 80,
+    "verified_em": 0.225
+   }
+  }
+ }
+}

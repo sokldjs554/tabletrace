@@ -1,9 +1,9 @@
 {
- "generated_at": "2026-10-29 08:43 UTC",
- "commit": "3541e72",
+ "generated_at": "2026-10-29 14:06 UTC",
+ "commit": "4b3fbed",
  "version": "0.1.0",
- "planner": "heuristic",
- "model_id": null,
+ "planner": "neural",
+ "model_id": "mt5-small-tabletrace",
  "hardware": "4 vCPU Intel Xeon 2.10GHz, no GPU (session container)",
  "runs": [
   {
@@ -64,8 +64,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: lookup ; cells: r6c4 ; answer: 5,436,789"
     },
     "trace": [
@@ -100,7 +100,98 @@
        "selected_table": "ko_29fbd6328d",
        "context_passage": "doc_ko_29fbd6328d_p0"
       },
-      "ms": 3.8874679994478356,
+      "ms": 3.1855050001468044,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "2018년 박스오피스에서 안시성의 관객수는 몇 명입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r6c1 ; answer: 9,436,789",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 6,
+          "col": 1
+         }
+        ],
+        "answer": "9,436,789",
+        "reason": null
+       }
+      },
+      "ms": 768.0450940006267,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 6,
+       "col": 1
+      },
+      "output": {
+       "cell": "r6c1",
+       "text": "안시성",
+       "header": "제목",
+       "row_label": "7",
+       "unit": null
+      },
+      "ms": 0.04574000013235491,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "9,436,789",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.1484399999753805,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 10x6"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2018'] vs evidence ['2018']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '9,436,789' != cell '안시성'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '9,436,789' is not supported by cell r6c1"
+        }
+       ]
+      },
+      "ms": 0.5388629997469252,
       "status": "ok"
      },
      {
@@ -109,7 +200,7 @@
       "input": {
        "question": "2018년 박스오피스에서 안시성의 관객수는 몇 명입니까?",
        "table_id": "ko_29fbd6328d",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: lookup ; cells: r6c4 ; answer: 5,436,789",
@@ -126,7 +217,7 @@
         "reason": null
        }
       },
-      "ms": 1.371141000163334,
+      "ms": 1.9183619997420465,
       "status": "ok"
      },
      {
@@ -143,7 +234,7 @@
        "row_label": "7",
        "unit": "명"
       },
-      "ms": 0.024571999347244855,
+      "ms": 0.02907799989770865,
       "status": "ok"
      },
      {
@@ -171,14 +262,14 @@
         }
        ]
       },
-      "ms": 0.1502679997429368,
+      "ms": 0.16591500025242567,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 14.821881999523612,
+    "elapsed_ms": 780.9032380000644,
     "error": null
    },
-   "wall_s": 0.02
+   "wall_s": 0.78
   },
   {
    "id": "ko_custom_03",
@@ -276,8 +367,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: diff ; cells: r0c4, r1c4 ; answer: -"
     },
     "trace": [
@@ -303,7 +394,93 @@
        "selected_table": "ko_29fbd6328d",
        "context_passage": "doc_ko_29fbd6328d_p0"
       },
-      "ms": 1.600909000444517,
+      "ms": 2.7242320002187626,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "신과함께: 인과 연과 어벤져스: 인피니티 워의 관객수 차이는 몇 명입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r1c1 ; answer: 10,274,031",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 1,
+          "col": 1
+         }
+        ],
+        "answer": "10,274,031",
+        "reason": null
+       }
+      },
+      "ms": 687.4880309997025,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 1,
+       "col": 1
+      },
+      "output": {
+       "cell": "r1c1",
+       "text": "어벤져스: 인피니티 워",
+       "header": "제목",
+       "row_label": "2",
+       "unit": null
+      },
+      "ms": 0.02607100032037124,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "10,274,031",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.11827099933725549,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 10x6"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '10,274,031' != cell '어벤져스: 인피니티 워'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '10,274,031' is not supported by cell r1c1"
+        }
+       ]
+      },
+      "ms": 0.25777300015761284,
       "status": "ok"
      },
      {
@@ -312,7 +489,7 @@
       "input": {
        "question": "신과함께: 인과 연과 어벤져스: 인피니티 워의 관객수 차이는 몇 명입니까?",
        "table_id": "ko_29fbd6328d",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: diff ; cells: r0c4, r1c4 ; answer: -",
@@ -334,7 +511,7 @@
         "reason": null
        }
       },
-      "ms": 1.1622299998634844,
+      "ms": 1.492265999331721,
       "status": "ok"
      },
      {
@@ -376,7 +553,7 @@
        "unit": "명",
        "formatted": "1,062,201 명"
       },
-      "ms": 0.2533169999878737,
+      "ms": 0.1587290007591946,
       "status": "ok"
      },
      {
@@ -404,14 +581,14 @@
         }
        ]
       },
-      "ms": 0.3134640001007938,
+      "ms": 0.21515600019483827,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 5.445482000141055,
+    "elapsed_ms": 696.2091480008894,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.7
   },
   {
    "id": "ko_custom_04",
@@ -427,66 +604,28 @@
     "doc_id": "doc_ko_29fbd6328d",
     "table_id": "ko_29fbd6328d",
     "status": "answered",
-    "answer": "98,907,452,875 원",
+    "answer": "5,063,620",
     "program": {
-     "op": "sum",
+     "op": "lookup",
      "cells": [
       {
        "table_id": "ko_29fbd6328d",
        "row": 2,
-       "col": 3
-      },
-      {
-       "table_id": "ko_29fbd6328d",
-       "row": 9,
-       "col": 3
+       "col": 1
       }
      ],
-     "answer": null,
+     "answer": "5,063,620",
      "reason": null
     },
     "evidence_cells": [
      {
       "table_id": "ko_29fbd6328d",
-      "row": 2,
-      "col": 3
-     },
-     {
-      "table_id": "ko_29fbd6328d",
       "row": 9,
-      "col": 3
+      "col": 4
      }
     ],
     "evidence_spans": [],
-    "calculation": {
-     "op": "sum",
-     "expression": "55423761962.0 + 43483690913.0",
-     "inputs": [
-      {
-       "cell": {
-        "table_id": "ko_29fbd6328d",
-        "row": 2,
-        "col": 3
-       },
-       "raw": "55,423,761,962",
-       "value": 55423761962.0,
-       "unit": "원"
-      },
-      {
-       "cell": {
-        "table_id": "ko_29fbd6328d",
-        "row": 9,
-        "col": 3
-       },
-       "raw": "43,483,690,913",
-       "value": 43483690913.0,
-       "unit": "원"
-      }
-     ],
-     "result": 98907452875.0,
-     "unit": "원",
-     "formatted": "98,907,452,875 원"
-    },
+    "calculation": null,
     "verdict": {
      "status": "answered",
      "reason": null,
@@ -494,24 +633,24 @@
       {
        "name": "cells_in_range",
        "passed": true,
-       "detail": "2 cell(s) in 10x6"
+       "detail": "1 cell(s) in 10x6"
       },
       {
-       "name": "calculation",
-       "passed": true,
-       "detail": "55423761962.0 + 43483690913.0 = 98,907,452,875 원"
+       "name": "answer_matches_cell",
+       "passed": false,
+       "detail": "proposed '5,063,620' != cell '미션 임파서블: 폴아웃'; cell text used"
       },
       {
-       "name": "units_consistent",
-       "passed": true,
-       "detail": "units ['원']"
+       "name": "evidence_repaired",
+       "passed": false,
+       "detail": "model cited r2c1; the answer text is in r9c4 (used as evidence)"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: sum ; cells: r2c3, r9c3 ; answer: -"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r2c1 ; answer: 5,063,620"
     },
     "trace": [
      {
@@ -536,80 +675,67 @@
        "selected_table": "ko_29fbd6328d",
        "context_passage": "doc_ko_29fbd6328d_p0"
       },
-      "ms": 1.1810410005637095,
+      "ms": 1.3026369997533038,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "미션 임파서블: 폴아웃과 독전의 매출액 합계는 얼마입니까?",
        "table_id": "ko_29fbd6328d",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
       },
       "output": {
-       "raw": "op: sum ; cells: r2c3, r9c3 ; answer: -",
+       "raw": "op: lookup ; cells: r2c1 ; answer: 5,063,620",
        "parsed": {
-        "op": "sum",
+        "op": "lookup",
         "cells": [
          {
           "table_id": "ko_29fbd6328d",
           "row": 2,
-          "col": 3
-         },
-         {
-          "table_id": "ko_29fbd6328d",
-          "row": 9,
-          "col": 3
+          "col": 1
          }
         ],
-        "answer": null,
+        "answer": "5,063,620",
         "reason": null
        }
       },
-      "ms": 0.9880070001599961,
+      "ms": 631.7005359996983,
       "status": "ok"
      },
      {
       "step": "tool",
-      "tool": "calculate",
+      "tool": "cell_lookup",
       "input": {
-       "op": "sum",
-       "cells": [
-        "r2c3",
-        "r9c3"
-       ]
+       "row": 2,
+       "col": 1
       },
       "output": {
-       "op": "sum",
-       "expression": "55423761962.0 + 43483690913.0",
-       "inputs": [
-        {
-         "cell": {
-          "table_id": "ko_29fbd6328d",
-          "row": 2,
-          "col": 3
-         },
-         "raw": "55,423,761,962",
-         "value": 55423761962.0,
-         "unit": "원"
-        },
-        {
-         "cell": {
-          "table_id": "ko_29fbd6328d",
-          "row": 9,
-          "col": 3
-         },
-         "raw": "43,483,690,913",
-         "value": 43483690913.0,
-         "unit": "원"
-        }
-       ],
-       "result": 98907452875.0,
-       "unit": "원",
-       "formatted": "98,907,452,875 원"
+       "cell": "r2c1",
+       "text": "미션 임파서블: 폴아웃",
+       "header": "제목",
+       "row_label": "3",
+       "unit": null
       },
-      "ms": 0.10597299933579052,
+      "ms": 0.028159000066807494,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "5,063,620",
+       "exact": true
+      },
+      "output": {
+       "cells": [
+        "r9c4"
+       ]
+      },
+      "ms": 0.0929870002437383,
       "status": "ok"
      },
      {
@@ -623,28 +749,28 @@
         {
          "name": "cells_in_range",
          "passed": true,
-         "detail": "2 cell(s) in 10x6"
+         "detail": "1 cell(s) in 10x6"
         },
         {
-         "name": "calculation",
-         "passed": true,
-         "detail": "55423761962.0 + 43483690913.0 = 98,907,452,875 원"
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '5,063,620' != cell '미션 임파서블: 폴아웃'; cell text used"
         },
         {
-         "name": "units_consistent",
-         "passed": true,
-         "detail": "units ['원']"
+         "name": "evidence_repaired",
+         "passed": false,
+         "detail": "model cited r2c1; the answer text is in r9c4 (used as evidence)"
         }
        ]
       },
-      "ms": 0.2209049998782575,
+      "ms": 0.25154099967039656,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 8.702842000275268,
+    "elapsed_ms": 635.6819239999822,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.64
   },
   {
    "id": "ko_custom_07",
@@ -659,32 +785,54 @@
     "corpus": "ko_tables",
     "doc_id": "doc_ko_29fbd6328d",
     "table_id": "ko_29fbd6328d",
-    "status": "abstained",
-    "answer": null,
+    "status": "answered",
+    "answer": "신과함께: 인과 연",
     "program": {
-     "op": "abstain",
-     "cells": [],
-     "answer": null,
-     "reason": "not_in_document"
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 0,
+       "col": 1
+      }
+     ],
+     "answer": "신과함께: 인과 연",
+     "reason": null
     },
-    "evidence_cells": [],
+    "evidence_cells": [
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 0,
+      "col": 1
+     }
+    ],
     "evidence_spans": [],
     "calculation": null,
     "verdict": {
-     "status": "abstained",
-     "reason": "not_in_document",
+     "status": "answered",
+     "reason": null,
      "checks": [
       {
-       "name": "abstain",
+       "name": "cells_in_range",
        "passed": true,
-       "detail": "planner abstained"
+       "detail": "1 cell(s) in 10x6"
+      },
+      {
+       "name": "period_consistent",
+       "passed": true,
+       "detail": "question ['2018'] vs evidence ['2018']"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r0c1 ; answer: 신과함께: 인과 연"
     },
     "trace": [
      {
@@ -709,27 +857,52 @@
        "selected_table": "ko_29fbd6328d",
        "context_passage": "doc_ko_29fbd6328d_p0"
       },
-      "ms": 2.384878999691864,
+      "ms": 2.981899000587873,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "이 2018년 박스오피스 순위는 언제부터의 통계를 집계합니까?",
        "table_id": "ko_29fbd6328d",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
       },
       "output": {
-       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "raw": "op: lookup ; cells: r0c1 ; answer: 신과함께: 인과 연",
        "parsed": {
-        "op": "abstain",
-        "cells": [],
-        "answer": null,
-        "reason": "not_in_document"
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 0,
+          "col": 1
+         }
+        ],
+        "answer": "신과함께: 인과 연",
+        "reason": null
        }
       },
-      "ms": 0.940167999942787,
+      "ms": 731.610078999438,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 0,
+       "col": 1
+      },
+      "output": {
+       "cell": "r0c1",
+       "text": "신과함께: 인과 연",
+       "header": "제목",
+       "row_label": "1",
+       "unit": null
+      },
+      "ms": 0.03631799972936278,
       "status": "ok"
      },
      {
@@ -737,24 +910,34 @@
       "tool": null,
       "input": {},
       "output": {
-       "status": "abstained",
-       "reason": "not_in_document",
+       "status": "answered",
+       "reason": null,
        "checks": [
         {
-         "name": "abstain",
+         "name": "cells_in_range",
          "passed": true,
-         "detail": "planner abstained"
+         "detail": "1 cell(s) in 10x6"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2018'] vs evidence ['2018']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
         }
        ]
       },
-      "ms": 0.02208700061601121,
+      "ms": 0.2082029996017809,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 5.451682999591867,
+    "elapsed_ms": 737.5593319993641,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.74
   },
   {
    "id": "ko_custom_05",
@@ -809,8 +992,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: lookup ; cells: r6c3 ; answer: 46,314,721,026"
     },
     "trace": [
@@ -836,7 +1019,93 @@
        "selected_table": "ko_29fbd6328d",
        "context_passage": "doc_ko_29fbd6328d_p0"
       },
-      "ms": 0.7835830001567956,
+      "ms": 1.5167339997788076,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "안시성의 매출액은 몇 원입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r6c1 ; answer: 9,436,789",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 6,
+          "col": 1
+         }
+        ],
+        "answer": "9,436,789",
+        "reason": null
+       }
+      },
+      "ms": 726.8190479999248,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 6,
+       "col": 1
+      },
+      "output": {
+       "cell": "r6c1",
+       "text": "안시성",
+       "header": "제목",
+       "row_label": "7",
+       "unit": null
+      },
+      "ms": 0.0354350004272419,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "9,436,789",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.1402709995090845,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 10x6"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '9,436,789' != cell '안시성'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '9,436,789' is not supported by cell r6c1"
+        }
+       ]
+      },
+      "ms": 0.32440199993288843,
       "status": "ok"
      },
      {
@@ -845,7 +1114,7 @@
       "input": {
        "question": "안시성의 매출액은 몇 원입니까?",
        "table_id": "ko_29fbd6328d",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: lookup ; cells: r6c3 ; answer: 46,314,721,026",
@@ -862,7 +1131,7 @@
         "reason": null
        }
       },
-      "ms": 0.6183969999256078,
+      "ms": 1.3165310001568287,
       "status": "ok"
      },
      {
@@ -879,7 +1148,7 @@
        "row_label": "7",
        "unit": "원"
       },
-      "ms": 0.020838000637013465,
+      "ms": 0.0221800000872463,
       "status": "ok"
      },
      {
@@ -902,14 +1171,14 @@
         }
        ]
       },
-      "ms": 0.06774600024073152,
+      "ms": 0.10397400001238566,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.3233730000574724,
+    "elapsed_ms": 734.3472590000601,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.73
   },
   {
    "id": "ko_custom_06",
@@ -1012,8 +1281,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: diff ; cells: r8c0, r3c0 ; answer: -"
     },
     "trace": [
@@ -1048,7 +1317,98 @@
        "selected_table": "ko_29fbd6328d",
        "context_passage": "doc_ko_29fbd6328d_p0"
       },
-      "ms": 3.3897590001288336,
+      "ms": 5.371749000005366,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "2017년 12월에 개봉한 영화 중 2018년 박스오피스 순위가 더 높은 영화는 무엇입니까?",
+       "table_id": "ko_29fbd6328d",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r8c1 ; answer: 41,912,306,108",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 8,
+          "col": 1
+         }
+        ],
+        "answer": "41,912,306,108",
+        "reason": null
+       }
+      },
+      "ms": 704.0512330004276,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 8,
+       "col": 1
+      },
+      "output": {
+       "cell": "r8c1",
+       "text": "1987",
+       "header": "제목",
+       "row_label": "9",
+       "unit": null
+      },
+      "ms": 0.028532999749586452,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "41,912,306,108",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.09221199979947414,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 10x6"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2017', '2018'] vs evidence ['1987', '2017', '2018']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '41,912,306,108' != cell '1987'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '41,912,306,108' is not supported by cell r8c1"
+        }
+       ]
+      },
+      "ms": 0.24838599983922904,
       "status": "ok"
      },
      {
@@ -1057,7 +1417,7 @@
       "input": {
        "question": "2017년 12월에 개봉한 영화 중 2018년 박스오피스 순위가 더 높은 영화는 무엇입니까?",
        "table_id": "ko_29fbd6328d",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: diff ; cells: r8c0, r3c0 ; answer: -",
@@ -1079,7 +1439,7 @@
         "reason": null
        }
       },
-      "ms": 0.9653460001572967,
+      "ms": 1.366986999528308,
       "status": "ok"
      },
      {
@@ -1121,7 +1481,7 @@
        "unit": null,
        "formatted": "5"
       },
-      "ms": 1.5171450004345388,
+      "ms": 0.2005120004469063,
       "status": "ok"
      },
      {
@@ -1154,14 +1514,14 @@
         }
        ]
       },
-      "ms": 1.5824819993213168,
+      "ms": 0.28847100020357175,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 7.8293079996001325,
+    "elapsed_ms": 715.0725100000273,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.72
   },
   {
    "id": "ko_custom_08",
@@ -1176,32 +1536,54 @@
     "corpus": "ko_tables",
     "doc_id": "doc_ko_29fbd6328d",
     "table_id": "ko_29fbd6328d",
-    "status": "abstained",
-    "answer": null,
+    "status": "answered",
+    "answer": "신과함께: 인과 연",
     "program": {
-     "op": "abstain",
-     "cells": [],
-     "answer": null,
-     "reason": "not_in_document"
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_29fbd6328d",
+       "row": 0,
+       "col": 1
+      }
+     ],
+     "answer": "신과함께: 인과 연",
+     "reason": null
     },
-    "evidence_cells": [],
+    "evidence_cells": [
+     {
+      "table_id": "ko_29fbd6328d",
+      "row": 0,
+      "col": 1
+     }
+    ],
     "evidence_spans": [],
     "calculation": null,
     "verdict": {
-     "status": "abstained",
-     "reason": "not_in_document",
+     "status": "answered",
+     "reason": null,
      "checks": [
       {
-       "name": "abstain",
+       "name": "cells_in_range",
        "passed": true,
-       "detail": "planner abstained"
+       "detail": "1 cell(s) in 10x6"
+      },
+      {
+       "name": "period_consistent",
+       "passed": true,
+       "detail": "question ['2018'] vs evidence ['2018']"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r0c1 ; answer: 신과함께: 인과 연"
     },
     "trace": [
      {
@@ -1235,27 +1617,52 @@
        "selected_table": "ko_29fbd6328d",
        "context_passage": "doc_ko_29fbd6328d_p0"
       },
-      "ms": 1.9689250002556946,
+      "ms": 2.8220389995112782,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "2018년 박스오피스에서 보헤미안 랩소디의 관객수는 몇 명입니까?",
        "table_id": "ko_29fbd6328d",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
       },
       "output": {
-       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "raw": "op: lookup ; cells: r0c1 ; answer: 신과함께: 인과 연",
        "parsed": {
-        "op": "abstain",
-        "cells": [],
-        "answer": null,
-        "reason": "not_in_document"
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_29fbd6328d",
+          "row": 0,
+          "col": 1
+         }
+        ],
+        "answer": "신과함께: 인과 연",
+        "reason": null
        }
       },
-      "ms": 0.91480999981286,
+      "ms": 878.4473969999453,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 0,
+       "col": 1
+      },
+      "output": {
+       "cell": "r0c1",
+       "text": "신과함께: 인과 연",
+       "header": "제목",
+       "row_label": "1",
+       "unit": null
+      },
+      "ms": 0.02834799943229882,
       "status": "ok"
      },
      {
@@ -1263,24 +1670,34 @@
       "tool": null,
       "input": {},
       "output": {
-       "status": "abstained",
-       "reason": "not_in_document",
+       "status": "answered",
+       "reason": null,
        "checks": [
         {
-         "name": "abstain",
+         "name": "cells_in_range",
          "passed": true,
-         "detail": "planner abstained"
+         "detail": "1 cell(s) in 10x6"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2018'] vs evidence ['2018']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
         }
        ]
       },
-      "ms": 0.021905999346927274,
+      "ms": 0.13038199995207833,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 4.712670000117214,
+    "elapsed_ms": 883.7746009994589,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.88
   },
   {
    "id": "ko_custom_10",
@@ -1296,66 +1713,28 @@
     "doc_id": "doc_ko_8bcc6a21a4",
     "table_id": "ko_8bcc6a21a4",
     "status": "answered",
-    "answer": "15.68 km",
+    "answer": "전라남도 나주시 다시면 복암리(다시 교차로)",
     "program": {
-     "op": "diff",
+     "op": "lookup",
      "cells": [
       {
        "table_id": "ko_8bcc6a21a4",
        "row": 2,
-       "col": 3
-      },
-      {
-       "table_id": "ko_8bcc6a21a4",
-       "row": 0,
-       "col": 3
+       "col": 1
       }
      ],
-     "answer": null,
+     "answer": "전라남도 나주시 다시면 복암리(다시 교차로)",
      "reason": null
     },
     "evidence_cells": [
      {
       "table_id": "ko_8bcc6a21a4",
       "row": 2,
-      "col": 3
-     },
-     {
-      "table_id": "ko_8bcc6a21a4",
-      "row": 0,
-      "col": 3
+      "col": 1
      }
     ],
     "evidence_spans": [],
-    "calculation": {
-     "op": "diff",
-     "expression": "19.5 - 3.82",
-     "inputs": [
-      {
-       "cell": {
-        "table_id": "ko_8bcc6a21a4",
-        "row": 2,
-        "col": 3
-       },
-       "raw": "19.5",
-       "value": 19.5,
-       "unit": "km"
-      },
-      {
-       "cell": {
-        "table_id": "ko_8bcc6a21a4",
-        "row": 0,
-        "col": 3
-       },
-       "raw": "3.82",
-       "value": 3.82,
-       "unit": "km"
-      }
-     ],
-     "result": 15.68,
-     "unit": "km",
-     "formatted": "15.68 km"
-    },
+    "calculation": null,
     "verdict": {
      "status": "answered",
      "reason": null,
@@ -1363,24 +1742,19 @@
       {
        "name": "cells_in_range",
        "passed": true,
-       "detail": "2 cell(s) in 5x6"
+       "detail": "1 cell(s) in 5x6"
       },
       {
-       "name": "calculation",
+       "name": "answer_matches_cell",
        "passed": true,
-       "detail": "19.5 - 3.82 = 15.68 km"
-      },
-      {
-       "name": "units_consistent",
-       "passed": true,
-       "detail": "units ['km']"
+       "detail": "answer equals cell"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: diff ; cells: r2c3, r0c3 ; answer: -"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r2c1 ; answer: 전라남도 나주시 다시면 복암리(다시 교차로)"
     },
     "trace": [
      {
@@ -1405,80 +1779,52 @@
        "selected_table": "ko_8bcc6a21a4",
        "context_passage": "doc_ko_8bcc6a21a4_p0"
       },
-      "ms": 1.4043720002518967,
+      "ms": 2.0241849997546524,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "빛가람장성로는 목포대교보다 총연장이 몇 km 더 깁니까?",
        "table_id": "ko_8bcc6a21a4",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
       },
       "output": {
-       "raw": "op: diff ; cells: r2c3, r0c3 ; answer: -",
+       "raw": "op: lookup ; cells: r2c1 ; answer: 전라남도 나주시 다시면 복암리(다시 교차로)",
        "parsed": {
-        "op": "diff",
+        "op": "lookup",
         "cells": [
          {
           "table_id": "ko_8bcc6a21a4",
           "row": 2,
-          "col": 3
-         },
-         {
-          "table_id": "ko_8bcc6a21a4",
-          "row": 0,
-          "col": 3
+          "col": 1
          }
         ],
-        "answer": null,
+        "answer": "전라남도 나주시 다시면 복암리(다시 교차로)",
         "reason": null
        }
       },
-      "ms": 0.7774410005367827,
+      "ms": 1015.3716009999698,
       "status": "ok"
      },
      {
       "step": "tool",
-      "tool": "calculate",
+      "tool": "cell_lookup",
       "input": {
-       "op": "diff",
-       "cells": [
-        "r2c3",
-        "r0c3"
-       ]
+       "row": 2,
+       "col": 1
       },
       "output": {
-       "op": "diff",
-       "expression": "19.5 - 3.82",
-       "inputs": [
-        {
-         "cell": {
-          "table_id": "ko_8bcc6a21a4",
-          "row": 2,
-          "col": 3
-         },
-         "raw": "19.5",
-         "value": 19.5,
-         "unit": "km"
-        },
-        {
-         "cell": {
-          "table_id": "ko_8bcc6a21a4",
-          "row": 0,
-          "col": 3
-         },
-         "raw": "3.82",
-         "value": 3.82,
-         "unit": "km"
-        }
-       ],
-       "result": 15.68,
-       "unit": "km",
-       "formatted": "15.68 km"
+       "cell": "r2c1",
+       "text": "전라남도 나주시 다시면 복암리(다시 교차로)",
+       "header": "시점",
+       "row_label": "빛가람장성로",
+       "unit": null
       },
-      "ms": 0.14390500018635066,
+      "ms": 0.027246000172453932,
       "status": "ok"
      },
      {
@@ -1492,28 +1838,23 @@
         {
          "name": "cells_in_range",
          "passed": true,
-         "detail": "2 cell(s) in 5x6"
+         "detail": "1 cell(s) in 5x6"
         },
         {
-         "name": "calculation",
+         "name": "answer_matches_cell",
          "passed": true,
-         "detail": "19.5 - 3.82 = 15.68 km"
-        },
-        {
-         "name": "units_consistent",
-         "passed": true,
-         "detail": "units ['km']"
+         "detail": "answer equals cell"
         }
        ]
       },
-      "ms": 0.1872610000646091,
+      "ms": 0.118717000077595,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 4.250713999681466,
+    "elapsed_ms": 1019.9952339999072,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 1.02
   },
   {
    "id": "ko_custom_12",
@@ -1551,8 +1892,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
     },
     "trace": [
@@ -1587,7 +1928,93 @@
        "selected_table": "ko_8bcc6a21a4",
        "context_passage": "doc_ko_8bcc6a21a4_p0"
       },
-      "ms": 2.752263999354909,
+      "ms": 3.640525999799138,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "국도 1호 자동차 전용도로 구간에서 이륜자동차 중 통행이 가능한 것은 무엇에 한합니까?",
+       "table_id": "ko_8bcc6a21a4",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r1c1 ; answer: 경운기, 우마차, 손수레",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_8bcc6a21a4",
+          "row": 1,
+          "col": 1
+         }
+        ],
+        "answer": "경운기, 우마차, 손수레",
+        "reason": null
+       }
+      },
+      "ms": 910.0291040003867,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 1,
+       "col": 1
+      },
+      "output": {
+       "cell": "r1c1",
+       "text": "전라남도 목포시 연산동(삽진산단입구 교차로)",
+       "header": "시점",
+       "row_label": "고하대로",
+       "unit": null
+      },
+      "ms": 0.04310399981477531,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "경운기, 우마차, 손수레",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.11419300062698312,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x6"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '경운기, 우마차, 손수레' != cell '전라남도 목포시 연산동(삽진산단입구 교차로)'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '경운기, 우마차, 손수레' is not supported by cell r1c1"
+        }
+       ]
+      },
+      "ms": 0.31024199961393606,
       "status": "ok"
      },
      {
@@ -1596,7 +2023,7 @@
       "input": {
        "question": "국도 1호 자동차 전용도로 구간에서 이륜자동차 중 통행이 가능한 것은 무엇에 한합니까?",
        "table_id": "ko_8bcc6a21a4",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
@@ -1607,7 +2034,7 @@
         "reason": "ambiguous_question"
        }
       },
-      "ms": 0.9908480005833553,
+      "ms": 2.0072019997314783,
       "status": "ok"
      },
      {
@@ -1625,14 +2052,14 @@
         }
        ]
       },
-      "ms": 0.021052999727544375,
+      "ms": 0.08635099948151037,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 5.598789999567089,
+    "elapsed_ms": 920.2837289994932,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.92
   },
   {
    "id": "ko_custom_13",
@@ -1647,32 +2074,49 @@
     "corpus": "ko_tables",
     "doc_id": "doc_ko_8bcc6a21a4",
     "table_id": "ko_8bcc6a21a4",
-    "status": "abstained",
-    "answer": null,
+    "status": "answered",
+    "answer": "서울특별시 금천구 독산동(안양천교)",
     "program": {
-     "op": "abstain",
-     "cells": [],
-     "answer": null,
-     "reason": "ambiguous_question"
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_8bcc6a21a4",
+       "row": 4,
+       "col": 1
+      }
+     ],
+     "answer": "서울특별시 금천구 독산동(안양천교)",
+     "reason": null
     },
-    "evidence_cells": [],
+    "evidence_cells": [
+     {
+      "table_id": "ko_8bcc6a21a4",
+      "row": 4,
+      "col": 1
+     }
+    ],
     "evidence_spans": [],
     "calculation": null,
     "verdict": {
-     "status": "abstained",
-     "reason": "ambiguous_question",
+     "status": "answered",
+     "reason": null,
      "checks": [
       {
-       "name": "abstain",
+       "name": "cells_in_range",
        "passed": true,
-       "detail": "planner abstained"
+       "detail": "1 cell(s) in 5x6"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r4c1 ; answer: 서울특별시 금천구 독산동(안양천교)"
     },
     "trace": [
      {
@@ -1697,27 +2141,52 @@
        "selected_table": "ko_8bcc6a21a4",
        "context_passage": "doc_ko_8bcc6a21a4_p0"
       },
-      "ms": 0.9959850003724569,
+      "ms": 1.743185999657726,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "서부간선도로의 제한속도는 얼마입니까?",
        "table_id": "ko_8bcc6a21a4",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
       },
       "output": {
-       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "raw": "op: lookup ; cells: r4c1 ; answer: 서울특별시 금천구 독산동(안양천교)",
        "parsed": {
-        "op": "abstain",
-        "cells": [],
-        "answer": null,
-        "reason": "ambiguous_question"
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_8bcc6a21a4",
+          "row": 4,
+          "col": 1
+         }
+        ],
+        "answer": "서울특별시 금천구 독산동(안양천교)",
+        "reason": null
        }
       },
-      "ms": 0.704895000126271,
+      "ms": 964.8380750004435,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 4,
+       "col": 1
+      },
+      "output": {
+       "cell": "r4c1",
+       "text": "서울특별시 금천구 독산동(안양천교)",
+       "header": "시점",
+       "row_label": "서부간선도로",
+       "unit": null
+      },
+      "ms": 0.042022999878099654,
       "status": "ok"
      },
      {
@@ -1725,24 +2194,29 @@
       "tool": null,
       "input": {},
       "output": {
-       "status": "abstained",
-       "reason": "ambiguous_question",
+       "status": "answered",
+       "reason": null,
        "checks": [
         {
-         "name": "abstain",
+         "name": "cells_in_range",
          "passed": true,
-         "detail": "planner abstained"
+         "detail": "1 cell(s) in 5x6"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
         }
        ]
       },
-      "ms": 0.020168999981251545,
+      "ms": 0.16421000054833712,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.583198999876913,
+    "elapsed_ms": 970.2240320002602,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.97
   },
   {
    "id": "ko_custom_15",
@@ -1802,8 +2276,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: lookup ; cells: r0c0 ; answer: 제1화"
     },
     "trace": [
@@ -1838,7 +2312,98 @@
        "selected_table": "ko_bc793b6a0d",
        "context_passage": "doc_ko_bc793b6a0d_p0"
       },
-      "ms": 2.888054999857559,
+      "ms": 6.335633999697166,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "2015년판 앨저넌에게 꽃을 제3화의 연출은 누구입니까?",
+       "table_id": "ko_bc793b6a0d",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r2c1 ; answer: 4월 10일",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_bc793b6a0d",
+          "row": 2,
+          "col": 1
+         }
+        ],
+        "answer": "4월 10일",
+        "reason": null
+       }
+      },
+      "ms": 799.4571389999692,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 2,
+       "col": 1
+      },
+      "output": {
+       "cell": "r2c1",
+       "text": "4월 24일",
+       "header": "방송일",
+       "row_label": "제3화",
+       "unit": null
+      },
+      "ms": 0.03703600032167742,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "4월 10일",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.1471659998060204,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 10x5"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2015'] vs evidence ['2015']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '4월 10일' != cell '4월 24일'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '4월 10일' is not supported by cell r2c1"
+        }
+       ]
+      },
+      "ms": 0.2981059997182456,
       "status": "ok"
      },
      {
@@ -1847,7 +2412,7 @@
       "input": {
        "question": "2015년판 앨저넌에게 꽃을 제3화의 연출은 누구입니까?",
        "table_id": "ko_bc793b6a0d",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: lookup ; cells: r0c0 ; answer: 제1화",
@@ -1864,7 +2429,7 @@
         "reason": null
        }
       },
-      "ms": 0.9500559999651159,
+      "ms": 1.3552499995057588,
       "status": "ok"
      },
      {
@@ -1881,7 +2446,7 @@
        "row_label": "제1화",
        "unit": null
       },
-      "ms": 0.017933999515662435,
+      "ms": 0.022973000341153238,
       "status": "ok"
      },
      {
@@ -1909,14 +2474,14 @@
         }
        ]
       },
-      "ms": 0.07258300047396915,
+      "ms": 0.0978540001597139,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 5.7581790006224765,
+    "elapsed_ms": 811.3766380001834,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.81
   },
   {
    "id": "ko_custom_16",
@@ -1932,66 +2497,28 @@
     "doc_id": "doc_ko_bc793b6a0d",
     "table_id": "ko_bc793b6a0d",
     "status": "answered",
-    "answer": "4.3 %",
+    "answer": "무구한 꿈, 사랑 우정이 가져오는 기적",
     "program": {
-     "op": "diff",
+     "op": "lookup",
      "cells": [
       {
        "table_id": "ko_bc793b6a0d",
-       "row": 0,
-       "col": 4
-      },
-      {
-       "table_id": "ko_bc793b6a0d",
        "row": 9,
-       "col": 4
+       "col": 1
       }
      ],
-     "answer": null,
+     "answer": "무구한 꿈, 사랑 우정이 가져오는 기적",
      "reason": null
     },
     "evidence_cells": [
      {
       "table_id": "ko_bc793b6a0d",
       "row": 0,
-      "col": 4
-     },
-     {
-      "table_id": "ko_bc793b6a0d",
-      "row": 9,
-      "col": 4
+      "col": 2
      }
     ],
     "evidence_spans": [],
-    "calculation": {
-     "op": "diff",
-     "expression": "11.5 - 7.2",
-     "inputs": [
-      {
-       "cell": {
-        "table_id": "ko_bc793b6a0d",
-        "row": 0,
-        "col": 4
-       },
-       "raw": "11.5%",
-       "value": 11.5,
-       "unit": "%"
-      },
-      {
-       "cell": {
-        "table_id": "ko_bc793b6a0d",
-        "row": 9,
-        "col": 4
-       },
-       "raw": "7.2%",
-       "value": 7.2,
-       "unit": "%"
-      }
-     ],
-     "result": 4.3,
-     "unit": "%",
-     "formatted": "4.3 %"
-    },
+    "calculation": null,
     "verdict": {
      "status": "answered",
      "reason": null,
@@ -1999,7 +2526,7 @@
       {
        "name": "cells_in_range",
        "passed": true,
-       "detail": "2 cell(s) in 10x5"
+       "detail": "1 cell(s) in 10x5"
       },
       {
        "name": "period_consistent",
@@ -2007,21 +2534,21 @@
        "detail": "question ['2015'] vs evidence ['2015']"
       },
       {
-       "name": "calculation",
-       "passed": true,
-       "detail": "11.5 - 7.2 = 4.3 %"
+       "name": "answer_matches_cell",
+       "passed": false,
+       "detail": "proposed '무구한 꿈, 사랑 우정이 가져오는 기적' != cell '6월 12일'; cell text used"
       },
       {
-       "name": "units_consistent",
-       "passed": true,
-       "detail": "units ['%']"
+       "name": "evidence_repaired",
+       "passed": false,
+       "detail": "model cited r9c1; the answer text is in r0c2 (used as evidence)"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: diff ; cells: r0c4, r9c4 ; answer: -"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r9c1 ; answer: 무구한 꿈, 사랑 우정이 가져오는 기적"
     },
     "trace": [
      {
@@ -2055,80 +2582,67 @@
        "selected_table": "ko_bc793b6a0d",
        "context_passage": "doc_ko_bc793b6a0d_p0"
       },
-      "ms": 9.393663999617274,
+      "ms": 3.9825280000513885,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "2015년판 앨저넌에게 꽃을 제1화와 최종화의 시청률 차이는 몇 %p입니까?",
        "table_id": "ko_bc793b6a0d",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
       },
       "output": {
-       "raw": "op: diff ; cells: r0c4, r9c4 ; answer: -",
+       "raw": "op: lookup ; cells: r9c1 ; answer: 무구한 꿈, 사랑 우정이 가져오는 기적",
        "parsed": {
-        "op": "diff",
+        "op": "lookup",
         "cells": [
          {
           "table_id": "ko_bc793b6a0d",
-          "row": 0,
-          "col": 4
-         },
-         {
-          "table_id": "ko_bc793b6a0d",
           "row": 9,
-          "col": 4
+          "col": 1
          }
         ],
-        "answer": null,
+        "answer": "무구한 꿈, 사랑 우정이 가져오는 기적",
         "reason": null
        }
       },
-      "ms": 1.8908169995484059,
+      "ms": 1085.1934610000171,
       "status": "ok"
      },
      {
       "step": "tool",
-      "tool": "calculate",
+      "tool": "cell_lookup",
       "input": {
-       "op": "diff",
-       "cells": [
-        "r0c4",
-        "r9c4"
-       ]
+       "row": 9,
+       "col": 1
       },
       "output": {
-       "op": "diff",
-       "expression": "11.5 - 7.2",
-       "inputs": [
-        {
-         "cell": {
-          "table_id": "ko_bc793b6a0d",
-          "row": 0,
-          "col": 4
-         },
-         "raw": "11.5%",
-         "value": 11.5,
-         "unit": "%"
-        },
-        {
-         "cell": {
-          "table_id": "ko_bc793b6a0d",
-          "row": 9,
-          "col": 4
-         },
-         "raw": "7.2%",
-         "value": 7.2,
-         "unit": "%"
-        }
-       ],
-       "result": 4.3,
-       "unit": "%",
-       "formatted": "4.3 %"
+       "cell": "r9c1",
+       "text": "6월 12일",
+       "header": "방송일",
+       "row_label": "최종화",
+       "unit": null
       },
-      "ms": 0.1506870003140648,
+      "ms": 0.03835400002571987,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "무구한 꿈, 사랑 우정이 가져오는 기적",
+       "exact": true
+      },
+      "output": {
+       "cells": [
+        "r0c2"
+       ]
+      },
+      "ms": 0.23401100042974576,
       "status": "ok"
      },
      {
@@ -2142,7 +2656,7 @@
         {
          "name": "cells_in_range",
          "passed": true,
-         "detail": "2 cell(s) in 10x5"
+         "detail": "1 cell(s) in 10x5"
         },
         {
          "name": "period_consistent",
@@ -2150,25 +2664,25 @@
          "detail": "question ['2015'] vs evidence ['2015']"
         },
         {
-         "name": "calculation",
-         "passed": true,
-         "detail": "11.5 - 7.2 = 4.3 %"
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '무구한 꿈, 사랑 우정이 가져오는 기적' != cell '6월 12일'; cell text used"
         },
         {
-         "name": "units_consistent",
-         "passed": true,
-         "detail": "units ['%']"
+         "name": "evidence_repaired",
+         "passed": false,
+         "detail": "model cited r9c1; the answer text is in r0c2 (used as evidence)"
         }
        ]
       },
-      "ms": 0.21220500002527842,
+      "ms": 0.47171400001388974,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 13.44930100003694,
+    "elapsed_ms": 1093.6555460002637,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 1.09
   },
   {
    "id": "ko_custom_17",
@@ -2183,32 +2697,54 @@
     "corpus": "ko_tables",
     "doc_id": "doc_ko_bc793b6a0d",
     "table_id": "ko_bc793b6a0d",
-    "status": "abstained",
-    "answer": null,
+    "status": "answered",
+    "answer": "2015년 4월 10일",
     "program": {
-     "op": "abstain",
-     "cells": [],
-     "answer": null,
-     "reason": "not_in_document"
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_bc793b6a0d",
+       "row": 0,
+       "col": 1
+      }
+     ],
+     "answer": "2015년 4월 10일",
+     "reason": null
     },
-    "evidence_cells": [],
+    "evidence_cells": [
+     {
+      "table_id": "ko_bc793b6a0d",
+      "row": 0,
+      "col": 1
+     }
+    ],
     "evidence_spans": [],
     "calculation": null,
     "verdict": {
-     "status": "abstained",
-     "reason": "not_in_document",
+     "status": "answered",
+     "reason": null,
      "checks": [
       {
-       "name": "abstain",
+       "name": "cells_in_range",
        "passed": true,
-       "detail": "planner abstained"
+       "detail": "1 cell(s) in 10x5"
+      },
+      {
+       "name": "period_consistent",
+       "passed": false,
+       "detail": "question ['2002'] vs evidence ['2015']"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": true,
+       "detail": "answer equals cell"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r0c1 ; answer: 2015년 4월 10일"
     },
     "trace": [
      {
@@ -2242,27 +2778,52 @@
        "selected_table": "ko_bc793b6a0d",
        "context_passage": "doc_ko_bc793b6a0d_p0"
       },
-      "ms": 2.053860000160057,
+      "ms": 5.146825999872817,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "2002년판 앨저넌에게 꽃을 드라마의 평균 시청률은 얼마입니까?",
        "table_id": "ko_bc793b6a0d",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
       },
       "output": {
-       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "raw": "op: lookup ; cells: r0c1 ; answer: 2015년 4월 10일",
        "parsed": {
-        "op": "abstain",
-        "cells": [],
-        "answer": null,
-        "reason": "not_in_document"
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_bc793b6a0d",
+          "row": 0,
+          "col": 1
+         }
+        ],
+        "answer": "2015년 4월 10일",
+        "reason": null
        }
       },
-      "ms": 1.116348999858019,
+      "ms": 882.5535500000115,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 0,
+       "col": 1
+      },
+      "output": {
+       "cell": "r0c1",
+       "text": "2015년 4월 10일",
+       "header": "방송일",
+       "row_label": "제1화",
+       "unit": null
+      },
+      "ms": 0.05291199977364158,
       "status": "ok"
      },
      {
@@ -2270,24 +2831,34 @@
       "tool": null,
       "input": {},
       "output": {
-       "status": "abstained",
-       "reason": "not_in_document",
+       "status": "answered",
+       "reason": null,
        "checks": [
         {
-         "name": "abstain",
+         "name": "cells_in_range",
          "passed": true,
-         "detail": "planner abstained"
+         "detail": "1 cell(s) in 10x5"
+        },
+        {
+         "name": "period_consistent",
+         "passed": false,
+         "detail": "question ['2002'] vs evidence ['2015']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": true,
+         "detail": "answer equals cell"
         }
        ]
       },
-      "ms": 0.019887999769707676,
+      "ms": 0.292875000013737,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 5.022269000619417,
+    "elapsed_ms": 892.5831770002333,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.89
   },
   {
    "id": "ko_custom_19",
@@ -2302,32 +2873,59 @@
     "corpus": "ko_tables",
     "doc_id": "doc_ko_bc793b6a0d",
     "table_id": "ko_bc793b6a0d",
-    "status": "abstained",
-    "answer": null,
+    "status": "answered",
+    "answer": "빛나는 세계 끝에서 기다리는 사랑 빼앗긴 키스",
     "program": {
-     "op": "abstain",
-     "cells": [],
-     "answer": null,
-     "reason": "ambiguous_question"
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_bc793b6a0d",
+       "row": 4,
+       "col": 1
+      }
+     ],
+     "answer": "빛나는 세계 끝에서 기다리는 사랑 빼앗긴 키스",
+     "reason": null
     },
-    "evidence_cells": [],
+    "evidence_cells": [
+     {
+      "table_id": "ko_bc793b6a0d",
+      "row": 4,
+      "col": 2
+     }
+    ],
     "evidence_spans": [],
     "calculation": null,
     "verdict": {
-     "status": "abstained",
-     "reason": "ambiguous_question",
+     "status": "answered",
+     "reason": null,
      "checks": [
       {
-       "name": "abstain",
+       "name": "cells_in_range",
        "passed": true,
-       "detail": "planner abstained"
+       "detail": "1 cell(s) in 10x5"
+      },
+      {
+       "name": "period_consistent",
+       "passed": true,
+       "detail": "question ['2015'] vs evidence ['2015']"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": false,
+       "detail": "proposed '빛나는 세계 끝에서 기다리는 사랑 빼앗긴 키스' != cell '5월 8일'; cell text used"
+      },
+      {
+       "name": "evidence_repaired",
+       "passed": false,
+       "detail": "model cited r4c1; the answer text is in r4c2 (used as evidence)"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r4c1 ; answer: 빛나는 세계 끝에서 기다리는 사랑 빼앗긴 키스"
     },
     "trace": [
      {
@@ -2361,27 +2959,67 @@
        "selected_table": "ko_bc793b6a0d",
        "context_passage": "doc_ko_bc793b6a0d_p0"
       },
-      "ms": 2.529759000026388,
+      "ms": 8.865149000484962,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "2015년판 앨저넌에게 꽃을 제5화의 시청자 수는 몇 명입니까?",
        "table_id": "ko_bc793b6a0d",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 10
       },
       "output": {
-       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "raw": "op: lookup ; cells: r4c1 ; answer: 빛나는 세계 끝에서 기다리는 사랑 빼앗긴 키스",
        "parsed": {
-        "op": "abstain",
-        "cells": [],
-        "answer": null,
-        "reason": "ambiguous_question"
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_bc793b6a0d",
+          "row": 4,
+          "col": 1
+         }
+        ],
+        "answer": "빛나는 세계 끝에서 기다리는 사랑 빼앗긴 키스",
+        "reason": null
        }
       },
-      "ms": 0.895889000275929,
+      "ms": 1175.3274379998402,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 4,
+       "col": 1
+      },
+      "output": {
+       "cell": "r4c1",
+       "text": "5월 8일",
+       "header": "방송일",
+       "row_label": "제5화",
+       "unit": null
+      },
+      "ms": 0.03859899970848346,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "빛나는 세계 끝에서 기다리는 사랑 빼앗긴 키스",
+       "exact": true
+      },
+      "output": {
+       "cells": [
+        "r4c2"
+       ]
+      },
+      "ms": 0.21672599996236386,
       "status": "ok"
      },
      {
@@ -2389,24 +3027,39 @@
       "tool": null,
       "input": {},
       "output": {
-       "status": "abstained",
-       "reason": "ambiguous_question",
+       "status": "answered",
+       "reason": null,
        "checks": [
         {
-         "name": "abstain",
+         "name": "cells_in_range",
          "passed": true,
-         "detail": "planner abstained"
+         "detail": "1 cell(s) in 10x5"
+        },
+        {
+         "name": "period_consistent",
+         "passed": true,
+         "detail": "question ['2015'] vs evidence ['2015']"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '빛나는 세계 끝에서 기다리는 사랑 빼앗긴 키스' != cell '5월 8일'; cell text used"
+        },
+        {
+         "name": "evidence_repaired",
+         "passed": false,
+         "detail": "model cited r4c1; the answer text is in r4c2 (used as evidence)"
         }
        ]
       },
-      "ms": 0.019514000086928718,
+      "ms": 0.43279799956508214,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 5.267320000712061,
+    "elapsed_ms": 1189.5137780002187,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 1.19
   },
   {
    "id": "ko_custom_25",
@@ -2424,29 +3077,40 @@
     "status": "abstained",
     "answer": null,
     "program": {
-     "op": "abstain",
-     "cells": [],
-     "answer": null,
-     "reason": "ambiguous_question"
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_f85ee50b20",
+       "row": 2,
+       "col": 1
+      }
+     ],
+     "answer": "1998년 9월 5일",
+     "reason": null
     },
     "evidence_cells": [],
     "evidence_spans": [],
     "calculation": null,
     "verdict": {
      "status": "abstained",
-     "reason": "ambiguous_question",
+     "reason": "not_in_document",
      "checks": [
+      {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 5x7"
+      },
       {
        "name": "abstain",
        "passed": true,
-       "detail": "planner abstained"
+       "detail": "cell r2c1 is empty"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r2c1 ; answer: 1998년 9월 5일"
     },
     "trace": [
      {
@@ -2480,27 +3144,52 @@
        "selected_table": "ko_f85ee50b20",
        "context_passage": "doc_ko_f85ee50b20_p0"
       },
-      "ms": 2.7736499996535713,
+      "ms": 5.1424190005491255,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "조선민주주의인민공화국 헌법상 국가원수 중 김영남의 임기 시작일은 언제입니까?",
        "table_id": "ko_f85ee50b20",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
       },
       "output": {
-       "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
+       "raw": "op: lookup ; cells: r2c1 ; answer: 1998년 9월 5일",
        "parsed": {
-        "op": "abstain",
-        "cells": [],
-        "answer": null,
-        "reason": "ambiguous_question"
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_f85ee50b20",
+          "row": 2,
+          "col": 1
+         }
+        ],
+        "answer": "1998년 9월 5일",
+        "reason": null
        }
       },
-      "ms": 1.215375000356289,
+      "ms": 780.9647200001564,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 2,
+       "col": 1
+      },
+      "output": {
+       "cell": "r2c1",
+       "text": "",
+       "header": "사진",
+       "row_label": "10.11",
+       "unit": null
+      },
+      "ms": 0.03030500010936521,
       "status": "ok"
      },
      {
@@ -2509,23 +3198,28 @@
       "input": {},
       "output": {
        "status": "abstained",
-       "reason": "ambiguous_question",
+       "reason": "not_in_document",
        "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x7"
+        },
         {
          "name": "abstain",
          "passed": true,
-         "detail": "planner abstained"
+         "detail": "cell r2c1 is empty"
         }
        ]
       },
-      "ms": 0.019484999938867986,
+      "ms": 0.08787000024312874,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 5.833856999743148,
+    "elapsed_ms": 789.1612009998425,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.79
   },
   {
    "id": "ko_custom_26",
@@ -2543,10 +3237,16 @@
     "status": "abstained",
     "answer": null,
     "program": {
-     "op": "abstain",
-     "cells": [],
-     "answer": null,
-     "reason": "not_in_document"
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "ko_f85ee50b20",
+       "row": 3,
+       "col": 1
+      }
+     ],
+     "answer": "김정일(金正日)",
+     "reason": null
     },
     "evidence_cells": [],
     "evidence_spans": [],
@@ -2556,16 +3256,21 @@
      "reason": "not_in_document",
      "checks": [
       {
+       "name": "cells_in_range",
+       "passed": true,
+       "detail": "1 cell(s) in 5x7"
+      },
+      {
        "name": "abstain",
        "passed": true,
-       "detail": "planner abstained"
+       "detail": "cell r3c1 is empty"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r3c1 ; answer: 김정일(金正日)"
     },
     "trace": [
      {
@@ -2590,27 +3295,52 @@
        "selected_table": "ko_f85ee50b20",
        "context_passage": "doc_ko_f85ee50b20_p0"
       },
-      "ms": 1.7788069999369327,
+      "ms": 1.903315999697952,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "김일성 주석이 사망한 날짜는 언제입니까?",
        "table_id": "ko_f85ee50b20",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
       },
       "output": {
-       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "raw": "op: lookup ; cells: r3c1 ; answer: 김정일(金正日)",
        "parsed": {
-        "op": "abstain",
-        "cells": [],
-        "answer": null,
-        "reason": "not_in_document"
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "ko_f85ee50b20",
+          "row": 3,
+          "col": 1
+         }
+        ],
+        "answer": "김정일(金正日)",
+        "reason": null
        }
       },
-      "ms": 0.8901930004867609,
+      "ms": 848.505791000207,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 3,
+       "col": 1
+      },
+      "output": {
+       "cell": "r3c1",
+       "text": "",
+       "header": "사진",
+       "row_label": "12",
+       "unit": null
+      },
+      "ms": 0.04463699951884337,
       "status": "ok"
      },
      {
@@ -2622,20 +3352,25 @@
        "reason": "not_in_document",
        "checks": [
         {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x7"
+        },
+        {
          "name": "abstain",
          "passed": true,
-         "detail": "planner abstained"
+         "detail": "cell r3c1 is empty"
         }
        ]
       },
-      "ms": 0.02030100040428806,
+      "ms": 0.13386299997364404,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 8.911990000342485,
+    "elapsed_ms": 853.3999400005996,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.85
   },
   {
    "id": "chem_custom_01",
@@ -2673,8 +3408,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
     },
     "trace": [
@@ -2725,7 +3460,68 @@
        "selected_table": "chem_m68759_t0",
        "context_passage": "doc_m68759_p10"
       },
-      "ms": 0.9432080005353782,
+      "ms": 1.1208779997105012,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "What is the van der Waals constant b for CO2?",
+       "table_id": "chem_m68759_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 6
+      },
+      "output": {
+       "raw": "op: diff ; cells: r2c2, r2c2 ; answer: 0.0427",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 2,
+          "col": 2
+         },
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 2,
+          "col": 2
+         }
+        ],
+        "answer": "0.0427",
+        "reason": null
+       }
+      },
+      "ms": 850.6319869993604,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "invalid_program",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 6x3"
+        },
+        {
+         "name": "distinct_cells",
+         "passed": false,
+         "detail": "repeated cells in diff: ['r2c2', 'r2c2']"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "calculation over repeated cells"
+        }
+       ]
+      },
+      "ms": 0.06894600028317655,
       "status": "ok"
      },
      {
@@ -2734,7 +3530,7 @@
       "input": {
        "question": "What is the van der Waals constant b for CO2?",
        "table_id": "chem_m68759_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
@@ -2745,7 +3541,7 @@
         "reason": "ambiguous_question"
        }
       },
-      "ms": 0.3943530000469764,
+      "ms": 0.383061999855272,
       "status": "ok"
      },
      {
@@ -2763,14 +3559,14 @@
         }
        ]
       },
-      "ms": 0.03292499968665652,
+      "ms": 0.02041100015048869,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 4.536373000519234,
+    "elapsed_ms": 856.2052159995801,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.86
   },
   {
    "id": "chem_custom_02",
@@ -2868,8 +3664,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: diff ; cells: r4c2, r5c2 ; answer: -"
     },
     "trace": [
@@ -2920,7 +3716,68 @@
        "selected_table": "chem_m68759_t0",
        "context_passage": "doc_m68759_p6"
       },
-      "ms": 0.9533510001347167,
+      "ms": 0.9313589998782845,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "How much larger is the van der Waals constant b of CCl4 than that of He?",
+       "table_id": "chem_m68759_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 6
+      },
+      "output": {
+       "raw": "op: diff ; cells: r5c2, r5c2 ; answer: 0.1383",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 5,
+          "col": 2
+         },
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 5,
+          "col": 2
+         }
+        ],
+        "answer": "0.1383",
+        "reason": null
+       }
+      },
+      "ms": 871.4632530000017,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "invalid_program",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 6x3"
+        },
+        {
+         "name": "distinct_cells",
+         "passed": false,
+         "detail": "repeated cells in diff: ['r5c2', 'r5c2']"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "calculation over repeated cells"
+        }
+       ]
+      },
+      "ms": 0.09080000018002465,
       "status": "ok"
      },
      {
@@ -2929,7 +3786,7 @@
       "input": {
        "question": "How much larger is the van der Waals constant b of CCl4 than that of He?",
        "table_id": "chem_m68759_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: diff ; cells: r4c2, r5c2 ; answer: -",
@@ -2951,7 +3808,7 @@
         "reason": null
        }
       },
-      "ms": 0.5527319999600877,
+      "ms": 0.3973849998146761,
       "status": "ok"
      },
      {
@@ -2993,7 +3850,7 @@
        "unit": "L/mol",
        "formatted": "-0.1146 L/mol"
       },
-      "ms": 0.17224400016857544,
+      "ms": 0.245985999754339,
       "status": "ok"
      },
      {
@@ -3021,14 +3878,14 @@
         }
        ]
       },
-      "ms": 0.31562300046061864,
+      "ms": 0.342682999871613,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 5.012159000216343,
+    "elapsed_ms": 877.2642920002909,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.88
   },
   {
    "id": "chem_custom_04",
@@ -3083,8 +3940,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: lookup ; cells: r2c1 ; answer: 3.59"
     },
     "trace": [
@@ -3135,7 +3992,68 @@
        "selected_table": "chem_m68759_t0",
        "context_passage": "doc_m68759_p10"
       },
-      "ms": 4.2062749998876825,
+      "ms": 4.060027000377886,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "In the worked example comparing the ideal gas law and the van der Waals equation, at what temperature does the 4.25-L flask contain 3.46 mol CO2?",
+       "table_id": "chem_m68759_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 6
+      },
+      "output": {
+       "raw": "op: diff ; cells: r2c2, r2c2 ; answer: 0.2227",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 2,
+          "col": 2
+         },
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 2,
+          "col": 2
+         }
+        ],
+        "answer": "0.2227",
+        "reason": null
+       }
+      },
+      "ms": 773.969548000423,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "invalid_program",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 6x3"
+        },
+        {
+         "name": "distinct_cells",
+         "passed": false,
+         "detail": "repeated cells in diff: ['r2c2', 'r2c2']"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "calculation over repeated cells"
+        }
+       ]
+      },
+      "ms": 0.0914189995455672,
       "status": "ok"
      },
      {
@@ -3144,7 +4062,7 @@
       "input": {
        "question": "In the worked example comparing the ideal gas law and the van der Waals equation, at what temperature does the 4.25-L flask contain 3.46 mol CO2?",
        "table_id": "chem_m68759_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: lookup ; cells: r2c1 ; answer: 3.59",
@@ -3161,7 +4079,7 @@
         "reason": null
        }
       },
-      "ms": 0.5185449999771663,
+      "ms": 0.45382100051938323,
       "status": "ok"
      },
      {
@@ -3178,7 +4096,7 @@
        "row_label": "CO2",
        "unit": null
       },
-      "ms": 0.029261999770824332,
+      "ms": 0.03756000023713568,
       "status": "ok"
      },
      {
@@ -3201,14 +4119,14 @@
         }
        ]
       },
-      "ms": 0.16755999968154356,
+      "ms": 0.14677800027129706,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 7.589054999698419,
+    "elapsed_ms": 783.432229999562,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.78
   },
   {
    "id": "chem_custom_05",
@@ -3246,8 +4164,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question"
     },
     "trace": [
@@ -3298,7 +4216,93 @@
        "selected_table": "chem_m68759_t0",
        "context_passage": "doc_m68759_p6"
       },
-      "ms": 0.6170970000312082,
+      "ms": 0.894200000402634,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "What is the van der Waals constant a for argon?",
+       "table_id": "chem_m68759_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 6
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r1c1 ; answer: 0.0383",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68759_t0",
+          "row": 1,
+          "col": 1
+         }
+        ],
+        "answer": "0.0383",
+        "reason": null
+       }
+      },
+      "ms": 580.0171939999927,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 1,
+       "col": 1
+      },
+      "output": {
+       "cell": "r1c1",
+       "text": "1.36",
+       "header": "a (L2 atm/mol2)",
+       "row_label": "O2",
+       "unit": null
+      },
+      "ms": 0.028702999770757742,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "0.0383",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.03603799996199086,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 6x3"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '0.0383' != cell '1.36'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '0.0383' is not supported by cell r1c1"
+        }
+       ]
+      },
+      "ms": 0.187580999408965,
       "status": "ok"
      },
      {
@@ -3307,7 +4311,7 @@
       "input": {
        "question": "What is the van der Waals constant a for argon?",
        "table_id": "chem_m68759_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: abstain ; cells: - ; answer: - ; reason: ambiguous_question",
@@ -3318,7 +4322,7 @@
         "reason": "ambiguous_question"
        }
       },
-      "ms": 0.41977199998655124,
+      "ms": 0.24877699979697354,
       "status": "ok"
      },
      {
@@ -3336,14 +4340,14 @@
         }
        ]
       },
-      "ms": 0.03287000072305091,
+      "ms": 0.016867000340425875,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.8962930002526264,
+    "elapsed_ms": 584.9785760001396,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.59
   },
   {
    "id": "chem_custom_06",
@@ -3398,8 +4402,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: lookup ; cells: r2c4 ; answer: 332 K"
     },
     "trace": [
@@ -3450,7 +4454,68 @@
        "selected_table": "chem_m68761_t0",
        "context_passage": "doc_m68761_p26"
       },
-      "ms": 0.5197800001042197,
+      "ms": 0.5403590002970304,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "What is the boiling point of bromine, Br2?",
+       "table_id": "chem_m68761_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
+      },
+      "output": {
+       "raw": "op: diff ; cells: r2c1, r2c1 ; answer: 332 K",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68761_t0",
+          "row": 2,
+          "col": 1
+         },
+         {
+          "table_id": "chem_m68761_t0",
+          "row": 2,
+          "col": 1
+         }
+        ],
+        "answer": "332 K",
+        "reason": null
+       }
+      },
+      "ms": 683.1038959999205,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "invalid_program",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 5x5"
+        },
+        {
+         "name": "distinct_cells",
+         "passed": false,
+         "detail": "repeated cells in diff: ['r2c1', 'r2c1']"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "calculation over repeated cells"
+        }
+       ]
+      },
+      "ms": 0.091112999143661,
       "status": "ok"
      },
      {
@@ -3459,7 +4524,7 @@
       "input": {
        "question": "What is the boiling point of bromine, Br2?",
        "table_id": "chem_m68761_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: lookup ; cells: r2c4 ; answer: 332 K",
@@ -3476,7 +4541,7 @@
         "reason": null
        }
       },
-      "ms": 0.43873499998881016,
+      "ms": 0.556278999283677,
       "status": "ok"
      },
      {
@@ -3493,7 +4558,7 @@
        "row_label": "bromine, Br2",
        "unit": null
       },
-      "ms": 0.028089999432268087,
+      "ms": 0.029892000384279527,
       "status": "ok"
      },
      {
@@ -3516,14 +4581,14 @@
         }
        ]
       },
-      "ms": 0.09341799977846676,
+      "ms": 0.11582200022530742,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.5641859994939296,
+    "elapsed_ms": 688.3551989994885,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.69
   },
   {
    "id": "chem_custom_07",
@@ -3621,8 +4686,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: diff ; cells: r3c4, r1c4 ; answer: -"
     },
     "trace": [
@@ -3673,7 +4738,68 @@
        "selected_table": "chem_m68761_t0",
        "context_passage": "doc_m68761_p26"
       },
-      "ms": 0.7337189999816474,
+      "ms": 1.2824079994970816,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "How much higher is the boiling point of iodine, I2, than that of chlorine, Cl2?",
+       "table_id": "chem_m68761_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
+      },
+      "output": {
+       "raw": "op: diff ; cells: r3c2, r3c2 ; answer: 173 K",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68761_t0",
+          "row": 3,
+          "col": 2
+         },
+         {
+          "table_id": "chem_m68761_t0",
+          "row": 3,
+          "col": 2
+         }
+        ],
+        "answer": "173 K",
+        "reason": null
+       }
+      },
+      "ms": 768.1751540003461,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "invalid_program",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 5x5"
+        },
+        {
+         "name": "distinct_cells",
+         "passed": false,
+         "detail": "repeated cells in diff: ['r3c2', 'r3c2']"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "calculation over repeated cells"
+        }
+       ]
+      },
+      "ms": 0.06615999973291764,
       "status": "ok"
      },
      {
@@ -3682,7 +4808,7 @@
       "input": {
        "question": "How much higher is the boiling point of iodine, I2, than that of chlorine, Cl2?",
        "table_id": "chem_m68761_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: diff ; cells: r3c4, r1c4 ; answer: -",
@@ -3704,7 +4830,7 @@
         "reason": null
        }
       },
-      "ms": 0.5435670000224491,
+      "ms": 0.37613599943142617,
       "status": "ok"
      },
      {
@@ -3746,7 +4872,7 @@
        "unit": "K",
        "formatted": "219 K"
       },
-      "ms": 9.409986999344255,
+      "ms": 0.13599400062958011,
       "status": "ok"
      },
      {
@@ -3774,14 +4900,14 @@
         }
        ]
       },
-      "ms": 9.514857999420201,
+      "ms": 0.17927899989444995,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 13.267185999211506,
+    "elapsed_ms": 773.5376399996312,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.77
   },
   {
    "id": "chem_custom_09",
@@ -3819,8 +4945,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
     },
     "trace": [
@@ -3871,7 +4997,93 @@
        "selected_table": "chem_m68761_t0",
        "context_passage": "doc_m68761_p17"
       },
-      "ms": 0.3679450001072837,
+      "ms": 0.4589709997162572,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "What are the boiling points of n-pentane, isopentane, and neopentane?",
+       "table_id": "chem_m68761_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r3c1 ; answer: 36 °C",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68761_t0",
+          "row": 3,
+          "col": 1
+         }
+        ],
+        "answer": "36 °C",
+        "reason": null
+       }
+      },
+      "ms": 672.8274710003461,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 3,
+       "col": 1
+      },
+      "output": {
+       "cell": "r3c1",
+       "text": "254 g/mol",
+       "header": "Molar Mass",
+       "row_label": "iodine, I2",
+       "unit": null
+      },
+      "ms": 0.045993000640009996,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "36 °C",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.07590600034745876,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x5"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '36 °C' != cell '254 g/mol'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '36 °C' is not supported by cell r3c1"
+        }
+       ]
+      },
+      "ms": 0.2708279998842045,
       "status": "ok"
      },
      {
@@ -3880,7 +5092,7 @@
       "input": {
        "question": "What are the boiling points of n-pentane, isopentane, and neopentane?",
        "table_id": "chem_m68761_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
@@ -3891,7 +5103,7 @@
         "reason": "not_in_document"
        }
       },
-      "ms": 1.0792879993459792,
+      "ms": 0.4117660000702017,
       "status": "ok"
      },
      {
@@ -3909,14 +5121,14 @@
         }
        ]
       },
-      "ms": 0.030418000278586987,
+      "ms": 0.024727999516471755,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.8415529998019338,
+    "elapsed_ms": 677.7004069999748,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.68
   },
   {
    "id": "chem_custom_11",
@@ -3971,8 +5183,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: lookup ; cells: r4c2 ; answer: 11,300"
     },
     "trace": [
@@ -4023,7 +5235,68 @@
        "selected_table": "chem_m68769_t0",
        "context_passage": "doc_m68769_p22"
       },
-      "ms": 0.5043209994255449,
+      "ms": 0.834775000839727,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "What is the critical pressure of ammonia?",
+       "table_id": "chem_m68769_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 7
+      },
+      "output": {
+       "raw": "op: diff ; cells: r4c2, r4c2 ; answer: 11,300",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 4,
+          "col": 2
+         },
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 4,
+          "col": 2
+         }
+        ],
+        "answer": "11,300",
+        "reason": null
+       }
+      },
+      "ms": 834.8640150006759,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "invalid_program",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 7x3"
+        },
+        {
+         "name": "distinct_cells",
+         "passed": false,
+         "detail": "repeated cells in diff: ['r4c2', 'r4c2']"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "calculation over repeated cells"
+        }
+       ]
+      },
+      "ms": 0.06403299994417466,
       "status": "ok"
      },
      {
@@ -4032,7 +5305,7 @@
       "input": {
        "question": "What is the critical pressure of ammonia?",
        "table_id": "chem_m68769_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: lookup ; cells: r4c2 ; answer: 11,300",
@@ -4049,7 +5322,7 @@
         "reason": null
        }
       },
-      "ms": 0.23216099998535356,
+      "ms": 0.27069799944001716,
       "status": "ok"
      },
      {
@@ -4066,7 +5339,7 @@
        "row_label": "ammonia",
        "unit": "kPa"
       },
-      "ms": 0.02819400015141582,
+      "ms": 0.0231080002777162,
       "status": "ok"
      },
      {
@@ -4089,14 +5362,14 @@
         }
        ]
       },
-      "ms": 0.09337600022263359,
+      "ms": 0.08209400039049797,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.242488000068988,
+    "elapsed_ms": 839.6135579996553,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.84
   },
   {
    "id": "chem_custom_13",
@@ -4194,8 +5467,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: diff ; cells: r6c1, r3c1 ; answer: -"
     },
     "trace": [
@@ -4246,7 +5519,68 @@
        "selected_table": "chem_m68769_t0",
        "context_passage": "doc_m68769_p22"
       },
-      "ms": 1.4041359991097124,
+      "ms": 1.5618179995726678,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "How much higher is the critical temperature of water than that of carbon dioxide?",
+       "table_id": "chem_m68769_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 7
+      },
+      "output": {
+       "raw": "op: diff ; cells: r3c2, r3c2 ; answer: 11,300",
+       "parsed": {
+        "op": "diff",
+        "cells": [
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 3,
+          "col": 2
+         },
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 3,
+          "col": 2
+         }
+        ],
+        "answer": "11,300",
+        "reason": null
+       }
+      },
+      "ms": 762.15547800075,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "invalid_program",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 7x3"
+        },
+        {
+         "name": "distinct_cells",
+         "passed": false,
+         "detail": "repeated cells in diff: ['r3c2', 'r3c2']"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "calculation over repeated cells"
+        }
+       ]
+      },
+      "ms": 0.08787699971435359,
       "status": "ok"
      },
      {
@@ -4255,7 +5589,7 @@
       "input": {
        "question": "How much higher is the critical temperature of water than that of carbon dioxide?",
        "table_id": "chem_m68769_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: diff ; cells: r6c1, r3c1 ; answer: -",
@@ -4277,7 +5611,7 @@
         "reason": null
        }
       },
-      "ms": 0.4491010004130658,
+      "ms": 0.5174959997020778,
       "status": "ok"
      },
      {
@@ -4319,7 +5653,7 @@
        "unit": "°C",
        "formatted": "342.9 °C"
       },
-      "ms": 0.14273599936132086,
+      "ms": 0.2071389999400708,
       "status": "ok"
      },
      {
@@ -4347,14 +5681,14 @@
         }
        ]
       },
-      "ms": 0.2037069998550578,
+      "ms": 0.2712049999900046,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 4.726656999991974,
+    "elapsed_ms": 768.4337370001231,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.77
   },
   {
    "id": "chem_custom_15",
@@ -4409,8 +5743,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: lookup ; cells: r6c1 ; answer: 374.0"
     },
     "trace": [
@@ -4461,19 +5795,21 @@
        "selected_table": "chem_m68769_t0",
        "context_passage": "doc_m68769_p2"
       },
-      "ms": 1.3904060006098007,
+      "ms": 2.565016000517062,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "In the phase diagram example, what pressure corresponds to the region labeled “ice” at −10 °C?",
        "table_id": "chem_m68769_t0",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 7
       },
       "output": {
-       "raw": "op: lookup ; cells: r6c1 ; answer: 374.0",
+       "raw": "op: lookup ; cells: r6c1 ; answer: 1,500",
        "parsed": {
         "op": "lookup",
         "cells": [
@@ -4483,11 +5819,11 @@
           "col": 1
          }
         ],
-        "answer": "374.0",
+        "answer": "1,500",
         "reason": null
        }
       },
-      "ms": 0.2662169999894104,
+      "ms": 667.4874489999638,
       "status": "ok"
      },
      {
@@ -4504,7 +5840,91 @@
        "row_label": "water",
        "unit": "°C"
       },
-      "ms": 0.01906000034068711,
+      "ms": 0.035567999475460965,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "1,500",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.04528699992079055,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 7x3"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '1,500' != cell '374.0'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '1,500' is not supported by cell r6c1"
+        }
+       ]
+      },
+      "ms": 0.2082249993691221,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "heuristic",
+      "input": {
+       "question": "In the phase diagram example, what pressure corresponds to the region labeled “ice” at −10 °C?",
+       "table_id": "chem_m68769_t0",
+       "fallback": true
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r6c1 ; answer: 374.0",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68769_t0",
+          "row": 6,
+          "col": 1
+         }
+        ],
+        "answer": "374.0",
+        "reason": null
+       }
+      },
+      "ms": 0.3675360003398964,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 6,
+       "col": 1
+      },
+      "output": {
+       "cell": "r6c1",
+       "text": "374.0",
+       "header": "Critical Temperature (°C)",
+       "row_label": "water",
+       "unit": "°C"
+      },
+      "ms": 0.02059599955828162,
       "status": "ok"
      },
      {
@@ -4527,14 +5947,14 @@
         }
        ]
       },
-      "ms": 0.06580499939445872,
+      "ms": 0.1024390003294684,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.5350360003576498,
+    "elapsed_ms": 674.8736030003784,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.68
   },
   {
    "id": "chem_custom_16",
@@ -4550,24 +5970,24 @@
     "doc_id": "doc_m68789",
     "table_id": "chem_m68789_t0",
     "status": "answered",
-    "answer": "3.96 × 10−4",
+    "answer": "2.00 × 10−6",
     "program": {
      "op": "lookup",
      "cells": [
       {
        "table_id": "chem_m68789_t0",
        "row": 3,
-       "col": 3
+       "col": 1
       }
      ],
-     "answer": "3.96 × 10−4",
+     "answer": "2.00 × 10−6",
      "reason": null
     },
     "evidence_cells": [
      {
       "table_id": "chem_m68789_t0",
       "row": 3,
-      "col": 3
+      "col": 1
      }
     ],
     "evidence_spans": [],
@@ -4589,9 +6009,9 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: lookup ; cells: r3c3 ; answer: 3.96 × 10−4"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r3c1 ; answer: 2.00 × 10−6"
     },
     "trace": [
      {
@@ -4657,33 +6077,35 @@
        "selected_table": "chem_m68789_t0",
        "context_passage": "doc_m68789_p25"
       },
-      "ms": 0.9102780004468514,
+      "ms": 1.2367899998935172,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "In the NO + O3 rate data, what is the rate Δ[NO2]/Δt in trial 4?",
        "table_id": "chem_m68789_t0",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
       },
       "output": {
-       "raw": "op: lookup ; cells: r3c3 ; answer: 3.96 × 10−4",
+       "raw": "op: lookup ; cells: r3c1 ; answer: 2.00 × 10−6",
        "parsed": {
         "op": "lookup",
         "cells": [
          {
           "table_id": "chem_m68789_t0",
           "row": 3,
-          "col": 3
+          "col": 1
          }
         ],
-        "answer": "3.96 × 10−4",
+        "answer": "2.00 × 10−6",
         "reason": null
        }
       },
-      "ms": 0.37591500040434767,
+      "ms": 707.0769550000477,
       "status": "ok"
      },
      {
@@ -4691,16 +6113,16 @@
       "tool": "cell_lookup",
       "input": {
        "row": 3,
-       "col": 3
+       "col": 1
       },
       "output": {
-       "cell": "r3c3",
-       "text": "3.96 × 10−4",
-       "header": "Δ[NO2]/Δt (mol L^−1 s^−1)",
+       "cell": "r3c1",
+       "text": "2.00 × 10−6",
+       "header": "[NO] (mol/L)",
        "row_label": "4",
-       "unit": null
+       "unit": "mol/L"
       },
-      "ms": 0.018045000615529716,
+      "ms": 0.03624100008892128,
       "status": "ok"
      },
      {
@@ -4723,14 +6145,14 @@
         }
        ]
       },
-      "ms": 0.06630000007135095,
+      "ms": 0.18559000000095693,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.5293969995109364,
+    "elapsed_ms": 711.3134990004255,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.71
   },
   {
    "id": "chem_custom_17",
@@ -4746,9 +6168,9 @@
     "doc_id": "doc_m68789",
     "table_id": "chem_m68789_t0",
     "status": "answered",
-    "answer": "-6.600e-05",
+    "answer": "0.5",
     "program": {
-     "op": "diff",
+     "op": "ratio",
      "cells": [
       {
        "table_id": "chem_m68789_t0",
@@ -4778,8 +6200,8 @@
     ],
     "evidence_spans": [],
     "calculation": {
-     "op": "diff",
-     "expression": "6.6e-05 - 0.000132",
+     "op": "ratio",
+     "expression": "6.6e-05 / 0.000132",
      "inputs": [
       {
        "cell": {
@@ -4802,9 +6224,9 @@
        "unit": null
       }
      ],
-     "result": -6.6e-05,
+     "result": 0.5,
      "unit": null,
-     "formatted": "-6.600e-05"
+     "formatted": "0.5"
     },
     "verdict": {
      "status": "answered",
@@ -4818,7 +6240,7 @@
       {
        "name": "calculation",
        "passed": true,
-       "detail": "6.6e-05 - 0.000132 = -6.600e-05"
+       "detail": "6.6e-05 / 0.000132 = 0.5"
       },
       {
        "name": "units_consistent",
@@ -4828,9 +6250,9 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: diff ; cells: r0c3, r1c3 ; answer: -"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: ratio ; cells: r0c3, r1c3 ; answer: -"
     },
     "trace": [
      {
@@ -4896,7 +6318,68 @@
        "selected_table": "chem_m68789_t0",
        "context_passage": "doc_m68789_p26"
       },
-      "ms": 1.4984129993536044,
+      "ms": 2.62847799967858,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "By what factor does the rate Δ[NO2]/Δt increase from trial 1 to trial 2 in the NO + O3 data?",
+       "table_id": "chem_m68789_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
+      },
+      "output": {
+       "raw": "op: ratio ; cells: r1c2, r1c2 ; answer: 1.65 × 10−4",
+       "parsed": {
+        "op": "ratio",
+        "cells": [
+         {
+          "table_id": "chem_m68789_t0",
+          "row": 1,
+          "col": 2
+         },
+         {
+          "table_id": "chem_m68789_t0",
+          "row": 1,
+          "col": 2
+         }
+        ],
+        "answer": "1.65 × 10−4",
+        "reason": null
+       }
+      },
+      "ms": 903.6005590005516,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "invalid_program",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "2 cell(s) in 5x4"
+        },
+        {
+         "name": "distinct_cells",
+         "passed": false,
+         "detail": "repeated cells in ratio: ['r1c2', 'r1c2']"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "calculation over repeated cells"
+        }
+       ]
+      },
+      "ms": 0.08612100009486312,
       "status": "ok"
      },
      {
@@ -4905,12 +6388,12 @@
       "input": {
        "question": "By what factor does the rate Δ[NO2]/Δt increase from trial 1 to trial 2 in the NO + O3 data?",
        "table_id": "chem_m68789_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
-       "raw": "op: diff ; cells: r0c3, r1c3 ; answer: -",
+       "raw": "op: ratio ; cells: r0c3, r1c3 ; answer: -",
        "parsed": {
-        "op": "diff",
+        "op": "ratio",
         "cells": [
          {
           "table_id": "chem_m68789_t0",
@@ -4927,22 +6410,22 @@
         "reason": null
        }
       },
-      "ms": 0.369535000572796,
+      "ms": 0.6987079996179091,
       "status": "ok"
      },
      {
       "step": "tool",
       "tool": "calculate",
       "input": {
-       "op": "diff",
+       "op": "ratio",
        "cells": [
         "r0c3",
         "r1c3"
        ]
       },
       "output": {
-       "op": "diff",
-       "expression": "6.6e-05 - 0.000132",
+       "op": "ratio",
+       "expression": "6.6e-05 / 0.000132",
        "inputs": [
         {
          "cell": {
@@ -4965,11 +6448,11 @@
          "unit": null
         }
        ],
-       "result": -6.6e-05,
+       "result": 0.5,
        "unit": null,
-       "formatted": "-6.600e-05"
+       "formatted": "0.5"
       },
-      "ms": 0.10952199954772368,
+      "ms": 0.22982500013313256,
       "status": "ok"
      },
      {
@@ -4988,7 +6471,7 @@
         {
          "name": "calculation",
          "passed": true,
-         "detail": "6.6e-05 - 0.000132 = -6.600e-05"
+         "detail": "6.6e-05 / 0.000132 = 0.5"
         },
         {
          "name": "units_consistent",
@@ -4997,14 +6480,14 @@
         }
        ]
       },
-      "ms": 0.15496800006076228,
+      "ms": 0.3395390003788634,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 4.083460000401828,
+    "elapsed_ms": 911.5488470006312,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.91
   },
   {
    "id": "chem_custom_19",
@@ -5042,8 +6525,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
     },
     "trace": [
@@ -5110,7 +6593,93 @@
        "selected_table": "chem_m68789_t0",
        "context_passage": "doc_m68789_p26"
       },
-      "ms": 1.8271349999849917,
+      "ms": 2.446778999910748,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "What is the activation energy of the NO + O3 reaction?",
+       "table_id": "chem_m68789_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r0c1 ; answer: 1.65 × 10−6",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68789_t0",
+          "row": 0,
+          "col": 1
+         }
+        ],
+        "answer": "1.65 × 10−6",
+        "reason": null
+       }
+      },
+      "ms": 685.7702729994344,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 0,
+       "col": 1
+      },
+      "output": {
+       "cell": "r0c1",
+       "text": "1.00 × 10−6",
+       "header": "[NO] (mol/L)",
+       "row_label": "1",
+       "unit": "mol/L"
+      },
+      "ms": 0.03126899991912069,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "1.65 × 10−6",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.046873999963281676,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x4"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '1.65 × 10−6' != cell '1.00 × 10−6'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '1.65 × 10−6' is not supported by cell r0c1"
+        }
+       ]
+      },
+      "ms": 0.23244900057761697,
       "status": "ok"
      },
      {
@@ -5119,7 +6688,7 @@
       "input": {
        "question": "What is the activation energy of the NO + O3 reaction?",
        "table_id": "chem_m68789_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
@@ -5130,7 +6699,7 @@
         "reason": "not_in_document"
        }
       },
-      "ms": 0.37147500006540213,
+      "ms": 0.29614799950650195,
       "status": "ok"
      },
      {
@@ -5148,14 +6717,14 @@
         }
        ]
       },
-      "ms": 0.032637000003887806,
+      "ms": 0.023536999833595473,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 4.9028029998225975,
+    "elapsed_ms": 691.849899000772,
     "error": null
    },
-   "wall_s": 0.01
+   "wall_s": 0.69
   },
   {
    "id": "chem_custom_20",
@@ -5170,32 +6739,54 @@
     "corpus": "chem_docs",
     "doc_id": "doc_m68789",
     "table_id": "chem_m68789_t0",
-    "status": "abstained",
-    "answer": null,
+    "status": "answered",
+    "answer": "2.00 × 10−6",
     "program": {
-     "op": "abstain",
-     "cells": [],
-     "answer": null,
-     "reason": "not_in_document"
+     "op": "lookup",
+     "cells": [
+      {
+       "table_id": "chem_m68789_t0",
+       "row": 1,
+       "col": 1
+      }
+     ],
+     "answer": "2.00 × 10−6",
+     "reason": null
     },
-    "evidence_cells": [],
+    "evidence_cells": [
+     {
+      "table_id": "chem_m68789_t0",
+      "row": 3,
+      "col": 1
+     }
+    ],
     "evidence_spans": [],
     "calculation": null,
     "verdict": {
-     "status": "abstained",
-     "reason": "not_in_document",
+     "status": "answered",
+     "reason": null,
      "checks": [
       {
-       "name": "abstain",
+       "name": "cells_in_range",
        "passed": true,
-       "detail": "planner abstained"
+       "detail": "1 cell(s) in 5x4"
+      },
+      {
+       "name": "answer_matches_cell",
+       "passed": false,
+       "detail": "proposed '2.00 × 10−6' != cell '1.00 × 10−6'; cell text used"
+      },
+      {
+       "name": "evidence_repaired",
+       "passed": false,
+       "detail": "model cited r1c1; the answer text is in r3c1 (used as evidence)"
       }
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
-     "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
+     "raw_output": "op: lookup ; cells: r1c1 ; answer: 2.00 × 10−6"
     },
     "trace": [
      {
@@ -5261,27 +6852,67 @@
        "selected_table": "chem_m68789_t0",
        "context_passage": "doc_m68789_p21"
       },
-      "ms": 0.8378219999940484,
+      "ms": 1.3360270004341146,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "At what temperature were the rate data in the laboratory study determined?",
        "table_id": "chem_m68789_t0",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
       },
       "output": {
-       "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
+       "raw": "op: lookup ; cells: r1c1 ; answer: 2.00 × 10−6",
        "parsed": {
-        "op": "abstain",
-        "cells": [],
-        "answer": null,
-        "reason": "not_in_document"
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68789_t0",
+          "row": 1,
+          "col": 1
+         }
+        ],
+        "answer": "2.00 × 10−6",
+        "reason": null
        }
       },
-      "ms": 0.3515520002110861,
+      "ms": 656.7187030004789,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 1,
+       "col": 1
+      },
+      "output": {
+       "cell": "r1c1",
+       "text": "1.00 × 10−6",
+       "header": "[NO] (mol/L)",
+       "row_label": "2",
+       "unit": "mol/L"
+      },
+      "ms": 0.045355999645835254,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "2.00 × 10−6",
+       "exact": true
+      },
+      "output": {
+       "cells": [
+        "r3c1"
+       ]
+      },
+      "ms": 0.07799300055921776,
       "status": "ok"
      },
      {
@@ -5289,24 +6920,34 @@
       "tool": null,
       "input": {},
       "output": {
-       "status": "abstained",
-       "reason": "not_in_document",
+       "status": "answered",
+       "reason": null,
        "checks": [
         {
-         "name": "abstain",
+         "name": "cells_in_range",
          "passed": true,
-         "detail": "planner abstained"
+         "detail": "1 cell(s) in 5x4"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '2.00 × 10−6' != cell '1.00 × 10−6'; cell text used"
+        },
+        {
+         "name": "evidence_repaired",
+         "passed": false,
+         "detail": "model cited r1c1; the answer text is in r3c1 (used as evidence)"
         }
        ]
       },
-      "ms": 0.02103099996020319,
+      "ms": 0.3086710003117332,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 2.952333999928669,
+    "elapsed_ms": 661.4945730007094,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.66
   },
   {
    "id": "chem_custom_21",
@@ -5361,8 +7002,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: lookup ; cells: r2c1 ; answer: 8.59 × 10−5"
     },
     "trace": [
@@ -5405,16 +7046,18 @@
        "selected_table": "chem_m68793_t0",
        "context_passage": "doc_m68793_p14"
       },
-      "ms": 0.931167000089772,
+      "ms": 2.09520699991117,
       "status": "ok"
      },
      {
       "step": "propose",
-      "tool": "heuristic",
+      "tool": "neural",
       "input": {
        "question": "What is the rate constant k at 645 K in the Arrhenius example data?",
        "table_id": "chem_m68793_t0",
-       "mode": "heuristic"
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
       },
       "output": {
        "raw": "op: lookup ; cells: r2c1 ; answer: 8.59 × 10−5",
@@ -5431,7 +7074,7 @@
         "reason": null
        }
       },
-      "ms": 0.25574699975550175,
+      "ms": 624.5171020000271,
       "status": "ok"
      },
      {
@@ -5448,7 +7091,7 @@
        "row_label": "645",
        "unit": "L/mol/s"
       },
-      "ms": 0.017141999705927446,
+      "ms": 0.027367000257072505,
       "status": "ok"
      },
      {
@@ -5471,14 +7114,14 @@
         }
        ]
       },
-      "ms": 0.06422799924621359,
+      "ms": 0.13262700031191343,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 3.3647619993644184,
+    "elapsed_ms": 629.5286040003703,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.63
   },
   {
    "id": "chem_custom_22",
@@ -5516,8 +7159,8 @@
      ]
     },
     "planner": {
-     "mode": "heuristic",
-     "model_id": null,
+     "mode": "neural",
+     "model_id": "mt5-small-tabletrace",
      "raw_output": "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
     },
     "trace": [
@@ -5559,7 +7202,93 @@
        "selected_table": "chem_m68793_t0",
        "context_passage": "doc_m68793_p14"
       },
-      "ms": 1.339855999503925,
+      "ms": 1.7527910003991565,
+      "status": "ok"
+     },
+     {
+      "step": "propose",
+      "tool": "neural",
+      "input": {
+       "question": "What activation energy Ea results from the Arrhenius plot in the worked example?",
+       "table_id": "chem_m68793_t0",
+       "mode": "neural",
+       "model": "mt5-small-tabletrace",
+       "rows_shown": 5
+      },
+      "output": {
+       "raw": "op: lookup ; cells: r0c1 ; answer: 1.22 × 10−7",
+       "parsed": {
+        "op": "lookup",
+        "cells": [
+         {
+          "table_id": "chem_m68793_t0",
+          "row": 0,
+          "col": 1
+         }
+        ],
+        "answer": "1.22 × 10−7",
+        "reason": null
+       }
+      },
+      "ms": 631.6382590002831,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_lookup",
+      "input": {
+       "row": 0,
+       "col": 1
+      },
+      "output": {
+       "cell": "r0c1",
+       "text": "3.52 × 10−7",
+       "header": "k (L/mol/s)",
+       "row_label": "555",
+       "unit": "L/mol/s"
+      },
+      "ms": 0.03268899945396697,
+      "status": "ok"
+     },
+     {
+      "step": "tool",
+      "tool": "cell_find",
+      "input": {
+       "text": "1.22 × 10−7",
+       "exact": true
+      },
+      "output": {
+       "cells": []
+      },
+      "ms": 0.03160600044793682,
+      "status": "ok"
+     },
+     {
+      "step": "verify",
+      "tool": null,
+      "input": {},
+      "output": {
+       "status": "abstained",
+       "reason": "verification_failed",
+       "checks": [
+        {
+         "name": "cells_in_range",
+         "passed": true,
+         "detail": "1 cell(s) in 5x2"
+        },
+        {
+         "name": "answer_matches_cell",
+         "passed": false,
+         "detail": "proposed '1.22 × 10−7' != cell '3.52 × 10−7'; cell text used"
+        },
+        {
+         "name": "abstain",
+         "passed": true,
+         "detail": "proposed answer '1.22 × 10−7' is not supported by cell r0c1"
+        }
+       ]
+      },
+      "ms": 0.1807429998734733,
       "status": "ok"
      },
      {
@@ -5568,7 +7297,7 @@
       "input": {
        "question": "What activation energy Ea results from the Arrhenius plot in the worked example?",
        "table_id": "chem_m68793_t0",
-       "mode": "heuristic"
+       "fallback": true
       },
       "output": {
        "raw": "op: abstain ; cells: - ; answer: - ; reason: not_in_document",
@@ -5579,7 +7308,7 @@
         "reason": "not_in_document"
        }
       },
-      "ms": 0.3370419999555452,
+      "ms": 0.22684499981551198,
       "status": "ok"
      },
      {
@@ -5597,14 +7326,14 @@
         }
        ]
       },
-      "ms": 0.03142300010949839,
+      "ms": 0.014734000615135301,
       "status": "ok"
      }
     ],
-    "elapsed_ms": 4.0415359999315115,
+    "elapsed_ms": 636.8473369993808,
     "error": null
    },
-   "wall_s": 0.0
+   "wall_s": 0.64
   }
  ]
 }

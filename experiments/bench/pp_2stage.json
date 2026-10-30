@@ -1,0 +1,61 @@
+{
+ "stages": [
+  {
+   "mode": "pipeline-parallel-2-stage",
+   "backend": "gloo",
+   "rank": 0,
+   "device": "cpu",
+   "stage": "encoder",
+   "stage_params": 146940608,
+   "n": 16,
+   "bs": 8,
+   "batch_latency_s": [
+    5.815,
+    5.13
+   ],
+   "throughput_ex_per_s": 1.46,
+   "mem_mb": 1158.9,
+   "threads": 2
+  },
+  {
+   "mode": "pipeline-parallel-2-stage",
+   "backend": "gloo",
+   "rank": 1,
+   "device": "cpu",
+   "stage": "decoder+lm_head",
+   "stage_params": 281293504,
+   "n": 16,
+   "bs": 8,
+   "batch_latency_s": [
+    5.817,
+    5.129
+   ],
+   "throughput_ex_per_s": 1.46,
+   "mem_mb": 1618.2,
+   "threads": 2
+  }
+ ],
+ "n": 16,
+ "bs": 8,
+ "wall_s": 10.957,
+ "throughput_ex_per_s": 1.46,
+ "mean_batch_latency_s": 5.473,
+ "outputs": [
+  "op: lookup ; cells: r3c1 ; answer: 일요일이 좋다 - 런닝맨",
+  "op: lookup ; cells: r0c1 ; answer: 공감토크쇼 놀러와",
+  "op: lookup ; cells: r0c1 ; answer: 일요일이 좋다 - 런닝맨",
+  "op: lookup ; cells: r1c1 ; answer: 미안해 로봇, 널 오해했어",
+  "op: lookup ; cells: r1c1 ; answer: 2월 10일",
+  "op: lookup ; cells: r0c1 ; answer: 레몬편지의 비밀",
+  "op: lookup ; cells: r6c1 ; answer: 1892년 9월 13일",
+  "op: lookup ; cells: r6c1 ; answer: 1920년 7월 18일(29세)",
+  "op: lookup ; cells: r4c1 ; answer: 1958년 1월 27일(69세)",
+  "op: lookup ; cells: r4c1 ; answer: 1957 11월",
+  "op: lookup ; cells: r0c1 ; answer: 소장 Edward J. ONeill",
+  "op: lookup ; cells: r8c1 ; answer: 소장 Robert C. Kyser",
+  "op: lookup ; cells: r0c1 ; answer: 2013년 3월 25일 ~ 2014년 8월 3일",
+  "op: lookup ; cells: r2c1 ; answer: 윤학배(尹學培)",
+  "op: lookup ; cells: r3c1 ; answer: 강준석(姜俊錫)",
+  "op: lookup ; cells: r3c1 ; answer: 데니스"
+ ]
+}

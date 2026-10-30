@@ -1,0 +1,72 @@
+{
+ "args": {
+  "model": "experiments/sft_ko2/model",
+  "train": [
+   "data/chem/stage_train.jsonl"
+  ],
+  "dev": [
+   "data/chem/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl",
+   "data/ko/documents.jsonl"
+  ],
+  "out": "experiments/sft_chem/model",
+  "epochs": 2.0,
+  "bs": 8,
+  "grad_accum": 1,
+  "lr": 0.00015,
+  "warmup": 0.05,
+  "max_in": 512,
+  "max_out": 64,
+  "max_steps": 0,
+  "max_train": 0,
+  "eval_bs": 8,
+  "seed": 0,
+  "threads": 4,
+  "log_every": 10
+ },
+ "n_train": 937,
+ "n_train_dropped_truncated": 33,
+ "n_dev": 80,
+ "steps_per_epoch": 118,
+ "total_steps": 236,
+ "params": 300176768,
+ "hardware": {
+  "cpu": "x86_64",
+  "threads": 4,
+  "cuda": false,
+  "ram_gb": 16.9
+ },
+ "torch": "2.15.0+cu132",
+ "started": "2026-10-29T13:05:12",
+ "train_sources": {
+  "korwikitq": 143,
+  "synthetic": 794
+ },
+ "finished": "2026-10-29T13:37:20",
+ "wall_s": 1927.4,
+ "steps": 236,
+ "epochs_done": 2,
+ "dev_history": [
+  {
+   "n": 80,
+   "program_exact": 0.15,
+   "verified_em": 0.3875,
+   "parse_fail": 0.0,
+   "epoch": 1,
+   "step": 118,
+   "elapsed_s": 1026.1
+  },
+  {
+   "n": 80,
+   "program_exact": 0.2,
+   "verified_em": 0.425,
+   "parse_fail": 0.025,
+   "epoch": 2,
+   "step": 236,
+   "elapsed_s": 1920.3
+  }
+ ],
+ "best_dev_verified_em": 0.425
+}

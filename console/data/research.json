@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-29 08:48 UTC",
- "commit": "3541e72",
+ "generated_at": "2026-10-29 14:06 UTC",
+ "commit": "4b3fbed",
  "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없음.",
  "sections": [
   {
@@ -12,7 +12,8 @@
     "verified EM",
     "lookup EM",
     "calc EM",
-    "근거 셀 일치",
+    "근거 셀 일치(최종)",
+    "근거 셀 일치(모델 인용)",
     "보류 재현율",
     "오보류율",
     "파싱 실패",
@@ -26,13 +27,79 @@
      "28.0%",
      "74.7%",
      "34.8%",
+     "34.8%",
      "66.1%",
      "42.8%",
      "0.0%",
      "7"
+    ],
+    [
+     "mT5-small 기본(변환만)",
+     699,
+     "18.2%",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "100.0%",
+     "100.0%",
+     "100.0%",
+     "332"
+    ],
+    [
+     "SFT stage1(표)",
+     699,
+     "26.5%",
+     "32.5%",
+     "2.4%",
+     "29.0%",
+     "20.3%",
+     "18.9%",
+     "20.4%",
+     "0.0%",
+     "432"
+    ],
+    [
+     "SFT stage2(+본문)",
+     699,
+     "30.6%",
+     "35.0%",
+     "6.0%",
+     "31.8%",
+     "24.1%",
+     "29.9%",
+     "21.0%",
+     "0.0%",
+     "403"
+    ],
+    [
+     "GRPO RL(stage2에서)",
+     699,
+     "27.5%",
+     "32.3%",
+     "4.5%",
+     "28.0%",
+     "21.4%",
+     "26.0%",
+     "31.0%",
+     "0.0%",
+     "414"
+    ],
+    [
+     "화학 SFT(stage2에서)",
+     699,
+     "29.8%",
+     "37.1%",
+     "0.0%",
+     "30.8%",
+     "17.1%",
+     "16.0%",
+     "19.4%",
+     "0.0%",
+     "447"
     ]
    ],
-   "status": "prep",
+   "status": "done",
    "artifact": "experiments/eval/*_ko_test/metrics.json"
   },
   {
@@ -44,7 +111,8 @@
     "verified EM",
     "lookup EM",
     "calc EM",
-    "근거 셀 일치",
+    "근거 셀 일치(최종)",
+    "근거 셀 일치(모델 인용)",
     "보류 재현율",
     "오보류율",
     "파싱 실패",
@@ -58,16 +126,87 @@
      "36.4%",
      "50.0%",
      "42.9%",
+     "42.9%",
      "77.8%",
      "42.9%",
      "0.0%",
-     "127"
+     "114"
+    ],
+    [
+     "mT5-small 기본(변환만)",
+     30,
+     "30.0%",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "100.0%",
+     "100.0%",
+     "100.0%",
+     "209"
+    ],
+    [
+     "SFT stage1(표)",
+     30,
+     "3.3%",
+     "9.1%",
+     "0.0%",
+     "9.5%",
+     "4.8%",
+     "0.0%",
+     "33.3%",
+     "0.0%",
+     "400"
+    ],
+    [
+     "SFT stage2(+본문)",
+     30,
+     "13.3%",
+     "9.1%",
+     "10.0%",
+     "14.3%",
+     "14.3%",
+     "22.2%",
+     "23.8%",
+     "0.0%",
+     "403"
+    ],
+    [
+     "GRPO RL(stage2에서)",
+     30,
+     "23.3%",
+     "7.7%",
+     "8.3%",
+     "8.0%",
+     "12.0%",
+     "100.0%",
+     "80.0%",
+     "0.0%",
+     "409"
+    ],
+    [
+     "화학 SFT(stage2에서)",
+     30,
+     "3.3%",
+     "7.7%",
+     "0.0%",
+     "4.0%",
+     "4.0%",
+     "0.0%",
+     "48.0%",
+     "0.0%",
+     "495"
     ]
    ],
-   "status": "prep",
+   "status": "done",
    "artifact": "experiments/eval/*_ko_custom/metrics.json",
    "notes": [
-    "휴리스틱(어휘 겹침) 기준선: abstain 100.0% (n=5), calc 83.3% (n=6), cell 44.4% (n=9), text_table 20.0% (n=5), unit_period 20.0% (n=5)"
+    "휴리스틱(어휘 겹침) 기준선: abstain 100.0% (n=5), calc 83.3% (n=6), cell 44.4% (n=9), text_table 20.0% (n=5), unit_period 20.0% (n=5)",
+    "mT5-small 기본(변환만): abstain 100.0% (n=5), calc 16.7% (n=6), cell 22.2% (n=9), text_table 20.0% (n=5), unit_period 0.0% (n=5)",
+    "SFT stage1(표): abstain 0.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
+    "SFT stage2(+본문): abstain 40.0% (n=5), calc 16.7% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
+    "GRPO RL(stage2에서): abstain 100.0% (n=5), calc 16.7% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
+    "화학 SFT(stage2에서): abstain 0.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)"
    ]
   },
   {
@@ -79,7 +218,8 @@
     "verified EM",
     "lookup EM",
     "calc EM",
-    "근거 셀 일치",
+    "근거 셀 일치(최종)",
+    "근거 셀 일치(모델 인용)",
     "보류 재현율",
     "오보류율",
     "파싱 실패",
@@ -94,15 +234,58 @@
      "28.6%",
      "75.0%",
      "75.0%",
+     "75.0%",
      "15.0%",
      "0.0%",
      "0"
+    ],
+    [
+     "mT5-small 기본(변환만)",
+     32,
+     "37.5%",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "100.0%",
+     "100.0%",
+     "100.0%",
+     "128"
+    ],
+    [
+     "SFT stage2(+본문)",
+     32,
+     "18.8%",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "50.0%",
+     "75.0%",
+     "0.0%",
+     "343"
+    ],
+    [
+     "화학 SFT(stage2에서)",
+     32,
+     "15.6%",
+     "7.7%",
+     "7.1%",
+     "7.4%",
+     "22.2%",
+     "60.0%",
+     "66.7%",
+     "3.1%",
+     "432"
     ]
    ],
-   "status": "prep",
+   "status": "done",
    "artifact": "experiments/eval/*_chem_custom/metrics.json",
    "notes": [
-    "휴리스틱(어휘 겹침) 기준선: abstain 100.0% (n=5), calc 28.6% (n=7), cell 80.0% (n=10), text_table 66.7% (n=6), unit_period 75.0% (n=4)"
+    "휴리스틱(어휘 겹침) 기준선: abstain 100.0% (n=5), calc 28.6% (n=7), cell 80.0% (n=10), text_table 66.7% (n=6), unit_period 75.0% (n=4)",
+    "mT5-small 기본(변환만): abstain 100.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 100.0% (n=6), unit_period 25.0% (n=4)",
+    "SFT stage2(+본문): abstain 40.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 66.7% (n=6), unit_period 0.0% (n=4)",
+    "화학 SFT(stage2에서): abstain 60.0% (n=5), calc 14.3% (n=7), cell 10.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)"
    ]
   },
   {
@@ -120,6 +303,33 @@
     [
      "SFT stage1 (ko)",
      3431,
+     858,
+     "120 min",
+     "4 threads CPU",
+     "20.8%",
+     "858"
+    ],
+    [
+     "SFT stage2 (ko+text)",
+     1542,
+     193,
+     "30 min",
+     "4 threads CPU",
+     "29.3%",
+     "193"
+    ],
+    [
+     "SFT chem",
+     937,
+     236,
+     "32 min",
+     "4 threads CPU",
+     "42.5%",
+     "236"
+    ],
+    [
+     "GRPO RL (ko)",
+     3485,
      "-",
      "(진행 중)",
      "4 threads CPU",
@@ -136,14 +346,151 @@
    }
   },
   {
-   "title": "추론 최적화 (CPU 실측)",
-   "status": "prep",
-   "description": "src/tabletrace/bench/inference.py — fp32/int8/배치/KV 캐시 비교. 아직 실행 전."
+   "title": "강화학습(GRPO 방식) 보상 추이",
+   "status": "done",
+   "description": "그룹 정규화 이점으로 정책 경사 업데이트. 보상은 검증기 기반(정답·근거 셀·보류 적절성).",
+   "columns": [
+    "구간",
+    "평균 보상",
+    "정답률(샘플)",
+    "보류율(샘플)",
+    "파싱 성공",
+    "KL"
+   ],
+   "rows": [
+    [
+     "처음 1 step",
+     "-0.138",
+     "12.5%",
+     "68.8%",
+     "100.0%",
+     "770.5072"
+    ],
+    [
+     "마지막 1 step",
+     "0.272",
+     "43.8%",
+     "43.8%",
+     "100.0%",
+     "nan"
+    ]
+   ],
+   "conditions": {},
+   "artifact": "experiments/rl_ko/train_log.jsonl"
   },
   {
-   "title": "멀티 GPU Model Parallelism",
-   "status": "prep",
-   "description": "src/tabletrace/bench/pipeline_parallel.py 준비, 실행 전."
+   "title": "추론 최적화 (CPU 실측)",
+   "status": "done",
+   "conditions": {
+    "model": "models/mt5-small-tabletrace",
+    "n_examples": 48,
+    "max_new_tokens": 48,
+    "warmup_rounds": 1,
+    "measured_rounds": 2,
+    "threads": 4,
+    "cpu": "x86_64",
+    "cores": 4,
+    "torch": "2.15.0+cu132",
+    "cuda": false,
+    "quantize_time_s": 2.8,
+    "finished": "2026-10-29T14:05:03",
+    "fp32_state_dict_mb": 1200.7
+   },
+   "columns": [
+    "설정",
+    "p50 ms",
+    "p95 ms",
+    "처리량 (예제/s)",
+    "RSS GB",
+    "fp32 bs=1과 출력 일치"
+   ],
+   "rows": [
+    [
+     "fp32 eager, bs=1, kv-cache on",
+     771.2,
+     1072.9,
+     1.27,
+     3.15,
+     "100.0%"
+    ],
+    [
+     "fp32 eager, bs=8, kv-cache on",
+     404.9,
+     529.4,
+     2.398,
+     3.22,
+     "100.0%"
+    ],
+    [
+     "fp32 eager, bs=1, kv-cache OFF",
+     2042.1,
+     2621.1,
+     0.476,
+     3.22,
+     "100.0%"
+    ],
+    [
+     "int8 dynamic (Linear), bs=1, kv-cache on",
+     458.5,
+     581.5,
+     2.197,
+     3.22,
+     "35.4%"
+    ],
+    [
+     "int8 dynamic (Linear), bs=8, kv-cache on",
+     256.3,
+     288.6,
+     3.917,
+     3.22,
+     "22.9%"
+    ]
+   ],
+   "artifact": "experiments/bench/inference.json"
+  },
+  {
+   "title": "멀티 GPU Model Parallelism — 2-스테이지 파이프라인 (CPU gloo 기능 검증)",
+   "status": "done",
+   "description": "rank0=인코더, rank1=디코더+lm_head로 모델을 분할. GPU가 없어 CPU 2프로세스(gloo)로 분할·통신·출력 동일성만 검증했고 GPU 성능은 측정하지 못함.",
+   "columns": [
+    "구성",
+    "장치",
+    "파라미터",
+    "처리량 (예제/s)",
+    "메모리 MB",
+    "검증"
+   ],
+   "rows": [
+    [
+     "단일 프로세스(전체 모델)",
+     "cpu",
+     "300,176,768",
+     "1.472",
+     "1747",
+     "-"
+    ],
+    [
+     "파이프라인 rank0 (encoder)",
+     "cpu",
+     "146,940,608",
+     "1.46",
+     "1159",
+     "출력 동일"
+    ],
+    [
+     "파이프라인 rank1 (decoder+lm_head)",
+     "cpu",
+     "281,293,504",
+     "",
+     "1618",
+     "출력 동일"
+    ]
+   ],
+   "notes": [
+    "동일 입력에 대해 단일 프로세스와 2-스테이지의 생성 결과가 완전히 일치",
+    "GPU 실행 명령: torchrun --nproc_per_node=2 -m tabletrace.bench.pipeline_parallel --backend nccl (docs/experiments/parallel.md)"
+   ],
+   "artifact": "experiments/bench/pp_*.json"
   },
   {
    "title": "vLLM / SGLang 서빙",

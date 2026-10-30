@@ -31,3 +31,40 @@
 [13:04:46] START eval_sft_ko2_chem_custom
 [13:05:05] OK    eval_sft_ko2_chem_custom
 [13:05:05] START sft_chem
+[13:37:22] OK    sft_chem
+[13:37:22] START eval_sft_chem_chem_custom
+[13:37:45] OK    eval_sft_chem_chem_custom
+[13:37:45] START eval_sft_chem_chem_syndev
+[13:38:29] OK    eval_sft_chem_chem_syndev
+[13:38:29] START eval_sft_ko2_chem_syndev
+[13:39:12] OK    eval_sft_ko2_chem_syndev
+[13:39:12] START eval_sft_chem_ko_test
+[13:44:37] OK    eval_sft_chem_ko_test
+[13:44:37] START eval_sft_chem_ko_custom
+[13:45:01] OK    eval_sft_chem_ko_custom
+[13:45:01] START rl_ko
+[13:49:46] FAIL  rl_ko (exit 0)
+[13:49:46] START eval_rl_ko_ko_test
+[13:54:49] OK    eval_rl_ko_ko_test
+[13:54:49] START eval_rl_ko_ko_custom
+[13:55:10] OK    eval_rl_ko_ko_custom
+final model = sft_chem
+[13:55:11] START bench_inference
+[14:05:05] OK    bench_inference
+[14:05:05] START pp_single
+[14:05:23] OK    pp_single
+[14:05:23] START pp_2stage
+[14:05:45] OK    pp_2stage
+[14:05:45] START recorded_runs
+[14:06:28] OK    recorded_runs
+[14:06:28] START research_json
+[14:06:28] OK    research_json
+[14:06:28] START model_tests
+[14:06:52] OK    model_tests
+[14:06:52] START e2e_live
+[14:07:33] FAIL  e2e_live (exit 0)
+[14:07:33] START static_build
+[14:07:33] OK    static_build
+[14:07:33] START e2e_static
+[14:07:43] FAIL  e2e_static (exit 0)
+[14:07:43] PIPELINE DONE
