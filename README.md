@@ -58,7 +58,7 @@ TableTrace는 이 문제를 **"모델은 제안하고, 도구가 실행·검증�
 |---|---|---|
 | ![desktop](docs/images/live-desktop-03-result.png) | ![mobile](docs/images/live-mobile-03-result.png) | ![abstain](docs/images/live-desktop-04-abstain.png) |
 
-화면 구조와 상태 설계는 [docs/design/screens.md](docs/design/screens.md), 참고한 제품 UI 조사는 [docs/design/ui-research.md](docs/design/ui-research.md)에 있습니다. 스크린샷은 `scripts/console_screenshots.py`(Playwright)가 데스크톱 1440×900·모바일 390×844에서 자동으로 찍고 동작을 검사합니다(`docs/images/e2e-*.json`).
+화면 구조와 상태 설계는 [docs/design/screens.md](docs/design/screens.md), 참고한 제품 UI 조사는 [docs/design/ui-research.md](docs/design/ui-research.md)에 있습니다. 데모 바탕은 다른 제품 화면(OCR Form Tools, MLflow, promptfoo, doccano, Marker)을 직접 열어 확인한 뒤 **단색 중립 바탕 + 실제 문서 콘텐츠**로 만들었고, 그라데이션·블러·질감 같은 장식 배경은 쓰지 않습니다(`tests/test_console_style.py`가 CSS에서 이를 검사합니다). 스크린샷은 `scripts/console_screenshots.py`(Playwright)가 데스크톱 1440×900·모바일 390×844에서 자동으로 찍고 동작을 검사합니다(`docs/images/e2e-*.json`).
 
 ## 4. 핵심 기능
 
