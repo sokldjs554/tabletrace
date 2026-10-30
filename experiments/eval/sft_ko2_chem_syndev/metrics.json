@@ -9,10 +9,10 @@
    "data/chem/documents.jsonl"
   ],
   "n": 80,
-  "wall_s": 39.5,
+  "wall_s": 40.3,
   "hardware": "x86_64",
   "label": null,
-  "finished": "2026-10-29T13:39:10",
+  "finished": "2026-10-30T06:20:58",
   "quantize": false
  },
  "metrics": {
@@ -40,7 +40,7 @@
   "verifier_corrections": 0.5781,
   "truncated_gold_rate": 0.0,
   "verified_em_untruncated": 0.225,
-  "mean_ms_per_example": 434.0,
+  "mean_ms_per_example": 441.9,
   "by_source": {
    "synthetic": {
     "n": 80,

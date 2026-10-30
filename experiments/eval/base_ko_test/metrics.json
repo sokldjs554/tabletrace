@@ -10,19 +10,19 @@
    "data/ko/documents.jsonl"
   ],
   "n": 699,
-  "wall_s": 364.3,
+  "wall_s": 396.7,
   "hardware": "x86_64",
-  "label": "untuned mT5-small",
-  "finished": "2026-10-29T12:23:10",
+  "label": null,
+  "finished": "2026-10-30T05:51:00",
   "quantize": false
  },
  "metrics": {
   "n": 699,
-  "n_answerable": 572,
-  "n_gold_abstain": 127,
-  "n_calc": 83,
-  "n_lookup": 489,
-  "verified_em": 0.1817,
+  "n_answerable": 649,
+  "n_gold_abstain": 50,
+  "n_calc": 110,
+  "n_lookup": 539,
+  "verified_em": 0.0715,
   "answer_em_answerable": 0.0,
   "raw_answer_em_answerable": 0.0,
   "evidence_cells_exact": 0.0,
@@ -36,19 +36,20 @@
   "unit_error_rate": null,
   "abstain_recall": 1.0,
   "false_abstain_rate": 1.0,
-  "abstain_precision": 0.1817,
+  "abstain_precision": 0.0715,
   "parse_fail_rate": 1.0,
   "verifier_corrections": 0.0,
-  "truncated_gold_rate": 0.1102,
-  "mean_ms_per_example": 331.5,
+  "truncated_gold_rate": 0.0887,
+  "verified_em_untruncated": 0.0785,
+  "mean_ms_per_example": 398.9,
   "by_source": {
    "korwikitq": {
     "n": 539,
-    "verified_em": 0.0928
+    "verified_em": 0.0
    },
    "synthetic": {
     "n": 160,
-    "verified_em": 0.4813
+    "verified_em": 0.3125
    }
   }
  }

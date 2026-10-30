@@ -1,0 +1,61 @@
+{
+ "run": "experiments/eval/sft_ko2_chem_syndev",
+ "n": 80,
+ "n_answerable": 64,
+ "pred_status_answerable": {
+  "abstained": 37,
+  "answered": 27
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 16,
+  "invalid_program": 21
+ },
+ "raw_correct_but_blocked": 8,
+ "evidence_repaired": 20,
+ "lookup_citation": {
+  "n": 30,
+  "row_correct": 0.967,
+  "col_correct": 0.533,
+  "both_correct": 0.5
+ },
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   30
+  ],
+  [
+   "abstain->lookup",
+   16
+  ],
+  [
+   "lookup->diff",
+   10
+  ],
+  [
+   "diff->lookup",
+   8
+  ],
+  [
+   "ratio->lookup",
+   4
+  ],
+  [
+   "diff->diff",
+   4
+  ],
+  [
+   "sum->lookup",
+   4
+  ],
+  [
+   "ratio->diff",
+   2
+  ]
+ ],
+ "by_source_verified": {
+  "synthetic": {
+   "n": 80,
+   "verified_em": 0.225
+  }
+ }
+}

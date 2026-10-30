@@ -1,0 +1,61 @@
+{
+ "run": "experiments/eval/rl_ko_chem_custom",
+ "n": 32,
+ "n_answerable": 27,
+ "pred_status_answerable": {
+  "abstained": 22,
+  "answered": 5
+ },
+ "abstain_reason_answerable": {
+  "invalid_program": 21,
+  "verification_failed": 1
+ },
+ "raw_correct_but_blocked": 2,
+ "evidence_repaired": 2,
+ "lookup_citation": {
+  "n": 3,
+  "row_correct": 0.667,
+  "col_correct": 0.333,
+  "both_correct": 0.0
+ },
+ "op_confusion_top": [
+  [
+   "lookup->diff",
+   10
+  ],
+  [
+   "abstain->diff",
+   5
+  ],
+  [
+   "diff->diff",
+   4
+  ],
+  [
+   "text->diff",
+   4
+  ],
+  [
+   "lookup->lookup",
+   3
+  ],
+  [
+   "ratio->diff",
+   2
+  ],
+  [
+   "text->lookup",
+   2
+  ],
+  [
+   "text->None",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 32,
+   "verified_em": 0.156
+  }
+ }
+}

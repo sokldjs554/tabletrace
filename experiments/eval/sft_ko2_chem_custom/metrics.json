@@ -9,47 +9,48 @@
    "data/chem/documents.jsonl"
   ],
   "n": 32,
-  "wall_s": 15.6,
+  "wall_s": 16.5,
   "hardware": "x86_64",
   "label": null,
-  "finished": "2026-10-29T13:05:04",
+  "finished": "2026-10-30T06:05:28",
   "quantize": false
  },
  "metrics": {
   "n": 32,
-  "n_answerable": 20,
-  "n_gold_abstain": 12,
-  "n_calc": 7,
+  "n_answerable": 27,
+  "n_gold_abstain": 5,
+  "n_calc": 14,
   "n_lookup": 13,
-  "verified_em": 0.1875,
+  "verified_em": 0.0938,
   "answer_em_answerable": 0.0,
-  "raw_answer_em_answerable": 0.1,
+  "raw_answer_em_answerable": 0.0741,
   "evidence_cells_exact": 0.0,
   "evidence_cells_exact_raw": 0.0,
-  "evidence_repaired_rate": 0.05,
+  "evidence_repaired_rate": 0.1481,
   "evidence_cells_overlap": 0.0,
   "op_acc": 0.25,
   "lookup_em": 0.0,
   "calc_em": 0.0,
   "calc_result_correct": 0.0,
-  "unit_error_rate": 1.0,
-  "abstain_recall": 0.5,
-  "false_abstain_rate": 0.75,
-  "abstain_precision": 0.2857,
+  "unit_error_rate": null,
+  "abstain_recall": 0.6,
+  "false_abstain_rate": 0.8148,
+  "abstain_precision": 0.12,
   "parse_fail_rate": 0.0,
-  "verifier_corrections": 0.95,
+  "verifier_corrections": 0.8519,
   "truncated_gold_rate": 0.0,
-  "mean_ms_per_example": 343.1,
+  "verified_em_untruncated": 0.0938,
+  "mean_ms_per_example": 352.1,
   "by_source": {
    "custom": {
     "n": 32,
-    "verified_em": 0.1875
+    "verified_em": 0.0938
    }
   },
   "by_category": {
    "abstain": {
     "n": 5,
-    "verified_em": 0.4
+    "verified_em": 0.6
    },
    "calc": {
     "n": 7,
@@ -61,7 +62,7 @@
    },
    "text_table": {
     "n": 6,
-    "verified_em": 0.6667
+    "verified_em": 0.0
    },
    "unit_period": {
     "n": 4,

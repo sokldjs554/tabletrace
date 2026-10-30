@@ -9,10 +9,10 @@
    "data/ko/documents.jsonl"
   ],
   "n": 30,
-  "wall_s": 19.4,
+  "wall_s": 21.3,
   "hardware": "x86_64",
   "label": null,
-  "finished": "2026-10-29T13:44:59",
+  "finished": "2026-10-30T06:19:49",
   "quantize": false
  },
  "metrics": {
@@ -40,7 +40,7 @@
   "verifier_corrections": 0.48,
   "truncated_gold_rate": 0.0,
   "verified_em_untruncated": 0.0333,
-  "mean_ms_per_example": 494.8,
+  "mean_ms_per_example": 535.9,
   "by_source": {
    "custom": {
     "n": 30,

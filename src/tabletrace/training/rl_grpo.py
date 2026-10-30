@@ -15,7 +15,8 @@ Reward (per sample; see `reward()`):
   gold answerable: answer correct        +1.0, evidence cells exact +0.5 (overlap +0.25), op correct +0.2,
                    answer text != cell   -0.3 (verifier substituted the cell), abstained instead -0.3,
                    proposal blocked by verifier -0.3
-  gold abstain:    abstained             +1.0, answered anyway (hallucination) -0.8
+  gold abstain:    planner chose op: abstain +1.0, verifier caught an unsupported proposal +0.2,
+                   invalid program 0.0, answered anyway (hallucination) -0.8
 Policy and reference are both run in eval mode (dropout off). Training mode would make the policy's
 log-probs differ from the reference's even at step 0 (KL of 1e2..1e6 in our first attempt, followed by NaN),
 and sampling is done from the same eval-mode policy so the update is on-policy.
@@ -46,7 +47,11 @@ from tabletrace.verify.verifier import resolve
 
 
 def reward(raw: str, e: Example) -> tuple[float, dict]:
-    info = {"parse_ok": True, "op": None, "abstained": None, "correct": False}
+    """Verifiable reward. v2: an abstention only earns full credit when the *planner* chose it (`op: abstain`).
+    v1 paid +1.0 for any final status 'abstained' on a no-answer prompt, so degenerate programs that the verifier
+    rejected scored as well as a deliberate abstention (observed: explicit abstain 7% -> 11% while status-abstain
+    61% -> 68%, policy drifting to `diff`)."""
+    info = {"parse_ok": True, "op": None, "abstained": None, "explicit_abstain": False, "reason": None, "correct": False}
     try:
         prog = parse(raw, e.table.id)
     except ProgramParseError:
@@ -56,6 +61,8 @@ def reward(raw: str, e: Example) -> tuple[float, dict]:
     res = resolve(e.question, e.table, prog, context=e.context)
     gold = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context)
     info["abstained"] = res.status == "abstained"
+    info["explicit_abstain"] = prog.op == "abstain"
+    info["reason"] = res.verdict.reason
     r = 0.0
     if gold.status == "answered":
         if res.status == "answered":
@@ -74,13 +81,17 @@ def reward(raw: str, e: Example) -> tuple[float, dict]:
             if any(c.name in ("answer_matches_cell", "evidence_repaired") and not c.passed for c in res.verdict.checks):
                 r -= 0.3
         else:
-            r -= 0.3
+            r -= 0.5 if res.verdict.reason == "invalid_program" else 0.3
             if res.verdict.reason == "verification_failed":
                 r -= 0.3   # named a value that its own evidence does not support
     else:
         if res.status == "abstained":
-            r += 1.0
-            info["correct"] = True
+            if prog.op == "abstain":
+                r += 1.0                      # the planner itself declined
+                info["correct"] = True
+            elif res.verdict.reason == "verification_failed":
+                r += 0.2                      # unsupported proposal, caught by the verifier
+            # invalid / degenerate program on a no-answer prompt: 0.0 (no credit for garbage)
         else:
             r -= 0.8
     return r, info
@@ -212,6 +223,8 @@ def main() -> None:
         rec = {"step": step, "reward_mean": round(R.mean().item(), 4), "reward_std": round(R.std().item(), 4),
                "frac_group_zero_std": round(float((R.std(1) == 0).float().mean()), 3), "pg_loss": round(loss_sum, 5), "kl": round(kl_sum, 5),
                "parse_ok": round(sum(i["parse_ok"] for i in infos) / len(infos), 3), "abstain_rate": round(sum(bool(i["abstained"]) for i in infos) / len(infos), 3),
+               "explicit_abstain_rate": round(sum(bool(i["explicit_abstain"]) for i in infos) / len(infos), 3),
+               "invalid_program_rate": round(sum(i["reason"] == "invalid_program" for i in infos) / len(infos), 3),
                "correct_rate": round(sum(i["correct"] for i in infos) / len(infos), 3), "ops": dict(ops),
                "grad_norm": round(float(gn), 4) if not skipped else None, "update_skipped": skipped,
                "prompt_kinds": [k for k in (kinds[(step * a.prompts_per_step + i) % len(kinds)] for i in range(a.prompts_per_step))],

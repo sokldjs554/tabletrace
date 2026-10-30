@@ -66,6 +66,8 @@ def main() -> None:
         tag = "live"
     from playwright.sync_api import sync_playwright
 
+    for stale in (out / f"e2e-{tag}.json",):   # never leave an old passing report behind if this run crashes
+        stale.unlink(missing_ok=True)
     report = {"mode": tag, "checks": [], "console_errors": []}
 
     def check(name: str, ok: bool, detail: str = "") -> None:
@@ -77,76 +79,87 @@ def main() -> None:
             kw = {"executable_path": a.chromium} if a.chromium else {}
             browser = p.chromium.launch(args=["--no-sandbox"], **kw)
             for label, vp in (("desktop", {"width": 1440, "height": 900}), ("mobile", {"width": 390, "height": 844})):
-                page = browser.new_page(viewport=vp, device_scale_factor=1)
-                page.on("console", lambda m: report["console_errors"].append(m.text) if m.type == "error" else None)
-                page.goto(base, wait_until="networkidle")
-                page.wait_for_timeout(800)
-                badge = page.text_content("#modetext") or ""
-                check(f"{label}: mode badge", ("실시간" in badge) if tag == "live" else ("저장된" in badge), badge)
-                page.screenshot(path=str(out / f"{tag}-{label}-01-home.png"), full_page=(label == "mobile"))
-                # a document is auto-selected (one with representative questions)
-                page.wait_for_selector(".chip", timeout=15000)
-                check(f"{label}: document + examples rendered", page.locator("table.tt").count() >= 1 and page.locator(".chip").count() >= 1)
-                if label == "mobile":
-                    page.click(".mtab[data-pane='center']")
-                    page.screenshot(path=str(out / f"{tag}-{label}-02-doc.png"), full_page=False)
-                    page.click(".mtab[data-pane='left']")
-                # answered example
-                chips = page.locator(".chip")
-                chips.nth(0).click()
-                page.wait_for_function("() => !document.querySelector('#result').hidden || !document.querySelector('#errorbar').hidden", timeout=120000)
-                status = page.text_content("#status") or ""
-                has_badge = page.locator(".badge-ok, .badge-hold").count() > 0
-                check(f"{label}: first example produced a result", has_badge, status)
-                page.screenshot(path=str(out / f"{tag}-{label}-03-result.png"), full_page=(label == "mobile"))
-                ev = page.locator(".evbtn")
-                if ev.count():
-                    ev.nth(0).click()
-                    page.wait_for_timeout(500)
-                    check(f"{label}: evidence highlighted in table", page.locator("td.is-evidence").count() >= 1)
-                # Abstain-state rendering. The neural planner often answers questions it should abstain on (a real
-                # model weakness measured in the evaluation), so this UI check switches to the heuristic planner,
-                # which abstains deterministically on the representative "no answer" questions.
-                if label == "mobile":
-                    page.click(".mtab[data-pane='left']")
-                page.select_option("#planner", "heuristic")
-                hold = page.locator(".chip", has_text="보류") if page.locator(".chip", has_text="보류").count() else page.locator(".chip", has_text="abstain")
-                shown_hold = False
-                for i in range(hold.count()):
-                    hold.nth(i).click()
-                    page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=120000)
-                    page.wait_for_timeout(300)
-                    if page.locator(".badge-hold").count() > 0:
-                        shown_hold = True
-                        break
-                check(f"{label}: abstain state renders 답변 보류 (heuristic planner)", shown_hold)
-                page.screenshot(path=str(out / f"{tag}-{label}-04-abstain.png"), full_page=(label == "mobile"))
-                page.select_option("#planner", "auto")
-                if tag == "live" and label == "desktop":
-                    # typed question + keyboard submit + invalid input handling
-                    page.fill("#question", "x")
-                    page.press("#question", "Enter")
-                    page.wait_for_timeout(1500)
-                    check("desktop: too-short question shows an error", not page.locator("#errorbar").is_hidden())
-                    page.fill("#question", "국도 1호 자동차 전용도로 구간 중 호남로의 총연장은 몇 km입니까?" if "ko" in page.text_content("#doccount") or True else "")
-                    page.press("#question", "Enter")
-                    page.wait_for_function("() => document.querySelector('#status') && /완료|보류|오류/.test(document.querySelector('#status').textContent)", timeout=120000)
-                    check("desktop: typed question executed", True, page.text_content("#status") or "")
-                    page.screenshot(path=str(out / f"{tag}-{label}-05-typed.png"))
-                    # chemistry corpus
-                    page.click(".segbtn[data-corpus='chem_docs']")
+                page = None
+                try:
+                    page = browser.new_page(viewport=vp, device_scale_factor=1)
+                    page.on("console", lambda m: report["console_errors"].append(m.text) if m.type == "error" else None)
+                    page.goto(base, wait_until="networkidle")
+                    page.wait_for_timeout(800)
+                    badge = page.text_content("#modetext") or ""
+                    check(f"{label}: mode badge", ("실시간" in badge) if tag == "live" else ("저장된" in badge), badge)
+                    page.screenshot(path=str(out / f"{tag}-{label}-01-home.png"), full_page=(label == "mobile"))
+                    # a document is auto-selected (one with representative questions)
                     page.wait_for_selector(".chip", timeout=15000)
-                    page.locator(".chip").nth(0).click()
-                    page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=120000)
-                    page.wait_for_timeout(300)
-                    check("desktop: chemistry example produced a result", page.locator(".badge-ok, .badge-hold").count() > 0)
-                    page.screenshot(path=str(out / f"{tag}-{label}-06-chem.png"))
-                # research view
-                page.goto(base + "#research", wait_until="networkidle")
-                page.wait_for_timeout(800)
-                check(f"{label}: research view renders", "연구 결과" in (page.text_content("#research") or ""))
-                page.screenshot(path=str(out / f"{tag}-{label}-07-research.png"), full_page=True)
-                page.close()
+                    check(f"{label}: document + examples rendered", page.locator("table.tt").count() >= 1 and page.locator(".chip").count() >= 1)
+                    if label == "mobile":
+                        page.click(".mtab[data-pane='center']")
+                        page.screenshot(path=str(out / f"{tag}-{label}-02-doc.png"), full_page=False)
+                        page.click(".mtab[data-pane='left']")
+                    # answered example
+                    chips = page.locator(".chip")
+                    chips.nth(0).click()
+                    page.wait_for_function("() => !document.querySelector('#result').hidden || !document.querySelector('#errorbar').hidden", timeout=120000)
+                    status = page.text_content("#status") or ""
+                    has_badge = page.locator(".badge-ok, .badge-hold").count() > 0
+                    check(f"{label}: first example produced a result", has_badge, status)
+                    page.screenshot(path=str(out / f"{tag}-{label}-03-result.png"), full_page=(label == "mobile"))
+                    ev = page.locator(".evbtn")
+                    if ev.count():
+                        ev.nth(0).click()
+                        page.wait_for_timeout(500)
+                        check(f"{label}: evidence highlighted in table", page.locator("td.is-evidence").count() >= 1)
+                    # Abstain-state rendering. The neural planner often answers questions it should abstain on (a real
+                    # model weakness measured in the evaluation), so this UI check switches to the heuristic planner,
+                    # which abstains deterministically on the representative "no answer" questions.
+                    if label == "mobile":
+                        page.click(".mtab[data-pane='right']")
+                    page.select_option("#planner", "heuristic")
+                    if label == "mobile":
+                        page.click(".mtab[data-pane='left']")
+                    hold = page.locator(".chip", has_text="보류") if page.locator(".chip", has_text="보류").count() else page.locator(".chip", has_text="abstain")
+                    shown_hold = False
+                    for i in range(hold.count()):
+                        hold.nth(i).click()
+                        page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=120000)
+                        page.wait_for_timeout(300)
+                        if page.locator(".badge-hold").count() > 0:
+                            shown_hold = True
+                            break
+                    check(f"{label}: abstain state renders 답변 보류 (heuristic planner)", shown_hold)
+                    page.screenshot(path=str(out / f"{tag}-{label}-04-abstain.png"), full_page=(label == "mobile"))
+                    if label == "mobile":
+                        page.click(".mtab[data-pane='right']")
+                    page.select_option("#planner", "auto")
+                    if tag == "live" and label == "desktop":
+                        # typed question + keyboard submit + invalid input handling
+                        page.fill("#question", "x")
+                        page.press("#question", "Enter")
+                        page.wait_for_timeout(1500)
+                        check("desktop: too-short question shows an error", not page.locator("#errorbar").is_hidden())
+                        page.fill("#question", "국도 1호 자동차 전용도로 구간 중 호남로의 총연장은 몇 km입니까?" if "ko" in page.text_content("#doccount") or True else "")
+                        page.press("#question", "Enter")
+                        page.wait_for_function("() => document.querySelector('#status') && /완료|보류|오류/.test(document.querySelector('#status').textContent)", timeout=120000)
+                        check("desktop: typed question executed", True, page.text_content("#status") or "")
+                        page.screenshot(path=str(out / f"{tag}-{label}-05-typed.png"))
+                        # chemistry corpus
+                        page.click(".segbtn[data-corpus='chem_docs']")
+                        page.wait_for_selector(".chip", timeout=15000)
+                        page.locator(".chip").nth(0).click()
+                        page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=120000)
+                        page.wait_for_timeout(300)
+                        check("desktop: chemistry example produced a result", page.locator(".badge-ok, .badge-hold").count() > 0)
+                        page.screenshot(path=str(out / f"{tag}-{label}-06-chem.png"))
+                    # research view
+                    page.goto(base + "#research", wait_until="networkidle")
+                    page.wait_for_timeout(800)
+                    check(f"{label}: research view renders", "연구 결과" in (page.text_content("#research") or ""))
+                    page.screenshot(path=str(out / f"{tag}-{label}-07-research.png"), full_page=True)
+                    page.close()
+                except Exception as e:  # a crash must show up as a FAILED check, never as a missing report
+                    check(f"{label}: unexpected error", False, f"{type(e).__name__}: {str(e)[:240]}")
+                finally:
+                    if page is not None and not page.is_closed():
+                        page.close()
             browser.close()
     finally:
         if proc:

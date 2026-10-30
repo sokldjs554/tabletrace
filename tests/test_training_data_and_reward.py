@@ -3,10 +3,13 @@ from pathlib import Path
 
 import pytest
 
-from tabletrace.agent.program import serialize
-from tabletrace.schema import Document, Source
-from tabletrace.training.data import build_examples
-from tabletrace.training.rl_grpo import reward
+pytest.importorskip("torch")          # CI installs only the lightweight extras; these tests need the model extra
+pytest.importorskip("transformers")
+
+from tabletrace.agent.program import serialize  # noqa: E402
+from tabletrace.schema import Document, Source  # noqa: E402
+from tabletrace.training.data import build_examples  # noqa: E402
+from tabletrace.training.rl_grpo import reward  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -57,3 +60,18 @@ def test_reward_shapes_behaviour(tok, medal_table):
     r_calc_gold, _ = reward(serialize(ex_calc.gold), ex_calc)
     r_calc_wrong_num, _ = reward("op: diff ; cells: r1c5, r2c5 ; answer: 50", ex_calc)   # verifier recomputes -> still correct answer
     assert r_calc_gold >= r_calc_wrong_num > 0
+
+
+def test_reward_does_not_pay_for_garbage_abstention(tok, medal_table):
+    """v1 paid +1.0 for any final 'abstained' on a no-answer prompt, including rejected garbage programs."""
+    docs = {medal_table.doc_id: _doc(medal_table)}
+    rec = {"qid": "b", "question": "일본의 합계는?", "answer": None, "doc_id": medal_table.doc_id, "table_id": medal_table.id, "op": "abstain",
+           "reason": "not_in_document", "gold_cells": [], "source": "t"}
+    (ex,) = build_examples([rec], docs, tok, 512)
+    explicit, info = reward("op: abstain ; cells: - ; answer: - ; reason: not_in_document", ex)
+    degenerate, info_d = reward("op: diff ; cells: r1c5, r1c5 ; answer: 0", ex)       # repeated cells -> invalid_program -> abstained
+    caught, _ = reward("op: lookup ; cells: r1c5 ; answer: 999", ex)                    # unsupported value -> verification_failed
+    halluc, _ = reward("op: lookup ; cells: r1c5 ; answer: 112", ex)                    # answers although it must abstain
+    assert explicit == 1.0 and info["explicit_abstain"] is True
+    assert info_d["abstained"] is True and info_d["explicit_abstain"] is False and degenerate == 0.0
+    assert explicit > caught > degenerate > halluc

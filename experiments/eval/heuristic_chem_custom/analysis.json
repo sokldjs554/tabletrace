@@ -1,0 +1,61 @@
+{
+ "run": "experiments/eval/heuristic_chem_custom",
+ "n": 32,
+ "n_answerable": 27,
+ "pred_status_answerable": {
+  "abstained": 7,
+  "answered": 20
+ },
+ "abstain_reason_answerable": {
+  "ambiguous_question": 2,
+  "not_in_document": 5
+ },
+ "raw_correct_but_blocked": 0,
+ "evidence_repaired": 0,
+ "lookup_citation": {
+  "n": 11,
+  "row_correct": 1.0,
+  "col_correct": 1.0,
+  "both_correct": 1.0
+ },
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   11
+  ],
+  [
+   "abstain->abstain",
+   5
+  ],
+  [
+   "text->abstain",
+   4
+  ],
+  [
+   "diff->diff",
+   3
+  ],
+  [
+   "lookup->abstain",
+   2
+  ],
+  [
+   "ratio->ratio",
+   2
+  ],
+  [
+   "text->lookup",
+   2
+  ],
+  [
+   "diff->abstain",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 32,
+   "verified_em": 0.562
+  }
+ }
+}

@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXP = ROOT / "experiments"
 MODELS = [("휴리스틱 기준선", "heuristic"), ("mT5-small 기본(미튜닝)", "base"), ("SFT stage1", "sft_ko"), ("SFT stage2(+본문)", "sft_ko2"),
-          ("GRPO RL", "rl_ko"), ("화학 SFT", "sft_chem")]
+          ("GRPO RL v1 (보상 허점)", "rl_ko_v1"), ("GRPO RL v2 (보상 수정)", "rl_ko"), ("화학 SFT", "sft_chem"), ("화학 SFT + int8 동적 양자화", "sft_chem_int8")]
 
 
 def load(p: Path):
@@ -59,7 +59,7 @@ def category_table(suffix: str, title: str) -> str:
 
 def training_table() -> str:
     rows = []
-    for name, d in [("SFT stage1 (ko 표)", "sft_ko"), ("SFT stage2 (ko 표+본문)", "sft_ko2"), ("SFT chem", "sft_chem"), ("GRPO RL (ko)", "rl_ko")]:
+    for name, d in [("SFT stage1 (ko 표)", "sft_ko"), ("SFT stage2 (ko 표+본문)", "sft_ko2"), ("SFT chem", "sft_chem"), ("GRPO RL v1 (ko)", "rl_ko_v1"), ("GRPO RL v2 (ko)", "rl_ko")]:
         s = load(EXP / d / "summary.json")
         if not s:
             c = load(EXP / d / "config.json")
@@ -73,27 +73,33 @@ def training_table() -> str:
     return ("| 실행 | 학습 예제/프롬프트 | 스텝 | 소요 (CPU 4스레드) | best dev verified EM % | dev 추이 % |\n|---|---:|---:|---:|---:|---|\n" + "\n".join(rows) + "\n")
 
 
-def rl_table() -> str:
-    log = EXP / "rl_ko" / "train_log.jsonl"
+def rl_table(run: str = "rl_ko") -> str:
+    log = EXP / run / "train_log.jsonl"
     if not log.exists():
         return "_RL 로그 없음_\n"
-    steps = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines() if line.strip() and '"eval"' not in line]
-    evals = [json.loads(line)["eval"] for line in log.read_text(encoding="utf-8").splitlines() if '"eval"' in line]
+    lines = log.read_text(encoding="utf-8").splitlines()
+    steps = [json.loads(line) for line in lines if line.strip() and '"eval"' not in line]
+    evals = [json.loads(line)["eval"] for line in lines if '"eval"' in line]
     if not steps:
         return "_RL 스텝 없음_\n"
     k = max(1, len(steps) // 4)
     chunks = [steps[i:i + k] for i in range(0, len(steps), k)]
     avg = lambda xs, key: sum(x[key] for x in xs) / len(xs)  # noqa: E731
-    out = "| 구간(step) | 평균 보상 | 보상 표준편차 | 샘플 정답률 % | 샘플 보류율 % | 파싱 성공 % | KL | 그룹 분산 0 비율 % |\n|---|---:|---:|---:|---:|---:|---:|---:|\n"
+
+    def opshare(ch, op):
+        tot = sum(sum(x.get("ops", {}).values()) for x in ch)
+        return sum(x.get("ops", {}).get(op, 0) for x in ch) / tot if tot else 0.0
+
+    out = ("| 구간(step) | 평균 보상 | 샘플 정답률 % | 샘플 최종 보류율 % | 모델이 명시적으로 abstain한 비율 % | lookup 비율 % | diff 비율 % | KL | 그룹 분산 0 비율 % |\n"
+           "|---|---:|---:|---:|---:|---:|---:|---:|---:|\n")
     for ch in chunks:
-        out += f"| {ch[0]['step']}–{ch[-1]['step']} | {avg(ch, 'reward_mean'):.3f} | {avg(ch, 'reward_std'):.3f} | {pct(avg(ch, 'correct_rate'))} | {pct(avg(ch, 'abstain_rate'))} | {pct(avg(ch, 'parse_ok'))} | {avg(ch, 'kl'):.4f} | {pct(avg(ch, 'frac_group_zero_std'))} |\n"
+        out += (f"| {ch[0]['step']}–{ch[-1]['step']} | {avg(ch, 'reward_mean'):.3f} | {pct(avg(ch, 'correct_rate'))} | {pct(avg(ch, 'abstain_rate'))} | "
+                f"{pct(opshare(ch, 'abstain'))} | {pct(opshare(ch, 'lookup'))} | {pct(opshare(ch, 'diff'))} | {avg(ch, 'kl'):.4f} | {pct(avg(ch, 'frac_group_zero_std'))} |\n")
     if evals:
-        out += "\ndev verified EM: " + " → ".join(f"step {e['step']}: {pct(e['verified_em'])}%" for e in evals) + "\n"
-    ops = {}
-    for s_ in steps:
-        for op, n in s_.get("ops", {}).items():
-            ops[op] = ops.get(op, 0) + n
-    out += "샘플 연산 분포(전체): " + ", ".join(f"{k_}: {v}" for k_, v in sorted(ops.items(), key=lambda x: -x[1])) + "\n"
+        out += "\ndev verified EM(n=245): " + " → ".join(f"step {e['step']}: {pct(e['verified_em'])}%" for e in evals) + "\n"
+    summ = load(EXP / run / "summary.json")
+    if summ:
+        out += f"\n**평가에 쓴 체크포인트: step {summ['best_step']}** (dev 최고로 선택; 마지막 step이 아님). 60 step wall time {summ['wall_s'] / 60:.0f} min, CPU 4스레드.\n"
     return out
 
 
@@ -102,11 +108,11 @@ def bench_table() -> str:
     if not b:
         return "_추론 벤치 산출물 없음_\n"
     m = b["meta"]
-    out = (f"조건: {m['model']}, 입력 {m['n_examples']}개(ko test), max_new_tokens {m['max_new_tokens']}, 워밍업 {m['warmup_rounds']}라운드 + 측정 {m['measured_rounds']}라운드, "
-           f"{m['threads']} 스레드, {m['cpu']} ({m['cores']} cores), torch {m['torch']}, CUDA {m['cuda']}, 양자화 소요 {m['quantize_time_s']} s, fp32 가중치 {m['fp32_state_dict_mb']} MB\n\n")
-    out += "| 설정 | p50 ms | p95 ms | 처리량 예제/s | RSS GB | fp32 bs=1과 출력 일치 % |\n|---|---:|---:|---:|---:|---:|\n"
+    out = (f"조건: {m['model']}(화학 SFT 모델), 입력 {m['n_examples']}개(ko test), max_new_tokens {m['max_new_tokens']}, 워밍업 {m['warmup_rounds']}라운드 + 측정 {m['measured_rounds']}라운드, "
+           f"{m['threads']} 스레드, {m['cores']} cores x86_64, torch {m['torch']}, CUDA {m['cuda']}. 정밀도마다 **별도 프로세스**에서 측정(메모리 비교를 위해). int8 준비 {m.get('int8_prepare_s', '?')} s.\n\n")
+    out += "| 설정 | p50 ms | p95 ms | 처리량 예제/s | 모델 파일 MB | 프로세스 peak RSS GB | fp32 bs=1과 출력 문자열 일치 % |\n|---|---:|---:|---:|---:|---:|---:|\n"
     for r in b["results"]:
-        out += f"| {r['config']} | {r['p50_ms']} | {r['p95_ms']} | {r['throughput_ex_per_s']} | {r['rss_gb_after']} | {pct(r['agreement_with_fp32_bs1'])} |\n"
+        out += f"| {r['config']} | {r['p50_ms']} | {r['p95_ms']} | {r['throughput_ex_per_s']} | {r.get('state_dict_mb', '–')} | {r.get('peak_rss_gb', r.get('rss_gb_after', '–'))} | {pct(r['agreement_with_fp32_bs1'])} |\n"
     return out
 
 
@@ -129,7 +135,8 @@ def blocks() -> dict[str, str]:
         "ko": eval_table("ko_test", "한국어 표 QA — 독립 test (원본 539 + 합성 160)") + "\n" + eval_table("ko_custom", "한국어 표 QA — 수작업 30문항") + "\n" + category_table("ko_custom", "한국어 수작업"),
         "chem": eval_table("chem_custom", "영어 화학 문서 — 수작업 32문항 (test 분할 문서)") + "\n" + eval_table("chem_syndev", "영어 화학 — 합성 dev 80문항(템플릿, 참고용)") + "\n" + category_table("chem_custom", "화학 수작업"),
         "training": training_table(),
-        "rl": rl_table(),
+        "rl": rl_table("rl_ko"),
+        "rl_v1": rl_table("rl_ko_v1"),
         "bench": bench_table(),
         "pp": pp_table(),
     }
@@ -147,8 +154,24 @@ def splice(path: Path, blk: dict[str, str]) -> int:
     return n
 
 
+def check_blocks(blk: dict[str, str]) -> int:
+    """Fail if a spliced block in README/REPORT differs from what the artifacts render to (stale or hand-edited table)."""
+    bad = 0
+    for p in [ROOT / "README.md", ROOT / "docs" / "REPORT.md"]:
+        text = p.read_text(encoding="utf-8")
+        for name, body in blk.items():
+            m = re.search(rf"<!-- results:{name}:start -->\n(.*?)\n<!-- results:{name}:end -->", text, re.S)
+            if m and m.group(1).strip() != body.strip():
+                print(f"{p.name}: block '{name}' is out of date with experiments/ artifacts (run scripts/render_results.py)")
+                bad += 1
+    print(f"checked result blocks, {bad} stale")
+    return 1 if bad else 0
+
+
 def main() -> None:
     blk = blocks()
+    if "--check" in sys.argv:
+        sys.exit(check_blocks(blk))
     if "--print" in sys.argv:
         for k, v in blk.items():
             print(f"### {k}\n{v}")

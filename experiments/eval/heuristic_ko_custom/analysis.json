@@ -1,0 +1,61 @@
+{
+ "run": "experiments/eval/heuristic_ko_custom",
+ "n": 30,
+ "n_answerable": 25,
+ "pred_status_answerable": {
+  "answered": 15,
+  "abstained": 10
+ },
+ "abstain_reason_answerable": {
+  "ambiguous_question": 5,
+  "not_in_document": 5
+ },
+ "raw_correct_but_blocked": 0,
+ "evidence_repaired": 0,
+ "lookup_citation": {
+  "n": 8,
+  "row_correct": 0.75,
+  "col_correct": 0.625,
+  "both_correct": 0.625
+ },
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   8
+  ],
+  [
+   "text->abstain",
+   6
+  ],
+  [
+   "abstain->abstain",
+   5
+  ],
+  [
+   "lookup->abstain",
+   4
+  ],
+  [
+   "diff->diff",
+   2
+  ],
+  [
+   "avg->avg",
+   2
+  ],
+  [
+   "sum->sum",
+   1
+  ],
+  [
+   "lookup->diff",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 30,
+   "verified_em": 0.5
+  }
+ }
+}

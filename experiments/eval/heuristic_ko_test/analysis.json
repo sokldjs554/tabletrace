@@ -1,35 +1,35 @@
 {
  "run": "experiments/eval/heuristic_ko_test",
  "n": 699,
- "n_answerable": 572,
+ "n_answerable": 649,
  "pred_status_answerable": {
-  "abstained": 245,
-  "answered": 327
+  "abstained": 275,
+  "answered": 374
  },
  "abstain_reason_answerable": {
-  "ambiguous_question": 185,
-  "not_in_document": 60
+  "ambiguous_question": 197,
+  "not_in_document": 78
  },
  "raw_correct_but_blocked": 0,
  "evidence_repaired": 0,
  "lookup_citation": {
-  "n": 248,
-  "row_correct": 0.847,
-  "col_correct": 0.585,
-  "both_correct": 0.552
+  "n": 270,
+  "row_correct": 0.807,
+  "col_correct": 0.567,
+  "both_correct": 0.522
  },
  "op_confusion_top": [
   [
-   "lookup->abstain",
-   271
+   "lookup->lookup",
+   270
   ],
   [
-   "lookup->lookup",
-   265
+   "lookup->abstain",
+   266
   ],
   [
    "diff->diff",
-   50
+   51
   ],
   [
    "abstain->abstain",
@@ -37,29 +37,29 @@
   ],
   [
    "avg->avg",
-   21
+   22
   ],
   [
    "sum->sum",
    12
   ],
   [
-   "sum->lookup",
+   "diff->lookup",
    8
   ],
   [
-   "diff->lookup",
-   7
+   "sum->lookup",
+   8
   ]
  ],
  "by_source_verified": {
   "korwikitq": {
    "n": 539,
-   "verified_em": 0.315
+   "verified_em": 0.262
   },
   "synthetic": {
    "n": 160,
-   "verified_em": 0.706
+   "verified_em": 0.7
   }
  }
 }

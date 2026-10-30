@@ -1,28 +1,28 @@
 {
  "run": "experiments/eval/sft_ko_ko_test",
  "n": 699,
- "n_answerable": 572,
+ "n_answerable": 649,
  "pred_status_answerable": {
-  "answered": 455,
-  "abstained": 117
+  "answered": 462,
+  "abstained": 187
  },
  "abstain_reason_answerable": {
-  "verification_failed": 57,
-  "not_in_document": 24,
-  "invalid_program": 36
+  "verification_failed": 68,
+  "invalid_program": 95,
+  "not_in_document": 24
  },
  "raw_correct_but_blocked": 15,
- "evidence_repaired": 307,
+ "evidence_repaired": 346,
  "lookup_citation": {
-  "n": 454,
-  "row_correct": 0.775,
-  "col_correct": 0.326,
-  "both_correct": 0.238
+  "n": 500,
+  "row_correct": 0.726,
+  "col_correct": 0.322,
+  "both_correct": 0.224
  },
  "op_confusion_top": [
   [
    "lookup->lookup",
-   503
+   500
   ],
   [
    "abstain->lookup",
@@ -30,7 +30,7 @@
   ],
   [
    "lookup->diff",
-   36
+   39
   ],
   [
    "diff->diff",
@@ -56,11 +56,11 @@
  "by_source_verified": {
   "korwikitq": {
    "n": 539,
-   "verified_em": 0.314
+   "verified_em": 0.299
   },
   "synthetic": {
    "n": 160,
-   "verified_em": 0.1
+   "verified_em": 0.087
   }
  }
 }

@@ -1,0 +1,66 @@
+{
+ "run": "experiments/eval/rl_ko_ko_test",
+ "n": 699,
+ "n_answerable": 649,
+ "pred_status_answerable": {
+  "answered": 403,
+  "abstained": 246
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 75,
+  "invalid_program": 154,
+  "not_in_document": 17
+ },
+ "raw_correct_but_blocked": 15,
+ "evidence_repaired": 258,
+ "lookup_citation": {
+  "n": 456,
+  "row_correct": 0.781,
+  "col_correct": 0.338,
+  "both_correct": 0.265
+ },
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   456
+  ],
+  [
+   "lookup->diff",
+   83
+  ],
+  [
+   "diff->diff",
+   47
+  ],
+  [
+   "abstain->lookup",
+   37
+  ],
+  [
+   "avg->diff",
+   21
+  ],
+  [
+   "sum->diff",
+   18
+  ],
+  [
+   "abstain->diff",
+   13
+  ],
+  [
+   "diff->lookup",
+   13
+  ]
+ ],
+ "by_source_verified": {
+  "korwikitq": {
+   "n": 539,
+   "verified_em": 0.306
+  },
+  "synthetic": {
+   "n": 160,
+   "verified_em": 0.138
+  }
+ }
+}

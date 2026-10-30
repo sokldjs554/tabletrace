@@ -10,10 +10,10 @@
    "data/ko/documents.jsonl"
   ],
   "n": 699,
-  "wall_s": 319.0,
+  "wall_s": 448.8,
   "hardware": "x86_64",
   "label": null,
-  "finished": "2026-10-29T13:44:36",
+  "finished": "2026-10-30T06:19:23",
   "quantize": false
  },
  "metrics": {
@@ -41,7 +41,7 @@
   "verifier_corrections": 0.1957,
   "truncated_gold_rate": 0.0887,
   "verified_em_untruncated": 0.3265,
-  "mean_ms_per_example": 446.7,
+  "mean_ms_per_example": 614.8,
   "by_source": {
    "korwikitq": {
     "n": 539,

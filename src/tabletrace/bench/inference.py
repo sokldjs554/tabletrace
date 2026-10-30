@@ -2,8 +2,9 @@
 
 Compares, on the same prompts and hardware:
   fp32 eager (baseline) | int8 dynamic quantization of nn.Linear | batch size 1 vs 8 | KV cache on/off
-and reports latency (p50/p95 per request), throughput (examples/s), peak RSS and answer agreement with
-the baseline. Everything is measured here; nothing is extrapolated.
+and reports latency (p50/p95 per request), throughput (examples/s), serialized model size, peak RSS (one
+process per precision) and string agreement with the fp32 bs=1 output. Whether quantization hurts *accuracy*
+is measured separately with `eval.run --quantize` (see docs/experiments/inference.md). Nothing is extrapolated.
 
   python -m tabletrace.bench.inference --model experiments/sft_ko/model --data data/ko/test.jsonl --n 48 --out experiments/bench/inference.json
 """
@@ -47,7 +48,44 @@ def run_config(model, tok, texts, bs, use_cache, max_out, warmup, repeats):
             "mean_ms": round(statistics.mean(lat_ms), 1), "throughput_ex_per_s": round(len(texts) / total_s, 3)}, outs
 
 
+def serialized_mb(model) -> float:
+    import io
+
+    buf = io.BytesIO()
+    torch.save(model.state_dict(), buf)
+    return round(buf.getbuffer().nbytes / 1e6, 1)
+
+
+def run_one(a) -> dict:
+    """Measure ONE precision in a fresh process so peak RSS is attributable to that configuration."""
+    import resource
+
+    from transformers import MT5ForConditionalGeneration, PreTrainedTokenizerFast
+
+    tok = PreTrainedTokenizerFast.from_pretrained(a.model)
+    docs = load_docs(*[Path(c) for c in a.corpus])
+    recs = read_records([Path(p) for p in a.data])[: a.n]
+    texts = [e.input_text for e in build_examples(recs, docs, tok, 512)]
+    model = MT5ForConditionalGeneration.from_pretrained(a.model).eval()
+    t0 = time.time()
+    if a.only == "int8":
+        model = torch.ao.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
+    prep_s = round(time.time() - t0, 1)
+    configs = [(1, True), (8, True)] + ([(1, False)] if a.only == "fp32" else [])
+    results = []
+    for bs, cache in configs:
+        m, outs = run_config(model, tok, texts, bs, cache, a.max_out, a.warmup, a.repeats)
+        m.update({"precision": a.only, "batch_size": bs, "kv_cache": cache, "outputs": outs})
+        results.append(m)
+        print(json.dumps({k: v for k, v in m.items() if k != "outputs"}, ensure_ascii=False), flush=True)
+    return {"precision": a.only, "prepare_s": prep_s, "state_dict_mb": serialized_mb(model),
+            "peak_rss_gb": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6, 2), "results": results}
+
+
 def main() -> None:
+    import subprocess
+    import sys
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
     ap.add_argument("--corpus", nargs="+", default=["data/ko/documents.jsonl"])
@@ -57,39 +95,36 @@ def main() -> None:
     ap.add_argument("--warmup", type=int, default=1)
     ap.add_argument("--repeats", type=int, default=2)
     ap.add_argument("--threads", type=int, default=4)
+    ap.add_argument("--only", choices=["fp32", "int8"], default=None, help="internal: measure one precision in this process")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
-    from transformers import MT5ForConditionalGeneration, PreTrainedTokenizerFast
-
-    tok = PreTrainedTokenizerFast.from_pretrained(a.model)
-    docs = load_docs(*[Path(c) for c in a.corpus])
-    recs = read_records([Path(p) for p in a.data])[: a.n]
-    texts = [e.input_text for e in build_examples(recs, docs, tok, 512)]
-    base = MT5ForConditionalGeneration.from_pretrained(a.model).eval()
+    if a.only:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(json.dumps(run_one(a), ensure_ascii=False))
+        return
+    parts = {}
+    for prec in ("fp32", "int8"):
+        tmp = Path(a.out).with_suffix(f".{prec}.tmp.json")
+        cmd = [sys.executable, "-m", "tabletrace.bench.inference", "--model", a.model, "--corpus", *a.corpus, "--data", *a.data, "--n", str(a.n),
+               "--max-out", str(a.max_out), "--warmup", str(a.warmup), "--repeats", str(a.repeats), "--threads", str(a.threads), "--only", prec, "--out", str(tmp)]
+        subprocess.run(cmd, check=True)
+        parts[prec] = json.loads(tmp.read_text())
+        tmp.unlink()
+    ref = {(r["batch_size"], r["kv_cache"]): r["outputs"] for r in parts["fp32"]["results"]}[(1, True)]
     results = []
-    configs = [("fp32 eager, bs=1, kv-cache on", base, 1, True), ("fp32 eager, bs=8, kv-cache on", base, 8, True),
-               ("fp32 eager, bs=1, kv-cache OFF", base, 1, False)]
-    t0 = time.time()
-    q = torch.ao.quantization.quantize_dynamic(MT5ForConditionalGeneration.from_pretrained(a.model).eval(), {torch.nn.Linear}, dtype=torch.qint8)
-    quant_s = round(time.time() - t0, 1)
-    configs += [("int8 dynamic (Linear), bs=1, kv-cache on", q, 1, True), ("int8 dynamic (Linear), bs=8, kv-cache on", q, 8, True)]
-    base_outs = None
-    for name, model, bs, cache in configs:
-        rss0 = rss_gb()
-        m, outs = run_config(model, tok, texts, bs, cache, a.max_out, a.warmup, a.repeats)
-        if base_outs is None:
-            base_outs = outs
-        agree = sum(1 for x, y in zip(outs, base_outs, strict=True) if x.strip() == y.strip()) / len(outs)
-        m.update({"config": name, "batch_size": bs, "kv_cache": cache, "rss_gb_after": round(rss_gb(), 2), "rss_gb_before": round(rss0, 2),
-                  "agreement_with_fp32_bs1": round(agree, 4)})
-        results.append(m)
-        print(json.dumps(m, ensure_ascii=False), flush=True)
-    sizes = {"fp32_state_dict_mb": round(sum(p.numel() * 4 for p in base.parameters()) / 1e6, 1)}
-    out = {"meta": {"model": a.model, "n_examples": len(texts), "max_new_tokens": a.max_out, "warmup_rounds": a.warmup, "measured_rounds": a.repeats,
-                    "threads": a.threads, "cpu": platform.processor() or platform.machine(), "cores": os.cpu_count(),
-                    "torch": torch.__version__, "cuda": torch.cuda.is_available(), "quantize_time_s": quant_s,
-                    "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), **sizes},
+    for prec in ("fp32", "int8"):
+        for r in parts[prec]["results"]:
+            agree = sum(1 for x, y in zip(r["outputs"], ref, strict=True) if x.strip() == y.strip()) / len(ref)
+            results.append({"config": f"{prec}, bs={r['batch_size']}, kv-cache {'on' if r['kv_cache'] else 'OFF'}", "precision": prec,
+                            "batch_size": r["batch_size"], "kv_cache": r["kv_cache"], "p50_ms": r["p50_ms"], "p95_ms": r["p95_ms"], "mean_ms": r["mean_ms"],
+                            "throughput_ex_per_s": r["throughput_ex_per_s"], "agreement_with_fp32_bs1": round(agree, 4),
+                            "peak_rss_gb": parts[prec]["peak_rss_gb"], "state_dict_mb": parts[prec]["state_dict_mb"]})
+    out = {"meta": {"model": a.model, "n_examples": len(ref), "max_new_tokens": a.max_out, "warmup_rounds": a.warmup, "measured_rounds": a.repeats,
+                    "threads": a.threads, "cpu": platform.processor() or platform.machine(), "cores": os.cpu_count(), "torch": torch.__version__,
+                    "cuda": torch.cuda.is_available(), "int8_prepare_s": parts["int8"]["prepare_s"], "finished": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "note": "each precision measured in its own process; peak_rss_gb = ru_maxrss of that process (includes the tokenizer/torch runtime); "
+                            "dynamic int8 quantizes nn.Linear only, the 250k x 512 embedding and lm_head stay fp32"},
            "results": results}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(out, ensure_ascii=False, indent=1))

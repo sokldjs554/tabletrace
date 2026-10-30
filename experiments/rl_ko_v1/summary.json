@@ -1,0 +1,85 @@
+{
+ "args": {
+  "model": "experiments/sft_ko2/model",
+  "train": [
+   "data/ko/train.jsonl",
+   "data/ko/synthetic_train.jsonl"
+  ],
+  "dev": [
+   "data/ko/dev.jsonl",
+   "data/ko/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "out": "experiments/rl_ko/model",
+  "steps": 60,
+  "prompts_per_step": 4,
+  "group": 4,
+  "lr": 1e-05,
+  "beta": 0.02,
+  "temperature": 1.0,
+  "max_in": 512,
+  "max_out": 64,
+  "eval_every": 20,
+  "chunk": 8,
+  "seed": 0,
+  "threads": 4,
+  "max_dev": 0,
+  "kl_clamp": 10.0
+ },
+ "n_train_prompts": 3485,
+ "prompt_pools": {
+  "lookup": 2585,
+  "calc": 640,
+  "abstain": 260
+ },
+ "n_dev": 245,
+ "hardware": {
+  "cpu": "x86_64",
+  "threads": 4,
+  "cuda": false,
+  "ram_gb": 16.9
+ },
+ "torch": "2.15.0+cu132",
+ "started": "2026-10-30T05:12:14",
+ "algorithm": "GRPO-style group-normalised policy gradient, on-policy, k3 KL to SFT reference",
+ "finished": "2026-10-30T05:43:31",
+ "wall_s": 1753.6,
+ "steps": 60,
+ "dev_history": [
+  {
+   "n": 245,
+   "program_exact": 0.08571428571428572,
+   "verified_em": 0.2816326530612245,
+   "parse_fail": 0.0,
+   "step": 0
+  },
+  {
+   "n": 245,
+   "program_exact": 0.09795918367346938,
+   "verified_em": 0.3020408163265306,
+   "parse_fail": 0.0,
+   "step": 20,
+   "elapsed_s": 630.3
+  },
+  {
+   "n": 245,
+   "program_exact": 0.10204081632653061,
+   "verified_em": 0.2653061224489796,
+   "parse_fail": 0.0,
+   "step": 40,
+   "elapsed_s": 1180.8
+  },
+  {
+   "n": 245,
+   "program_exact": 0.08163265306122448,
+   "verified_em": 0.24081632653061225,
+   "parse_fail": 0.0,
+   "step": 60,
+   "elapsed_s": 1753.6
+  }
+ ],
+ "best_dev_verified_em": 0.3020408163265306,
+ "best_step": 20
+}

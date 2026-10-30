@@ -17,7 +17,7 @@ ev() { # key model corpus data...
   python scripts/analyze_predictions.py "experiments/eval/$key" > /dev/null 2>&1
   echo "[$(date -u +%H:%M:%S)] eval $key: $(python -c "import json;m=json.load(open('experiments/eval/$key/metrics.json'))['metrics'];print('vEM',m['verified_em'],'untrunc',m['verified_em_untruncated'])" 2>/dev/null)"
 }
-for pair in "heuristic:heuristic" "base:models/mt5-small-base" "sft_ko:experiments/sft_ko/model" "sft_ko2:experiments/sft_ko2/model" "rl_ko:experiments/rl_ko/model" "sft_chem:experiments/sft_chem/model"; do
+for pair in "heuristic:heuristic" "base:models/mt5-small-base" "sft_ko:experiments/sft_ko/model" "sft_ko2:experiments/sft_ko2/model" "rl_ko_v1:experiments/rl_ko_v1/model" "rl_ko:experiments/rl_ko/model" "sft_chem:experiments/sft_chem/model"; do
   key=${pair%%:*}; model=${pair#*:}
   [ "$model" = "heuristic" ] || [ -f "$model/model.safetensors" ] || { echo "skip $key (no model)"; continue; }
   ev "${key}_ko_test" "$model" "$KO" $KO_TEST
@@ -27,20 +27,4 @@ done
 for pair in "sft_ko2:experiments/sft_ko2/model" "sft_chem:experiments/sft_chem/model"; do
   key=${pair%%:*}; model=${pair#*:}; [ -f "$model/model.safetensors" ] && ev "${key}_chem_syndev" "$model" "$CH" data/chem/synthetic_dev.jsonl
 done
-CHROMIUM=${TT_CHROMIUM:-/opt/pw-browsers/chromium-1243/chrome-linux64/chrome}
-MODEL_FINAL=models/mt5-small-tabletrace
-if [ -f "$MODEL_FINAL/model.safetensors" ]; then
-  python scripts/make_recorded_runs.py --planners neural heuristic --model "$MODEL_FINAL" > experiments/pipeline/final_recorded.log 2>&1
-else
-  python scripts/make_recorded_runs.py --planners heuristic > experiments/pipeline/final_recorded.log 2>&1
-fi
-echo "[$(date -u +%H:%M:%S)] recorded runs: $(tail -1 experiments/pipeline/final_recorded.log)"
-python scripts/build_research.py > /dev/null && python scripts/render_results.py
-python scripts/build_static_site.py --out _site --commit "$(git rev-parse --short HEAD)" > /dev/null
-python scripts/console_screenshots.py --out docs/images --chromium "$CHROMIUM" --planner auto > experiments/pipeline/final_e2e_live.log 2>&1
-echo "[$(date -u +%H:%M:%S)] e2e live: $(tail -1 experiments/pipeline/final_e2e_live.log)"
-python scripts/console_screenshots.py --out docs/images --static _site --chromium "$CHROMIUM" > experiments/pipeline/final_e2e_static.log 2>&1
-echo "[$(date -u +%H:%M:%S)] e2e static: $(tail -1 experiments/pipeline/final_e2e_static.log)"
-rm -rf _site
-python scripts/check_numbers.py
-echo "[$(date -u +%H:%M:%S)] FINALIZE DONE"
+bash "$(dirname "$0")/finalize_tail.sh"

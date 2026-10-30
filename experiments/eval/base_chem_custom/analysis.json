@@ -1,0 +1,51 @@
+{
+ "run": "experiments/eval/base_chem_custom",
+ "n": 32,
+ "n_answerable": 27,
+ "pred_status_answerable": {
+  "abstained": 27
+ },
+ "abstain_reason_answerable": {
+  "invalid_program": 27
+ },
+ "raw_correct_but_blocked": 0,
+ "evidence_repaired": 0,
+ "lookup_citation": {
+  "n": 0,
+  "row_correct": null,
+  "col_correct": null,
+  "both_correct": null
+ },
+ "op_confusion_top": [
+  [
+   "lookup->None",
+   13
+  ],
+  [
+   "text->None",
+   7
+  ],
+  [
+   "abstain->None",
+   5
+  ],
+  [
+   "diff->None",
+   4
+  ],
+  [
+   "ratio->None",
+   2
+  ],
+  [
+   "sum->None",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 32,
+   "verified_em": 0.156
+  }
+ }
+}

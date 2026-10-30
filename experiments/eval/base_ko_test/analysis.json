@@ -1,0 +1,51 @@
+{
+ "run": "experiments/eval/base_ko_test",
+ "n": 699,
+ "n_answerable": 649,
+ "pred_status_answerable": {
+  "abstained": 649
+ },
+ "abstain_reason_answerable": {
+  "invalid_program": 649
+ },
+ "raw_correct_but_blocked": 0,
+ "evidence_repaired": 0,
+ "lookup_citation": {
+  "n": 0,
+  "row_correct": null,
+  "col_correct": null,
+  "both_correct": null
+ },
+ "op_confusion_top": [
+  [
+   "lookup->None",
+   539
+  ],
+  [
+   "diff->None",
+   60
+  ],
+  [
+   "abstain->None",
+   50
+  ],
+  [
+   "sum->None",
+   25
+  ],
+  [
+   "avg->None",
+   25
+  ]
+ ],
+ "by_source_verified": {
+  "korwikitq": {
+   "n": 539,
+   "verified_em": 0.0
+  },
+  "synthetic": {
+   "n": 160,
+   "verified_em": 0.312
+  }
+ }
+}
