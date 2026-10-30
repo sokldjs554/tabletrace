@@ -6,8 +6,7 @@
 [![pages](https://github.com/sokldjs554/tabletrace/actions/workflows/pages.yml/badge.svg)](https://github.com/sokldjs554/tabletrace/actions/workflows/pages.yml)
 ![license](https://img.shields.io/badge/code-Apache--2.0-blue)
 
-> **공개 데모 상태: 아직 배포되지 않았습니다.** 이 프로젝트를 만든 세션이 GitHub에 푸시할 수 없어(Claude GitHub App 미설치, 403) Pages 워크플로가 한 번도 실행되지 않았습니다. 푸시 후 `main`에서 자동 배포되도록 [pages.yml](.github/workflows/pages.yml)을 작성해 두었고, 배포될 주소는 <https://sokldjs554.github.io/tabletrace/> 입니다(**지금은 이 주소가 열리지 않을 수 있습니다**).
-> **지금 바로 볼 수 있는 방법**: `docker compose up --build` 후 <http://localhost:8000> — 같은 화면이 실제 모델·도구로 동작합니다(§12). 정적 데모(저장된 실행 결과)도 로컬에서 빌드해 Playwright로 검증했습니다(§13).
+> **데모 상태**: GitHub Pages 배포는 하지 못했습니다(이 프로젝트를 만든 세션이 GitHub에 푸시할 수 없었습니다: Claude GitHub App 미설치, 403). 대신 **저장된 실행 결과 데모를 단일 HTML 페이지로 만들어 claude.ai Artifact로 호스팅**했습니다: <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> 이 링크는 **비공개**이고 소유자가 공유해야 다른 사람이 열 수 있습니다. 이 페이지에는 백엔드가 없어 항상 **저장된 실행 결과** 모드이며(기록 시각·모델·커밋을 화면에 표시), 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). `pages.yml`은 푸시 후 `main`에서 자동 배포되도록 작성했지만 한 번도 실행되지 않았고, 배포될 주소 <https://sokldjs554.github.io/tabletrace/>는 지금 열리지 않을 수 있습니다.
 > **정직한 한 줄 요약**: 튜닝한 mT5-small(300M, CPU 학습)은 미튜닝 모델보다 크게 나아졌고, 2차 재학습과 강화학습(RL v3)으로 본문 답변과 모델 스스로의 보류까지 일부 고쳤습니다. 그러나 한국어 독립 test 전체 점수는 단순한 어휘 겹침 기준선을 여전히 넘지 못했습니다(§9). 약점은 셀 **좌표**(열) 생성입니다.
 
 ![TableTrace 워크벤치 — 한국어 표 질문의 답변·근거 셀·검증 항목](docs/images/live-desktop-03-result.png)
@@ -604,4 +603,5 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | Docker 이미지 | 완료 | 로컬 빌드·컨테이너 smoke |
 | GitHub Actions CI | **구현 후 미실행** | 푸시 불가(403) |
 | GitHub Pages 공개 배포 | **구현 후 미실행** | 푸시 불가(403) |
+| 저장된 결과 데모 호스팅(대체 경로) | 완료(비공개 링크) | 단일 파일 `scripts/build_artifact_page.py` → claude.ai Artifact. 소유자가 공유해야 공개됨, 실시간 모드는 호스팅하지 않음 |
 | gRPC | 미구현(불필요 판단) | §7 |

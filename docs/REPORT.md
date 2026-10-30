@@ -9,9 +9,9 @@
 | 목표 저장소 | <https://github.com/sokldjs554/tabletrace> — **푸시하지 못했다.** git 푸시와 GitHub API 푸시가 모두 `403`(`Claude doesn't have GitHub access … for your organization`, `Resource not accessible by integration`). 이 계정에 Claude GitHub App이 설치되어 있지 않다. 사용자 요청으로 재시도했으나 같은 결과였고, 최종 커밋 뒤에 한 번 더 시도한 `git push`(두 저장소)와 API 브랜치 생성도 모두 403이었다. 읽기 API는 동작하며 tabletrace는 브랜치 목록이 비어 있다(저장소가 비어 있는지 없는지는 확인하지 못함). |
 | chartwire 지정 브랜치 | <https://github.com/sokldjs554/chartwire> `claude/bold-carson-ix16u0` — **여기도 푸시하지 못했다.** 로컬에는 `tabletrace/` 복사본과 전체 이력 번들(`tabletrace-history.bundle`)을 커밋해 두었다. |
 | 지금 코드가 있는 곳 | 컨테이너의 `/home/user/tabletrace`(git 저장소 원본), `/home/user/chartwire/tabletrace/`(복사본), `/home/user/chartwire/tabletrace-history.bundle`(전체 이력) |
-| 공개 데모 | **배포하지 못했다.** Pages 워크플로(`pages.yml`)는 작성했으나 원격에 푸시되지 않아 한 번도 실행되지 않았다. 배포 예정 주소 <https://sokldjs554.github.io/tabletrace/>는 지금 열리지 않을 수 있다. |
+| 공개 데모 | **GitHub Pages로는 배포하지 못했다**(`pages.yml`은 푸시되지 않아 실행된 적 없음, 주소 <https://sokldjs554.github.io/tabletrace/>는 열리지 않을 수 있음). **대체 경로로 저장된 실행 결과 데모를 claude.ai Artifact로 호스팅했다**: <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> — 이 링크는 **비공개**이며 소유자가 공유해야 다른 사람이 열 수 있다(공유 설정은 내가 바꿀 수 없다). 백엔드가 없어 저장된 실행 결과 모드로만 동작한다 |
 | 로컬 실시간 데모 | `docker compose up --build` → http://localhost:8000 (Docker 빌드·컨테이너 smoke는 이 세션에서 실행해 통과) |
-| 정적 데모 | 로컬에서 `scripts/build_static_site.py`로 빌드해 Playwright로 검증(§10) |
+| 정적 데모 | 로컬에서 `scripts/build_static_site.py`(GitHub Pages용 폴더)와 `scripts/build_artifact_page.py`(단일 HTML, Artifact용)로 빌드하고 Playwright로 검증(§10). 단일 HTML은 file:// 로 열어 데스크톱·모바일에서 오류 0, 가로 넘침 없음을 확인 |
 
 푸시를 가능하게 하려면 https://claude.ai/connect-github 에서 GitHub 계정을 다시 연결하고 Claude GitHub App을 해당 저장소에 설치한 뒤, 저장소가 선택된 새 세션을 시작해야 한다(이 세션에서는 저장소 선택을 바꿀 수 없다).
 
@@ -19,10 +19,10 @@
 
 | 항목 | 값 |
 |---|---|
-| 최종 커밋(tabletrace 로컬 저장소) | `799d528`(코드·모델 평가·정적 데모 기록의 기준 커밋). 이후 변경은 `src/`·`Dockerfile`·`.github/`를 건드리지 않고 문서, 숫자 표식, 결과 표, 저장된 실행 결과 재기록(`console/data`), E2E 스크린샷·요약, 테스트 린트 정리(8줄)뿐이다(`git diff --stat 799d528 HEAD -- src scripts tests console data Dockerfile .github` 로 확인 가능). 이 보고서를 포함한 **최종 커밋의 SHA는 자기 참조라 파일에 적을 수 없으며** `git log -1`과 최종 응답에 있다 |
+| 최종 커밋(tabletrace 로컬 저장소) | `e6f9d71`(코드·모델 평가·저장된 실행 결과 기록의 기준 커밋). 이후 변경은 `src/`의 **선택 기능 `column_check`(기본 꺼짐, 평가에 쓰이지 않음)**와 그 테스트, 문서·숫자 표식·결과 표·E2E 스크린샷·테스트 요약이다(`git diff --stat e6f9d71 HEAD -- src scripts tests console Dockerfile .github` 로 확인 가능). 이 보고서를 포함한 **최종 커밋의 SHA는 자기 참조라 파일에 적을 수 없으며** `git log -1`과 최종 응답에 있다 |
 | 패키지 버전 | 0.1.0 (`src/tabletrace/__init__.py`) |
-| 정적 데모에 기록된 커밋 | `799d528` (`console/data/recorded/index.json`) |
-| 배포된 버전 | 없음(배포하지 못함) |
+| 정적 데모에 기록된 커밋 | `e6f9d71` (`console/data/recorded/index.json`, Artifact 페이지에도 같은 데이터) |
+| 배포된 버전 | GitHub Pages: 없음. claude.ai Artifact(저장된 결과, 비공개): 버전 1, 기록 커밋 `e6f9d71` — <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> |
 
 ## 3. 공고 대조표
 
@@ -46,7 +46,8 @@
 | Docker | API+콘솔 이미지, compose, 헬스체크 | `Dockerfile`, `docker-compose.yml`, `experiments/docker/smoke.json` | 이 세션에서 이미지 빌드(786 MB) + 컨테이너 smoke 통과(Docker Hub 429로 MCR 베이스 이미지 사용) | 완료 |
 | LangChain 또는 LangGraph | 위 Agent 항목(LangGraph) | `agent/graph.py` | `GET /v1/graph` 가 Mermaid 반환, 조건부 재시도 분기 | 완료 |
 | GitHub Actions | `ci.yml`(린트·테스트·데이터·수치·Docker smoke), `pages.yml` | `.github/workflows/` | 원격 실행 없음(푸시 불가). 같은 명령을 로컬에서 실행해 통과 | 구현 후 미실행 |
-| 공개 데모 배포 | GitHub Pages 정적 데모 | `pages.yml`, `scripts/build_static_site.py` | 배포하지 못함. 로컬 정적 빌드는 Playwright로 검증 | 구현 후 미실행 |
+| 공개 데모 배포 | GitHub Pages 정적 데모 | `pages.yml`, `scripts/build_static_site.py` | 푸시가 막혀 배포하지 못함. 로컬 정적 빌드는 Playwright로 검증 | 구현 후 미실행 |
+| 저장된 결과 데모 호스팅(대체) | 단일 HTML 페이지를 claude.ai Artifact로 호스팅 | `scripts/build_artifact_page.py`, <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> | 데스크톱·모바일 오류 0 확인. 링크는 비공개, 소유자가 공유해야 공개됨 | 완료 |
 
 ## 4. 사용한 기술과 실제 역할
 
@@ -469,7 +470,7 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 |---|---|---|
 | tabletrace / chartwire 원격 푸시 | 두 저장소 모두 git 푸시와 GitHub API 푸시가 `403`. Claude GitHub App 미설치. 사용자 요청으로 재시도했으나 동일 | 로컬 커밋 이력, 번들, chartwire 안의 복사본과 로컬 커밋(§1) |
 | GitHub Actions 실행·결과 확인 | 푸시 불가 | `ci.yml`, `pages.yml` — 같은 명령(린트·pytest·데이터 검사·수치 검사·Docker smoke)을 로컬에서 실행해 통과 |
-| GitHub Pages 공개 배포 | 푸시 불가, 외부 배포 플랫폼 접근도 차단 | 정적 빌드 스크립트 + 로컬 Playwright 검증 |
+| GitHub Pages 공개 배포 | 푸시 불가, 외부 배포 플랫폼 접근도 차단 | 정적 빌드 스크립트 + 로컬 Playwright 검증. 대체로 저장된 결과를 단일 HTML로 만들어 claude.ai Artifact에 호스팅(비공개 링크) |
 | EXAONE 다운로드·튜닝·서빙 | `huggingface.co` 차단, GPU 없음 | 라이선스·버전 확인(docs/experiments/exaone.md), LoRA SFT 스크립트, 예상 자원·비용 |
 | 멀티 GPU 병렬 실측 | GPU 없음 | 파이프라인 병렬 코드(CPU 2프로세스로 정확성 검증), GPU 명령·예상 자원 |
 | vLLM / SGLang 실행 | GPU 없음 | OpenAI 호환 클라이언트·서빙 스크립트·벤치 스크립트, 모의 서버 테스트 |
@@ -492,7 +493,7 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 9. **int8 양자화**: 모든 층 int8은 정확도를 해친다(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%). `lm_head`만 int8은 ko test에서 손실이 검출되지 않지만 본문 테스트에서는 fp32가 <!-- num:experiments/eval/paired_tests.json:int8_lm_head_vs_fp32_text2_test.reference_better:int -->6<!-- /num -->문항, int8이 <!-- num:experiments/eval/paired_tests.json:int8_lm_head_vs_fp32_text2_test.candidate_better:int -->1<!-- /num -->문항 더 맞혔다(비유의). 정확도 확인은 CPU에서만 했다(§8, §18.2).
 10. **하드웨어**: CPU 4코어 단일 환경의 수치다. 지연 시간은 공유 VM이라 실행마다 20% 이상 변동한다. GPU·멀티 GPU·vLLM·EXAONE 실측 없음.
 11. **RL**: 120 step·시드 1개의 예비 실험이다. 보상은 검증기가 정의하므로 검증기의 허점이 곧 보상 허점이다(1차에서 실제로 발생). v3의 이득은 본문 근거 없음 문항의 직접 보류에 한정되고 ko test 전체 점수는 그대로다(§18). 시드 반복을 하지 않아 이득의 재현성은 모른다.
-12. **배포**: 공개 URL 없음, CI는 원격 미실행.
+12. **배포**: 공개 URL 없음(저장된 결과 데모는 비공개 Artifact 링크, 소유자가 공유해야 함), CI는 원격 미실행, 실시간 모드는 호스팅하지 않음.
 
 ## 16. 사용자가 데모를 직접 확인하는 순서
 
@@ -504,6 +505,8 @@ git clone /home/user/chartwire/tabletrace-history.bundle tabletrace && cd tablet
 git remote add origin https://github.com/sokldjs554/tabletrace && git push -u origin main
 ```
 먼저 https://claude.ai/connect-github 에서 GitHub를 다시 연결하고 Claude GitHub App을 tabletrace에 설치해야 푸시된다(또는 본인 환경에서 위 명령 실행).
+
+**B0. 지금 바로 보기(저장된 실행 결과)**: <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> (비공개 링크: 소유자 계정으로 열거나 공유 설정을 켠 뒤 다른 사람에게 보냄). 화면 위쪽 배지가 "저장된 실행 결과"인지 확인하고, 문서를 고른 뒤 대표 질문을 눌러 보고, 오른쪽 패널에서 플래너를 "모델"과 "휴리스틱"으로 바꿔 같은 질문의 결과를 비교한다. 모델 결과에는 틀린 답도 그대로 들어 있다(예: 안시성의 관객수에 날짜 열의 값을 답하면서 검증기가 셀과 답의 일치만 확인해 통과시킨 경우).
 
 **B. 공개 데모(GitHub Pages)**: main 푸시 → Actions `pages` 워크플로가 `console/` + 저장된 실행 결과를 배포한다. 저장소 Settings → Pages → Source가 "GitHub Actions"인지 확인한다.
 
