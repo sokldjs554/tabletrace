@@ -15,8 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXP = ROOT / "experiments"
 MODELS = [("휴리스틱 기준선", "heuristic"), ("mT5-small 기본(미튜닝)", "base"), ("SFT stage1", "sft_ko"), ("SFT stage2(+본문)", "sft_ko2"),
           ("GRPO RL v1 (보상 허점)", "rl_ko_v1"), ("GRPO RL v2 (보상 수정)", "rl_ko"), ("화학 SFT", "sft_chem"), ("화학 SFT + int8 동적 양자화", "sft_chem_int8"),
-          ("[2차] SFT stage2 재학습(실제 표 옆 본문 예제)", "sft_ko3"), ("[2차] + 표 조회 보강 epoch", "sft_ko4"), ("[2차] 화학 SFT v2", "sft_chem2"), ("[2차] GRPO RL v3", "rl_v3"),
-          ("[2차] 화학 SFT v2 + int8 부분 양자화", "sft_chem2_int8")]
+          ("[2차] SFT stage2 재학습(실제 표 옆 본문 예제)", "sft_ko3"), ("[2차] + 표 조회 보강 epoch", "sft_ko4"), ("[2차] 화학 SFT v2", "sft_chem2"), ("[2차] GRPO RL v3", "rl_v3")]
 V2 = "_ec"   # eval dirs written by replaying the stored raw outputs through the verifier WITH the subject check
 
 
@@ -100,7 +99,7 @@ def rl_table(run: str = "rl_ko") -> str:
         out += (f"| {ch[0]['step']}–{ch[-1]['step']} | {avg(ch, 'reward_mean'):.3f} | {pct(avg(ch, 'correct_rate'))} | {pct(avg(ch, 'abstain_rate'))} | "
                 f"{pct(opshare(ch, 'abstain'))} | {pct(opshare(ch, 'lookup'))} | {pct(opshare(ch, 'diff'))} | {avg(ch, 'kl'):.4f} | {pct(avg(ch, 'frac_group_zero_std'))} |\n")
     if evals:
-        out += "\ndev verified EM(n=245): " + " → ".join(f"step {e['step']}: {pct(e['verified_em'])}%" for e in evals) + "\n"
+        out += f"\ndev verified EM(n={evals[0].get('n', '?')}): " + " → ".join(f"step {e['step']}: {pct(e['verified_em'])}%" for e in evals) + "\n"
     summ = load(EXP / run / "summary.json")
     if summ:
         last = summ.get("steps")
@@ -115,7 +114,7 @@ def bench_table(fname: str = "inference.json", label: str = "1차 최종 모델"
         return "_추론 벤치 산출물 없음_\n"
     m = b["meta"]
     out = (f"조건: {m['model']}({label}), 입력 {m['n_examples']}개(ko test), max_new_tokens {m['max_new_tokens']}, 워밍업 {m['warmup_rounds']}라운드 + 측정 {m['measured_rounds']}라운드, "
-           f"{m['threads']} 스레드, {m['cores']} cores x86_64, torch {m['torch']}, CUDA {m['cuda']}. 정밀도마다 **별도 프로세스**에서 측정(메모리 비교를 위해). int8 준비 {m.get('int8_prepare_s', '?')} s. 모델 실행 조건은 위와 같고 **양자화 범위**는 설정 이름의 `int8`(모든 Linear, lm_head 포함) 또는 `int8-<범위>`(일부)로 구분합니다.\n\n")
+           f"{m['threads']} 스레드, {m['cores']} cores x86_64, torch {m['torch']}, CUDA {m['cuda']}. 정밀도마다 **별도 프로세스**에서 측정(메모리 비교를 위해). 양자화 준비 시간 {', '.join(f'{k} {v}s' for k, v in (m.get('prepare_s') or {'int8': m.get('int8_prepare_s')}).items() if k != 'fp32')}. 모델 실행 조건은 위와 같고 **양자화 범위**는 설정 이름의 `int8`(모든 Linear, lm_head 포함) 또는 `int8-<범위>`(일부)로 구분합니다.\n\n")
     out += "| 설정 | p50 ms | p95 ms | 처리량 예제/s | 모델 파일 MB | 프로세스 peak RSS GB | fp32 bs=1과 출력 문자열 일치 % |\n|---|---:|---:|---:|---:|---:|---:|\n"
     for r in b["results"]:
         out += f"| {r['config']} | {r['p50_ms']} | {r['p95_ms']} | {r['throughput_ex_per_s']} | {r.get('state_dict_mb', '–')} | {r.get('peak_rss_gb', r.get('rss_gb_after', '–'))} | {pct(r['agreement_with_fp32_bs1'])} |\n"

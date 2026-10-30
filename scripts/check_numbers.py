@@ -35,7 +35,7 @@ def fmt(v, mode: str | None = None) -> str:
     if isinstance(v, int):
         return f"{v:,}"
     if isinstance(v, float):
-        return f"{v:.3f}".rstrip("0").rstrip(".") if abs(v) < 1 else f"{v:,.1f}".rstrip("0").rstrip(".")
+        return f"{v:.3f}".rstrip("0").rstrip(".") if abs(v) < 1 else f"{v:,.2f}".rstrip("0").rstrip(".")
     return str(v)
 
 

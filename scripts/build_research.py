@@ -94,13 +94,16 @@ def main() -> None:
                          "artifact": "experiments/bench/inference.json"})
     else:
         sections.append({"title": "추론 최적화 (CPU 실측)", "status": "prep", "description": "src/tabletrace/bench/inference.py — fp32/int8/배치/KV 캐시 비교. 아직 실행 전."})
-    b2 = load(EXP / "bench" / "inference_r2.json")
-    if b2:
-        sections.append({"title": "추론 최적화 2차 — 최종 모델(RL v3)의 int8 범위별 측정 (CPU)", "status": "done", "conditions": b2["meta"],
+    for r2_file, r2_title in (("inference_r2.json", "추론 최적화 2차 — 최종 모델(RL v3)의 int8 범위별 측정 (CPU)"),
+                              ("inference_r2b.json", "추론 최적화 2차 — fp32 대 lm_head만 int8 (같은 측정 안에서 비교)")):
+        b2 = load(EXP / "bench" / r2_file)
+        if not b2:
+            continue
+        sections.append({"title": r2_title, "status": "done", "conditions": b2["meta"],
                          "description": "int8 = 모든 Linear(lm_head 포함), int8-<범위> = 일부 Linear만. 정확도(ko test verified EM)는 README §10.1과 보고서 §8에 있다.",
                          "columns": ["설정", "p50 ms", "p95 ms", "처리량 (예제/s)", "최대 RSS GB", "모델 파일 MB", "fp32 bs=1과 출력 일치"],
                          "rows": [[r["config"], r["p50_ms"], r["p95_ms"], r["throughput_ex_per_s"], r.get("peak_rss_gb", "–"), r.get("state_dict_mb", "–"), pct(r["agreement_with_fp32_bs1"])] for r in b2["results"]],
-                         "artifact": "experiments/bench/inference_r2.json"})
+                         "artifact": f"experiments/bench/{r2_file}"})
     pp1, pp2 = load(EXP / "bench" / "pp_single.json"), load(EXP / "bench" / "pp_2stage.json")
     if pp1 and pp2:
         same = pp1.get("outputs") == pp2.get("outputs")

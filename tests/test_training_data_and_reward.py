@@ -54,9 +54,12 @@ def test_reward_shapes_behaviour(tok, medal_table):
     r_unsupported, _ = reward("op: lookup ; cells: r2c5 ; answer: 61", ex_lookup)
     r_abstain, _ = reward("op: abstain ; cells: - ; answer: - ; reason: not_in_document", ex_lookup)
     r_garbage, _ = reward("hello", ex_lookup)
-    assert r_gold > r_wrong_cell > r_abstain > r_unsupported > r_garbage
+    # the reward runs the verifier WITH the subject check (RL v3): a citation of another country's row is rejected like an
+    # unsupported proposal, so it ranks below an explicit abstention on an answerable prompt
+    assert r_gold > r_abstain > r_wrong_cell >= r_unsupported > r_garbage
     assert reward("op: abstain ; cells: - ; answer: - ; reason: not_in_document", ex_abstain)[0] == 1.0
-    assert reward("op: lookup ; cells: r0c1 ; answer: 중국", ex_abstain)[0] < 0
+    # answering about a country that is not in the table: the subject check blocks it (0.0), it never pays
+    assert reward("op: lookup ; cells: r0c1 ; answer: 중국", ex_abstain)[0] <= 0.0
     r_calc_gold, _ = reward(serialize(ex_calc.gold), ex_calc)
     r_calc_wrong_num, _ = reward("op: diff ; cells: r1c5, r2c5 ; answer: 50", ex_calc)   # verifier recomputes -> still correct answer
     assert r_calc_gold >= r_calc_wrong_num > 0
@@ -74,4 +77,7 @@ def test_reward_does_not_pay_for_garbage_abstention(tok, medal_table):
     halluc, _ = reward("op: lookup ; cells: r1c5 ; answer: 112", ex)                    # answers although it must abstain
     assert explicit == 1.0 and info["explicit_abstain"] is True
     assert info_d["abstained"] is True and info_d["explicit_abstain"] is False and degenerate == 0.0
-    assert explicit > caught > degenerate > halluc
+    assert explicit > caught > degenerate >= halluc
+    # the subject check ("일본" is not in the cited row or anywhere in the table) turns the hallucination into an
+    # abstention with reason not_in_document: no credit (0.0) instead of the -0.8 it earned before the check existed
+    assert halluc == 0.0

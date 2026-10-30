@@ -160,5 +160,32 @@
   "reference_better": 18,
   "p_two_sided": 1.0,
   "p_display": "1.000"
+ },
+ "int8_lm_head_vs_fp32_text2_test": {
+  "reference": "rl_v3_text2_test",
+  "candidate": "final_int8_lm_head_text2_test",
+  "n": 150,
+  "candidate_better": 1,
+  "reference_better": 6,
+  "p_two_sided": 0.125,
+  "p_display": "0.125"
+ },
+ "int8_lm_head_vs_fp32_ko_custom": {
+  "reference": "rl_v3_ko_custom",
+  "candidate": "final_int8_lm_head_ko_custom",
+  "n": 30,
+  "candidate_better": 1,
+  "reference_better": 1,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "int8_lm_head_vs_fp32_chem_custom": {
+  "reference": "rl_v3_chem_custom",
+  "candidate": "final_int8_lm_head_chem_custom",
+  "n": 32,
+  "candidate_better": 2,
+  "reference_better": 1,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
  }
 }

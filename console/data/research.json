@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-30 15:21 UTC",
- "commit": "9b9823b",
+ "generated_at": "2026-10-30 15:25 UTC",
+ "commit": "62e909b",
  "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없음.",
  "sections": [
   {
@@ -960,6 +960,87 @@
     ]
    ],
    "artifact": "experiments/bench/inference_r2.json"
+  },
+  {
+   "title": "추론 최적화 2차 — fp32 대 lm_head만 int8 (같은 측정 안에서 비교)",
+   "status": "done",
+   "conditions": {
+    "model": "experiments/rl_v3/model",
+    "n_examples": 48,
+    "max_new_tokens": 48,
+    "warmup_rounds": 1,
+    "measured_rounds": 2,
+    "threads": 4,
+    "cpu": "x86_64",
+    "cores": 4,
+    "torch": "2.15.0+cu132",
+    "cuda": false,
+    "int8_prepare_s": null,
+    "prepare_s": {
+     "fp32": 0.0,
+     "int8-lm_head": 4.0
+    },
+    "finished": "2026-10-30T15:18:08",
+    "note": "each precision measured in its own process; peak_rss_gb = ru_maxrss of that process (includes the tokenizer/torch runtime); dynamic int8 quantizes nn.Linear layers only (the shared 250k x 512 embedding stays fp32); `int8` quantizes ALL of them including lm_head, `int8-<scope>` a subset (model/quant.py)"
+   },
+   "description": "int8 = 모든 Linear(lm_head 포함), int8-<범위> = 일부 Linear만. 정확도(ko test verified EM)는 README §10.1과 보고서 §8에 있다.",
+   "columns": [
+    "설정",
+    "p50 ms",
+    "p95 ms",
+    "처리량 (예제/s)",
+    "최대 RSS GB",
+    "모델 파일 MB",
+    "fp32 bs=1과 출력 일치"
+   ],
+   "rows": [
+    [
+     "fp32, bs=1, kv-cache on",
+     1071.5,
+     1285.2,
+     0.93,
+     3.4,
+     1200.8,
+     "100.0%"
+    ],
+    [
+     "fp32, bs=8, kv-cache on",
+     464.0,
+     529.6,
+     2.117,
+     3.4,
+     1200.8,
+     "100.0%"
+    ],
+    [
+     "fp32, bs=1, kv-cache OFF",
+     2832.8,
+     3481.1,
+     0.351,
+     3.4,
+     1200.8,
+     "100.0%"
+    ],
+    [
+     "int8-lm_head, bs=1, kv-cache on",
+     665.2,
+     845.4,
+     1.479,
+     3.67,
+     816.6,
+     "68.8%"
+    ],
+    [
+     "int8-lm_head, bs=8, kv-cache on",
+     302.3,
+     397.1,
+     3.209,
+     3.67,
+     816.6,
+     "68.8%"
+    ]
+   ],
+   "artifact": "experiments/bench/inference_r2b.json"
   },
   {
    "title": "멀티 GPU Model Parallelism — 2-스테이지 파이프라인 (CPU gloo 기능 검증)",

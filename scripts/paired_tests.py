@@ -33,6 +33,9 @@ PAIRS = [
     ("int8_no_lm_head_vs_fp32_ko_test", "rl_v3_ko_test", "final_int8_no_lm_head_ko_test"),
     ("int8_ffn_vs_fp32_ko_test", "rl_v3_ko_test", "final_int8_ffn_ko_test"),
     ("int8_attn_vs_fp32_ko_test", "rl_v3_ko_test", "final_int8_attn_ko_test"),
+    ("int8_lm_head_vs_fp32_text2_test", "rl_v3_text2_test", "final_int8_lm_head_text2_test"),
+    ("int8_lm_head_vs_fp32_ko_custom", "rl_v3_ko_custom", "final_int8_lm_head_ko_custom"),
+    ("int8_lm_head_vs_fp32_chem_custom", "rl_v3_chem_custom", "final_int8_lm_head_chem_custom"),
 ]
 
 
