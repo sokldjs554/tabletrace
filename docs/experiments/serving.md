@@ -18,7 +18,14 @@
 | OpenAI 호환 클라이언트 | `src/tabletrace/service/engines.py` (`EnginePlanner`) | 모의 서버로 테스트 완료 |
 | 엔진 벤치 | `src/tabletrace/bench/engine_bench.py` | 서빙 중인 엔진 URL |
 
-**호환성 확인**: EXAONE 3.5 README는 vLLM≥0.6과 SGLang을 공식 지원한다고 적고 있다(docs/experiments/exaone.md). 이 프로젝트의 mT5-small은 encoder-decoder라 vLLM의 주 대상(decoder-only)이 아니므로, 엔진 경로는 EXAONE 같은 causal LM 플래너용이다. PyPI에서 `vllm 0.32.0`, `sglang 0.5.22`가 설치 가능함은 확인했지만 GPU 없이 import·실행 검증은 하지 않았다.
+**호환성 확인 (실측)**: `scripts/serving/check_engine_support.py`가 두 엔진의 공개 wheel을 내려받아(설치하지 않음) 모델 등록부를 읽는다. 결과는 `experiments/serving/engine_support.json`.
+
+| 엔진 (wheel) | T5/mT5 | BART 계열 | EXAONE |
+|---|---|---|---|
+| vLLM 0.32.0 | **없음** | 외부 플러그인으로만 | `ExaoneForCausalLM`, `Exaone4ForCausalLM` 등 지원 |
+| SGLang 0.5.23 | **없음** | 없음 | `exaone.py`, `exaone4.py` 지원 |
+
+따라서 **이 프로젝트의 mT5-small(encoder-decoder)은 vLLM/SGLang으로 서빙할 수 없다.** 서빙 스크립트가 의미를 가지려면 EXAONE 같은 decoder-only 모델을 LoRA SFT해야 하고(`scripts/train/exaone_lora_sft.py`), 가중치가 필요하다. 이 환경은 가중치 호스트(`huggingface.co`, 미러, ModelScope)가 정책으로 막혀 있고 GPU도 없어 여기서는 실행하지 못했다. 이전 문서의 "EXAONE이 vLLM≥0.6을 지원한다"는 EXAONE 3.5 README의 문구이고, 위 표는 현재 wheel에서 직접 확인한 값이다.
 
 ## 측정 지표 정의 (`bench/inference.py`)
 

@@ -1,0 +1,61 @@
+{
+ "run": "experiments/eval/sft_ko2_text2_test_ec",
+ "n": 150,
+ "n_answerable": 100,
+ "pred_status_answerable": {
+  "abstained": 74,
+  "answered": 26
+ },
+ "abstain_reason_answerable": {
+  "not_in_document": 29,
+  "verification_failed": 44,
+  "invalid_program": 1
+ },
+ "raw_correct_but_blocked": 7,
+ "evidence_repaired": 33,
+ "lookup_citation": {
+  "n": 0,
+  "row_correct": null,
+  "col_correct": null,
+  "both_correct": null
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 50,
+  "explicit_abstain_outputs": 0,
+  "explicit_abstain_on_answerable": 0,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 0.84,
+  "abstained_via_invalid_program_recall": 0.02,
+  "abstained_via_verifier_recall": 0.82
+ },
+ "degenerate_calc_outputs": 2,
+ "degenerate_calc_rate": 0.0133,
+ "op_confusion_top": [
+  [
+   "text->lookup",
+   99
+  ],
+  [
+   "abstain->lookup",
+   49
+  ],
+  [
+   "text->diff",
+   1
+  ],
+  [
+   "abstain->diff",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "korquad_neg": {
+   "n": 50,
+   "verified_em": 0.84
+  },
+  "korquad_text2": {
+   "n": 100,
+   "verified_em": 0.0
+  }
+ }
+}

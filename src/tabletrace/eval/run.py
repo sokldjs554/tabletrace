@@ -32,6 +32,7 @@ def main() -> None:
     ap.add_argument("--bs", type=int, default=8)
     ap.add_argument("--max-in", type=int, default=512)
     ap.add_argument("--quantize", action="store_true")
+    ap.add_argument("--quantize-scope", default="all", help="which nn.Linear layers get int8 (see model/quant.py)")
     ap.add_argument("--threads", type=int, default=0)
     ap.add_argument("--label", default=None)
     ap.add_argument("--no-entity-check", action="store_true", help="verifier without the subject check (the evaluation before it existed)")
@@ -67,7 +68,8 @@ def main() -> None:
     elif a.planner == "neural":
         from tabletrace.model.planner import NeuralPlanner
 
-        planner = NeuralPlanner(a.model, max_in=a.max_in, threads=a.threads or None, quantize=a.quantize)
+        planner = NeuralPlanner(a.model, max_in=a.max_in, threads=a.threads or None,
+                               quantize=(a.quantize_scope if a.quantize else False))
         planner_id = planner.model_id
         plans = planner.plan_batch([(e.question, e.table, e.context) for e in examples], batch_size=a.bs)
     else:
@@ -117,7 +119,7 @@ def main() -> None:
     metrics["entity_check"] = not a.no_entity_check
     meta = {"planner": a.planner, "model": planner_id, "data": a.data, "corpus": a.corpus, "n": len(rows),
             "wall_s": round(time.time() - t0, 1), "hardware": platform.processor() or platform.machine(),
-            "label": a.label, "entity_check": not a.no_entity_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize}
+            "label": a.label, "entity_check": not a.no_entity_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None}
     (out / "metrics.json").write_text(json.dumps({"meta": meta, "metrics": metrics}, ensure_ascii=False, indent=1))
     with open(out / "predictions.jsonl", "w", encoding="utf-8") as f:
         for r in rows:

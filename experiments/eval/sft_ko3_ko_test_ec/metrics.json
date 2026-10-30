@@ -1,0 +1,61 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "replay of experiments/eval/sft_ko3_ko_test",
+  "data": [
+   "data/ko/test.jsonl",
+   "data/ko/synthetic_test.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 699,
+  "wall_s": 6.0,
+  "hardware": "x86_64",
+  "label": "entity check (replay of sft_ko3_ko_test)",
+  "entity_check": true,
+  "replay_from": "experiments/eval/sft_ko3_ko_test",
+  "finished": "2026-10-30T10:35:41",
+  "quantize": false,
+  "quantize_scope": null
+ },
+ "metrics": {
+  "n": 699,
+  "n_answerable": 649,
+  "n_gold_abstain": 50,
+  "n_calc": 110,
+  "n_lookup": 539,
+  "verified_em": 0.2418,
+  "answer_em_answerable": 0.2126,
+  "raw_answer_em_answerable": 0.2527,
+  "evidence_cells_exact": 0.2203,
+  "evidence_cells_exact_raw": 0.171,
+  "evidence_repaired_rate": 0.3867,
+  "evidence_cells_overlap": 0.225,
+  "op_acc": 0.618,
+  "lookup_em": 0.243,
+  "calc_em": 0.0636,
+  "calc_result_correct": 0.0636,
+  "unit_error_rate": 0.1176,
+  "abstain_recall": 0.62,
+  "false_abstain_rate": 0.5193,
+  "abstain_precision": 0.0842,
+  "parse_fail_rate": 0.01,
+  "verifier_corrections": 0.5039,
+  "truncated_gold_rate": 0.0887,
+  "verified_em_untruncated": 0.2653,
+  "mean_ms_per_example": 519.2,
+  "by_source": {
+   "korwikitq": {
+    "n": 539,
+    "verified_em": 0.243
+   },
+   "synthetic": {
+    "n": 160,
+    "verified_em": 0.2375
+   }
+  },
+  "gold_subject_fail_rate": 0.0431,
+  "entity_check": true
+ }
+}

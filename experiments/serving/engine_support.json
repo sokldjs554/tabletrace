@@ -1,0 +1,75 @@
+{
+ "checked_at": "2026-10-30T09:41:00",
+ "vllm": {
+  "wheel": "vllm-0.32.0-cp38-abi3-manylinux_2_28_x86_64.whl",
+  "requires_torch": [
+   "Requires-Dist: torch==2.13.0"
+  ],
+  "t5": {
+   "model_files": [],
+   "registry_lines": [],
+   "listed": false
+  },
+  "bart": {
+   "model_files": [],
+   "registry_lines": [
+    "\"BartForConditionalGeneration\": \"https://github.com/vllm-project/bart-plugin\",",
+    "\"BartModel\": \"https://github.com/vllm-project/bart-plugin\",",
+    "\"Florence2ForConditionalGeneration\": \"https://github.com/vllm-project/bart-plugin\",",
+    "\"MBartForConditionalGeneration\": \"https://github.com/vllm-project/bart-plugin\","
+   ],
+   "listed": true
+  },
+  "exaone": {
+   "model_files": [
+    "vllm/model_executor/models/exaone.py",
+    "vllm/model_executor/models/exaone4.py",
+    "vllm/model_executor/models/exaone4_5.py",
+    "vllm/model_executor/models/exaone4_5_mtp.py",
+    "vllm/model_executor/models/exaone_moe.py",
+    "vllm/model_executor/models/exaone_moe_mtp.py"
+   ],
+   "registry_lines": [
+    "\"Exaone4ForCausalLM\": (\"exaone4\", \"Exaone4ForCausalLM\"),",
+    "\"Exaone4_5_ForConditionalGeneration\",",
+    "\"Exaone4_5_ForConditionalGeneration\": (",
+    "\"Exaone4_5_MTP\": (\"exaone4_5_mtp\", \"Exaone4_5_MTP\"),",
+    "\"ExaoneForCausalLM\": (\"exaone\", \"ExaoneForCausalLM\"),",
+    "\"ExaoneMoEForCausalLM\": (\"exaone_moe\", \"ExaoneMoeForCausalLM\"),",
+    "\"ExaoneMoeForCausalLM\": (\"exaone_moe\", \"ExaoneMoeForCausalLM\"),",
+    "\"ExaoneMoeMTP\": (\"exaone_moe_mtp\", \"ExaoneMoeMTP\"),"
+   ],
+   "listed": true
+  }
+ },
+ "sglang": {
+  "wheel": "sglang-0.5.23-cp313-cp313-manylinux_2_34_x86_64.whl",
+  "requires_torch": [
+   "Requires-Dist: torch==2.14.1"
+  ],
+  "t5": {
+   "model_files": [],
+   "registry_lines": [],
+   "listed": false
+  },
+  "bart": {
+   "model_files": [],
+   "registry_lines": [],
+   "listed": false
+  },
+  "exaone": {
+   "model_files": [
+    "sglang/srt/models/exaone.py",
+    "sglang/srt/models/exaone4.py",
+    "sglang/srt/models/exaone_moe.py",
+    "sglang/srt/models/exaone_moe_mtp.py"
+   ],
+   "registry_lines": [
+    "\"ExaoneMoEForCausalLM\",",
+    "\"ExaoneMoeForCausalLM\",",
+    "self.hf_config.architectures[0] = \"ExaoneMoEForCausalLMMTP\""
+   ],
+   "listed": true
+  }
+ }
+}

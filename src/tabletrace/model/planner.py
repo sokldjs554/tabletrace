@@ -11,7 +11,7 @@ from tabletrace.schema import Program, Table
 
 class NeuralPlanner:
     def __init__(self, model_dir: str | Path, max_in: int = 512, max_out: int = 64, threads: int | None = None,
-                 quantize: bool = False) -> None:
+                 quantize: bool | str = False) -> None:
         import torch
         from transformers import MT5ForConditionalGeneration, PreTrainedTokenizerFast
 
@@ -23,10 +23,16 @@ class NeuralPlanner:
         self.model.eval()
         self.quantized = False
         if quantize:
-            self.model = torch.ao.quantization.quantize_dynamic(self.model, {torch.nn.Linear}, dtype=torch.qint8)
+            from tabletrace.model.quant import quantize_model
+
+            scope = quantize if isinstance(quantize, str) else "all"
+            self.model = quantize_model(self.model, scope)
             self.quantized = True
         self.max_in, self.max_out = max_in, max_out
-        self.model_id = Path(model_dir).name + (":int8" if quantize else "")
+        tag = ""
+        if quantize:
+            tag = ":int8" if quantize is True or quantize == "all" else f":int8-{quantize}"
+        self.model_id = Path(model_dir).name + tag
 
     def inputs_for(self, question: str, table: Table, context: str | None) -> tuple[str, int]:
         context, n = choose_context_and_rows(self.tok, question, table, context, self.max_in)

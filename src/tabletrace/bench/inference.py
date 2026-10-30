@@ -68,8 +68,10 @@ def run_one(a) -> dict:
     texts = [e.input_text for e in build_examples(recs, docs, tok, 512)]
     model = MT5ForConditionalGeneration.from_pretrained(a.model).eval()
     t0 = time.time()
-    if a.only == "int8":
-        model = torch.ao.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
+    if a.only.startswith("int8"):
+        from tabletrace.model.quant import quantize_model
+
+        model = quantize_model(model, a.only.partition("-")[2] or "all")
     prep_s = round(time.time() - t0, 1)
     configs = [(1, True), (8, True)] + ([(1, False)] if a.only == "fp32" else [])
     results = []
@@ -95,7 +97,8 @@ def main() -> None:
     ap.add_argument("--warmup", type=int, default=1)
     ap.add_argument("--repeats", type=int, default=2)
     ap.add_argument("--threads", type=int, default=4)
-    ap.add_argument("--only", choices=["fp32", "int8"], default=None, help="internal: measure one precision in this process")
+    ap.add_argument("--only", default=None, help="internal: measure one precision in this process (fp32, int8, int8-<scope>)")
+    ap.add_argument("--precisions", nargs="+", default=["fp32", "int8"], help="fp32, int8 (all Linear) and/or int8-<scope> (see model/quant.py)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
@@ -104,7 +107,7 @@ def main() -> None:
         Path(a.out).write_text(json.dumps(run_one(a), ensure_ascii=False))
         return
     parts = {}
-    for prec in ("fp32", "int8"):
+    for prec in a.precisions:
         tmp = Path(a.out).with_suffix(f".{prec}.tmp.json")
         cmd = [sys.executable, "-m", "tabletrace.bench.inference", "--model", a.model, "--corpus", *a.corpus, "--data", *a.data, "--n", str(a.n),
                "--max-out", str(a.max_out), "--warmup", str(a.warmup), "--repeats", str(a.repeats), "--threads", str(a.threads), "--only", prec, "--out", str(tmp)]
@@ -113,7 +116,7 @@ def main() -> None:
         tmp.unlink()
     ref = {(r["batch_size"], r["kv_cache"]): r["outputs"] for r in parts["fp32"]["results"]}[(1, True)]
     results = []
-    for prec in ("fp32", "int8"):
+    for prec in a.precisions:
         for r in parts[prec]["results"]:
             agree = sum(1 for x, y in zip(r["outputs"], ref, strict=True) if x.strip() == y.strip()) / len(ref)
             results.append({"config": f"{prec}, bs={r['batch_size']}, kv-cache {'on' if r['kv_cache'] else 'OFF'}", "precision": prec,
@@ -122,9 +125,9 @@ def main() -> None:
                             "peak_rss_gb": parts[prec]["peak_rss_gb"], "state_dict_mb": parts[prec]["state_dict_mb"]})
     out = {"meta": {"model": a.model, "n_examples": len(ref), "max_new_tokens": a.max_out, "warmup_rounds": a.warmup, "measured_rounds": a.repeats,
                     "threads": a.threads, "cpu": platform.processor() or platform.machine(), "cores": os.cpu_count(), "torch": torch.__version__,
-                    "cuda": torch.cuda.is_available(), "int8_prepare_s": parts["int8"]["prepare_s"], "finished": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "cuda": torch.cuda.is_available(), "int8_prepare_s": parts["int8"]["prepare_s"] if "int8" in parts else None, "prepare_s": {p: parts[p]["prepare_s"] for p in parts}, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "note": "each precision measured in its own process; peak_rss_gb = ru_maxrss of that process (includes the tokenizer/torch runtime); "
-                            "dynamic int8 quantizes nn.Linear only, the 250k x 512 embedding and lm_head stay fp32"},
+                            "dynamic int8 quantizes nn.Linear layers only (the shared 250k x 512 embedding stays fp32); `int8` quantizes ALL of them including lm_head, `int8-<scope>` a subset (model/quant.py)"},
            "results": results}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(out, ensure_ascii=False, indent=1))

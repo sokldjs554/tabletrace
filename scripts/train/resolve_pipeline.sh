@@ -2,7 +2,8 @@
 # Second experiment round: fix what failed in round one (text answers next to a real table, missing-subject
 # hallucinations, RL without gain). Restartable: every step has a done-marker. Logs: experiments/pipeline/r2_*.log
 #   1. sft_ko3   stage 2 again from stage 1 with real-table text examples + natural not-in-document negatives
-#   2. sft_chem2 chemistry stage on top of sft_ko3 (+ rehearsal of text/abstain examples)
+#   1b. sft_ko4  one lookup-heavy epoch on top (ko3 sent 15% of table lookups to `op: text`; see scripts/train/sft_ko4.sh)
+#   2. sft_chem2 chemistry stage on top of sft_ko4 (+ rehearsal of text/abstain examples)
 #   3. rl_v3     GRPO from sft_chem2 on ko + chem + text prompts, 150 steps, dev checkpoint selection
 #   4. int8 variants of the final model (selective quantisation)
 # Every model is run once WITHOUT the subject check (--no-entity-check, identical planner outputs) and its stored raw
@@ -45,6 +46,10 @@ step eval_sft_chem_text2_test experiments/eval/sft_chem_text2_test_ec/metrics.js
 
 evalsets sft_ko3 experiments/sft_ko3/model
 
+# 1b. lookup-heavy epoch on top of ko3 (started separately by scripts/train/sft_ko4.sh)
+while [ ! -f experiments/sft_ko4/summary.json ]; do sleep 30; done
+evalsets sft_ko4 experiments/sft_ko4/model
+
 # 2. chemistry stage on top (rehearsal: text + not-in-document examples keep their behaviour)
 python - <<'PY'
 import json, random
@@ -57,7 +62,7 @@ rnd.shuffle(rows)
 open("data/chem/stage2_train.jsonl", "w", encoding="utf-8").write("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
 print(len(rows), "chem stage-2 examples")
 PY
-step sft_chem2 experiments/sft_chem2/summary.json python -m tabletrace.training.sft --model experiments/sft_ko3/model --train data/chem/stage2_train.jsonl \
+step sft_chem2 experiments/sft_chem2/summary.json python -m tabletrace.training.sft --model experiments/sft_ko4/model --train data/chem/stage2_train.jsonl \
   --dev data/chem/synthetic_dev.jsonl --corpus $CH $KO data/ko/text2_documents_train.jsonl --out experiments/sft_chem2/model --epochs 2 --bs 8 --lr 1.5e-4 --threads 4
 evalsets sft_chem2 experiments/sft_chem2/model chem
 
