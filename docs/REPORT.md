@@ -19,7 +19,7 @@
 
 | 항목 | 값 |
 |---|---|
-| 최종 커밋(tabletrace 로컬 저장소) | `799d528`(코드·모델 평가·정적 데모 기록의 기준 커밋). 이후 커밋은 문서·숫자 표식·결과 표·E2E 스크린샷·테스트 요약만 바꾼다(`git diff --stat 799d528 HEAD -- src scripts tests console data` 로 확인 가능). 이 보고서를 포함한 **최종 커밋의 SHA는 자기 참조라 파일에 적을 수 없으며** `git log -1`과 최종 응답에 있다 |
+| 최종 커밋(tabletrace 로컬 저장소) | `799d528`(코드·모델 평가·정적 데모 기록의 기준 커밋). 이후 변경은 `src/`·`Dockerfile`·`.github/`를 건드리지 않고 문서, 숫자 표식, 결과 표, 저장된 실행 결과 재기록(`console/data`), E2E 스크린샷·요약, 테스트 린트 정리(8줄)뿐이다(`git diff --stat 799d528 HEAD -- src scripts tests console data Dockerfile .github` 로 확인 가능). 이 보고서를 포함한 **최종 커밋의 SHA는 자기 참조라 파일에 적을 수 없으며** `git log -1`과 최종 응답에 있다 |
 | 패키지 버전 | 0.1.0 (`src/tabletrace/__init__.py`) |
 | 정적 데모에 기록된 커밋 | `799d528` (`console/data/recorded/index.json`) |
 | 배포된 버전 | 없음(배포하지 못함) |
