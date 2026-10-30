@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-30 06:24 UTC",
- "commit": "1d74a71",
+ "generated_at": "2026-10-30 07:36 UTC",
+ "commit": "096a0e0",
  "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없음.",
  "sections": [
   {
@@ -75,15 +75,15 @@
     [
      "GRPO RL(stage2에서)",
      699,
-     "26.8%",
-     "30.6%",
+     "27.0%",
+     "31.0%",
      "4.5%",
-     "26.7%",
-     "20.6%",
+     "27.0%",
+     "20.3%",
      "34.0%",
-     "37.9%",
+     "35.9%",
      "0.0%",
-     "460"
+     "504"
     ],
     [
      "화학 SFT(stage2에서)",
@@ -180,9 +180,9 @@
      "4.0%",
      "12.0%",
      "100.0%",
-     "84.0%",
+     "76.0%",
      "0.0%",
-     "437"
+     "525"
     ],
     [
      "화학 SFT(stage2에서)",
@@ -281,15 +281,15 @@
     [
      "GRPO RL(stage2에서)",
      32,
-     "15.6%",
+     "12.5%",
      "0.0%",
      "0.0%",
      "0.0%",
+     "7.4%",
+     "80.0%",
+     "85.2%",
      "0.0%",
-     "100.0%",
-     "81.5%",
-     "3.1%",
-     "424"
+     "426"
     ],
     [
      "화학 SFT(stage2에서)",
@@ -312,7 +312,7 @@
     "mT5-small 기본(변환만): abstain 100.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
     "SFT stage1(표): abstain 60.0% (n=5), calc 0.0% (n=7), cell 10.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
     "SFT stage2(+본문): abstain 60.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
-    "GRPO RL(stage2에서): abstain 100.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
+    "GRPO RL(stage2에서): abstain 80.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
     "화학 SFT(stage2에서): abstain 60.0% (n=5), calc 14.3% (n=7), cell 10.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)"
    ]
   },
@@ -359,9 +359,9 @@
      "GRPO RL (ko)",
      3485,
      60,
-     "29 min",
+     "32 min",
      "4 threads CPU",
-     "30.2%",
+     "30.6%",
      "60"
     ]
    ],
@@ -388,19 +388,19 @@
    "rows": [
     [
      "처음 12 step",
-     "-0.003",
-     "27.6%",
+     "-0.185",
+     "13.0%",
      "62.0%",
      "100.0%",
-     "0.0006"
+     "0.0005"
     ],
     [
      "마지막 12 step",
-     "0.065",
-     "27.6%",
-     "69.3%",
+     "-0.095",
+     "15.1%",
+     "59.9%",
      "100.0%",
-     "0.0173"
+     "0.0095"
     ]
    ],
    "conditions": {
@@ -448,57 +448,63 @@
     "cores": 4,
     "torch": "2.15.0+cu132",
     "cuda": false,
-    "quantize_time_s": 2.8,
-    "finished": "2026-10-29T14:05:03",
-    "fp32_state_dict_mb": 1200.7
+    "int8_prepare_s": 8.3,
+    "finished": "2026-10-30T06:45:22",
+    "note": "each precision measured in its own process; peak_rss_gb = ru_maxrss of that process (includes the tokenizer/torch runtime); dynamic int8 quantizes nn.Linear only, the 250k x 512 embedding and lm_head stay fp32"
    },
    "columns": [
     "설정",
     "p50 ms",
     "p95 ms",
     "처리량 (예제/s)",
-    "RSS GB",
+    "최대 RSS GB",
+    "모델 파일 MB",
     "fp32 bs=1과 출력 일치"
    ],
    "rows": [
     [
-     "fp32 eager, bs=1, kv-cache on",
-     771.2,
-     1072.9,
-     1.27,
-     3.15,
+     "fp32, bs=1, kv-cache on",
+     995.7,
+     1484.1,
+     0.985,
+     3.38,
+     1200.8,
      "100.0%"
     ],
     [
-     "fp32 eager, bs=8, kv-cache on",
-     404.9,
-     529.4,
-     2.398,
-     3.22,
+     "fp32, bs=8, kv-cache on",
+     446.9,
+     555.2,
+     2.196,
+     3.38,
+     1200.8,
      "100.0%"
     ],
     [
-     "fp32 eager, bs=1, kv-cache OFF",
-     2042.1,
-     2621.1,
-     0.476,
-     3.22,
+     "fp32, bs=1, kv-cache OFF",
+     2736.9,
+     3674.2,
+     0.356,
+     3.38,
+     1200.8,
      "100.0%"
     ],
     [
-     "int8 dynamic (Linear), bs=1, kv-cache on",
-     458.5,
-     581.5,
-     2.197,
-     3.22,
+     "int8, bs=1, kv-cache on",
+     594.1,
+     729.0,
+     1.676,
+     3.73,
+     684.6,
      "35.4%"
     ],
     [
-     "int8 dynamic (Linear), bs=8, kv-cache on",
-     256.3,
-     288.6,
-     3.917,
-     3.22,
+     "int8, bs=8, kv-cache on",
+     273.4,
+     333.1,
+     3.66,
+     3.73,
+     684.6,
      "22.9%"
     ]
    ],

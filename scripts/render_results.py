@@ -99,7 +99,9 @@ def rl_table(run: str = "rl_ko") -> str:
         out += "\ndev verified EM(n=245): " + " → ".join(f"step {e['step']}: {pct(e['verified_em'])}%" for e in evals) + "\n"
     summ = load(EXP / run / "summary.json")
     if summ:
-        out += f"\n**평가에 쓴 체크포인트: step {summ['best_step']}** (dev 최고로 선택; 마지막 step이 아님). 60 step wall time {summ['wall_s'] / 60:.0f} min, CPU 4스레드.\n"
+        last = summ.get("steps")
+        why = "dev 최고가 마지막 step과 일치" if summ["best_step"] == last else "dev 최고로 선택; 마지막 step이 아님"
+        out += f"\n**평가에 쓴 체크포인트: step {summ['best_step']}** ({why}). {last} step wall time {summ['wall_s'] / 60:.0f} min, CPU 4스레드.\n"
     return out
 
 

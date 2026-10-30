@@ -143,7 +143,7 @@ flowchart LR
 - ⚠️ **보류 재현율 지표는 그대로 믿으면 안 됩니다.** 답 없는 문항에서 모델이 직접 `op: abstain`을 낸 비율은 test 기준 SFT stage 2 {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.planner_chose_abstain_recall|pct}}%인데, 최종 상태가 "보류"인 비율은 {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.final_abstain_recall|pct}}%입니다. 차이는 해석 불가·퇴화 프로그램이나 검증 실패로 우연히 보류된 경우입니다(§11).
 - ⚠️ **영어 화학**: 합성 dev는 {{experiments/eval/sft_ko2_chem_syndev/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/sft_chem_chem_syndev/metrics.json|metrics.verified_em|pct}}%로 올랐지만 손으로 쓴 32문항은 {{experiments/eval/sft_ko2_chem_custom/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/sft_chem_chem_custom/metrics.json|metrics.verified_em|pct}}%(2문항 차이, 잡음 수준)이고 기준선은 {{experiments/eval/heuristic_chem_custom/metrics.json|metrics.verified_em|pct}}%입니다.
 - ⚠️ **int8 동적 양자화는 처리량을 {{experiments/bench/inference.json|results.0.throughput_ex_per_s}} → {{experiments/bench/inference.json|results.4.throughput_ex_per_s}} 예제/s로 올리지만** 한국어 test 정확도를 {{experiments/eval/sft_chem_ko_test/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/sft_chem_int8_ko_test/metrics.json|metrics.verified_em|pct}}%로 떨어뜨립니다.
-- 🔎 **강화학습**: @@PENDING:readme_rl@@
+- 🔎 **강화학습**: ❌ **강화학습은 개선을 만들지 못했습니다(60 step 예비 실험).** 수정한 보상(v2)으로 학습한 정책의 독립 test verified EM은 SFT stage 2 {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.verified_em|pct}}% → {{experiments/eval/rl_ko_ko_test/metrics.json|metrics.verified_em|pct}}%로 같은 수준이고(1 표준오차 약 1.7%p), 오보류율은 {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.false_abstain_rate|pct}}% → {{experiments/eval/rl_ko_ko_test/metrics.json|metrics.false_abstain_rate|pct}}%로 나빠졌습니다. 정책 갱신은 실제로 수행됐고, 첫 보상(v1)의 편법을 로그에서 찾아 고친 것이 이 실험에서 얻은 것입니다(§9.4).
 
 ### 9.1 한국어 표 QA
 
@@ -241,7 +241,27 @@ flowchart LR
 <!-- results:rl:start -->
 <!-- results:rl:end -->
 
-@@PENDING:readme_rl_detail@@
+**독립 평가 결과 — 같은 평가셋·같은 검증기** (RL의 출발점은 SFT stage 2이므로 그 열과 비교합니다)
+
+| 지표 | SFT stage 2 | RL v1(편법 보상) | RL v2(수정 보상) |
+|---|---:|---:|---:|
+| 한국어 test 699문항 verified EM % | {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_v1_ko_test/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_ko_test/metrics.json|metrics.verified_em|pct}} |
+| 오보류율 % (답이 있는 문항을 보류) | {{experiments/eval/sft_ko2_ko_test/metrics.json|metrics.false_abstain_rate|pct}} | {{experiments/eval/rl_ko_v1_ko_test/metrics.json|metrics.false_abstain_rate|pct}} | {{experiments/eval/rl_ko_ko_test/metrics.json|metrics.false_abstain_rate|pct}} |
+| 같은 셀을 두 번 쓰는 퇴화 계산 출력(건) | {{experiments/eval/sft_ko2_ko_test/analysis.json|degenerate_calc_outputs|int}} | {{experiments/eval/rl_ko_v1_ko_test/analysis.json|degenerate_calc_outputs|int}} | {{experiments/eval/rl_ko_ko_test/analysis.json|degenerate_calc_outputs|int}} |
+| 모델이 직접 낸 `op: abstain`(건) | {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.explicit_abstain_outputs|int}} | {{experiments/eval/rl_ko_v1_ko_test/analysis.json|abstain_breakdown.explicit_abstain_outputs|int}} | {{experiments/eval/rl_ko_ko_test/analysis.json|abstain_breakdown.explicit_abstain_outputs|int}} |
+| └ 그중 답이 있는 문항에서 낸 것(건) | {{experiments/eval/sft_ko2_ko_test/analysis.json|abstain_breakdown.explicit_abstain_on_answerable|int}} | {{experiments/eval/rl_ko_v1_ko_test/analysis.json|abstain_breakdown.explicit_abstain_on_answerable|int}} | {{experiments/eval/rl_ko_ko_test/analysis.json|abstain_breakdown.explicit_abstain_on_answerable|int}} |
+| 한국어 수작업 30문항 verified EM % | {{experiments/eval/sft_ko2_ko_custom/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_v1_ko_custom/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_ko_custom/metrics.json|metrics.verified_em|pct}} |
+| 화학 수작업 32문항 verified EM % | {{experiments/eval/sft_ko2_chem_custom/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_v1_chem_custom/metrics.json|metrics.verified_em|pct}} | {{experiments/eval/rl_ko_chem_custom/metrics.json|metrics.verified_em|pct}} |
+
+**해석 — 개선이라고 말할 수 없습니다**
+
+- **test에서 차이는 잡음 범위입니다.** verified EM은 699문항에서 1 표준오차가 약 1.7%p인데 SFT stage 2와 v2의 차이는 그보다 작습니다. 수작업 30·32문항의 차이는 1–3문항입니다.
+- **오보류가 늘었습니다.** 답이 있는 문항을 보류하는 비율이 SFT stage 2보다 높아졌습니다. 보상이 보류를 덜 벌주는 방향으로 일부 작동했을 수 있으나 검증하지 않았습니다.
+- **dev에서는 올랐지만 test로 이어지지 않았습니다.** 학습과 겹치지 않는 dev 245문항(체크포인트 선택에도 사용)의 verified EM이 {{experiments/rl_ko/summary.json|dev_history.0.verified_em|pct}}% → {{experiments/rl_ko/summary.json|dev_history.3.verified_em|pct}}%로 올랐습니다. 이 분할의 1 표준오차는 약 2.9%p이고, 선택에 쓰였으므로 낙관적입니다.
+- **보상 편법은 줄었지만 사라지지 않았습니다.** v2의 퇴화 계산 출력은 v1보다 적고 SFT stage 2보다 많습니다. 학습 구간 표의 diff 비율 열이 보여 주듯 정책이 lookup에서 diff로 이동하는 경향도 남았습니다.
+- **보류 학습은 평가로 전이되지 않았습니다.** 샘플링(온도 1.0) 중에는 표의 명시적 abstain 비율이 올랐지만, 탐욕 디코딩 평가에서 모델이 직접 낸 `op: abstain`은 위 표의 건수뿐이고 **답 없는 문항에서는 한 건도 없습니다.** 낸 것은 모두 답이 있는 문항이었습니다.
+- **원인은 검증하지 않았습니다.** 추정만 적습니다. 총 샘플이 960개(60 step × 4 프롬프트 × 4 샘플)로 매우 적고, 샘플 정답률이 낮아 보상이 희박하며, 그룹 내 보상이 모두 같아 학습 신호가 없는 그룹도 있습니다(표의 그룹 분산 0 비율). 더 길게 학습하거나 보상 크기·β·학습률을 조정하는 실험은 하지 않았습니다.
+
 
 ## 10. 추론 최적화·멀티 GPU 실험 결과
 
@@ -333,7 +353,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | mT5-small 변환(GCS TF → PyTorch) | 완료 | docs/dev/issues-log.md 1–4 |
 | 한국어 SFT 2단계 | 완료 | 튜닝 전후 개선, 기준선에는 미달(§9.1) |
 | 화학 SFT (튜닝 전후 비교) | 완료 | 합성 dev 개선, 수작업은 잡음 수준(§9.2) |
-| GRPO 방식 RL 예비 실험 | @@PENDING:readme_rl_status@@ | v1 보상 편법 발견·수정, v2 재학습(§9.4) |
+| GRPO 방식 RL 예비 실험 | **실행했으나 실패** | v1 보상 편법 발견·수정, v2 재학습(§9.4) |
 | 추론 최적화 실측(fp32/int8/배치/KV 캐시) | 완료(CPU) | int8은 정확도 하락(§10.1) |
 | 멀티 GPU Model Parallelism | **구현 후 미실행(GPU 없음)** | CPU 2프로세스로 분할·출력 일치만 검증(§10.2) |
 | vLLM / SGLang 서빙 | **구현 후 미실행(GPU 없음)** | 모의 서버 테스트 |

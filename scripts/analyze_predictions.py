@@ -41,6 +41,8 @@ def main(path: str) -> None:
     n_ab = len(gold_ab)
     out["abstain_breakdown"] = {
         "n_gold_abstain": n_ab,
+        "explicit_abstain_outputs": sum(1 for r in rows if r["pred_op"] == "abstain"),
+        "explicit_abstain_on_answerable": sum(1 for r in rows if r["pred_op"] == "abstain" and r["gold_status"] == "answered"),
         "planner_chose_abstain_recall": round(sum(1 for r in gold_ab if r["pred_op"] == "abstain") / n_ab, 4) if n_ab else None,
         "final_abstain_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained") / n_ab, 4) if n_ab else None,
         "abstained_via_invalid_program_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained" and r["pred_op"] != "abstain" and r["pred_reason"] == "invalid_program") / n_ab, 4) if n_ab else None,

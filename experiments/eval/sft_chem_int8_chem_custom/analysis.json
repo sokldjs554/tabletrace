@@ -20,6 +20,8 @@
  },
  "abstain_breakdown": {
   "n_gold_abstain": 5,
+  "explicit_abstain_outputs": 0,
+  "explicit_abstain_on_answerable": 0,
   "planner_chose_abstain_recall": 0.0,
   "final_abstain_recall": 0.8,
   "abstained_via_invalid_program_recall": 0.0,

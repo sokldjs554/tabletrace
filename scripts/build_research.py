@@ -85,8 +85,8 @@ def main() -> None:
     b = load(EXP / "bench" / "inference.json")
     if b:
         sections.append({"title": "추론 최적화 (CPU 실측)", "status": "done", "conditions": b["meta"],
-                         "columns": ["설정", "p50 ms", "p95 ms", "처리량 (예제/s)", "RSS GB", "fp32 bs=1과 출력 일치"],
-                         "rows": [[r["config"], r["p50_ms"], r["p95_ms"], r["throughput_ex_per_s"], r["rss_gb_after"], pct(r["agreement_with_fp32_bs1"])] for r in b["results"]],
+                         "columns": ["설정", "p50 ms", "p95 ms", "처리량 (예제/s)", "최대 RSS GB", "모델 파일 MB", "fp32 bs=1과 출력 일치"],
+                         "rows": [[r["config"], r["p50_ms"], r["p95_ms"], r["throughput_ex_per_s"], r.get("peak_rss_gb", "–"), r.get("state_dict_mb", "–"), pct(r["agreement_with_fp32_bs1"])] for r in b["results"]],
                          "artifact": "experiments/bench/inference.json"})
     else:
         sections.append({"title": "추론 최적화 (CPU 실측)", "status": "prep", "description": "src/tabletrace/bench/inference.py — fp32/int8/배치/KV 캐시 비교. 아직 실행 전."})
