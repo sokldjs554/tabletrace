@@ -28,6 +28,14 @@
   "abstained_via_invalid_program_recall": 0.0,
   "abstained_via_verifier_recall": 0.3125
  },
+ "selective": {
+  "n": 80,
+  "answered": 49,
+  "answered_correct": 25,
+  "answered_wrong": 24,
+  "precision": 0.5102,
+  "wrong_answer_rate": 0.3
+ },
  "degenerate_calc_outputs": 14,
  "degenerate_calc_rate": 0.175,
  "op_confusion_top": [

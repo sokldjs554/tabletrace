@@ -79,7 +79,7 @@ def build_runtime(settings: Settings):
     if settings.planner in ("auto", "neural") and model_dir.exists():
         from tabletrace.model.planner import NeuralPlanner
 
-        neural = NeuralPlanner(model_dir, threads=settings.threads or None, quantize=settings.quantize)
+        neural = NeuralPlanner(model_dir, threads=settings.threads or None, quantize=(settings.quantize_scope or settings.quantize))
     elif settings.planner == "neural":
         raise RuntimeError(f"planner=neural but model dir {model_dir} is missing")
     return store, AgentRuntime(indexes, neural, entity_check=settings.entity_check)

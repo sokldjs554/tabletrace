@@ -1,5 +1,5 @@
 {
- "run": "experiments/eval/rl_v3_ko_test",
+ "run": "experiments/eval/rl_v3_ko_test/",
  "n": 699,
  "n_answerable": 649,
  "pred_status_answerable": {
@@ -26,6 +26,14 @@
   "final_abstain_recall": 0.46,
   "abstained_via_invalid_program_recall": 0.0,
   "abstained_via_verifier_recall": 0.04
+ },
+ "selective": {
+  "n": 699,
+  "answered": 501,
+  "answered_correct": 206,
+  "answered_wrong": 295,
+  "precision": 0.4112,
+  "wrong_answer_rate": 0.422
  },
  "degenerate_calc_outputs": 0,
  "degenerate_calc_rate": 0.0,

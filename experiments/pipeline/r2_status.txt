@@ -64,3 +64,15 @@
 [14:09:20] OK    eval_rl_v3_chem_syndev
 [14:09:20] final model = experiments/rl_v3/model
 [14:09:20] START eval_final_int8_all_ko_test
+[14:14:55] OK    eval_final_int8_all_ko_test
+[14:14:55] START eval_final_int8_no_lm_head_ko_test
+[14:21:03] OK    eval_final_int8_no_lm_head_ko_test
+[14:21:03] START eval_final_int8_ffn_ko_test
+[14:27:07] OK    eval_final_int8_ffn_ko_test
+[14:27:07] START eval_final_int8_attn_ko_test
+[14:33:44] OK    eval_final_int8_attn_ko_test
+[14:33:44] START bench_inference
+[14:58:54] OK    bench_inference
+[14:58:54] ROUND2 B DONE
+[15:20:58] lm_head extra evals done
+[15:23:04] finalize tail exit=0

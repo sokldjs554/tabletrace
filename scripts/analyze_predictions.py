@@ -48,6 +48,11 @@ def main(path: str) -> None:
         "abstained_via_invalid_program_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained" and r["pred_op"] != "abstain" and r["pred_reason"] == "invalid_program") / n_ab, 4) if n_ab else None,
         "abstained_via_verifier_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained" and r["pred_op"] != "abstain" and r["pred_reason"] not in ("invalid_program", None)) / n_ab, 4) if n_ab else None,
     }
+    answered = [r for r in rows if r["pred_status"] == "answered"]
+    out["selective"] = {"n": len(rows), "answered": len(answered), "answered_correct": sum(1 for r in answered if r["verified_correct"]),
+                        "answered_wrong": sum(1 for r in answered if not r["verified_correct"]),
+                        "precision": round(sum(1 for r in answered if r["verified_correct"]) / len(answered), 4) if answered else None,
+                        "wrong_answer_rate": round(sum(1 for r in answered if not r["verified_correct"]) / len(rows), 4) if rows else None}
     gold_text = [r for r in rows if r["gold_op"] == "text"]
     if gold_text:
         # passage questions: did the planner choose `text`, and was the verified answer right?

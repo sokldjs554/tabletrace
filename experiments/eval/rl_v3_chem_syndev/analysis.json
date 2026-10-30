@@ -1,5 +1,5 @@
 {
- "run": "experiments/eval/rl_v3_chem_syndev",
+ "run": "experiments/eval/rl_v3_chem_syndev/",
  "n": 80,
  "n_answerable": 64,
  "pred_status_answerable": {
@@ -26,6 +26,14 @@
   "final_abstain_recall": 0.8125,
   "abstained_via_invalid_program_recall": 0.0,
   "abstained_via_verifier_recall": 0.0
+ },
+ "selective": {
+  "n": 80,
+  "answered": 39,
+  "answered_correct": 23,
+  "answered_wrong": 16,
+  "precision": 0.5897,
+  "wrong_answer_rate": 0.2
  },
  "degenerate_calc_outputs": 19,
  "degenerate_calc_rate": 0.2375,

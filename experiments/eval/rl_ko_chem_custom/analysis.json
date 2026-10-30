@@ -27,6 +27,14 @@
   "abstained_via_invalid_program_recall": 0.8,
   "abstained_via_verifier_recall": 0.0
  },
+ "selective": {
+  "n": 32,
+  "answered": 5,
+  "answered_correct": 0,
+  "answered_wrong": 5,
+  "precision": 0.0,
+  "wrong_answer_rate": 0.1562
+ },
  "text_answers": {
   "n_gold_text": 7,
   "chose_text_op_rate": 0.0,

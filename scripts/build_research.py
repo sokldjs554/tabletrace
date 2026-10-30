@@ -39,18 +39,20 @@ def main() -> None:
     env = load(ROOT / "docs" / "research" / "environment.json") or {}
     sections = []
     cols = ["플래너 / 모델", "n", "verified EM", "lookup EM", "calc EM", "근거 셀 일치(최종)", "근거 셀 일치(모델 인용)", "보류 재현율", "오보류율", "파싱 실패", "ms/예제"]
-    models = [("휴리스틱(어휘 겹침) 기준선", "heuristic"), ("mT5-small 기본(변환만)", "base"), ("SFT stage1(표)", "sft_ko"),
-              ("SFT stage2(+본문)", "sft_ko2"), ("GRPO RL(stage2에서)", "rl_ko"), ("화학 SFT(stage2에서)", "sft_chem")]
+    models = [("휴리스틱(어휘 겹침) 기준선", "heuristic", False), ("mT5-small 기본(변환만)", "base", False), ("SFT stage1(표)", "sft_ko", False),
+              ("SFT stage2(+본문, 1차)", "sft_ko2", False), ("GRPO RL v2(1차)", "rl_ko", False), ("화학 SFT(1차 최종)", "sft_chem", False),
+              ("[2차] 화학 SFT v2", "sft_chem2", False), ("[2차] GRPO RL v3 (최종)", "rl_v3", False), ("[2차] RL v3 + 검증기 v2(개체 일치 검사)", "rl_v3", True)]
     for title, suffix, desc in [("한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160)", "ko_test", "표가 학습 분할과 겹치지 않는 539문항(원 데이터, lookup) + 합성 160문항(계산·보류)."),
                                 ("한국어 표 QA — 수작업 평가 30문항", "ko_custom", "셀·계산·본문+표·단위/기간·보류 범주. 표본이 작아 참고치."),
-                                ("영어 화학 문서 — 수작업 평가 32문항 (test 분할 문서)", "chem_custom", "물질 상수·실험 조건·수치/단위·본문·보류 범주.")]:
-        rows = [r for r in (eval_row(n, f"{k}_{suffix}") for n, k in models) if r]
+                                ("영어 화학 문서 — 수작업 평가 32문항 (test 분할 문서)", "chem_custom", "물질 상수·실험 조건·수치/단위·본문·보류 범주."),
+                                ("본문 답변·근거 없음 — 실제 표 옆 KorQuAD 150문항", "text2_test", "본문 100문항(답이 본문에만 있음) + 근거 없음 50문항. 표는 test 분할의 표(학습에 쓰이지 않음). 2차에서 새로 만든 평가셋.")]:
+        rows = [r for r in (eval_row(n, f"{k}_{suffix}{'_ec' if ec else ''}") for n, k, ec in models) if r]
         done = any(r[0] != models[0][0] for r in rows)
         sec = {"title": title, "description": desc, "columns": cols, "rows": rows, "status": "done" if done else "prep",
                "artifact": f"experiments/eval/*_{suffix}/metrics.json"}
         cats = {}
-        for n, k in models:
-            m = load(EXP / "eval" / f"{k}_{suffix}" / "metrics.json")
+        for n, k, ec in models:
+            m = load(EXP / "eval" / f"{k}_{suffix}{'_ec' if ec else ''}" / "metrics.json")
             if m and m["metrics"].get("by_category"):
                 cats[n] = m["metrics"]["by_category"]
         if cats:
@@ -59,7 +61,8 @@ def main() -> None:
         sections.append(sec)
     # training runs
     rows = []
-    for name, d in [("SFT stage1 (ko)", "sft_ko"), ("SFT stage2 (ko+text)", "sft_ko2"), ("SFT chem", "sft_chem"), ("GRPO RL (ko)", "rl_ko")]:
+    for name, d in [("SFT stage1 (ko)", "sft_ko"), ("SFT stage2 (ko+text, 1차)", "sft_ko2"), ("SFT chem (1차)", "sft_chem"), ("GRPO RL v2 (1차)", "rl_ko"),
+                    ("[2차] SFT stage2 재학습", "sft_ko3"), ("[2차] 표 조회 보강 epoch", "sft_ko4"), ("[2차] SFT chem v2", "sft_chem2"), ("[2차] GRPO RL v3", "rl_v3")]:
         s = load(EXP / d / "summary.json") or load(EXP / d / "config.json")
         if not s:
             continue
@@ -69,19 +72,20 @@ def main() -> None:
     sections.append({"title": "학습 실행 기록", "columns": ["실행", "학습 예제", "스텝", "소요", "하드웨어", "best dev verified EM", "best step"], "rows": rows,
                      "status": "done" if rows else "prep", "artifact": "experiments/*/summary.json, train_log.jsonl",
                      "conditions": {"모델": "mT5-small 300M (gs://t5-data 체크포인트를 직접 변환)", "최적화기": "AdamW, 선형 워밍업 5% + 선형 감쇠, clip 1.0", "입력": "question + title + context(≤300자) + 표 직렬화 ≤512 토큰"}})
-    rl = load(EXP / "rl_ko" / "train_log.jsonl".replace("train_log.jsonl", "summary.json"))
-    rl_log = EXP / "rl_ko" / "train_log.jsonl"
-    if rl_log.exists():
-        steps = [json.loads(line) for line in rl_log.read_text(encoding="utf-8").splitlines() if line.strip() and '"eval"' not in line]
-        if steps:
-            first, last = steps[: max(1, len(steps) // 5)], steps[-max(1, len(steps) // 5):]
-            avg = lambda xs, k: sum(x[k] for x in xs) / len(xs)  # noqa: E731
-            sections.append({"title": "강화학습(GRPO 방식) 보상 추이", "status": "done",
-                             "description": "그룹 정규화 이점으로 정책 경사 업데이트. 보상은 검증기 기반(정답·근거 셀·보류 적절성).",
-                             "columns": ["구간", "평균 보상", "정답률(샘플)", "보류율(샘플)", "파싱 성공", "KL"],
-                             "rows": [[f"처음 {len(first)} step", f"{avg(first, 'reward_mean'):.3f}", pct(avg(first, 'correct_rate')), pct(avg(first, 'abstain_rate')), pct(avg(first, 'parse_ok')), f"{avg(first, 'kl'):.4f}"],
-                                      [f"마지막 {len(last)} step", f"{avg(last, 'reward_mean'):.3f}", pct(avg(last, 'correct_rate')), pct(avg(last, 'abstain_rate')), pct(avg(last, 'parse_ok')), f"{avg(last, 'kl'):.4f}"]],
-                             "conditions": (rl or {}).get("args", {}), "artifact": "experiments/rl_ko/train_log.jsonl"})
+    for rl_dir, rl_title in (("rl_ko", "강화학습(GRPO 방식) 1차 v2 보상 추이"), ("rl_v3", "강화학습(GRPO 방식) 2차 v3 보상 추이 (한국어+화학+본문 프롬프트)")):
+        rl = load(EXP / rl_dir / "summary.json")
+        rl_log = EXP / rl_dir / "train_log.jsonl"
+        if rl_log.exists():
+            steps = [json.loads(line) for line in rl_log.read_text(encoding="utf-8").splitlines() if line.strip() and '"eval"' not in line]
+            if steps:
+                first, last = steps[: max(1, len(steps) // 5)], steps[-max(1, len(steps) // 5):]
+                avg = lambda xs, k: sum(x[k] for x in xs) / len(xs)  # noqa: E731
+                sections.append({"title": rl_title, "status": "done",
+                                 "description": "그룹 정규화 이점으로 정책 경사 업데이트. 보상은 검증기 기반(정답·근거 셀·보류 적절성).",
+                                 "columns": ["구간", "평균 보상", "정답률(샘플)", "보류율(샘플)", "파싱 성공", "KL"],
+                                 "rows": [[f"처음 {len(first)} step", f"{avg(first, 'reward_mean'):.3f}", pct(avg(first, 'correct_rate')), pct(avg(first, 'abstain_rate')), pct(avg(first, 'parse_ok')), f"{avg(first, 'kl'):.4f}"],
+                                          [f"마지막 {len(last)} step", f"{avg(last, 'reward_mean'):.3f}", pct(avg(last, 'correct_rate')), pct(avg(last, 'abstain_rate')), pct(avg(last, 'parse_ok')), f"{avg(last, 'kl'):.4f}"]],
+                                 "conditions": (rl or {}).get("args", {}), "artifact": f"experiments/{rl_dir}/train_log.jsonl"})
     b = load(EXP / "bench" / "inference.json")
     if b:
         sections.append({"title": "추론 최적화 (CPU 실측)", "status": "done", "conditions": b["meta"],
@@ -90,6 +94,13 @@ def main() -> None:
                          "artifact": "experiments/bench/inference.json"})
     else:
         sections.append({"title": "추론 최적화 (CPU 실측)", "status": "prep", "description": "src/tabletrace/bench/inference.py — fp32/int8/배치/KV 캐시 비교. 아직 실행 전."})
+    b2 = load(EXP / "bench" / "inference_r2.json")
+    if b2:
+        sections.append({"title": "추론 최적화 2차 — 최종 모델(RL v3)의 int8 범위별 측정 (CPU)", "status": "done", "conditions": b2["meta"],
+                         "description": "int8 = 모든 Linear(lm_head 포함), int8-<범위> = 일부 Linear만. 정확도(ko test verified EM)는 README §10.1과 보고서 §8에 있다.",
+                         "columns": ["설정", "p50 ms", "p95 ms", "처리량 (예제/s)", "최대 RSS GB", "모델 파일 MB", "fp32 bs=1과 출력 일치"],
+                         "rows": [[r["config"], r["p50_ms"], r["p95_ms"], r["throughput_ex_per_s"], r.get("peak_rss_gb", "–"), r.get("state_dict_mb", "–"), pct(r["agreement_with_fp32_bs1"])] for r in b2["results"]],
+                         "artifact": "experiments/bench/inference_r2.json"})
     pp1, pp2 = load(EXP / "bench" / "pp_single.json"), load(EXP / "bench" / "pp_2stage.json")
     if pp1 and pp2:
         same = pp1.get("outputs") == pp2.get("outputs")
@@ -105,7 +116,7 @@ def main() -> None:
     else:
         sections.append({"title": "멀티 GPU Model Parallelism", "status": "prep", "description": "src/tabletrace/bench/pipeline_parallel.py 준비, 실행 전."})
     sections.append({"title": "vLLM / SGLang 서빙", "status": "prep",
-                     "description": "GPU가 없어 실행하지 못함. OpenAI 호환 클라이언트(EnginePlanner)·TP=2 서빙 스크립트·벤치 스크립트를 준비했고 모의 서버로 왕복 테스트했다(tests/test_engines.py).",
+                     "description": "GPU가 없어 실행하지 못함. OpenAI 호환 클라이언트(EnginePlanner)·TP=2 서빙 스크립트·벤치 스크립트를 준비했고 모의 서버로 왕복 테스트했다(tests/test_engines.py). vLLM 0.32.0과 SGLang 0.5.23은 모델 등록부에 T5/mT5가 없어 이 프로젝트의 mT5 모델은 두 엔진으로 서빙할 수 없다(experiments/serving/engine_support.json); EXAONE 같은 decoder-only 모델이 필요하다.",
                      "artifact": "scripts/serving/*.sh, src/tabletrace/service/engines.py, docs/experiments/serving.md"})
     data = {"generated_at": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "commit": commit,
             "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없음 (docs/research/environment.md). " + json.dumps(env, ensure_ascii=False) if env else "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없음.",

@@ -1,5 +1,5 @@
 {
- "run": "experiments/eval/rl_v3_chem_custom_ec",
+ "run": "experiments/eval/rl_v3_chem_custom_ec/",
  "n": 32,
  "n_answerable": 27,
  "pred_status_answerable": {
@@ -26,6 +26,14 @@
   "final_abstain_recall": 0.6,
   "abstained_via_invalid_program_recall": 0.2,
   "abstained_via_verifier_recall": 0.0
+ },
+ "selective": {
+  "n": 32,
+  "answered": 15,
+  "answered_correct": 4,
+  "answered_wrong": 11,
+  "precision": 0.2667,
+  "wrong_answer_rate": 0.3438
  },
  "text_answers": {
   "n_gold_text": 7,

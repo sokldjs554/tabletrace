@@ -109,13 +109,13 @@ def rl_table(run: str = "rl_ko") -> str:
     return out
 
 
-def bench_table() -> str:
-    b = load(EXP / "bench" / "inference.json")
+def bench_table(fname: str = "inference.json", label: str = "1차 최종 모델") -> str:
+    b = load(EXP / "bench" / fname)
     if not b:
         return "_추론 벤치 산출물 없음_\n"
     m = b["meta"]
-    out = (f"조건: {m['model']}(화학 SFT 모델), 입력 {m['n_examples']}개(ko test), max_new_tokens {m['max_new_tokens']}, 워밍업 {m['warmup_rounds']}라운드 + 측정 {m['measured_rounds']}라운드, "
-           f"{m['threads']} 스레드, {m['cores']} cores x86_64, torch {m['torch']}, CUDA {m['cuda']}. 정밀도마다 **별도 프로세스**에서 측정(메모리 비교를 위해). int8 준비 {m.get('int8_prepare_s', '?')} s.\n\n")
+    out = (f"조건: {m['model']}({label}), 입력 {m['n_examples']}개(ko test), max_new_tokens {m['max_new_tokens']}, 워밍업 {m['warmup_rounds']}라운드 + 측정 {m['measured_rounds']}라운드, "
+           f"{m['threads']} 스레드, {m['cores']} cores x86_64, torch {m['torch']}, CUDA {m['cuda']}. 정밀도마다 **별도 프로세스**에서 측정(메모리 비교를 위해). int8 준비 {m.get('int8_prepare_s', '?')} s. 모델 실행 조건은 위와 같고 **양자화 범위**는 설정 이름의 `int8`(모든 Linear, lm_head 포함) 또는 `int8-<범위>`(일부)로 구분합니다.\n\n")
     out += "| 설정 | p50 ms | p95 ms | 처리량 예제/s | 모델 파일 MB | 프로세스 peak RSS GB | fp32 bs=1과 출력 문자열 일치 % |\n|---|---:|---:|---:|---:|---:|---:|\n"
     for r in b["results"]:
         out += f"| {r['config']} | {r['p50_ms']} | {r['p95_ms']} | {r['throughput_ex_per_s']} | {r.get('state_dict_mb', '–')} | {r.get('peak_rss_gb', r.get('rss_gb_after', '–'))} | {pct(r['agreement_with_fp32_bs1'])} |\n"
@@ -152,6 +152,8 @@ def blocks() -> dict[str, str]:
         "rl_v1": rl_table("rl_ko_v1"),
         "rl_v3": rl_table("rl_v3"),
         "bench": bench_table(),
+        "bench_r2": bench_table("inference_r2.json", "2차 최종 모델 = RL v3"),
+        "bench_r2b": bench_table("inference_r2b.json", "2차 최종 모델 = RL v3, fp32 대 lm_head만 int8"),
         "pp": pp_table(),
     }
 

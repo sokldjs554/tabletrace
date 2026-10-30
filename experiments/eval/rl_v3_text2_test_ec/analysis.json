@@ -1,5 +1,5 @@
 {
- "run": "experiments/eval/rl_v3_text2_test_ec",
+ "run": "experiments/eval/rl_v3_text2_test_ec/",
  "n": 150,
  "n_answerable": 100,
  "pred_status_answerable": {
@@ -27,6 +27,14 @@
   "final_abstain_recall": 0.92,
   "abstained_via_invalid_program_recall": 0.0,
   "abstained_via_verifier_recall": 0.02
+ },
+ "selective": {
+  "n": 150,
+  "answered": 68,
+  "answered_correct": 26,
+  "answered_wrong": 42,
+  "precision": 0.3824,
+  "wrong_answer_rate": 0.28
  },
  "text_answers": {
   "n_gold_text": 100,

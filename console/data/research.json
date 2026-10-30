@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-10-30 07:37 UTC",
- "commit": "799d528",
+ "generated_at": "2026-10-30 15:21 UTC",
+ "commit": "9b9823b",
  "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. 실행 환경: 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없음.",
  "sections": [
   {
@@ -60,7 +60,7 @@
      "591"
     ],
     [
-     "SFT stage2(+본문)",
+     "SFT stage2(+본문, 1차)",
      699,
      "27.5%",
      "32.3%",
@@ -73,7 +73,7 @@
      "422"
     ],
     [
-     "GRPO RL(stage2에서)",
+     "GRPO RL v2(1차)",
      699,
      "27.0%",
      "31.0%",
@@ -86,7 +86,7 @@
      "504"
     ],
     [
-     "화학 SFT(stage2에서)",
+     "화학 SFT(1차 최종)",
      699,
      "29.8%",
      "37.1%",
@@ -97,6 +97,45 @@
      "19.4%",
      "0.0%",
      "615"
+    ],
+    [
+     "[2차] 화학 SFT v2",
+     699,
+     "32.9%",
+     "38.4%",
+     "0.0%",
+     "31.9%",
+     "17.9%",
+     "46.0%",
+     "29.0%",
+     "1.4%",
+     "538"
+    ],
+    [
+     "[2차] GRPO RL v3 (최종)",
+     699,
+     "32.8%",
+     "38.2%",
+     "0.0%",
+     "31.7%",
+     "18.9%",
+     "46.0%",
+     "27.0%",
+     "0.0%",
+     "500"
+    ],
+    [
+     "[2차] RL v3 + 검증기 v2(개체 일치 검사)",
+     699,
+     "31.6%",
+     "36.5%",
+     "0.0%",
+     "30.3%",
+     "18.9%",
+     "48.0%",
+     "31.6%",
+     "0.0%",
+     "500"
     ]
    ],
    "status": "done",
@@ -159,7 +198,7 @@
      "447"
     ],
     [
-     "SFT stage2(+본문)",
+     "SFT stage2(+본문, 1차)",
      30,
      "23.3%",
      "7.7%",
@@ -172,7 +211,7 @@
      "480"
     ],
     [
-     "GRPO RL(stage2에서)",
+     "GRPO RL v2(1차)",
      30,
      "20.0%",
      "7.7%",
@@ -185,7 +224,7 @@
      "525"
     ],
     [
-     "화학 SFT(stage2에서)",
+     "화학 SFT(1차 최종)",
      30,
      "3.3%",
      "7.7%",
@@ -196,6 +235,45 @@
      "48.0%",
      "0.0%",
      "536"
+    ],
+    [
+     "[2차] 화학 SFT v2",
+     30,
+     "6.7%",
+     "7.7%",
+     "0.0%",
+     "16.0%",
+     "12.0%",
+     "20.0%",
+     "36.0%",
+     "6.7%",
+     "623"
+    ],
+    [
+     "[2차] GRPO RL v3 (최종)",
+     30,
+     "13.3%",
+     "7.7%",
+     "0.0%",
+     "12.0%",
+     "20.0%",
+     "60.0%",
+     "32.0%",
+     "0.0%",
+     "507"
+    ],
+    [
+     "[2차] RL v3 + 검증기 v2(개체 일치 검사)",
+     30,
+     "13.3%",
+     "7.7%",
+     "0.0%",
+     "12.0%",
+     "20.0%",
+     "60.0%",
+     "32.0%",
+     "0.0%",
+     "507"
     ]
    ],
    "status": "done",
@@ -204,9 +282,12 @@
     "휴리스틱(어휘 겹침) 기준선: abstain 100.0% (n=5), calc 83.3% (n=6), cell 44.4% (n=9), text_table 0.0% (n=5), unit_period 20.0% (n=5)",
     "mT5-small 기본(변환만): abstain 100.0% (n=5), calc 0.0% (n=6), cell 0.0% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
     "SFT stage1(표): abstain 80.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
-    "SFT stage2(+본문): abstain 100.0% (n=5), calc 16.7% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
-    "GRPO RL(stage2에서): abstain 100.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
-    "화학 SFT(stage2에서): abstain 0.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)"
+    "SFT stage2(+본문, 1차): abstain 100.0% (n=5), calc 16.7% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
+    "GRPO RL v2(1차): abstain 100.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
+    "화학 SFT(1차 최종): abstain 0.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
+    "[2차] 화학 SFT v2: abstain 20.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
+    "[2차] GRPO RL v3 (최종): abstain 60.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)",
+    "[2차] RL v3 + 검증기 v2(개체 일치 검사): abstain 60.0% (n=5), calc 0.0% (n=6), cell 11.1% (n=9), text_table 0.0% (n=5), unit_period 0.0% (n=5)"
    ]
   },
   {
@@ -266,7 +347,7 @@
      "399"
     ],
     [
-     "SFT stage2(+본문)",
+     "SFT stage2(+본문, 1차)",
      32,
      "9.4%",
      "0.0%",
@@ -279,7 +360,7 @@
      "352"
     ],
     [
-     "GRPO RL(stage2에서)",
+     "GRPO RL v2(1차)",
      32,
      "12.5%",
      "0.0%",
@@ -292,7 +373,7 @@
      "426"
     ],
     [
-     "화학 SFT(stage2에서)",
+     "화학 SFT(1차 최종)",
      32,
      "15.6%",
      "7.7%",
@@ -303,6 +384,45 @@
      "66.7%",
      "3.1%",
      "459"
+    ],
+    [
+     "[2차] 화학 SFT v2",
+     32,
+     "18.8%",
+     "23.1%",
+     "0.0%",
+     "11.1%",
+     "7.4%",
+     "60.0%",
+     "55.6%",
+     "0.0%",
+     "447"
+    ],
+    [
+     "[2차] GRPO RL v3 (최종)",
+     32,
+     "21.9%",
+     "23.1%",
+     "7.1%",
+     "14.8%",
+     "14.8%",
+     "60.0%",
+     "51.8%",
+     "0.0%",
+     "391"
+    ],
+    [
+     "[2차] RL v3 + 검증기 v2(개체 일치 검사)",
+     32,
+     "21.9%",
+     "23.1%",
+     "7.1%",
+     "14.8%",
+     "14.8%",
+     "60.0%",
+     "51.8%",
+     "0.0%",
+     "391"
     ]
    ],
    "status": "done",
@@ -311,10 +431,99 @@
     "휴리스틱(어휘 겹침) 기준선: abstain 100.0% (n=5), calc 28.6% (n=7), cell 80.0% (n=10), text_table 0.0% (n=6), unit_period 75.0% (n=4)",
     "mT5-small 기본(변환만): abstain 100.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
     "SFT stage1(표): abstain 60.0% (n=5), calc 0.0% (n=7), cell 10.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
-    "SFT stage2(+본문): abstain 60.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
-    "GRPO RL(stage2에서): abstain 80.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
-    "화학 SFT(stage2에서): abstain 60.0% (n=5), calc 14.3% (n=7), cell 10.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)"
+    "SFT stage2(+본문, 1차): abstain 60.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
+    "GRPO RL v2(1차): abstain 80.0% (n=5), calc 0.0% (n=7), cell 0.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
+    "화학 SFT(1차 최종): abstain 60.0% (n=5), calc 14.3% (n=7), cell 10.0% (n=10), text_table 0.0% (n=6), unit_period 0.0% (n=4)",
+    "[2차] 화학 SFT v2: abstain 60.0% (n=5), calc 0.0% (n=7), cell 20.0% (n=10), text_table 0.0% (n=6), unit_period 25.0% (n=4)",
+    "[2차] GRPO RL v3 (최종): abstain 60.0% (n=5), calc 14.3% (n=7), cell 10.0% (n=10), text_table 0.0% (n=6), unit_period 50.0% (n=4)",
+    "[2차] RL v3 + 검증기 v2(개체 일치 검사): abstain 60.0% (n=5), calc 14.3% (n=7), cell 10.0% (n=10), text_table 0.0% (n=6), unit_period 50.0% (n=4)"
    ]
+  },
+  {
+   "title": "본문 답변·근거 없음 — 실제 표 옆 KorQuAD 150문항",
+   "description": "본문 100문항(답이 본문에만 있음) + 근거 없음 50문항. 표는 test 분할의 표(학습에 쓰이지 않음). 2차에서 새로 만든 평가셋.",
+   "columns": [
+    "플래너 / 모델",
+    "n",
+    "verified EM",
+    "lookup EM",
+    "calc EM",
+    "근거 셀 일치(최종)",
+    "근거 셀 일치(모델 인용)",
+    "보류 재현율",
+    "오보류율",
+    "파싱 실패",
+    "ms/예제"
+   ],
+   "rows": [
+    [
+     "SFT stage2(+본문, 1차)",
+     150,
+     "8.7%",
+     "-",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "26.0%",
+     "46.0%",
+     "0.0%",
+     "1234"
+    ],
+    [
+     "화학 SFT(1차 최종)",
+     150,
+     "11.3%",
+     "-",
+     "0.0%",
+     "0.0%",
+     "0.0%",
+     "34.0%",
+     "36.0%",
+     "0.0%",
+     "1202"
+    ],
+    [
+     "[2차] 화학 SFT v2",
+     150,
+     "37.3%",
+     "-",
+     "28.0%",
+     "66.0%",
+     "66.0%",
+     "56.0%",
+     "31.0%",
+     "1.3%",
+     "493"
+    ],
+    [
+     "[2차] GRPO RL v3 (최종)",
+     150,
+     "47.3%",
+     "-",
+     "26.0%",
+     "61.0%",
+     "61.0%",
+     "90.0%",
+     "33.0%",
+     "0.7%",
+     "456"
+    ],
+    [
+     "[2차] RL v3 + 검증기 v2(개체 일치 검사)",
+     150,
+     "48.0%",
+     "-",
+     "26.0%",
+     "61.0%",
+     "61.0%",
+     "92.0%",
+     "36.0%",
+     "0.7%",
+     "456"
+    ]
+   ],
+   "status": "done",
+   "artifact": "experiments/eval/*_text2_test/metrics.json"
   },
   {
    "title": "학습 실행 기록",
@@ -338,7 +547,7 @@
      "858"
     ],
     [
-     "SFT stage2 (ko+text)",
+     "SFT stage2 (ko+text, 1차)",
      1542,
      193,
      "30 min",
@@ -347,7 +556,7 @@
      "193"
     ],
     [
-     "SFT chem",
+     "SFT chem (1차)",
      937,
      236,
      "32 min",
@@ -356,13 +565,49 @@
      "236"
     ],
     [
-     "GRPO RL (ko)",
+     "GRPO RL v2 (1차)",
      3485,
      60,
      "32 min",
      "4 threads CPU",
      "30.6%",
      "60"
+    ],
+    [
+     "[2차] SFT stage2 재학습",
+     2136,
+     267,
+     "52 min",
+     "4 threads CPU",
+     "27.1%",
+     "267"
+    ],
+    [
+     "[2차] 표 조회 보강 epoch",
+     2379,
+     298,
+     "52 min",
+     "4 threads CPU",
+     "29.9%",
+     "298"
+    ],
+    [
+     "[2차] SFT chem v2",
+     1590,
+     398,
+     "62 min",
+     "4 threads CPU",
+     "41.2%",
+     "398"
+    ],
+    [
+     "[2차] GRPO RL v3",
+     5130,
+     120,
+     "57 min",
+     "4 threads CPU",
+     "43.2%",
+     "120"
     ]
    ],
    "status": "done",
@@ -374,7 +619,7 @@
    }
   },
   {
-   "title": "강화학습(GRPO 방식) 보상 추이",
+   "title": "강화학습(GRPO 방식) 1차 v2 보상 추이",
    "status": "done",
    "description": "그룹 정규화 이점으로 정책 경사 업데이트. 보상은 검증기 기반(정답·근거 셀·보류 적절성).",
    "columns": [
@@ -433,6 +678,74 @@
     "kl_clamp": 10.0
    },
    "artifact": "experiments/rl_ko/train_log.jsonl"
+  },
+  {
+   "title": "강화학습(GRPO 방식) 2차 v3 보상 추이 (한국어+화학+본문 프롬프트)",
+   "status": "done",
+   "description": "그룹 정규화 이점으로 정책 경사 업데이트. 보상은 검증기 기반(정답·근거 셀·보류 적절성).",
+   "columns": [
+    "구간",
+    "평균 보상",
+    "정답률(샘플)",
+    "보류율(샘플)",
+    "파싱 성공",
+    "KL"
+   ],
+   "rows": [
+    [
+     "처음 24 step",
+     "0.174",
+     "28.6%",
+     "59.6%",
+     "100.0%",
+     "0.0033"
+    ],
+    [
+     "마지막 24 step",
+     "0.232",
+     "32.6%",
+     "47.4%",
+     "98.7%",
+     "0.0588"
+    ]
+   ],
+   "conditions": {
+    "model": "experiments/sft_chem2/model",
+    "train": [
+     "data/ko/train.jsonl",
+     "data/ko/synthetic_train.jsonl",
+     "data/chem/synthetic_train.jsonl",
+     "data/ko/text2_train.jsonl"
+    ],
+    "dev": [
+     "data/ko/dev.jsonl",
+     "data/ko/synthetic_dev.jsonl",
+     "data/chem/synthetic_dev.jsonl",
+     "data/ko/text2_dev.jsonl"
+    ],
+    "corpus": [
+     "data/ko/documents.jsonl",
+     "data/chem/documents.jsonl",
+     "data/ko/text2_documents_train.jsonl",
+     "data/ko/text2_documents_dev.jsonl"
+    ],
+    "out": "experiments/rl_v3/model",
+    "steps": 120,
+    "prompts_per_step": 4,
+    "group": 4,
+    "lr": 2e-05,
+    "beta": 0.02,
+    "temperature": 1.0,
+    "max_in": 512,
+    "max_out": 64,
+    "eval_every": 40,
+    "chunk": 8,
+    "seed": 0,
+    "threads": 4,
+    "max_dev": 0,
+    "kl_clamp": 10.0
+   },
+   "artifact": "experiments/rl_v3/train_log.jsonl"
   },
   {
    "title": "추론 최적화 (CPU 실측)",
@@ -511,6 +824,144 @@
    "artifact": "experiments/bench/inference.json"
   },
   {
+   "title": "추론 최적화 2차 — 최종 모델(RL v3)의 int8 범위별 측정 (CPU)",
+   "status": "done",
+   "conditions": {
+    "model": "experiments/rl_v3/model",
+    "n_examples": 48,
+    "max_new_tokens": 48,
+    "warmup_rounds": 1,
+    "measured_rounds": 2,
+    "threads": 4,
+    "cpu": "x86_64",
+    "cores": 4,
+    "torch": "2.15.0+cu132",
+    "cuda": false,
+    "int8_prepare_s": 5.1,
+    "prepare_s": {
+     "fp32": 0.0,
+     "int8": 5.1,
+     "int8-no_lm_head": 0.9,
+     "int8-ffn": 0.8,
+     "int8-attn": 0.6
+    },
+    "finished": "2026-10-30T14:58:53",
+    "note": "each precision measured in its own process; peak_rss_gb = ru_maxrss of that process (includes the tokenizer/torch runtime); dynamic int8 quantizes nn.Linear layers only (the shared 250k x 512 embedding stays fp32); `int8` quantizes ALL of them including lm_head, `int8-<scope>` a subset (model/quant.py)"
+   },
+   "description": "int8 = 모든 Linear(lm_head 포함), int8-<범위> = 일부 Linear만. 정확도(ko test verified EM)는 README §10.1과 보고서 §8에 있다.",
+   "columns": [
+    "설정",
+    "p50 ms",
+    "p95 ms",
+    "처리량 (예제/s)",
+    "최대 RSS GB",
+    "모델 파일 MB",
+    "fp32 bs=1과 출력 일치"
+   ],
+   "rows": [
+    [
+     "fp32, bs=1, kv-cache on",
+     996.8,
+     1190.2,
+     0.997,
+     3.39,
+     1200.8,
+     "100.0%"
+    ],
+    [
+     "fp32, bs=8, kv-cache on",
+     432.4,
+     469.1,
+     2.299,
+     3.39,
+     1200.8,
+     "100.0%"
+    ],
+    [
+     "fp32, bs=1, kv-cache OFF",
+     2990.7,
+     3711.6,
+     0.335,
+     3.39,
+     1200.8,
+     "100.0%"
+    ],
+    [
+     "int8, bs=1, kv-cache on",
+     702.7,
+     872.1,
+     1.411,
+     3.72,
+     684.6,
+     "54.2%"
+    ],
+    [
+     "int8, bs=8, kv-cache on",
+     317.0,
+     362.2,
+     3.117,
+     3.72,
+     684.6,
+     "31.2%"
+    ],
+    [
+     "int8-no_lm_head, bs=1, kv-cache on",
+     1013.7,
+     1249.0,
+     0.989,
+     3.34,
+     1068.8,
+     "58.3%"
+    ],
+    [
+     "int8-no_lm_head, bs=8, kv-cache on",
+     478.7,
+     601.3,
+     2.038,
+     3.34,
+     1068.8,
+     "47.9%"
+    ],
+    [
+     "int8-ffn, bs=1, kv-cache on",
+     1012.5,
+     1259.6,
+     0.965,
+     3.36,
+     1125.3,
+     "50.0%"
+    ],
+    [
+     "int8-ffn, bs=8, kv-cache on",
+     482.7,
+     680.1,
+     1.967,
+     3.36,
+     1125.3,
+     "47.9%"
+    ],
+    [
+     "int8-attn, bs=1, kv-cache on",
+     1090.9,
+     1263.9,
+     0.926,
+     3.32,
+     1144.2,
+     "79.2%"
+    ],
+    [
+     "int8-attn, bs=8, kv-cache on",
+     470.8,
+     557.5,
+     2.055,
+     3.32,
+     1144.2,
+     "75.0%"
+    ]
+   ],
+   "artifact": "experiments/bench/inference_r2.json"
+  },
+  {
    "title": "멀티 GPU Model Parallelism — 2-스테이지 파이프라인 (CPU gloo 기능 검증)",
    "status": "done",
    "description": "rank0=인코더, rank1=디코더+lm_head로 모델을 분할. GPU가 없어 CPU 2프로세스(gloo)로 분할·통신·출력 동일성만 검증했고 GPU 성능은 측정하지 못함.",
@@ -557,7 +1008,7 @@
   {
    "title": "vLLM / SGLang 서빙",
    "status": "prep",
-   "description": "GPU가 없어 실행하지 못함. OpenAI 호환 클라이언트(EnginePlanner)·TP=2 서빙 스크립트·벤치 스크립트를 준비했고 모의 서버로 왕복 테스트했다(tests/test_engines.py).",
+   "description": "GPU가 없어 실행하지 못함. OpenAI 호환 클라이언트(EnginePlanner)·TP=2 서빙 스크립트·벤치 스크립트를 준비했고 모의 서버로 왕복 테스트했다(tests/test_engines.py). vLLM 0.32.0과 SGLang 0.5.23은 모델 등록부에 T5/mT5가 없어 이 프로젝트의 mT5 모델은 두 엔진으로 서빙할 수 없다(experiments/serving/engine_support.json); EXAONE 같은 decoder-only 모델이 필요하다.",
    "artifact": "scripts/serving/*.sh, src/tabletrace/service/engines.py, docs/experiments/serving.md"
   }
  ]
