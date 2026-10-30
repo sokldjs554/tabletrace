@@ -27,3 +27,5 @@ data/ko/text2_*.jsonl
 data/ko/stage3_train.jsonl
 data/chem/stage2_train.jsonl
 data/ko/stage4_train.jsonl
+data/ko/text2_extra.jsonl
+data/ko/text2_documents_extra.jsonl

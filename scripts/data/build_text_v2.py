@@ -142,6 +142,11 @@ if __name__ == "__main__":
         convert("train", 600, 250, 11, "train.jsonl", tok)
     if only in ("all", "dev"):
         convert("dev", 100, 50, 12, "dev.jsonl", tok)
+    if only == "extra":
+        # more text positives for the chemistry stage: other KorQuAD train questions than text2_train, same train-table distractors
+        used = {json.loads(line)["qid"].split("_", 2)[-1] for line in open(KO / "text2_train.jsonl", encoding="utf-8")}
+        used |= {u.removeprefix("neg_") for u in used}
+        convert("extra", 700, 0, 21, "train.jsonl", tok, src="train", exclude=used)
     if only in ("all", "test"):
         # independent text/not-in-document evaluation: other KorQuAD dev questions than text2_dev, distractors from TEST tables
         used = {json.loads(line)["qid"].split("_", 2)[-1] for line in open(KO / "text2_dev.jsonl", encoding="utf-8")}

@@ -56,14 +56,16 @@ import json, random
 rnd = random.Random(5)
 rows = [json.loads(l) for l in open("data/chem/stage_train.jsonl", encoding="utf-8")]
 t2 = [json.loads(l) for l in open("data/ko/text2_train.jsonl", encoding="utf-8")]
+extra = [json.loads(l) for l in open("data/ko/text2_extra.jsonl", encoding="utf-8")]
 rnd.shuffle(t2)
-rows += [r for r in t2 if r["op"] == "text"][:100] + [r for r in t2 if r["op"] == "abstain"][:60]
+# text answers are the weakest skill (8/100 after stage 4), so the chemistry stage also carries 550 text examples
+rows += [r for r in t2 if r["op"] == "text"][:100] + extra[:450] + [r for r in t2 if r["op"] == "abstain"][:100]
 rnd.shuffle(rows)
 open("data/chem/stage2_train.jsonl", "w", encoding="utf-8").write("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
 print(len(rows), "chem stage-2 examples")
 PY
 step sft_chem2 experiments/sft_chem2/summary.json python -m tabletrace.training.sft --model experiments/sft_ko4/model --train data/chem/stage2_train.jsonl \
-  --dev data/chem/synthetic_dev.jsonl --corpus $CH $KO data/ko/text2_documents_train.jsonl --out experiments/sft_chem2/model --epochs 2 --bs 8 --lr 1.5e-4 --threads 4
+  --dev data/chem/synthetic_dev.jsonl --corpus $CH $KO data/ko/text2_documents_train.jsonl data/ko/text2_documents_extra.jsonl --out experiments/sft_chem2/model --epochs 2 --bs 8 --lr 1.5e-4 --threads 4
 evalsets sft_chem2 experiments/sft_chem2/model chem
 
 # 3. RL v3

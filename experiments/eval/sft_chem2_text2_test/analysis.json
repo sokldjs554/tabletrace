@@ -1,0 +1,75 @@
+{
+ "run": "experiments/eval/sft_chem2_text2_test/",
+ "n": 150,
+ "n_answerable": 100,
+ "pred_status_answerable": {
+  "answered": 69,
+  "abstained": 31
+ },
+ "abstain_reason_answerable": {
+  "not_in_document": 27,
+  "verification_failed": 2,
+  "invalid_program": 2
+ },
+ "raw_correct_but_blocked": 0,
+ "evidence_repaired": 1,
+ "lookup_citation": {
+  "n": 0,
+  "row_correct": null,
+  "col_correct": null,
+  "both_correct": null
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 50,
+  "explicit_abstain_outputs": 1,
+  "explicit_abstain_on_answerable": 1,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 0.56,
+  "abstained_via_invalid_program_recall": 0.0,
+  "abstained_via_verifier_recall": 0.56
+ },
+ "text_answers": {
+  "n_gold_text": 100,
+  "chose_text_op_rate": 0.92,
+  "verified_correct_rate": 0.28,
+  "verified_correct": 28
+ },
+ "degenerate_calc_outputs": 0,
+ "degenerate_calc_rate": 0.0,
+ "op_confusion_top": [
+  [
+   "text->text",
+   92
+  ],
+  [
+   "abstain->text",
+   48
+  ],
+  [
+   "text->lookup",
+   5
+  ],
+  [
+   "text->None",
+   2
+  ],
+  [
+   "abstain->lookup",
+   2
+  ],
+  [
+   "text->abstain",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "korquad_neg": {
+   "n": 50,
+   "verified_em": 0.56
+  },
+  "korquad_text2": {
+   "n": 100,
+   "verified_em": 0.28
+  }
+ }
+}

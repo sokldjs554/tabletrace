@@ -1,0 +1,78 @@
+{
+ "run": "experiments/eval/rl_ko_v1_chem_custom_ec/",
+ "n": 32,
+ "n_answerable": 27,
+ "pred_status_answerable": {
+  "abstained": 22,
+  "answered": 5
+ },
+ "abstain_reason_answerable": {
+  "invalid_program": 21,
+  "verification_failed": 1
+ },
+ "raw_correct_but_blocked": 2,
+ "evidence_repaired": 2,
+ "lookup_citation": {
+  "n": 3,
+  "row_correct": 0.667,
+  "col_correct": 0.333,
+  "both_correct": 0.0
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 5,
+  "explicit_abstain_outputs": 0,
+  "explicit_abstain_on_answerable": 0,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 1.0,
+  "abstained_via_invalid_program_recall": 1.0,
+  "abstained_via_verifier_recall": 0.0
+ },
+ "text_answers": {
+  "n_gold_text": 7,
+  "chose_text_op_rate": 0.0,
+  "verified_correct_rate": 0.0,
+  "verified_correct": 0
+ },
+ "degenerate_calc_outputs": 24,
+ "degenerate_calc_rate": 0.75,
+ "op_confusion_top": [
+  [
+   "lookup->diff",
+   10
+  ],
+  [
+   "abstain->diff",
+   5
+  ],
+  [
+   "diff->diff",
+   4
+  ],
+  [
+   "text->diff",
+   4
+  ],
+  [
+   "lookup->lookup",
+   3
+  ],
+  [
+   "ratio->diff",
+   2
+  ],
+  [
+   "text->lookup",
+   2
+  ],
+  [
+   "text->None",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 32,
+   "verified_em": 0.156
+  }
+ }
+}

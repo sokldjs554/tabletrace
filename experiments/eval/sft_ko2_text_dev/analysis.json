@@ -27,6 +27,12 @@
   "abstained_via_invalid_program_recall": null,
   "abstained_via_verifier_recall": null
  },
+ "text_answers": {
+  "n_gold_text": 100,
+  "chose_text_op_rate": 0.99,
+  "verified_correct_rate": 0.29,
+  "verified_correct": 29
+ },
  "degenerate_calc_outputs": 0,
  "degenerate_calc_rate": 0.0,
  "op_confusion_top": [

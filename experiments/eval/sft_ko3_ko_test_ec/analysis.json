@@ -1,5 +1,5 @@
 {
- "run": "experiments/eval/sft_ko3_ko_test_ec",
+ "run": "experiments/eval/sft_ko3_ko_test_ec/",
  "n": 699,
  "n_answerable": 649,
  "pred_status_answerable": {

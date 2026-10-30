@@ -1,0 +1,78 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "model",
+  "data": [
+   "data/chem/custom_eval.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl"
+  ],
+  "n": 32,
+  "wall_s": 20.0,
+  "hardware": "x86_64",
+  "label": null,
+  "entity_check": false,
+  "replay_from": null,
+  "finished": "2026-10-30T12:53:52",
+  "quantize": false,
+  "quantize_scope": null
+ },
+ "metrics": {
+  "n": 32,
+  "n_answerable": 27,
+  "n_gold_abstain": 5,
+  "n_calc": 14,
+  "n_lookup": 13,
+  "verified_em": 0.1875,
+  "answer_em_answerable": 0.1111,
+  "raw_answer_em_answerable": 0.1852,
+  "evidence_cells_exact": 0.1111,
+  "evidence_cells_exact_raw": 0.0741,
+  "evidence_repaired_rate": 0.0741,
+  "evidence_cells_overlap": 0.1111,
+  "op_acc": 0.625,
+  "lookup_em": 0.2308,
+  "calc_em": 0.0,
+  "calc_result_correct": 0.0,
+  "unit_error_rate": null,
+  "abstain_recall": 0.6,
+  "false_abstain_rate": 0.5556,
+  "abstain_precision": 0.1667,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.4444,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.1875,
+  "mean_ms_per_example": 447.3,
+  "by_source": {
+   "custom": {
+    "n": 32,
+    "verified_em": 0.1875
+   }
+  },
+  "by_category": {
+   "abstain": {
+    "n": 5,
+    "verified_em": 0.6
+   },
+   "calc": {
+    "n": 7,
+    "verified_em": 0.0
+   },
+   "cell": {
+    "n": 10,
+    "verified_em": 0.2
+   },
+   "text_table": {
+    "n": 6,
+    "verified_em": 0.0
+   },
+   "unit_period": {
+    "n": 4,
+    "verified_em": 0.25
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": false
+ }
+}

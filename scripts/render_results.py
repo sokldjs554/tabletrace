@@ -14,7 +14,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXP = ROOT / "experiments"
 MODELS = [("휴리스틱 기준선", "heuristic"), ("mT5-small 기본(미튜닝)", "base"), ("SFT stage1", "sft_ko"), ("SFT stage2(+본문)", "sft_ko2"),
-          ("GRPO RL v1 (보상 허점)", "rl_ko_v1"), ("GRPO RL v2 (보상 수정)", "rl_ko"), ("화학 SFT", "sft_chem"), ("화학 SFT + int8 동적 양자화", "sft_chem_int8")]
+          ("GRPO RL v1 (보상 허점)", "rl_ko_v1"), ("GRPO RL v2 (보상 수정)", "rl_ko"), ("화학 SFT", "sft_chem"), ("화학 SFT + int8 동적 양자화", "sft_chem_int8"),
+          ("[2차] SFT stage2 재학습(실제 표 옆 본문 예제)", "sft_ko3"), ("[2차] + 표 조회 보강 epoch", "sft_ko4"), ("[2차] 화학 SFT v2", "sft_chem2"), ("[2차] GRPO RL v3", "rl_v3"),
+          ("[2차] 화학 SFT v2 + int8 부분 양자화", "sft_chem2_int8")]
+V2 = "_ec"   # eval dirs written by replaying the stored raw outputs through the verifier WITH the subject check
 
 
 def load(p: Path):
@@ -25,10 +28,10 @@ def pct(x) -> str:
     return "–" if x is None else f"{100 * x:.1f}"
 
 
-def eval_table(suffix: str, title: str) -> str:
+def eval_table(suffix: str, title: str, ec: bool = False) -> str:
     rows = []
     for name, key in MODELS:
-        m = load(EXP / "eval" / f"{key}_{suffix}" / "metrics.json")
+        m = load(EXP / "eval" / f"{key}_{suffix}{V2 if ec else ''}" / "metrics.json")
         if not m:
             continue
         mm = m["metrics"]
@@ -40,11 +43,11 @@ def eval_table(suffix: str, title: str) -> str:
     return f"**{title}**\n\n{head}" + "\n".join(rows) + "\n"
 
 
-def category_table(suffix: str, title: str) -> str:
+def category_table(suffix: str, title: str, ec: bool = False) -> str:
     cats: dict[str, dict] = {}
     names = []
     for name, key in MODELS:
-        m = load(EXP / "eval" / f"{key}_{suffix}" / "metrics.json")
+        m = load(EXP / "eval" / f"{key}_{suffix}{V2 if ec else ''}" / "metrics.json")
         if m and m["metrics"].get("by_category"):
             cats[name] = m["metrics"]["by_category"]
             names.append(name)
@@ -59,7 +62,8 @@ def category_table(suffix: str, title: str) -> str:
 
 def training_table() -> str:
     rows = []
-    for name, d in [("SFT stage1 (ko 표)", "sft_ko"), ("SFT stage2 (ko 표+본문)", "sft_ko2"), ("SFT chem", "sft_chem"), ("GRPO RL v1 (ko)", "rl_ko_v1"), ("GRPO RL v2 (ko)", "rl_ko")]:
+    for name, d in [("SFT stage1 (ko 표)", "sft_ko"), ("SFT stage2 (ko 표+본문)", "sft_ko2"), ("SFT chem", "sft_chem"), ("GRPO RL v1 (ko)", "rl_ko_v1"), ("GRPO RL v2 (ko)", "rl_ko"),
+                    ("[2차] SFT stage2 재학습", "sft_ko3"), ("[2차] 표 조회 보강 epoch", "sft_ko4"), ("[2차] SFT chem v2", "sft_chem2"), ("[2차] GRPO RL v3 (ko+chem+text)", "rl_v3")]:
         s = load(EXP / d / "summary.json")
         if not s:
             c = load(EXP / d / "config.json")
@@ -133,12 +137,20 @@ def pp_table() -> str:
 
 
 def blocks() -> dict[str, str]:
+    v1 = "검증기 v1: 개체 일치 검사 없음 (1차 평가와 같은 조건)"
+    v2 = "검증기 v2: 개체 일치 검사 있음 (같은 모델 출력을 다시 검증)"
     return {
-        "ko": eval_table("ko_test", "한국어 표 QA — 독립 test (원본 539 + 합성 160)") + "\n" + eval_table("ko_custom", "한국어 표 QA — 수작업 30문항") + "\n" + category_table("ko_custom", "한국어 수작업"),
-        "chem": eval_table("chem_custom", "영어 화학 문서 — 수작업 32문항 (test 분할 문서)") + "\n" + eval_table("chem_syndev", "영어 화학 — 합성 dev 80문항(템플릿, 참고용)") + "\n" + category_table("chem_custom", "화학 수작업"),
+        "ko": eval_table("ko_test", f"한국어 표 QA — 독립 test (원본 539 + 합성 160), {v1}") + "\n" + eval_table("ko_test", f"한국어 표 QA — 독립 test, {v2}", ec=True)
+        + "\n" + eval_table("ko_custom", f"한국어 표 QA — 수작업 30문항, {v1}") + "\n" + eval_table("ko_custom", f"한국어 표 QA — 수작업 30문항, {v2}", ec=True)
+        + "\n" + category_table("ko_custom", "한국어 수작업 (검증기 v2)", ec=True),
+        "chem": eval_table("chem_custom", f"영어 화학 문서 — 수작업 32문항 (test 분할 문서), {v1}") + "\n" + eval_table("chem_custom", f"영어 화학 — 수작업 32문항, {v2}", ec=True)
+        + "\n" + eval_table("chem_syndev", f"영어 화학 — 합성 dev 80문항(템플릿, 참고용), {v1}") + "\n" + eval_table("chem_syndev", f"영어 화학 — 합성 dev 80문항, {v2}", ec=True)
+        + "\n" + category_table("chem_custom", "화학 수작업 (검증기 v2)", ec=True),
+        "text": eval_table("text2_test", f"본문 답변·근거 없음 — 실제 표 옆 KorQuAD 150문항(본문 100 + 근거 없음 50), {v1}") + "\n" + eval_table("text2_test", f"본문 답변·근거 없음, {v2}", ec=True),
         "training": training_table(),
         "rl": rl_table("rl_ko"),
         "rl_v1": rl_table("rl_ko_v1"),
+        "rl_v3": rl_table("rl_v3"),
         "bench": bench_table(),
         "pp": pp_table(),
     }

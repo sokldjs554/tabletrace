@@ -1,5 +1,5 @@
 {
- "run": "experiments/eval/sft_chem_text2_test_ec",
+ "run": "experiments/eval/sft_chem_text2_test_ec/",
  "n": 150,
  "n_answerable": 100,
  "pred_status_answerable": {
@@ -26,6 +26,12 @@
   "final_abstain_recall": 0.86,
   "abstained_via_invalid_program_recall": 0.0,
   "abstained_via_verifier_recall": 0.86
+ },
+ "text_answers": {
+  "n_gold_text": 100,
+  "chose_text_op_rate": 0.0,
+  "verified_correct_rate": 0.0,
+  "verified_correct": 0
  },
  "degenerate_calc_outputs": 0,
  "degenerate_calc_rate": 0.0,

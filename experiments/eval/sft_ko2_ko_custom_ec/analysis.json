@@ -1,0 +1,79 @@
+{
+ "run": "experiments/eval/sft_ko2_ko_custom_ec/",
+ "n": 30,
+ "n_answerable": 25,
+ "pred_status_answerable": {
+  "abstained": 20,
+  "answered": 5
+ },
+ "abstain_reason_answerable": {
+  "invalid_program": 13,
+  "verification_failed": 4,
+  "not_in_document": 3
+ },
+ "raw_correct_but_blocked": 1,
+ "evidence_repaired": 1,
+ "lookup_citation": {
+  "n": 6,
+  "row_correct": 1.0,
+  "col_correct": 0.167,
+  "both_correct": 0.167
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 5,
+  "explicit_abstain_outputs": 0,
+  "explicit_abstain_on_answerable": 0,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 1.0,
+  "abstained_via_invalid_program_recall": 0.6,
+  "abstained_via_verifier_recall": 0.4
+ },
+ "text_answers": {
+  "n_gold_text": 6,
+  "chose_text_op_rate": 0.0,
+  "verified_correct_rate": 0.0,
+  "verified_correct": 0
+ },
+ "degenerate_calc_outputs": 16,
+ "degenerate_calc_rate": 0.5333,
+ "op_confusion_top": [
+  [
+   "lookup->diff",
+   7
+  ],
+  [
+   "lookup->lookup",
+   6
+  ],
+  [
+   "diff->diff",
+   3
+  ],
+  [
+   "text->diff",
+   3
+  ],
+  [
+   "abstain->diff",
+   3
+  ],
+  [
+   "text->lookup",
+   3
+  ],
+  [
+   "avg->diff",
+   2
+  ],
+  [
+   "abstain->lookup",
+   2
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 30,
+   "verified_em": 0.233
+  }
+ }
+}

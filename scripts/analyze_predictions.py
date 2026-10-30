@@ -48,6 +48,13 @@ def main(path: str) -> None:
         "abstained_via_invalid_program_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained" and r["pred_op"] != "abstain" and r["pred_reason"] == "invalid_program") / n_ab, 4) if n_ab else None,
         "abstained_via_verifier_recall": round(sum(1 for r in gold_ab if r["pred_status"] == "abstained" and r["pred_op"] != "abstain" and r["pred_reason"] not in ("invalid_program", None)) / n_ab, 4) if n_ab else None,
     }
+    gold_text = [r for r in rows if r["gold_op"] == "text"]
+    if gold_text:
+        # passage questions: did the planner choose `text`, and was the verified answer right?
+        out["text_answers"] = {"n_gold_text": len(gold_text),
+                               "chose_text_op_rate": round(sum(1 for r in gold_text if r["pred_op"] == "text") / len(gold_text), 4),
+                               "verified_correct_rate": round(sum(1 for r in gold_text if r["verified_correct"]) / len(gold_text), 4),
+                               "verified_correct": sum(1 for r in gold_text if r["verified_correct"])}
     calc_ops = ("diff", "sum", "avg", "ratio", "pct_change")
     degenerate = 0
     for r in rows:

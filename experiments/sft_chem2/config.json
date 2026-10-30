@@ -1,0 +1,51 @@
+{
+ "args": {
+  "model": "experiments/sft_ko4/model",
+  "train": [
+   "data/chem/stage2_train.jsonl"
+  ],
+  "dev": [
+   "data/chem/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl",
+   "data/ko/documents.jsonl",
+   "data/ko/text2_documents_train.jsonl",
+   "data/ko/text2_documents_extra.jsonl"
+  ],
+  "out": "experiments/sft_chem2/model",
+  "epochs": 2.0,
+  "bs": 8,
+  "grad_accum": 1,
+  "lr": 0.00015,
+  "warmup": 0.05,
+  "max_in": 512,
+  "max_out": 64,
+  "max_steps": 0,
+  "max_train": 0,
+  "eval_bs": 8,
+  "seed": 0,
+  "threads": 4,
+  "log_every": 10
+ },
+ "n_train": 1590,
+ "n_train_dropped_truncated": 30,
+ "n_dev": 80,
+ "steps_per_epoch": 199,
+ "total_steps": 398,
+ "params": 300176768,
+ "hardware": {
+  "cpu": "x86_64",
+  "threads": 4,
+  "cuda": false,
+  "ram_gb": 16.9
+ },
+ "torch": "2.15.0+cu132",
+ "started": "2026-10-30T11:43:36",
+ "train_sources": {
+  "korquad_neg": 100,
+  "korquad_text2": 550,
+  "korwikitq": 145,
+  "synthetic": 795
+ }
+}

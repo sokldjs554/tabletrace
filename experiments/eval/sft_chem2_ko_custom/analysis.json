@@ -1,0 +1,79 @@
+{
+ "run": "experiments/eval/sft_chem2_ko_custom/",
+ "n": 30,
+ "n_answerable": 25,
+ "pred_status_answerable": {
+  "answered": 16,
+  "abstained": 9
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 3,
+  "invalid_program": 3,
+  "not_in_document": 3
+ },
+ "raw_correct_but_blocked": 0,
+ "evidence_repaired": 8,
+ "lookup_citation": {
+  "n": 13,
+  "row_correct": 0.923,
+  "col_correct": 0.077,
+  "both_correct": 0.0
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 5,
+  "explicit_abstain_outputs": 0,
+  "explicit_abstain_on_answerable": 0,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 0.2,
+  "abstained_via_invalid_program_recall": 0.0,
+  "abstained_via_verifier_recall": 0.2
+ },
+ "text_answers": {
+  "n_gold_text": 6,
+  "chose_text_op_rate": 0.6667,
+  "verified_correct_rate": 0.0,
+  "verified_correct": 0
+ },
+ "degenerate_calc_outputs": 1,
+ "degenerate_calc_rate": 0.0333,
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   13
+  ],
+  [
+   "text->text",
+   4
+  ],
+  [
+   "diff->lookup",
+   3
+  ],
+  [
+   "abstain->lookup",
+   3
+  ],
+  [
+   "abstain->text",
+   2
+  ],
+  [
+   "text->None",
+   2
+  ],
+  [
+   "sum->lookup",
+   1
+  ],
+  [
+   "avg->lookup",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 30,
+   "verified_em": 0.067
+  }
+ }
+}

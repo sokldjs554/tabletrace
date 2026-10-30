@@ -1,0 +1,77 @@
+{
+ "run": "experiments/eval/sft_ko_ko_test_ec/",
+ "n": 699,
+ "n_answerable": 649,
+ "pred_status_answerable": {
+  "answered": 389,
+  "abstained": 260
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 106,
+  "invalid_program": 95,
+  "not_in_document": 59
+ },
+ "raw_correct_but_blocked": 24,
+ "evidence_repaired": 346,
+ "lookup_citation": {
+  "n": 500,
+  "row_correct": 0.726,
+  "col_correct": 0.322,
+  "both_correct": 0.224
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 50,
+  "explicit_abstain_outputs": 0,
+  "explicit_abstain_on_answerable": 0,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 0.48,
+  "abstained_via_invalid_program_recall": 0.08,
+  "abstained_via_verifier_recall": 0.4
+ },
+ "degenerate_calc_outputs": 98,
+ "degenerate_calc_rate": 0.1402,
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   500
+  ],
+  [
+   "abstain->lookup",
+   46
+  ],
+  [
+   "lookup->diff",
+   39
+  ],
+  [
+   "diff->diff",
+   32
+  ],
+  [
+   "diff->lookup",
+   28
+  ],
+  [
+   "sum->diff",
+   15
+  ],
+  [
+   "avg->diff",
+   15
+  ],
+  [
+   "sum->lookup",
+   10
+  ]
+ ],
+ "by_source_verified": {
+  "korwikitq": {
+   "n": 539,
+   "verified_em": 0.28
+  },
+  "synthetic": {
+   "n": 160,
+   "verified_em": 0.163
+  }
+ }
+}

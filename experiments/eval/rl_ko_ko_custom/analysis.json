@@ -28,6 +28,12 @@
   "abstained_via_invalid_program_recall": 0.6,
   "abstained_via_verifier_recall": 0.4
  },
+ "text_answers": {
+  "n_gold_text": 6,
+  "chose_text_op_rate": 0.0,
+  "verified_correct_rate": 0.0,
+  "verified_correct": 0
+ },
  "degenerate_calc_outputs": 15,
  "degenerate_calc_rate": 0.5,
  "op_confusion_top": [
