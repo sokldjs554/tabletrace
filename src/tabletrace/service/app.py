@@ -82,7 +82,7 @@ def build_runtime(settings: Settings):
         neural = NeuralPlanner(model_dir, threads=settings.threads or None, quantize=settings.quantize)
     elif settings.planner == "neural":
         raise RuntimeError(f"planner=neural but model dir {model_dir} is missing")
-    return store, AgentRuntime(indexes, neural)
+    return store, AgentRuntime(indexes, neural, entity_check=settings.entity_check)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -108,7 +108,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         rt: AgentRuntime = state["runtime"]
         return {"version": __version__, "commit": git_commit(), "release": settings.release,
                 "planner": "neural" if rt.neural else "heuristic", "model_id": rt.neural.model_id if rt.neural else None,
-                "quantized": bool(rt.neural and rt.neural.quantized), "max_concurrent_jobs": settings.max_concurrent_jobs,
+                "quantized": bool(rt.neural and rt.neural.quantized), "entity_check": rt.entity_check, "max_concurrent_jobs": settings.max_concurrent_jobs,
                 "job_timeout_s": settings.job_timeout_s}
 
     @app.get("/v1/corpora")

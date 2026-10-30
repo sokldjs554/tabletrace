@@ -50,9 +50,10 @@ class AgentState(TypedDict, total=False):
 class AgentRuntime:
     """Holds indexes and planners; builds one compiled graph that nodes close over."""
 
-    def __init__(self, indexes: dict[str, CorpusIndex], neural_planner: Any | None = None) -> None:
+    def __init__(self, indexes: dict[str, CorpusIndex], neural_planner: Any | None = None, entity_check: bool = True) -> None:
         self.indexes = indexes
         self.neural = neural_planner
+        self.entity_check = entity_check
         self.graph = self._build()
 
     # ---- nodes -------------------------------------------------------------------------
@@ -109,7 +110,7 @@ class AgentRuntime:
     def verify(self, s: AgentState) -> AgentState:
         t0 = time.perf_counter()
         res = resolve(s["question"], s.get("table"), s.get("program"), context=s.get("context"),
-                      passage_id=s.get("context_passage_id") or "context")
+                      passage_id=s.get("context_passage_id") or "context", entity_check=self.entity_check)
         trace = s["trace"] + res.trace
         trace.append(TraceStep(step="verify", output={"status": res.status, "reason": res.verdict.reason,
                                                        "checks": [c.model_dump() for c in res.verdict.checks]},

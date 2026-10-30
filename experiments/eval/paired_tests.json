@@ -1,0 +1,106 @@
+{
+ "chem2_vs_chem1_ko_test": {
+  "reference": "sft_chem_ko_test",
+  "candidate": "sft_chem2_ko_test",
+  "n": 699,
+  "candidate_better": 64,
+  "reference_better": 42,
+  "p_two_sided": 0.0409
+ },
+ "chem2_vs_ko2_ko_test": {
+  "reference": "sft_ko2_ko_test",
+  "candidate": "sft_chem2_ko_test",
+  "n": 699,
+  "candidate_better": 91,
+  "reference_better": 53,
+  "p_two_sided": 0.0019
+ },
+ "rl_v3_vs_chem2_ko_test": {
+  "reference": "sft_chem2_ko_test",
+  "candidate": "rl_v3_ko_test",
+  "n": 699,
+  "candidate_better": 34,
+  "reference_better": 35,
+  "p_two_sided": 1.0
+ },
+ "rl_v3_vs_chem1_ko_test": {
+  "reference": "sft_chem_ko_test",
+  "candidate": "rl_v3_ko_test",
+  "n": 699,
+  "candidate_better": 78,
+  "reference_better": 57,
+  "p_two_sided": 0.0848
+ },
+ "chem2_vs_chem1_text2_test": {
+  "reference": "sft_chem_text2_test",
+  "candidate": "sft_chem2_text2_test",
+  "n": 150,
+  "candidate_better": 47,
+  "reference_better": 8,
+  "p_two_sided": 0.0
+ },
+ "rl_v3_vs_chem2_text2_test": {
+  "reference": "sft_chem2_text2_test",
+  "candidate": "rl_v3_text2_test",
+  "n": 150,
+  "candidate_better": 26,
+  "reference_better": 11,
+  "p_two_sided": 0.0201
+ },
+ "rl_v3_vs_chem2_ko_custom": {
+  "reference": "sft_chem2_ko_custom",
+  "candidate": "rl_v3_ko_custom",
+  "n": 30,
+  "candidate_better": 3,
+  "reference_better": 1,
+  "p_two_sided": 0.625
+ },
+ "rl_v3_vs_chem2_chem_custom": {
+  "reference": "sft_chem2_chem_custom",
+  "candidate": "rl_v3_chem_custom",
+  "n": 32,
+  "candidate_better": 4,
+  "reference_better": 3,
+  "p_two_sided": 1.0
+ },
+ "rl_v3_vs_chem2_chem_syndev": {
+  "reference": "sft_chem2_chem_syndev",
+  "candidate": "rl_v3_chem_syndev",
+  "n": 80,
+  "candidate_better": 10,
+  "reference_better": 5,
+  "p_two_sided": 0.3018
+ },
+ "subject_check_on_chem2_ko_test": {
+  "reference": "sft_chem2_ko_test",
+  "candidate": "sft_chem2_ko_test_ec",
+  "n": 699,
+  "candidate_better": 1,
+  "reference_better": 9,
+  "p_two_sided": 0.0215
+ },
+ "subject_check_on_chem1_ko_test": {
+  "reference": "sft_chem_ko_test",
+  "candidate": "sft_chem_ko_test_ec",
+  "n": 699,
+  "candidate_better": 14,
+  "reference_better": 11,
+  "p_two_sided": 0.69
+ },
+ "subject_check_on_ko2_ko_test": {
+  "reference": "sft_ko2_ko_test",
+  "candidate": "sft_ko2_ko_test_ec",
+  "n": 699,
+  "candidate_better": 14,
+  "reference_better": 9,
+  "p_two_sided": 0.4049
+ },
+ "rl_v2_vs_ko2_ko_test": {
+  "reference": "sft_ko2_ko_test",
+  "candidate": "rl_ko_ko_test",
+  "n": 699,
+  "candidate_better": 18,
+  "reference_better": 21,
+  "p_two_sided": 0.7493
+ }
+}

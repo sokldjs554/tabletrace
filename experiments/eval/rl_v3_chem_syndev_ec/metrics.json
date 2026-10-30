@@ -1,0 +1,56 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "replay of experiments/eval/rl_v3_chem_syndev",
+  "data": [
+   "data/chem/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl"
+  ],
+  "n": 80,
+  "wall_s": 0.0,
+  "hardware": "x86_64",
+  "label": "entity check (replay of rl_v3_chem_syndev)",
+  "entity_check": true,
+  "replay_from": "experiments/eval/rl_v3_chem_syndev",
+  "finished": "2026-10-30T14:09:19",
+  "quantize": false,
+  "quantize_scope": null
+ },
+ "metrics": {
+  "n": 80,
+  "n_answerable": 64,
+  "n_gold_abstain": 16,
+  "n_calc": 24,
+  "n_lookup": 40,
+  "verified_em": 0.4625,
+  "answer_em_answerable": 0.3594,
+  "raw_answer_em_answerable": 0.4219,
+  "evidence_cells_exact": 0.3438,
+  "evidence_cells_exact_raw": 0.375,
+  "evidence_repaired_rate": 0.1875,
+  "evidence_cells_overlap": 0.3438,
+  "op_acc": 0.9125,
+  "lookup_em": 0.575,
+  "calc_em": 0.0,
+  "calc_result_correct": 0.0,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 0.875,
+  "false_abstain_rate": 0.4375,
+  "abstain_precision": 0.3333,
+  "parse_fail_rate": 0.05,
+  "verifier_corrections": 0.3906,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.4625,
+  "mean_ms_per_example": 537.0,
+  "by_source": {
+   "synthetic": {
+    "n": 80,
+    "verified_em": 0.4625
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": true
+ }
+}

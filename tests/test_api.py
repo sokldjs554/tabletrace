@@ -139,3 +139,10 @@ def test_job_timeout_and_queue_limit():
         assert j.status == "failed" and "ValueError" in j.error
 
     asyncio.run(main())
+
+
+def test_release_reports_entity_check_and_it_can_be_disabled(client):
+    from tabletrace.service.settings import Settings
+
+    assert client.get("/v1/release").json()["entity_check"] is True
+    assert Settings(entity_check=False).entity_check is False

@@ -51,3 +51,16 @@
 [12:56:41] START rl_v3
 [12:56:53] part B took over
 [12:56:53] START rl_v3
+[13:59:31] OK    rl_v3
+[13:59:31] START eval_rl_v3_ko_test
+[14:05:52] OK    eval_rl_v3_ko_test
+[14:05:52] START eval_rl_v3_ko_custom
+[14:06:29] OK    eval_rl_v3_ko_custom
+[14:06:29] START eval_rl_v3_chem_custom
+[14:06:55] OK    eval_rl_v3_chem_custom
+[14:06:55] START eval_rl_v3_text2_test
+[14:08:24] OK    eval_rl_v3_text2_test
+[14:08:24] START eval_rl_v3_chem_syndev
+[14:09:20] OK    eval_rl_v3_chem_syndev
+[14:09:20] final model = experiments/rl_v3/model
+[14:09:20] START eval_final_int8_all_ko_test

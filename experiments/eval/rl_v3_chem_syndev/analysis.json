@@ -1,0 +1,72 @@
+{
+ "run": "experiments/eval/rl_v3_chem_syndev",
+ "n": 80,
+ "n_answerable": 64,
+ "pred_status_answerable": {
+  "answered": 36,
+  "abstained": 28
+ },
+ "abstain_reason_answerable": {
+  "invalid_program": 26,
+  "verification_failed": 2
+ },
+ "raw_correct_but_blocked": 4,
+ "evidence_repaired": 12,
+ "lookup_citation": {
+  "n": 40,
+  "row_correct": 1.0,
+  "col_correct": 0.6,
+  "both_correct": 0.6
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 16,
+  "explicit_abstain_outputs": 13,
+  "explicit_abstain_on_answerable": 0,
+  "planner_chose_abstain_recall": 0.8125,
+  "final_abstain_recall": 0.8125,
+  "abstained_via_invalid_program_recall": 0.0,
+  "abstained_via_verifier_recall": 0.0
+ },
+ "degenerate_calc_outputs": 19,
+ "degenerate_calc_rate": 0.2375,
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   40
+  ],
+  [
+   "abstain->abstain",
+   13
+  ],
+  [
+   "diff->diff",
+   11
+  ],
+  [
+   "ratio->ratio",
+   5
+  ],
+  [
+   "sum->sum",
+   4
+  ],
+  [
+   "abstain->lookup",
+   3
+  ],
+  [
+   "sum->None",
+   2
+  ],
+  [
+   "diff->None",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "synthetic": {
+   "n": 80,
+   "verified_em": 0.45
+  }
+ }
+}
