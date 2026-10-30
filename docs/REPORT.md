@@ -6,7 +6,7 @@
 
 | 항목 | 값 |
 |---|---|
-| 목표 저장소 | <https://github.com/sokldjs554/tabletrace> — **푸시하지 못했다.** git 푸시와 GitHub API 푸시가 모두 `403`(`Claude doesn't have GitHub access … for your organization`, `Resource not accessible by integration`). 이 계정에 Claude GitHub App이 설치되어 있지 않다. 사용자 요청으로 재시도했으나 같은 결과였다. |
+| 목표 저장소 | <https://github.com/sokldjs554/tabletrace> — **푸시하지 못했다.** git 푸시와 GitHub API 푸시가 모두 `403`(`Claude doesn't have GitHub access … for your organization`, `Resource not accessible by integration`). 이 계정에 Claude GitHub App이 설치되어 있지 않다. 사용자 요청으로 재시도했으나 같은 결과였고, 최종 커밋 뒤에 한 번 더 시도한 `git push`(두 저장소)와 API 브랜치 생성도 모두 403이었다. 읽기 API는 동작하며 tabletrace는 브랜치 목록이 비어 있다(저장소가 비어 있는지 없는지는 확인하지 못함). |
 | chartwire 지정 브랜치 | <https://github.com/sokldjs554/chartwire> `claude/bold-carson-ix16u0` — **여기도 푸시하지 못했다.** 로컬에는 `tabletrace/` 복사본과 전체 이력 번들(`tabletrace-history.bundle`)을 커밋해 두었다. |
 | 지금 코드가 있는 곳 | 컨테이너의 `/home/user/tabletrace`(git 저장소 원본), `/home/user/chartwire/tabletrace/`(복사본), `/home/user/chartwire/tabletrace-history.bundle`(전체 이력) |
 | 공개 데모 | **배포하지 못했다.** Pages 워크플로(`pages.yml`)는 작성했으나 원격에 푸시되지 않아 한 번도 실행되지 않았다. 배포 예정 주소 <https://sokldjs554.github.io/tabletrace/>는 지금 열리지 않을 수 있다. |
