@@ -43,8 +43,12 @@
 
   // ---------- boot ----------
   async function init() {
-    if (localStorage.getItem("tt.intro") === "closed") $("#intro").hidden = true;
-    $("#introclose").addEventListener("click", () => { $("#intro").hidden = true; localStorage.setItem("tt.intro", "closed"); });
+    const store = {
+      get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage can be blocked (private window, sandboxed frame) */ } },
+    };
+    if (store.get("tt.intro") === "closed") $("#intro").hidden = true;
+    $("#introclose").addEventListener("click", () => { $("#intro").hidden = true; store.set("tt.intro", "closed"); });
     try {
       state.release = await fetchJSON("v1/release", {}, 3000);
       state.mode = "live";
