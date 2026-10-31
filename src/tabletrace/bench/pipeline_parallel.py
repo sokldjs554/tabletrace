@@ -9,6 +9,8 @@ Backends: `gloo` (CPU, used for the functional check in this project) or `nccl` 
 its own device). Run:
   torchrun --nproc_per_node=2 -m tabletrace.bench.pipeline_parallel --model experiments/sft_ko/model --backend gloo --n 16
   torchrun --nproc_per_node=2 -m tabletrace.bench.pipeline_parallel --model ... --backend nccl --n 64   # 2 GPUs
+  # no tuned weights at hand (they are not in git): --model google/mt5-small (the untuned base, same architecture; this measures
+  # the splitting, the transfer and the 1-GPU vs 2-GPU output equality, not answer quality; needs `pip install sentencepiece`)
 The single-process baseline for the same inputs is measured by --single (no distributed init).
 """
 from __future__ import annotations
@@ -64,11 +66,14 @@ def main() -> None:
     ap.add_argument("--single", action="store_true", help="single-process baseline, no distributed init")
     ap.add_argument("--out", default=None)
     ap.add_argument("--threads", type=int, default=2)
+    ap.add_argument("--tokenizer", default=None, help="hub name or path; default: --model (use google/mt5-small together with --model google/mt5-small)")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
-    from transformers import MT5ForConditionalGeneration, PreTrainedTokenizerFast
+    from transformers import MT5ForConditionalGeneration
 
-    tok = PreTrainedTokenizerFast.from_pretrained(a.model)
+    from tabletrace.model.approx_tokenizer import load_tokenizer
+
+    tok = load_tokenizer(a.tokenizer or a.model)
     docs = load_docs(*[Path(c) for c in a.corpus])
     recs = read_records([Path(p) for p in a.data])[: a.n]
     texts = [e.input_text for e in build_examples(recs, docs, tok, 512)]

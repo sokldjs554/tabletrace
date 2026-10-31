@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     model_dir: str = "models/mt5-small-tabletrace"
     quantize: bool = False
     quantize_scope: str = ""                  # "" = all Linear when `quantize` is true; or lm_head | no_lm_head | ffn | attn (model/quant.py)
+    engine_url: str = ""                      # OpenAI-compatible server (vLLM / SGLang); when set it replaces the in-process model
+    engine_model: str = "planner"             # the --served-model-name of that server
+    engine_api_key: str = "EMPTY"
     entity_check: bool = True                 # verifier: the question's subject must occur in the cited rows (TABLETRACE_ENTITY_CHECK=0 turns it off)
     threads: int = 0
     max_concurrent_jobs: int = 2

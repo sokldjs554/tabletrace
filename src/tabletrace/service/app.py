@@ -76,7 +76,12 @@ def build_runtime(settings: Settings):
     indexes = {c: CorpusIndex(docs, "ko" if c == "ko_tables" else "en") for c, docs in store.corpora.items()}
     neural = None
     model_dir = ROOT / settings.model_dir
-    if settings.planner in ("auto", "neural") and model_dir.exists():
+    if settings.engine_url and settings.planner in ("auto", "neural"):
+        from tabletrace.service.engines import EnginePlanner
+
+        neural = EnginePlanner(settings.engine_url, settings.engine_model, api_key=settings.engine_api_key, timeout_s=settings.job_timeout_s)
+        neural.health()                      # fail at start-up, not on the first question, if the engine is not reachable
+    elif settings.planner in ("auto", "neural") and model_dir.exists():
         from tabletrace.model.planner import NeuralPlanner
 
         neural = NeuralPlanner(model_dir, threads=settings.threads or None, quantize=(settings.quantize_scope or settings.quantize))

@@ -1,4 +1,4 @@
-"""Latency/throughput benchmark against an OpenAI-compatible engine (vLLM / SGLang). Prepared, not run (no GPU)."""
+"""Latency/throughput benchmark against an OpenAI-compatible engine (vLLM / SGLang). Needs a running server (scripts/serving/); not run in the CPU container."""
 from __future__ import annotations
 
 import argparse
@@ -19,13 +19,14 @@ def main() -> None:
     ap.add_argument("--corpus", nargs="+", default=["data/ko/documents.jsonl"])
     ap.add_argument("--data", nargs="+", default=["data/ko/test.jsonl"])
     ap.add_argument("--n", type=int, default=64)
+    ap.add_argument("--tokenizer", default=None, help="approx | hub name | path (default: models/mt5-small-base if present, else approx)")
     ap.add_argument("--concurrency", type=int, default=8)
     ap.add_argument("--out", default="experiments/bench/engine.json")
     a = ap.parse_args()
     planner = EnginePlanner(a.url, a.model)
-    from transformers import PreTrainedTokenizerFast
+    from tabletrace.model.approx_tokenizer import load_tokenizer
 
-    tok = PreTrainedTokenizerFast.from_pretrained("models/mt5-small-base")
+    tok = load_tokenizer(a.tokenizer)
     docs = load_docs(*[Path(c) for c in a.corpus])
     exs = build_examples(read_records([Path(p) for p in a.data])[: a.n], docs, tok, 512)
     t0 = time.perf_counter()

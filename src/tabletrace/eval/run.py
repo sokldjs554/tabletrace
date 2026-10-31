@@ -23,8 +23,12 @@ from tabletrace.verify.verifier import resolve
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--planner", choices=["heuristic", "neural"], required=True)
+    ap.add_argument("--planner", choices=["heuristic", "neural", "engine"], required=True)
     ap.add_argument("--model", default=None)
+    ap.add_argument("--tokenizer", default=None, help="tokenizer for the row budget: approx | hub name | path (default: --model, else models/mt5-small-base, else approx)")
+    ap.add_argument("--engine-url", default=None, help="OpenAI-compatible server (vLLM / SGLang) for --planner engine")
+    ap.add_argument("--engine-model", default="planner")
+    ap.add_argument("--concurrency", type=int, default=8)
     ap.add_argument("--corpus", nargs="+", required=True)
     ap.add_argument("--data", nargs="+", required=True)
     ap.add_argument("--out", required=True)
@@ -45,10 +49,9 @@ def main() -> None:
     recs = read_records([Path(p) for p in a.data])
     if a.limit:
         recs = recs[: a.limit]
-    from transformers import PreTrainedTokenizerFast
+    from tabletrace.model.approx_tokenizer import load_tokenizer
 
-    tok_dir = a.model or "models/mt5-small-base"
-    tok = PreTrainedTokenizerFast.from_pretrained(tok_dir)
+    tok = load_tokenizer(a.tokenizer or (a.model if a.planner == "neural" else None))
     examples = build_examples(recs, docs, tok, a.max_in)
     lang = next(iter(docs.values())).lang
     t0 = time.time()
@@ -66,6 +69,16 @@ def main() -> None:
                 prog = None
             plans.append((prog, o["raw_output"], e.rows_kept, o["ms"]))
         planner_id = f"replay of {a.replay_from}"
+    elif a.planner == "engine":
+        import concurrent.futures as cf
+
+        from tabletrace.service.engines import EnginePlanner
+
+        planner = EnginePlanner(a.engine_url, a.engine_model, timeout_s=120.0)
+        planner_id = planner.model_id
+        planner.health()
+        with cf.ThreadPoolExecutor(a.concurrency) as pool:
+            plans = list(pool.map(lambda e: planner.plan(e.question, e.table, e.context), examples))
     elif a.planner == "neural":
         from tabletrace.model.planner import NeuralPlanner
 
