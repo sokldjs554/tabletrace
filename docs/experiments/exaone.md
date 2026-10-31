@@ -1,5 +1,7 @@
 # EXAONE 사용 가능성 검토
 
+> **GPU에서 실행하는 방법**은 [gpu-runbook.md](gpu-runbook.md)와 `notebooks/gpu_experiments.ipynb`(Colab·Kaggle)에 있다. 이 문서의 서술은 개발 컨테이너(GPU 없음)에서 실행하지 못한 상태의 기록이다.
+
 ## 확인한 사실 (GitHub raw로 LICENSE·README 직접 읽음, 2026-10-29)
 
 | 항목 | EXAONE 3.5 | EXAONE 4.0 |

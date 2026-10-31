@@ -1,5 +1,7 @@
 # 추론 서빙: 실제 실행 경로와 준비만 한 경로
 
+> **GPU에서 실행하는 방법**은 [gpu-runbook.md](gpu-runbook.md)와 `notebooks/gpu_experiments.ipynb`(Colab·Kaggle)에 있다. 이 문서의 서술은 개발 컨테이너(GPU 없음)에서 실행하지 못한 상태의 기록이다.
+
 ## 실제로 실행한 것 (CPU)
 
 | 항목 | 내용 |

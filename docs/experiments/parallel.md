@@ -1,5 +1,7 @@
 # 멀티 GPU Model Parallelism — 설계, CPU 기능 검증, GPU 실행 계획
 
+> **GPU에서 실행하는 방법**은 [gpu-runbook.md](gpu-runbook.md)와 `notebooks/gpu_experiments.ipynb`(Colab·Kaggle)에 있다. 이 문서의 서술은 개발 컨테이너(GPU 없음)에서 실행하지 못한 상태의 기록이다.
+
 ## 데이터 병렬과 모델 병렬의 구분
 
 - **DDP(데이터 병렬)**: GPU마다 모델 전체를 복제하고 배치를 나눈다. 이 프로젝트에서는 수행하지 않았고, 수행했다고 주장하지 않는다.

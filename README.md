@@ -6,7 +6,7 @@
 [![pages](https://github.com/sokldjs554/tabletrace/actions/workflows/pages.yml/badge.svg)](https://github.com/sokldjs554/tabletrace/actions/workflows/pages.yml)
 ![license](https://img.shields.io/badge/code-Apache--2.0-blue)
 
-> **데모 상태**: GitHub Pages 배포는 하지 못했습니다(이 프로젝트를 만든 세션이 GitHub에 푸시할 수 없었습니다: Claude GitHub App 미설치, 403). 대신 **저장된 실행 결과 데모를 단일 HTML 페이지로 만들어 claude.ai Artifact로 호스팅**했습니다: <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> 이 링크는 **비공개**이고 소유자가 공유해야 다른 사람이 열 수 있습니다. 이 페이지에는 백엔드가 없어 항상 **저장된 실행 결과** 모드이며(기록 시각·모델·커밋을 화면에 표시), 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). `pages.yml`은 푸시 후 `main`에서 자동 배포되도록 작성했지만 한 번도 실행되지 않았고, 배포될 주소 <https://sokldjs554.github.io/tabletrace/>는 지금 열리지 않을 수 있습니다.
+> **데모 상태**: 저장소는 공개이고 **GitHub Pages에 배포했습니다**(Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281), build와 deploy 단계 모두 통과): <https://sokldjs554.github.io/tabletrace/> 이 세션의 네트워크에서는 `github.io`를 열 수 없어 배포된 페이지를 직접 열어 보지는 못했습니다. 같은 내용을 로컬에서 Playwright로 검증했습니다(§13). Pages 화면에는 백엔드가 없어 항상 **저장된 실행 결과** 모드이고, 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). 같은 저장된 결과를 단일 HTML로 만든 claude.ai Artifact 사본도 있습니다(비공개 링크, 소유자만): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM>
 > **정직한 한 줄 요약**: 튜닝한 mT5-small(300M, CPU 학습)은 미튜닝 모델보다 크게 나아졌고, 2차 재학습과 강화학습(RL v3)으로 본문 답변과 모델 스스로의 보류까지 일부 고쳤습니다. 그러나 한국어 독립 test 전체 점수는 단순한 어휘 겹침 기준선을 여전히 넘지 못했습니다(§9). 약점은 셀 **좌표**(열) 생성입니다.
 
 ![TableTrace 워크벤치 — 한국어 표 질문의 답변·근거 셀·검증 항목](docs/images/live-desktop-03-result.png)
@@ -568,7 +568,7 @@ python3.11+ -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"            # 휴리스틱 플래너 + API + 콘솔 (torch 없음)
 pip install -e ".[model]"          # + PyTorch/Transformers (모델 플래너)
 python scripts/check_data.py       # 데이터 무결성
-pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->91<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
+pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->95<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
 tabletrace serve                   # http://127.0.0.1:8000  (모델이 models/mt5-small-tabletrace 에 있으면 자동 사용)
 ```
 
@@ -580,11 +580,11 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 
 ## 13. 테스트·CI·배포
 
-- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 모델 로딩. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->91<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). 모델 가중치가 없으면 모델 테스트는 skip됩니다.
+- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 모델 로딩. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->95<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). 모델 가중치가 없으면 모델 테스트는 skip됩니다.
 - **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·대표 질문·결과·근거 강조·보류·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 최종 실행: 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num --> 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
 - **Docker**: 이미지(786 MB)를 이 세션에서 빌드하고 컨테이너 smoke(health·release·corpora·ask·콘솔)를 통과했습니다(`experiments/docker/smoke.json`). Docker Hub·ECR이 429를 돌려 MCR 베이스 이미지로 빌드했습니다.
-- **CI**: `.github/workflows/ci.yml`(ruff, pytest, 데이터 무결성, **README·REPORT 표·수치 대조**, Docker 빌드·smoke)를 작성했지만 **원격에서 한 번도 실행되지 않았습니다**(푸시 불가). 같은 명령을 로컬에서 실행해 통과시켰습니다.
-- **배포**: `.github/workflows/pages.yml`이 `main` 푸시 시 정적 데모를 GitHub Pages에 배포하도록 작성했으나 **실행되지 않았습니다**. 공개 URL은 아직 없습니다. 대신 저장된 결과 데모를 단일 HTML(`scripts/build_artifact_page.py`)로 만들어 claude.ai Artifact에 올렸습니다(비공개 링크, 맨 위 "데모 상태" 참고).
+- **CI**: `.github/workflows/ci.yml`(ruff, pytest, 데이터 무결성, **README·REPORT 표·수치 대조**, Docker 빌드·smoke)가 GitHub Actions에서 실행되어 **전부 통과**했습니다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/41213002277): `test` 작업과 `docker` 작업 모두 success, 커밋 `0f38f8d`). 그 뒤 커밋의 실행 결과는 저장소 Actions 탭에서 확인하세요.
+- **배포**: `.github/workflows/pages.yml`이 `main` 푸시 때 정적 데모를 GitHub Pages에 배포합니다. 첫 실행이 성공했습니다([기록](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281)). 실시간 모드(백엔드)는 호스팅하지 않습니다. claude.ai Artifact 사본은 위 "데모 상태" 참고.
 
 ## 14. 실제 수행한 것과 하지 못한 것
 
@@ -597,13 +597,13 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | 화학 SFT (튜닝 전후 비교) | 완료 | 합성 dev 개선, 수작업은 잡음 수준이며 전부 보류하는 미튜닝 모델과 같은 점수(§9.2) |
 | GRPO 방식 RL 예비 실험 | 완료(부분 개선) | 1차 v1 보상 편법 발견, v2 개선 없음(실패). 2차 v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나 ko test 전체 점수는 그대로(§9.4, §9.5) |
 | 추론 최적화 실측(fp32/int8/배치/KV 캐시) | 완료(CPU) | int8 `lm_head`만 양자화하면 ko test 정확도 손실이 검출되지 않고 약 1.5배(§10.1). 모든 층 int8은 정확도 하락 |
-| 멀티 GPU Model Parallelism | **구현 후 미실행(GPU 없음)** | CPU 2프로세스로 분할·출력 일치만 검증(§10.2) |
+| 멀티 GPU Model Parallelism | **구현 후 미실행(GPU 없음)** | CPU 2프로세스로 분할·출력 일치만 검증(§10.2) GPU에서 돌리는 절차는 [docs/experiments/gpu-runbook.md](docs/experiments/gpu-runbook.md), 노트북은 `notebooks/gpu_experiments.ipynb`. |
 | vLLM / SGLang 서빙 | **구현 후 미실행(GPU 없음)** | 모의 서버 테스트. 두 엔진이 mT5를 지원하지 않음을 wheel에서 확인(`experiments/serving/engine_support.json`) |
-| EXAONE 사용 | **미실행** | HF 차단·GPU 없음; 라이선스·조건 확인(docs/experiments/exaone.md) |
+| EXAONE 사용 | **미실행** | HF 차단·GPU 없음; 라이선스·조건 확인(docs/experiments/exaone.md) GPU에서 돌리는 절차는 [docs/experiments/gpu-runbook.md](docs/experiments/gpu-runbook.md), 노트북은 `notebooks/gpu_experiments.ipynb`. |
 | FastAPI + LangGraph + 도구 + 비동기 작업 | 완료 | 테스트 통과 |
 | 콘솔(데스크톱·모바일·상태·키보드) + E2E | 완료 | `docs/images/` |
 | Docker 이미지 | 완료 | 로컬 빌드·컨테이너 smoke |
-| GitHub Actions CI | **구현 후 미실행** | 푸시 불가(403) |
-| GitHub Pages 공개 배포 | **구현 후 미실행** | 푸시 불가(403) |
+| GitHub Actions CI | 완료 | 커밋 `0f38f8d`에서 test·docker 작업 모두 success |
+| GitHub Pages 공개 배포 | 완료(페이지는 직접 열어 보지 못함) | build·deploy 작업 success. 이 세션에서 `github.io`가 차단되어 접속 확인은 못 함 |
 | 저장된 결과 데모 호스팅(대체 경로) | 완료(비공개 링크) | 단일 파일 `scripts/build_artifact_page.py` → claude.ai Artifact. 소유자가 공유해야 공개됨, 실시간 모드는 호스팅하지 않음 |
 | gRPC | 미구현(불필요 판단) | §7 |
