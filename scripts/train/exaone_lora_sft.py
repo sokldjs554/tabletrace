@@ -61,8 +61,13 @@ def main() -> None:
     if a.grad_ckpt:
         model.gradient_checkpointing_enable()
         model.enable_input_require_grads()
-    model = get_peft_model(model, LoraConfig(r=a.lora_r, lora_alpha=2 * a.lora_r, lora_dropout=0.05,
-                                             target_modules=["q_proj", "k_proj", "v_proj", "o_proj"], task_type="CAUSAL_LM"))
+    try:
+        model = get_peft_model(model, LoraConfig(r=a.lora_r, lora_alpha=2 * a.lora_r, lora_dropout=0.05,
+                                                 target_modules=["q_proj", "k_proj", "v_proj", "o_proj"], task_type="CAUSAL_LM"))
+    except ImportError as e:
+        if "torchao" in str(e):
+            raise SystemExit("peft found an old torchao (Colab ships 0.10.0, peft needs >= 0.16). This project does not use torchao: run `pip uninstall -y torchao` and start again.") from e
+        raise
     model.print_trainable_parameters()
     docs = load_docs(*[Path(c) for c in a.corpus])
     exs = build_examples(read_records([Path(p) for p in a.train]), docs, tok, a.max_len - 96, drop_truncated_gold=True)

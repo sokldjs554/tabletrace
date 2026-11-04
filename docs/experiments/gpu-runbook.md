@@ -63,3 +63,10 @@ EXAONE은 비상업 연구용 라이선스(EXAONE AI Model License 1.2-NC)이고
 ## 결과를 저장소에 반영하는 법
 
 결과 파일(`experiments/eval/exaone_*`, `experiments/bench/engine_*`, `experiments/bench/pp_*_gpu.json`, `experiments/exaone_lora/train_info.json`)을 저장소에 넣고 `python scripts/render_results.py && python scripts/check_numbers.py --expand` 후 README·보고서의 "구현 후 미실행"을 해당 수치로 바꾼다. 실패하거나 mT5보다 낮게 나와도 그대로 적는다.
+
+## 막혔을 때
+
+| 증상 | 원인 | 해결 |
+|---|---|---|
+| LoRA 단계에서 `ImportError: Found an incompatible version of torchao. Found version 0.10.0, but only versions above 0.16.0 are supported` | Colab에 기본 설치된 `torchao`가 peft 요구 버전보다 낮음 | `pip uninstall -y torchao` 후 튜닝만 다시 실행(노트북 준비 셀에 반영됨) |
+
