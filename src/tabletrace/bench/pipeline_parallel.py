@@ -100,7 +100,9 @@ def main() -> None:
             Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1))
         return
 
-    dist.init_process_group(a.backend)
+    # NCCL only moves CUDA tensors; the small control tensors here (shape, attention mask, token counts) live on the CPU.
+    # "cpu:gloo,cuda:nccl" sends CPU tensors over gloo and CUDA tensors over NCCL, so one script serves both backends.
+    dist.init_process_group("cpu:gloo,cuda:nccl" if a.backend == "nccl" else a.backend)
     rank, world = dist.get_rank(), dist.get_world_size()
     assert world == 2, "this pipeline has exactly 2 stages"
     device = torch.device(f"cuda:{rank}" if a.backend == "nccl" else "cpu")
