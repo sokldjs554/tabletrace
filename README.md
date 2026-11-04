@@ -598,7 +598,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | GRPO 방식 RL 예비 실험 | 완료(부분 개선) | 1차 v1 보상 편법 발견, v2 개선 없음(실패). 2차 v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나 ko test 전체 점수는 그대로(§9.4, §9.5) |
 | 추론 최적화 실측(fp32/int8/배치/KV 캐시) | 완료(CPU) | int8 `lm_head`만 양자화하면 ko test 정확도 손실이 검출되지 않고 약 1.5배(§10.1). 모든 층 int8은 정확도 하락 |
 | 멀티 GPU Model Parallelism | **구현 후 미실행(GPU 없음)** | CPU 2프로세스로 분할·출력 일치만 검증(§10.2) GPU에서 돌리는 절차는 [docs/experiments/gpu-runbook.md](docs/experiments/gpu-runbook.md), 노트북은 `notebooks/gpu_experiments.ipynb`. |
-| vLLM / SGLang 서빙 | **구현 후 미실행(GPU 없음)** | 모의 서버 테스트. 두 엔진이 mT5를 지원하지 않음을 wheel에서 확인(`experiments/serving/engine_support.json`) |
+| vLLM / SGLang 서빙 | **실행했으나 실패(SGLang, T4)**. vLLM은 결과 대기 | 모의 서버 테스트. 두 엔진이 mT5를 지원하지 않음을 wheel에서 확인(`experiments/serving/engine_support.json`). Colab T4에서 SGLang 0.5.9는 `sgl_kernel`에 sm75 커널이 없어 첫 연산에서 실패했고 Ampere 이상이 필요함(`experiments/serving/sglang_t4_failure.md`) |
 | EXAONE 사용 | **미실행** | HF 차단·GPU 없음; 라이선스·조건 확인(docs/experiments/exaone.md) GPU에서 돌리는 절차는 [docs/experiments/gpu-runbook.md](docs/experiments/gpu-runbook.md), 노트북은 `notebooks/gpu_experiments.ipynb`. |
 | FastAPI + LangGraph + 도구 + 비동기 작업 | 완료 | 테스트 통과 |
 | 콘솔(데스크톱·모바일·상태·키보드) + E2E | 완료 | `docs/images/` |

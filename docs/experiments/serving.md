@@ -36,3 +36,9 @@
 - 메모리: 측정 직후 프로세스 RSS(GB). CPU라 GPU 메모리는 없음.
 - 정확성: fp32 bs=1 출력과의 문자열 일치율(양자화가 출력을 바꾸는지).
 - 조건: 동일 48개 입력(ko test), max_new_tokens 48, 워밍업 1라운드 + 측정 2라운드, 4 스레드.
+
+## 실행 결과 (사용자 Colab T4, 2026-11-04)
+
+- **SGLang 0.5.9**: T4에서 **실패**. 서버가 모델을 올린 뒤 첫 연산에서 `no kernel image is available for execution on the device`. `sgl_kernel`에 sm75 커널이 없다. 설정으로 우회할 수 없다. 로그와 해석은 `experiments/serving/sglang_t4_failure.md`. Ampere 이상(L4·A100·H100)에서는 시도하지 않았다.
+- **vLLM 0.32.0**: 설치와 서버 기동 단계까지 진행했고 평가·벤치 결과는 아직 받지 못했다.
+

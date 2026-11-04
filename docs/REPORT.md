@@ -41,7 +41,7 @@
 | 프롬프트·컨텍스트 엔지니어링과 검색 결합 | BM25(Kiwi 형태소) 검색, 본문 스니펫+표 직렬화, 컨텍스트→행 예산 | `retrieval/`, `model/serialize.py` | 표 검색 hit@1 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_1:pct -->80.0<!-- /num -->% / hit@5 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_5:pct -->95.7<!-- /num -->%(한국어 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.n_tables_searched -->1,140<!-- /num -->표), 화학 hit@1 <!-- num:experiments/eval/retrieval/metrics.json:chem_custom.hit_at_1:pct -->65.6<!-- /num -->%. 컨텍스트 유무의 모델 정확도 효과는 분리 측정하지 않음 | 완료 |
 | Linux, Python, Hugging Face, PyTorch | Python 3.13 / PyTorch 2.15 / **Hugging Face Transformers·tokenizers 라이브러리**(Hub는 차단되어 사용하지 못함), 자체 학습 루프 | 저장소 전체 | — | 완료 |
 | 멀티 GPU Model Parallelism | 2-스테이지 파이프라인 병렬(인코더 / 디코더+lm_head), torch.distributed | `bench/pipeline_parallel.py`, `experiments/bench/pp_*.json` | GPU 없음. CPU 2프로세스(gloo)로 분할·통신·출력 일치만 검증, 처리량 이득 없음(§9) | 구현 후 미실행 |
-| vLLM 또는 SGLang | OpenAI 호환 EnginePlanner + TP/PP 서빙 스크립트 + 엔진 벤치 | `service/engines.py`, `scripts/serving/`, `tests/test_engines.py`, `experiments/serving/engine_support.json` | 모의 서버 왕복 테스트만 통과. 실제 엔진 미실행. **vLLM 0.32.0과 SGLang 0.5.23의 모델 등록부에 T5/mT5가 없어 이 프로젝트의 mT5 모델은 두 엔진으로 서빙할 수 없음**을 wheel에서 확인(EXAONE은 두 엔진 모두 지원). 가중치 호스트가 차단되고 GPU가 없어 EXAONE 경로도 미실행 | 구현 후 미실행 |
+| vLLM 또는 SGLang | OpenAI 호환 EnginePlanner + TP/PP 서빙 스크립트 + 엔진 벤치. mT5는 두 엔진이 지원하지 않아(`experiments/serving/engine_support.json`) EXAONE을 같은 데이터로 LoRA 튜닝해 서빙하는 경로 | `service/engines.py`, `scripts/serving/`, `scripts/train/exaone_lora_sft.py`, `notebooks/gpu_experiments.ipynb`, `experiments/serving/sglang_t4_failure.md` | **SGLang**: 사용자가 Colab T4에서 `sglang==0.5.9`를 실행했고 서버가 모델을 올린 뒤 첫 연산에서 `no kernel image is available for execution on the device`로 실패(`sgl_kernel`에 sm75 커널 없음, Ampere 이상 필요). **vLLM**: 설치와 서버 기동 시도까지 진행 중이며 평가·벤치 결과는 아직 없음. 모의 서버 왕복 테스트는 통과 | 실행했으나 실패 |
 | Docker | API+콘솔 이미지, compose, 헬스체크 | `Dockerfile`, `docker-compose.yml`, `experiments/docker/smoke.json` | 이 세션에서 이미지 빌드(786 MB) + 컨테이너 smoke 통과(Docker Hub 429로 MCR 베이스 이미지 사용) | 완료 |
 | LangChain 또는 LangGraph | 위 Agent 항목(LangGraph) | `agent/graph.py` | `GET /v1/graph` 가 Mermaid 반환, 조건부 재시도 분기 | 완료 |
 | GitHub Actions | `ci.yml`(린트·테스트·데이터·수치·Docker smoke), `pages.yml` | `.github/workflows/` | GitHub Actions에서 실행해 **통과**: [ci](https://github.com/sokldjs554/tabletrace/actions/runs/41213002277)의 `test`·`docker` 작업과 [pages](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281)의 build·deploy 작업이 모두 success(커밋 `0f38f8d`) | 완료 |
@@ -472,7 +472,7 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 | GitHub Pages 접속 확인 | 이 세션의 네트워크에서 `github.io`가 차단됨 | 배포 작업 success 기록, 사용자가 주소를 열어 확인해야 함 |
 | EXAONE 다운로드·튜닝·서빙 | `huggingface.co` 차단, GPU 없음 | 라이선스·버전 확인(docs/experiments/exaone.md), LoRA SFT 스크립트, 예상 자원·비용 |
 | 멀티 GPU 병렬 실측 | GPU 없음(Colab은 GPU 1장이라 불가, Kaggle T4 ×2나 2장 이상 필요) | 파이프라인 병렬 코드(CPU 2프로세스로 정확성 검증), GPU 명령·예상 자원 |
-| vLLM / SGLang 실행 | GPU 없음 | OpenAI 호환 클라이언트·서빙 스크립트·벤치 스크립트, 모의 서버 테스트 |
+| vLLM / SGLang 실행 | 개발 컨테이너에는 GPU 없음. 사용자가 Colab T4에서 시도: SGLang은 T4 미지원으로 실패(`experiments/serving/sglang_t4_failure.md`), vLLM 결과 대기 | OpenAI 호환 클라이언트·서빙 스크립트·벤치 스크립트, 모의 서버 테스트 |
 | 채용 공고·LG 논문 페이지 원문 확인 | `www.lgresearch.ai` 차단 | 사용자 제공 역량 목록 기준으로 진행 |
 | 논문·특허 기반 화학 데이터 | PMC·ChemRxiv·Google Patents 등 차단 | OpenStax 교과서 데이터 표 사용 |
 | 외부 유료 API | `api.openai.com` 차단, 키 없음 | 사용 안 함 — 비용 0, 승인 필요한 실행 없음 |

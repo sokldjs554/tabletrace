@@ -20,7 +20,7 @@ TableTrace의 학습된 모델은 **mT5-small(encoder-decoder)** 이다. vLLM 0.
 |---|---|---|
 | EXAONE LoRA 튜닝 | 된다(어림) | T4는 bf16이 없어 fp16 + 손실 스케일링. 스크립트가 자동 선택 |
 | vLLM 서빙·평가·벤치 | 된다(시도) | vLLM 0.32는 T4에서 float16만 지원하고 FlashInfer를 쓰지 않는다(wheel 확인). 메모리가 모자라면 `MAX_LEN`을 줄이거나 `EXTRA_ARGS=--enforce-eager` |
-| SGLang 서빙·평가·벤치 | 된다(시도) | wheel이 "sm75 이상"을 요구한다(T4는 sm75). T4에서는 `ATTN_BACKEND=triton`을 지정 |
+| SGLang 서빙·평가·벤치 | **T4에서는 안 된다(실행해 확인)** | `sgl_kernel`에 sm75 커널이 없어 첫 연산에서 `no kernel image is available`. Ampere 이상(L4/A100/H100)이 필요. 근거: `experiments/serving/sglang_t4_failure.md` |
 | 텐서 병렬 TP=2, 멀티 GPU 모델 병렬 | **안 된다** | Colab은 GPU 1장. **Kaggle 노트북(T4 ×2, 무료 주 30시간)** 이나 GPU 2장 이상 환경이 필요 |
 
 vLLM과 SGLang은 torch 버전을 다르게 고정한다(vLLM 0.32.0은 torch 2.13.0, SGLang 0.5.23은 2.14.1). 같은 환경에 같이 설치하지 말고 노트북처럼 가상환경을 따로 만든다.
@@ -74,4 +74,5 @@ EXAONE은 비상업 연구용 라이선스(EXAONE AI Model License 1.2-NC)이고
 | vLLM 서버 기동 로그 끝에 `OSError: Repo id must be in the form 'repo_name' or 'namespace/repo_name': 'experiments/exaone_lora/merged'` | 모델 경로가 폴더로 존재하지 않아 허깅페이스 저장소 이름으로 해석됨. 1번 절(LoRA 튜닝)이 끝나지 않았거나 실패해 `experiments/exaone_lora/merged`가 없음 | `!ls -la experiments/exaone_lora experiments/exaone_lora/merged` 로 확인. 튜닝 셀 출력의 마지막 오류를 고친 뒤 다시 실행. 서버만 먼저 시험하려면 `MERGED = "LGAI-EXAONE/EXAONE-4.0-1.2B"` |
 | SGLang 로그 끝에 `AttributeError: 'list' object has no attribute 'keys'` (`tokenization_utils_base.py`, `_set_model_specific_special_tokens`) | 학습 환경의 transformers 5.x가 `tokenizer_config.json`에 `extra_special_tokens`를 목록으로, `tokenizer_class`를 `TokenizersBackend`로 저장. SGLang이 고정한 transformers 4.57은 둘 다 읽지 못함 | `python scripts/serving/fix_tokenizer_config.py experiments/exaone_lora/merged` (목록을 `additional_special_tokens`로 옮기고 클래스명을 `PreTrainedTokenizerFast`로). 새로 학습한 모델은 스크립트가 저장할 때 자동 처리 |
 | T4에서 SGLang이 샘플링 단계에서 실패 | 기본 샘플링 백엔드 `flashinfer`가 sm75에서 불안정(vLLM 소스에도 같은 경고) | `sglang.sh`가 기본으로 `--sampling-backend pytorch`를 씀(`SAMPLING_BACKEND`로 변경) |
+| SGLang이 모델을 올린 뒤 `Capture cuda graph failed: RMSNorm failed with error code no kernel image is available for execution on the device` | T4(sm75)용 커널이 `sgl_kernel` 바이너리에 없음. 설정으로 우회할 수 없음(`--disable-cuda-graph`도 같은 호출이 첫 추론으로 옮겨갈 뿐) | Ampere 이상 GPU에서 실행. T4에서는 vLLM만 사용 |
 
