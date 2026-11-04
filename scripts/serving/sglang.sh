@@ -11,5 +11,6 @@ PORT="${PORT:-8002}"
 NUM_GPUS="${NUM_GPUS:-2}"
 DTYPE="${DTYPE:-auto}"
 ATTN="${ATTN_BACKEND:-}"
+SAMPLING="${SAMPLING_BACKEND:-pytorch}"      # the default (flashinfer) is unreliable on T4 (sm75)
 exec python -m sglang.launch_server --model-path "$MODEL" --tensor-parallel-size "$NUM_GPUS" --port "$PORT" --dtype "$DTYPE" --context-length 2048 \
-  --served-model-name planner ${ATTN:+--attention-backend "$ATTN"} ${EXTRA_ARGS:-}
+  --served-model-name planner ${ATTN:+--attention-backend "$ATTN"} --sampling-backend "$SAMPLING" ${EXTRA_ARGS:-}

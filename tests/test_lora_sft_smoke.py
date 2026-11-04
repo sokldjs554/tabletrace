@@ -53,3 +53,20 @@ def test_lora_sft_runs_and_merges(tmp_path):
     assert info["steps"] >= 1 and all(x["loss"] == x["loss"] for x in info["loss_log"])      # finite losses
     assert (out / "adapter_config.json").exists() and (out / "merged" / "config.json").exists()
     assert list((out / "merged").glob("*.safetensors"))
+    tcfg = json.loads((out / "merged" / "tokenizer_config.json").read_text())
+    assert not isinstance(tcfg.get("extra_special_tokens"), list) and tcfg.get("tokenizer_class") != "TokenizersBackend"
+
+
+def test_tokenizer_config_is_made_portable(tmp_path):
+    """transformers 5 saves extra_special_tokens as a list and names the class TokenizersBackend; SGLang's 4.57 cannot read that."""
+    sys.path.insert(0, str(ROOT / "scripts" / "serving"))
+    from fix_tokenizer_config import portable_tokenizer_config
+
+    cfg = {"extra_special_tokens": ["[|system|]", "[|user|]"], "additional_special_tokens": ["[|user|]"], "tokenizer_class": "TokenizersBackend", "model_max_length": 4096}
+    (tmp_path / "tokenizer_config.json").write_text(json.dumps(cfg))
+    assert portable_tokenizer_config(tmp_path) is True
+    out = json.loads((tmp_path / "tokenizer_config.json").read_text())
+    assert "extra_special_tokens" not in out and out["additional_special_tokens"] == ["[|user|]", "[|system|]"]
+    assert out["tokenizer_class"] == "PreTrainedTokenizerFast" and out["model_max_length"] == 4096
+    assert portable_tokenizer_config(tmp_path) is False          # idempotent
+    assert portable_tokenizer_config(tmp_path / "missing") is False

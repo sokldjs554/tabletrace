@@ -15,12 +15,16 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import sys
 from pathlib import Path
 
 import torch
 
-from tabletrace.service.engines import SYSTEM_PROMPT
-from tabletrace.training.data import build_examples, load_docs, read_records
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "serving"))
+from fix_tokenizer_config import portable_tokenizer_config  # noqa: E402
+
+from tabletrace.service.engines import SYSTEM_PROMPT  # noqa: E402
+from tabletrace.training.data import build_examples, load_docs, read_records  # noqa: E402
 
 
 def pick_dtype(name: str) -> torch.dtype:
@@ -128,6 +132,8 @@ def main() -> None:
         merged = model.merge_and_unload()
         merged.save_pretrained(out / "merged", safe_serialization=True)
         tok.save_pretrained(out / "merged")
+        portable_tokenizer_config(out / "merged")     # SGLang pins transformers 4.57, which cannot read the 5.x tokenizer_config.json
+    portable_tokenizer_config(out)
     (out / "train_info.json").write_text(json.dumps({"n_examples": len(data), "steps": step, "dtype": str(dtype), "args": vars(a), "loss_log": log}, indent=1))
 
 
