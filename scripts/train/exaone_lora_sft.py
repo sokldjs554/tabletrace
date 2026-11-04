@@ -21,10 +21,10 @@ from pathlib import Path
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "serving"))
-from fix_tokenizer_config import portable_tokenizer_config  # noqa: E402
+from fix_tokenizer_config import portable_tokenizer_config
 
-from tabletrace.service.engines import SYSTEM_PROMPT  # noqa: E402
-from tabletrace.training.data import build_examples, load_docs, read_records  # noqa: E402
+from tabletrace.service.engines import SYSTEM_PROMPT
+from tabletrace.training.data import build_examples, load_docs, read_records
 
 
 def pick_dtype(name: str) -> torch.dtype:
