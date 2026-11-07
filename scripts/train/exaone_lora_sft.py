@@ -21,7 +21,7 @@ from pathlib import Path
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "serving"))
-from fix_tokenizer_config import portable_tokenizer_config
+from fix_tokenizer_config import portable_model_dir
 
 from tabletrace.service.engines import SYSTEM_PROMPT
 from tabletrace.training.data import build_examples, load_docs, read_records
@@ -137,8 +137,8 @@ def main() -> None:
         merged = model.merge_and_unload()
         merged.save_pretrained(out / "merged", safe_serialization=True)
         tok.save_pretrained(out / "merged")
-        portable_tokenizer_config(out / "merged")     # SGLang pins transformers 4.57, which cannot read the 5.x tokenizer_config.json
-    portable_tokenizer_config(out)
+        portable_model_dir(out / "merged")     # SGLang pins transformers 4.57, which cannot read the 5.x tokenizer_config.json
+    portable_model_dir(out)
     (out / "train_info.json").write_text(json.dumps({"n_examples": len(data), "steps": step, "dtype": str(dtype), "args": vars(a), "loss_log": log}, indent=1))
 
 

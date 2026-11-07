@@ -70,3 +70,26 @@ def test_tokenizer_config_is_made_portable(tmp_path):
     assert out["tokenizer_class"] == "PreTrainedTokenizerFast" and out["model_max_length"] == 4096
     assert portable_tokenizer_config(tmp_path) is False          # idempotent
     assert portable_tokenizer_config(tmp_path / "missing") is False
+
+
+def test_model_config_rope_keys_are_restored_for_transformers_4(tmp_path):
+    """transformers 5 writes RoPE settings only under rope_parameters (rope_theta/rope_scaling null). 4.57's Exaone4Config then
+    falls back to rope_theta=10000 and no scaling: the model loads and talks fluently but ignores the context (owner's SGLang run)."""
+    sys.path.insert(0, str(ROOT / "scripts" / "serving"))
+    from fix_tokenizer_config import portable_model_config, portable_model_dir
+
+    cfg = {"model_type": "exaone4", "rope_theta": None, "rope_scaling": None, "dtype": "float16", "torch_dtype": None,
+           "rope_parameters": {"rope_theta": 1000000.0, "rope_type": "llama3", "factor": 16.0, "low_freq_factor": 1.0, "high_freq_factor": 4.0, "original_max_position_embeddings": 8192}}
+    (tmp_path / "config.json").write_text(json.dumps(cfg))
+    assert portable_model_config(tmp_path) is True
+    out = json.loads((tmp_path / "config.json").read_text())
+    assert out["rope_theta"] == 1000000.0 and out["torch_dtype"] == "float16"
+    assert out["rope_scaling"] == {"rope_type": "llama3", "factor": 16.0, "low_freq_factor": 1.0, "high_freq_factor": 4.0, "original_max_position_embeddings": 8192}
+    assert out["rope_parameters"] == cfg["rope_parameters"]            # 5.x keeps reading this one
+    assert portable_model_config(tmp_path) is False                     # idempotent
+    # default rope type: only rope_theta is restored, rope_scaling stays unset
+    (tmp_path / "config.json").write_text(json.dumps({"rope_parameters": {"rope_theta": 500000.0, "rope_type": "default"}}))
+    assert portable_model_config(tmp_path) is True
+    out = json.loads((tmp_path / "config.json").read_text())
+    assert out["rope_theta"] == 500000.0 and "rope_scaling" not in out
+    assert portable_model_dir(tmp_path / "missing") is False

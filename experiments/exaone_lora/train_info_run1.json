@@ -1,0 +1,120 @@
+{
+ "n_examples": 300,
+ "steps": 18,
+ "dtype": "torch.bfloat16",
+ "args": {
+  "model": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+  "train": [
+   "data/ko/train.jsonl",
+   "data/ko/synthetic_train.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "out": "experiments/exaone_lora",
+  "dtype": "auto",
+  "trust_remote_code": false,
+  "epochs": 1.0,
+  "bs": 2,
+  "grad_accum": 8,
+  "lr": 0.0002,
+  "max_len": 768,
+  "lora_r": 16,
+  "grad_ckpt": true,
+  "merge": true,
+  "limit": 300,
+  "tokenizer": null
+ },
+ "loss_log": [
+  {
+   "step": 1,
+   "of": 18,
+   "loss": 1.236
+  },
+  {
+   "step": 2,
+   "of": 18,
+   "loss": 0.2451
+  },
+  {
+   "step": 3,
+   "of": 18,
+   "loss": 0.1996
+  },
+  {
+   "step": 4,
+   "of": 18,
+   "loss": 0.1439
+  },
+  {
+   "step": 5,
+   "of": 18,
+   "loss": 0.3432
+  },
+  {
+   "step": 6,
+   "of": 18,
+   "loss": 0.1311
+  },
+  {
+   "step": 7,
+   "of": 18,
+   "loss": 0.1911
+  },
+  {
+   "step": 8,
+   "of": 18,
+   "loss": 0.2822
+  },
+  {
+   "step": 9,
+   "of": 18,
+   "loss": 0.4631
+  },
+  {
+   "step": 10,
+   "of": 18,
+   "loss": 0.1346
+  },
+  {
+   "step": 11,
+   "of": 18,
+   "loss": 0.0724
+  },
+  {
+   "step": 12,
+   "of": 18,
+   "loss": 0.5996
+  },
+  {
+   "step": 13,
+   "of": 18,
+   "loss": 0.2015
+  },
+  {
+   "step": 14,
+   "of": 18,
+   "loss": 0.1707
+  },
+  {
+   "step": 15,
+   "of": 18,
+   "loss": 0.1236
+  },
+  {
+   "step": 16,
+   "of": 18,
+   "loss": 0.0955
+  },
+  {
+   "step": 17,
+   "of": 18,
+   "loss": 0.0808
+  },
+  {
+   "step": 18,
+   "of": 18,
+   "loss": 0.4436
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 {
  "n_examples": 300,
  "steps": 18,
- "dtype": "torch.bfloat16",
+ "dtype": "torch.float16",
  "args": {
   "model": "LGAI-EXAONE/EXAONE-4.0-1.2B",
   "train": [
@@ -29,92 +29,92 @@
   {
    "step": 1,
    "of": 18,
-   "loss": 1.236
+   "loss": 1.2592
   },
   {
    "step": 2,
    "of": 18,
-   "loss": 0.2451
+   "loss": 1.6208
   },
   {
    "step": 3,
    "of": 18,
-   "loss": 0.1996
+   "loss": 2.0561
   },
   {
    "step": 4,
    "of": 18,
-   "loss": 0.1439
+   "loss": 1.1721
   },
   {
    "step": 5,
    "of": 18,
-   "loss": 0.3432
+   "loss": 2.068
   },
   {
    "step": 6,
    "of": 18,
-   "loss": 0.1311
+   "loss": 1.9126
   },
   {
    "step": 7,
    "of": 18,
-   "loss": 0.1911
+   "loss": 0.7262
   },
   {
    "step": 8,
    "of": 18,
-   "loss": 0.2822
+   "loss": 0.1775
   },
   {
    "step": 9,
    "of": 18,
-   "loss": 0.4631
+   "loss": 0.6719
   },
   {
    "step": 10,
    "of": 18,
-   "loss": 0.1346
+   "loss": 0.2403
   },
   {
    "step": 11,
    "of": 18,
-   "loss": 0.0724
+   "loss": 0.0645
   },
   {
    "step": 12,
    "of": 18,
-   "loss": 0.5996
+   "loss": 0.8257
   },
   {
    "step": 13,
    "of": 18,
-   "loss": 0.2015
+   "loss": 0.1093
   },
   {
    "step": 14,
    "of": 18,
-   "loss": 0.1707
+   "loss": 0.2352
   },
   {
    "step": 15,
    "of": 18,
-   "loss": 0.1236
+   "loss": 0.143
   },
   {
    "step": 16,
    "of": 18,
-   "loss": 0.0955
+   "loss": 0.2722
   },
   {
    "step": 17,
    "of": 18,
-   "loss": 0.0808
+   "loss": 0.0744
   },
   {
    "step": 18,
    "of": 18,
-   "loss": 0.4436
+   "loss": 0.4077
   }
  ]
 }

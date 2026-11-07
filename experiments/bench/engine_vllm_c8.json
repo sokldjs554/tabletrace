@@ -3,9 +3,9 @@
  "model": "planner",
  "n": 64,
  "concurrency": 8,
- "wall_s": 4.51,
- "throughput_req_per_s": 14.192,
- "p50_ms": 500.6,
- "p95_ms": 721.6,
- "parse_ok_rate": 0.984
+ "wall_s": 4.17,
+ "throughput_req_per_s": 15.329,
+ "p50_ms": 471.2,
+ "p95_ms": 615.2,
+ "parse_ok_rate": 1.0
 }

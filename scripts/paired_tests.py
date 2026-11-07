@@ -43,6 +43,9 @@ PAIRS = [
     ("exaone_vllm_vs_heuristic_ko_test_ec", "heuristic_ko_test_ec", "exaone_vllm_ko_test_ec"),
     ("subject_check_on_exaone_vllm_ko_test", "exaone_vllm_ko_test", "exaone_vllm_ko_test_ec"),
     ("exaone_vllm_tp2_vs_tp1_ko_test", "exaone_vllm_ko_test", "exaone_vllm_tp2_ko_test"),   # same model, TP=2 vs 1 GPU: run-to-run variation
+    # second LoRA training run (same 300 examples, fp16 instead of emulated bf16) vs the first one: training-run variation
+    ("exaone_vllm_run2_vs_run1_ko_test", "exaone_vllm_ko_test_run1", "exaone_vllm_ko_test"),
+    ("exaone_vllm_run2_vs_run1_ko_test_ec", "exaone_vllm_ko_test_ec_run1", "exaone_vllm_ko_test_ec"),
 ]
 
 
