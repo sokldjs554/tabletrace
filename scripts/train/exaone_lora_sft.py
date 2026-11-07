@@ -29,7 +29,12 @@ from tabletrace.training.data import build_examples, load_docs, read_records
 
 def pick_dtype(name: str) -> torch.dtype:
     if name == "auto":
-        name = "bf16" if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else ("fp16" if torch.cuda.is_available() else "fp32")
+        # torch.cuda.is_bf16_supported() counts emulated bf16 on Turing (T4) as supported, so an owner's T4 run trained in
+        # emulated bf16 (train_info.json: dtype torch.bfloat16). Decide by compute capability instead: bf16 on sm80+, fp16 below.
+        if torch.cuda.is_available():
+            name = "bf16" if torch.cuda.get_device_capability(0)[0] >= 8 else "fp16"
+        else:
+            name = "fp32"
     return {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}[name]
 
 
