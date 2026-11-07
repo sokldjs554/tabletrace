@@ -41,7 +41,7 @@
 | 프롬프트·컨텍스트 엔지니어링과 검색 결합 | BM25(Kiwi 형태소) 검색, 본문 스니펫+표 직렬화, 컨텍스트→행 예산 | `retrieval/`, `model/serialize.py` | 표 검색 hit@1 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_1:pct -->80.0<!-- /num -->% / hit@5 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_5:pct -->95.7<!-- /num -->%(한국어 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.n_tables_searched -->1,140<!-- /num -->표), 화학 hit@1 <!-- num:experiments/eval/retrieval/metrics.json:chem_custom.hit_at_1:pct -->65.6<!-- /num -->%. 컨텍스트 유무의 모델 정확도 효과는 분리 측정하지 않음 | 완료 |
 | Linux, Python, Hugging Face, PyTorch | Python 3.13 / PyTorch 2.15 / **Hugging Face Transformers·tokenizers 라이브러리**(Hub는 차단되어 사용하지 못함), 자체 학습 루프 | 저장소 전체 | — | 완료 |
 | 멀티 GPU Model Parallelism | 2-스테이지 파이프라인 병렬(인코더 / 디코더+lm_head), torch.distributed | `bench/pipeline_parallel.py`, `experiments/bench/pp_*.json` | GPU 없음. CPU 2프로세스(gloo)로 분할·통신·출력 일치만 검증, 처리량 이득 없음(§9) | 구현 후 미실행 |
-| vLLM 또는 SGLang | OpenAI 호환 EnginePlanner + TP/PP 서빙 스크립트 + 엔진 벤치. mT5는 두 엔진이 지원하지 않아(`experiments/serving/engine_support.json`) EXAONE을 같은 데이터로 LoRA 튜닝해 서빙하는 경로 | `service/engines.py`, `scripts/serving/`, `scripts/train/exaone_lora_sft.py`, `notebooks/gpu_experiments.ipynb`, `experiments/serving/sglang_t4_failure.md` | **SGLang**: 사용자가 Colab T4에서 `sglang==0.5.9`를 실행했고 서버가 모델을 올린 뒤 첫 연산에서 `no kernel image is available for execution on the device`로 실패(`sgl_kernel`에 sm75 커널 없음, Ampere 이상 필요). **vLLM**: 설치와 서버 기동 시도까지 진행 중이며 평가·벤치 결과는 아직 없음. 모의 서버 왕복 테스트는 통과 | 실행했으나 실패 |
+| vLLM 또는 SGLang | OpenAI 호환 EnginePlanner + TP/PP 서빙 스크립트 + 엔진 벤치. mT5는 두 엔진이 지원하지 않아(`experiments/serving/engine_support.json`) EXAONE을 같은 데이터로 LoRA 튜닝해 서빙하는 경로 | `service/engines.py`, `scripts/serving/`, `scripts/train/exaone_lora_sft.py`, `notebooks/gpu_experiments.ipynb`, `experiments/serving/sglang_t4_failure.md` | **vLLM**: 소유자가 Colab T4 1장에서 EXAONE-4.0-1.2B LoRA 병합 모델을 vLLM fp16으로 띄우고 ko test 699문항을 같은 검증기로 평가(verified EM <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.verified_em:pct -->52.2<!-- /num -->%, 계산 문항 0%)·동시 요청 1/8/32 벤치(최대 <!-- num:experiments/bench/engine_vllm_c32.json:throughput_req_per_s -->24.61<!-- /num --> 요청/s). 출력을 옮겨 적음, 예측 파일 대기(§18.3). **SGLang**: 같은 T4에서 `sglang==0.5.9`가 모델을 올린 뒤 첫 연산에서 `no kernel image is available for execution on the device`로 두 번 실패(`sgl_kernel`에 sm75 커널 없음, Ampere 이상 필요) | 완료(vLLM) · 실행했으나 실패(SGLang) |
 | Docker | API+콘솔 이미지, compose, 헬스체크 | `Dockerfile`, `docker-compose.yml`, `experiments/docker/smoke.json` | 이 세션에서 이미지 빌드(786 MB) + 컨테이너 smoke 통과(Docker Hub 429로 MCR 베이스 이미지 사용) | 완료 |
 | LangChain 또는 LangGraph | 위 Agent 항목(LangGraph) | `agent/graph.py` | `GET /v1/graph` 가 Mermaid 반환, 조건부 재시도 분기 | 완료 |
 | GitHub Actions | `ci.yml`(린트·테스트·데이터·수치·Docker smoke), `pages.yml` | `.github/workflows/` | GitHub Actions에서 실행해 **통과**: [ci](https://github.com/sokldjs554/tabletrace/actions/runs/41213002277)의 `test`·`docker` 작업과 [pages](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281)의 build·deploy 작업이 모두 success(커밋 `0f38f8d`) | 완료 |
@@ -62,8 +62,8 @@
 | torch.distributed (gloo) | 파이프라인 병렬 기능 검증(CPU) | 실행(CPU) |
 | TensorFlow (별도 venv) | mesh-TF 체크포인트 읽기 전용(변환 시 1회) | 실행 |
 | GitHub Actions | CI·Pages 워크플로 | 작성만, 원격 실행 없음 |
-| vLLM / SGLang | 서빙 스크립트·클라이언트 | 미실행(GPU 없음) |
-| Hugging Face Hub / EXAONE | — | 사용 못함(`huggingface.co` 차단) |
+| vLLM / SGLang | 서빙 스크립트·클라이언트·엔진 벤치 | vLLM: 소유자가 Colab T4에서 실행(§18.3). SGLang: T4에서 실패 |
+| Hugging Face Hub / EXAONE | EXAONE-4.0-1.2B LoRA SFT 스크립트 | 개발 컨테이너는 `huggingface.co` 차단. 소유자가 Colab에서 내려받아 튜닝·서빙(§18.3) |
 
 ## 5. 한국어 표 QA — 데이터·모델·평가
 
@@ -379,7 +379,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 3. **int8 동적 양자화는 빠르고 파일이 작지만 정확도를 크게 해친다.** 파일 <!-- num:experiments/bench/inference.json:results.0.state_dict_mb -->1,200.8<!-- /num --> MB → <!-- num:experiments/bench/inference.json:results.3.state_dict_mb -->684.6<!-- /num --> MB(공유 임베딩 250k×512는 fp32로 남아 절반에 못 미침. 1차에는 lm_head도 fp32로 남는다고 적었으나 틀렸고 lm_head는 int8이다, §18.2). 처리량은 bs=8에서 <!-- num:experiments/bench/inference.json:results.1.throughput_ex_per_s -->2.2<!-- /num --> → <!-- num:experiments/bench/inference.json:results.4.throughput_ex_per_s -->3.66<!-- /num --> 예제/s. **그러나 출력 문자열이 fp32와 일치하는 비율은 bs=1에서 <!-- num:experiments/bench/inference.json:results.3.agreement_with_fp32_bs1:pct -->35.4<!-- /num -->%뿐이고, 평가셋 점수도 한국어 독립 test verified EM <!-- num:experiments/eval/sft_chem_ko_test/metrics.json:metrics.verified_em:pct -->29.8<!-- /num -->% → <!-- num:experiments/eval/sft_chem_int8_ko_test/metrics.json:metrics.verified_em:pct -->17.7<!-- /num -->%, lookup EM <!-- num:experiments/eval/sft_chem_ko_test/metrics.json:metrics.lookup_em:pct -->37.1<!-- /num -->% → <!-- num:experiments/eval/sft_chem_int8_ko_test/metrics.json:metrics.lookup_em:pct -->18.6<!-- /num -->%로 떨어지고 오보류율이 <!-- num:experiments/eval/sft_chem_ko_test/metrics.json:metrics.false_abstain_rate:pct -->19.4<!-- /num -->% → <!-- num:experiments/eval/sft_chem_int8_ko_test/metrics.json:metrics.false_abstain_rate:pct -->55.3<!-- /num -->%로 뛴다.** 작은 수작업 평가셋(30·32문항)에서는 오히려 올라가지만(보류가 늘어 보류 문항이 맞는 효과) 표본이 작고 같은 방향의 개선으로 읽으면 안 된다. 따라서 이 모델에서 int8 동적 양자화는 **공짜 최적화가 아니다.** 선택적 양자화는 2차에서 시도했다(§18.2): `lm_head`만 int8이면 정확도 손실이 검출되지 않고 속도 이득의 대부분을 얻는다. 정적 양자화는 시도하지 않았다.
 4. **메모리**: 프로세스 최대 RSS는 fp32 <!-- num:experiments/bench/inference.json:results.0.peak_rss_gb -->3.38<!-- /num --> GB, int8 <!-- num:experiments/bench/inference.json:results.3.peak_rss_gb -->3.73<!-- /num --> GB로 **int8이 오히려 크다.** `quantize_dynamic`이 fp32 모델을 먼저 올린 뒤 변환하기 때문에 최대치에 두 모델이 겹친다. 서빙 시 상주 메모리를 줄이려면 양자화된 가중치를 파일에서 직접 로드해야 하며 구현하지 않았다.
 5. **변동성**: 공유 VM이라 같은 설정의 p50이 실행마다 20% 이상 달라질 수 있다(앞선 오염된 실행에서 fp32 bs=1 p50이 이번보다 약 25% 낮게 관측되었다). 단일 실행의 절대값이 아니라 설정 간 비율을 보라. 반복은 측정 2라운드(워밍업 1)뿐이라 신뢰구간은 구하지 않았다.
-6. **실행하지 않은 것**: vLLM/SGLang 서빙, GPU 지연·메모리, 그 외 양자화(GPTQ/AWQ), 컴파일(torch.compile), ONNX. 이것들은 성능을 주장하지 않는다.
+6. **실행하지 않은 것**: GPU 지연·메모리(mT5), 그 외 양자화(GPTQ/AWQ), 컴파일(torch.compile), ONNX. 이것들은 성능을 주장하지 않는다. vLLM 서빙은 EXAONE 모델로 2차에서 실행했고(§18.3), SGLang은 T4에서 실패했다.
 
 ## 9. 멀티 GPU Model Parallelism — 방식·환경·결과
 
@@ -404,7 +404,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 - **분할 확인**: rank 0은 파라미터 <!-- num:experiments/bench/pp_2stage.json:stages.0.stage_params:int -->146,940,608<!-- /num -->개(인코더+임베딩), rank 1은 <!-- num:experiments/bench/pp_2stage.json:stages.1.stage_params:int -->281,293,504<!-- /num -->개(디코더+임베딩+lm_head)를 가졌다. 합이 전체 300,176,768보다 큰 것은 공유 임베딩(약 1.28억)이 인코더 입력과 디코더 입력에 모두 필요해 **양쪽에 복제**되었기 때문이다. 나머지 레이어는 분할되었다.
 - **정확성**: 같은 16개 입력에서 단일 프로세스와 2-스테이지의 생성 출력이 **모두 일치**했다.
 - **성능**: 처리량 이득 **없음**(단일 <!-- num:experiments/bench/pp_single.json:throughput_ex_per_s -->1.47<!-- /num --> vs 2-스테이지 <!-- num:experiments/bench/pp_2stage.json:throughput_ex_per_s -->1.46<!-- /num --> 예제/s). 두 프로세스가 같은 4코어를 나눠 쓰고 마이크로배치 파이프라이닝이 없어 스테이지가 순차 실행되므로 예상된 결과이며, 이 실험은 속도를 보이려는 것이 아니다.
-- **GPU별 메모리·지연·처리량은 측정하지 못했다.** 실행 명령, 필요 자원(GPU 2장, 각 ≥8 GB), 예상 시간(분 단위)과 비용(시간당 $1–3 기준 $1 미만)은 docs/experiments/parallel.md. vLLM 텐서 병렬(`--tensor-parallel-size 2`) 서빙 스크립트도 준비만 했다.
+- **GPU별 메모리·지연·처리량은 측정하지 못했다.** 실행 명령, 필요 자원(GPU 2장, 각 ≥8 GB), 예상 시간(분 단위)과 비용(시간당 $1–3 기준 $1 미만)은 docs/experiments/parallel.md. vLLM 텐서 병렬(`--tensor-parallel-size 2`)은 소유자가 Kaggle T4 2장에서 돌렸다고 보고했으나 결과 파일을 받지 못해 수치가 없다. GPU 1장 vLLM 서빙 결과는 §18.3.
 
 ## 10. 테스트와 반복 검증
 
@@ -470,9 +470,9 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 | (해결됨) tabletrace 원격 푸시 | 사용자가 GitHub를 다시 연결해 푸시됨 | 이전 `403`은 Claude GitHub App 미설치 때문이었다 |
 | (해결됨) GitHub Actions 실행 | 푸시 후 실행·통과 | 위 §3 |
 | GitHub Pages 접속 확인 | 이 세션의 네트워크에서 `github.io`가 차단됨 | 배포 작업 success 기록, 사용자가 주소를 열어 확인해야 함 |
-| EXAONE 다운로드·튜닝·서빙 | `huggingface.co` 차단, GPU 없음 | 라이선스·버전 확인(docs/experiments/exaone.md), LoRA SFT 스크립트, 예상 자원·비용 |
-| 멀티 GPU 병렬 실측 | GPU 없음(Colab은 GPU 1장이라 불가, Kaggle T4 ×2나 2장 이상 필요) | 파이프라인 병렬 코드(CPU 2프로세스로 정확성 검증), GPU 명령·예상 자원 |
-| vLLM / SGLang 실행 | 개발 컨테이너에는 GPU 없음. 사용자가 Colab T4에서 시도: SGLang은 T4 미지원으로 실패(`experiments/serving/sglang_t4_failure.md`), vLLM 결과 대기 | OpenAI 호환 클라이언트·서빙 스크립트·벤치 스크립트, 모의 서버 테스트 |
+| (해결됨) EXAONE 다운로드·튜닝·서빙 | 소유자가 Colab T4에서 노트북으로 실행(§18.3). 개발 컨테이너에서는 `huggingface.co` 차단·GPU 없음 | 학습 예제 수·손실(`train_info.json`)과 예측 파일은 아직 받지 못함 |
+| 멀티 GPU 병렬 실측 | 개발 컨테이너에 GPU 없음. 소유자가 Kaggle T4 ×2에서 노트북 4번 절 성공을 보고했으나 결과 파일(`gpu_results.tgz`) 미수령 | 파이프라인 병렬 코드(CPU 2프로세스로 정확성 검증), GPU 명령·예상 자원 |
+| (vLLM 해결됨) SGLang 실행 | SGLang 0.5.9는 Colab T4에서 두 번 실패(`sgl_kernel`에 sm75 커널 없음, `experiments/serving/sglang_t4_failure.md`). Ampere 이상 GPU는 유료라 승인 없이 쓰지 않음 | vLLM은 같은 환경에서 실행 완료(§18.3). SGLang용 스크립트·가상환경 설치 절차는 노트북 3번 절 |
 | 채용 공고·LG 논문 페이지 원문 확인 | `www.lgresearch.ai` 차단 | 사용자 제공 역량 목록 기준으로 진행 |
 | 논문·특허 기반 화학 데이터 | PMC·ChemRxiv·Google Patents 등 차단 | OpenStax 교과서 데이터 표 사용 |
 | 외부 유료 API | `api.openai.com` 차단, 키 없음 | 사용 안 함 — 비용 0, 승인 필요한 실행 없음 |
@@ -490,7 +490,7 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 7. **데이터**: 합성 계산·보류는 템플릿이라 표현이 단조롭고 기준선에 유리한 편향이 있다. 화학은 논문이 아니라 교과서 표다. 수작업 평가는 한국어 30·화학 32문항으로 1 표준오차가 6–9%p다.
 8. **검색**: BM25만. 문서를 지정하지 않으면 한국어 질문의 약 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_1:pct -->80.0<!-- /num -->%만 첫 번째 표가 맞다(hit@1). 문서 지정 없는 엔드투엔드 정확도는 측정하지 않았다.
 9. **int8 양자화**: 모든 층 int8은 정확도를 해친다(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%). `lm_head`만 int8은 ko test에서 손실이 검출되지 않지만 본문 테스트에서는 fp32가 <!-- num:experiments/eval/paired_tests.json:int8_lm_head_vs_fp32_text2_test.reference_better:int -->6<!-- /num -->문항, int8이 <!-- num:experiments/eval/paired_tests.json:int8_lm_head_vs_fp32_text2_test.candidate_better:int -->1<!-- /num -->문항 더 맞혔다(비유의). 정확도 확인은 CPU에서만 했다(§8, §18.2).
-10. **하드웨어**: CPU 4코어 단일 환경의 수치다. 지연 시간은 공유 VM이라 실행마다 20% 이상 변동한다. GPU·멀티 GPU·vLLM·EXAONE 실측 없음.
+10. **하드웨어**: mT5 수치는 CPU 4코어 단일 환경이다. 지연 시간은 공유 VM이라 실행마다 20% 이상 변동한다. GPU 실측은 EXAONE+vLLM 1회(§18.3, 소유자 실행)뿐이고 멀티 GPU 수치는 없다.
 11. **RL**: 120 step·시드 1개의 예비 실험이다. 보상은 검증기가 정의하므로 검증기의 허점이 곧 보상 허점이다(1차에서 실제로 발생). v3의 이득은 본문 근거 없음 문항의 직접 보류에 한정되고 ko test 전체 점수는 그대로다(§18). 시드 반복을 하지 않아 이득의 재현성은 모른다.
 12. **배포**: Pages는 저장된 결과만 보여 주고 실시간 모드는 호스팅하지 않는다. 배포된 페이지는 이 세션에서 열어 확인하지 못했다.
 
@@ -536,8 +536,8 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
 
-- GPU 학습·튜닝, **멀티 GPU 모델 병렬 실행**, vLLM/SGLang 서빙 실행, EXAONE 사용·튜닝, Hugging Face Hub 사용 경험.
-- "기준선보다 좋은 모델"(전체 평가에서 <!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% 대 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%), "강화학습으로 ko test 점수를 올렸다"(v3도 그대로), "모든 int8로 최적화했다"(정확도 하락), "vLLM/SGLang으로 서빙했다"(이 mT5 모델은 두 엔진이 지원하지 않음).
+- **멀티 GPU 모델 병렬 실측값**(실행 보고만 있고 파일 없음), SGLang 서빙 성공, 작성자 본인의 GPU 실행 경험(EXAONE LoRA·vLLM 실행은 소유자가 Colab에서 했고 작성자는 스크립트·노트북·분석을 맡음).
+- "기준선보다 좋은 모델"(전체 평가에서 <!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% 대 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%), "강화학습으로 ko test 점수를 올렸다"(v3도 그대로), "모든 int8로 최적화했다"(정확도 하락), "mT5를 vLLM/SGLang으로 서빙했다"(두 엔진이 mT5를 지원하지 않음. vLLM 서빙은 EXAONE 모델), "EXAONE이 mT5보다 튜닝이 잘 됐다"(모델 크기·사전학습·하드웨어가 달라 같은 조건 비교가 아님).
 - 공개 배포·GitHub Actions 실행·운영 경험, 실제 사용자 트래픽.
 - 논문·특허 화학 문서 처리(교과서 표만 사용), 실사용 질문 분포에서의 일반 성능(수작업 평가는 62문항).
 - 공고 원문 대조(공고 페이지를 열지 못함).
@@ -682,3 +682,27 @@ dev(475문항, 학습과 겹치지 않음)에서 verified EM이 step 0 <!-- num:
 
 **읽는 법**: 속도 이득은 거의 전부 `lm_head`(디코딩 토큰마다 25만 어휘로 투영)에서 나오고, FFN·어텐션 int8은 이 CPU에서 속도가 오히려 줄거나 같습니다. 그런데 모든 층을 함께 int8로 하면 정확도가 크게 무너지는 반면 `lm_head`만이면 손실이 검출되지 않습니다(층별 손실의 합보다 훨씬 크게 겹쳐 나타남). 한계: 정확도 확인은 한국어 test 699문항(그리고 위 작은 평가셋)이고, 영어 화학 합성 dev와 GPU에서는 확인하지 않았습니다. 정적 양자화·GPTQ·AWQ·컴파일은 시도하지 않았습니다.
 
+### 18.3 EXAONE LoRA + vLLM 서빙 — GPU 실측 (저장소 소유자가 Colab T4에서 실행, 2026-11-07)
+
+§3의 "vLLM 또는 SGLang" 항목이 **완료(vLLM)**가 된 근거다. 작성자는 GPU가 없어 실행하지 못했고, 소유자가 `notebooks/gpu_experiments.ipynb` 1~2번 절을 Colab(Tesla T4 1장)에서 돌려 붙여 준 출력을 그대로 옮겨 적었다(`experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`). 조건: EXAONE-4.0-1.2B를 한국어 학습 데이터(표 조회·계산·보류)로 LoRA 튜닝해 병합, vLLM fp16 GPU 1장, `--max-model-len 2048`, 평가는 ko test 699문항·같은 검증기·동시 16요청.
+
+<!-- results:engine:start -->
+| 플래너 / 모델 | n | verified EM % v1 | verified EM % v2 | raw EM % (답 있는 문항) | lookup EM % | calc EM % | 근거 셀 일치 %(최종) | 근거 셀 일치 %(모델 인용) | 보류 재현율 % v1 → v2 | 오보류율 % v1 → v2 | 파싱 실패 % | ms/예제 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 휴리스틱 기준선 (CPU) | 699 | **36.2** | **35.9** | 21.7 | 26.2 | 59.1 | 31.6 | 31.6 | 94.0 → 96.0 | 42.4 → 45.8 | 0.0 | 21 |
+| [2차] GRPO RL v3 = mT5-small 300M (CPU 4스레드, bs=1) | 699 | **32.8** | **31.6** | 32.2 | 38.2 | 0.0 | 31.7 | 18.9 | 46.0 → 48.0 | 27.0 → 31.6 | 0.0 | 500 |
+| EXAONE-4.0-1.2B + LoRA, vLLM fp16 (Colab T4, 동시 16요청) | 699 | **52.2** | **50.5** | 55.9 | 66.2 | 0.0 | 54.9 | 29.6 | 16.0 → 48.0 | 13.9 → 25.4 | 0.6 | 2518 |
+
+EXAONE 행의 조건: ko test 699문항 전체 114.2초(동시 16요청, 끝에서 끝까지 6.1문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(EXAONE v2는 행 예산을 근사 토크나이저로 다시 계산한 값, `experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`).
+
+**vLLM 엔진 벤치** (`bench/engine_bench.py`, 같은 서버, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)
+
+| 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 64 | 28.33 | 2.259 | 430.0 | 549.8 | 98.4 |
+| 8 | 64 | 4.51 | 14.192 | 500.6 | 721.6 | 98.4 |
+| 32 | 64 | 2.6 | 24.613 | 1084.2 | 1500.7 | 98.4 |
+
+<!-- results:engine:end -->
+
+해석과 한계는 README §10.3과 같다. 요점만 적으면 (1) verified EM <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.verified_em:pct -->52.2<!-- /num -->%는 mT5 최종 <!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->%·기준선 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%보다 높지만 모델 크기(4배)·사전학습 언어·하드웨어가 모두 달라 튜닝 방법의 비교가 아니다. (2) 계산 문항 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.calc_em:pct -->0.0<!-- /num -->%로 mT5와 같은 약점이다. (3) 모델이 인용한 셀 그대로는 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->29.6<!-- /num -->%만 맞고 검증기 보정 뒤 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.evidence_cells_exact:pct -->54.9<!-- /num -->%다. (4) 검증기 v2 재검증은 행 예산을 다른 토크나이저로 다시 계산한 값이라 개체 검사만의 효과가 아니다(노트북 수정, 재실행 값 대기). (5) 예측 파일이 없어 쌍 비교 p값·범주별 분석이 없고, LoRA 학습 예제 수도 `train_info.json`을 받기 전까지 미확인이다. (6) SGLang은 같은 T4에서 두 번 실패했다(`experiments/serving/sglang_t4_failure.md`). (7) 멀티 GPU(Kaggle T4 2장, 노트북 4번 절)는 소유자가 성공을 보고했으나 결과 파일을 받지 못해 수치가 없다.

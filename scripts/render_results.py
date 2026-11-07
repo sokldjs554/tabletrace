@@ -135,6 +135,33 @@ def pp_table() -> str:
     return out
 
 
+def engine_table() -> str:
+    """EXAONE LoRA served by vLLM (owner's Colab T4 run, transcribed) next to the CPU mT5 rows, same test set, same verifier."""
+    rows = [("휴리스틱 기준선 (CPU)", "heuristic_ko_test"), ("[2차] GRPO RL v3 = mT5-small 300M (CPU 4스레드, bs=1)", "rl_v3_ko_test"),
+            ("EXAONE-4.0-1.2B + LoRA, vLLM fp16 (Colab T4, 동시 16요청)", "exaone_vllm_ko_test")]
+    out = ""
+    got = [(name, load(EXP / "eval" / f"{key}" / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
+    if not got[-1][1]:
+        return "_EXAONE/vLLM 산출물 없음_\n"
+    out += ("| 플래너 / 모델 | n | verified EM % v1 | verified EM % v2 | raw EM % (답 있는 문항) | lookup EM % | calc EM % | 근거 셀 일치 %(최종) | 근거 셀 일치 %(모델 인용) | 보류 재현율 % v1 → v2 | 오보류율 % v1 → v2 | 파싱 실패 % | ms/예제 |\n"
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n")
+    for name, a, b in got:
+        if not a:
+            continue
+        m, e = a["metrics"], (b or a)["metrics"]
+        out += (f"| {name} | {m['n']} | **{pct(m['verified_em'])}** | **{pct(e['verified_em'])}** | {pct(m['raw_answer_em_answerable'])} | {pct(m['lookup_em'])} | {pct(m['calc_em'])} | {pct(m['evidence_cells_exact'])} | {pct(m.get('evidence_cells_exact_raw'))} "
+                f"| {pct(m['abstain_recall'])} → {pct(e['abstain_recall'])} | {pct(m['false_abstain_rate'])} → {pct(e['false_abstain_rate'])} | {pct(m['parse_fail_rate'])} | {m['mean_ms_per_example']:.0f} |\n")
+    ev = got[-1][1]["meta"]
+    out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체 {ev['wall_s']}초(동시 16요청, 끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(EXAONE v2는 행 예산을 근사 토크나이저로 다시 계산한 값, `experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`).\n"
+    bench = [load(EXP / "bench" / f"engine_vllm_c{c}.json") for c in (1, 8, 32)]
+    bench = [b for b in bench if b]
+    if bench:
+        out += "\n**vLLM 엔진 벤치** (`bench/engine_bench.py`, 같은 서버, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)\n\n| 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |\n|---:|---:|---:|---:|---:|---:|---:|\n"
+        for b in bench:
+            out += f"| {b['concurrency']} | {b['n']} | {b['wall_s']} | {b['throughput_req_per_s']} | {b['p50_ms']} | {b['p95_ms']} | {pct(b['parse_ok_rate'])} |\n"
+    return out
+
+
 def blocks() -> dict[str, str]:
     v1 = "검증기 v1: 개체 일치 검사 없음 (1차 평가와 같은 조건)"
     v2 = "검증기 v2: 개체 일치 검사 있음 (같은 모델 출력을 다시 검증)"
@@ -154,6 +181,7 @@ def blocks() -> dict[str, str]:
         "bench_r2": bench_table("inference_r2.json", "2차 최종 모델 = RL v3"),
         "bench_r2b": bench_table("inference_r2b.json", "2차 최종 모델 = RL v3, fp32 대 lm_head만 int8"),
         "pp": pp_table(),
+        "engine": engine_table(),
     }
 
 

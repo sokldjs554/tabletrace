@@ -14,7 +14,7 @@
 
 | 항목 | 파일 | 실행 조건 |
 |---|---|---|
-| vLLM TP=2 서빙 | `scripts/serving/vllm_tp2.sh` | NVIDIA GPU 2장, vllm≥0.6, HF 접근 |
+| vLLM 서빙 | `scripts/serving/vllm_tp2.sh` | GPU 1장은 **실행됨**(아래). TP=2는 GPU 2장, 수치 대기 |
 | vLLM PP=2 서빙 | `scripts/serving/vllm_pp2.sh` | 동일 |
 | SGLang TP=2 서빙 | `scripts/serving/sglang.sh` | 동일 |
 | OpenAI 호환 클라이언트 | `src/tabletrace/service/engines.py` (`EnginePlanner`) | 모의 서버로 테스트 완료 |
@@ -40,5 +40,6 @@
 ## 실행 결과 (사용자 Colab T4, 2026-11-04)
 
 - **SGLang 0.5.9**: T4에서 **실패**. 서버가 모델을 올린 뒤 첫 연산에서 `no kernel image is available for execution on the device`. `sgl_kernel`에 sm75 커널이 없다. 설정으로 우회할 수 없다. 로그와 해석은 `experiments/serving/sglang_t4_failure.md`. Ampere 이상(L4·A100·H100)에서는 시도하지 않았다.
-- **vLLM 0.32.0**: 설치와 서버 기동 단계까지 진행했고 평가·벤치 결과는 아직 받지 못했다.
+- **vLLM**(가상환경에 `uv pip install vllm`, 2026-11-07): EXAONE-4.0-1.2B LoRA 병합 모델을 fp16·GPU 1장으로 띄워 ko test 699문항을 같은 검증기로 평가하고 동시 요청 1/8/32 벤치를 받았다. 값은 `experiments/eval/exaone_vllm_ko_test*/metrics.json`, `experiments/bench/engine_vllm_c*.json`, 표와 해석은 README §10.3·REPORT §18.3, 출처는 `experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`. 처음에는 상대 경로 모델 폴더를 서버가 못 찾아 `OSError`가 났고(이슈 37), 절대 경로로 고친 뒤 떴다.
+- **vLLM TP=2·NCCL 파이프라인**(Kaggle T4 2장): 소유자가 성공을 보고했으나 결과 파일을 받지 못해 수치가 없다.
 
