@@ -1,5 +1,7 @@
 # 멀티 GPU Model Parallelism — 설계, CPU 기능 검증, GPU 실행 계획
 
+> **GPU 실측(2026-11-07)**: 소유자가 Kaggle T4 2장에서 아래 계획대로 돌린 결과가 `experiments/bench/pp_single_gpu.json`·`pp_2stage_gpu.json`에 있고, 표와 해석은 README §10.2·REPORT §9에 있다. 출력 일치, 처리량 이득 없음(14.6 대 15.0 예제/s), 장치당 메모리 분할. 아래 '예상' 수치는 실측 전에 쓴 것이다.
+
 > **GPU에서 실행하는 방법**은 [gpu-runbook.md](gpu-runbook.md)와 `notebooks/gpu_experiments.ipynb`(Colab·Kaggle)에 있다. 이 문서의 서술은 개발 컨테이너(GPU 없음)에서 실행하지 못한 상태의 기록이다.
 
 ## 데이터 병렬과 모델 병렬의 구분

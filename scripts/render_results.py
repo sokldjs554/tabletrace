@@ -121,12 +121,12 @@ def bench_table(fname: str = "inference.json", label: str = "1차 최종 모델"
     return out
 
 
-def pp_table() -> str:
-    a, b = load(EXP / "bench" / "pp_single.json"), load(EXP / "bench" / "pp_2stage.json")
+def pp_table(suffix: str = "", cond: str = "CPU(gloo)") -> str:
+    a, b = load(EXP / "bench" / f"pp_single{suffix}.json"), load(EXP / "bench" / f"pp_2stage{suffix}.json")
     if not (a and b):
         return "_파이프라인 병렬 산출물 없음_\n"
     same = a.get("outputs") == b.get("outputs")
-    out = f"조건: CPU(gloo), n={a['n']}, bs={a['bs']}, 단일 프로세스 {a.get('params_total', 0):,} 파라미터\n\n"
+    out = f"조건: {cond}, n={a['n']}, bs={a['bs']}, 단일 프로세스 {a.get('params_total', 0):,} 파라미터\n\n"
     out += "| 구성 | 장치 | 스테이지 파라미터 | 처리량 예제/s | 메모리 MB | 평균 배치 지연 s |\n|---|---|---:|---:|---:|---:|\n"
     out += f"| 단일 프로세스 | {a['device']} | {a['params_total']:,} | {a['throughput_ex_per_s']} | {a['mem_mb']:.0f} | {sum(a['batch_latency_s']) / len(a['batch_latency_s']):.2f} |\n"
     for st in b["stages"]:
@@ -138,27 +138,31 @@ def pp_table() -> str:
 def engine_table() -> str:
     """EXAONE LoRA served by vLLM (owner's Kaggle T4 run, files from gpu_results.tgz) next to the CPU mT5 rows, same test set, same verifier."""
     rows = [("휴리스틱 기준선 (CPU)", "heuristic_ko_test"), ("[2차] GRPO RL v3 = mT5-small 300M (CPU 4스레드, bs=1)", "rl_v3_ko_test"),
-            ("EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_vllm_ko_test")]
+            ("EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_vllm_ko_test"),
+            ("같은 모델, vLLM 텐서 병렬 TP=2 (Kaggle T4 2장, 동시 16요청)", "exaone_vllm_tp2_ko_test")]
     out = ""
     got = [(name, load(EXP / "eval" / f"{key}" / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
-    if not got[-1][1]:
+    if not got[2][1]:
         return "_EXAONE/vLLM 산출물 없음_\n"
     out += ("| 플래너 / 모델 | n | verified EM % v1 | verified EM % v2 | raw EM % (답 있는 문항) | lookup EM % | calc EM % | 근거 셀 일치 %(최종) | 근거 셀 일치 %(모델 인용) | 보류 재현율 % v1 → v2 | 오보류율 % v1 → v2 | 파싱 실패 % | ms/예제 |\n"
             "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n")
     for name, a, b in got:
         if not a:
             continue
-        m, e = a["metrics"], (b or a)["metrics"]
-        out += (f"| {name} | {m['n']} | **{pct(m['verified_em'])}** | **{pct(e['verified_em'])}** | {pct(m['raw_answer_em_answerable'])} | {pct(m['lookup_em'])} | {pct(m['calc_em'])} | {pct(m['evidence_cells_exact'])} | {pct(m.get('evidence_cells_exact_raw'))} "
-                f"| {pct(m['abstain_recall'])} → {pct(e['abstain_recall'])} | {pct(m['false_abstain_rate'])} → {pct(e['false_abstain_rate'])} | {pct(m['parse_fail_rate'])} | {m['mean_ms_per_example']:.0f} |\n")
-    ev = got[-1][1]["meta"]
+        m, e = a["metrics"], (b["metrics"] if b else None)
+
+        def v2(k, e=e):
+            return pct(e[k]) if e else "–"
+        out += (f"| {name} | {m['n']} | **{pct(m['verified_em'])}** | **{v2('verified_em')}** | {pct(m['raw_answer_em_answerable'])} | {pct(m['lookup_em'])} | {pct(m['calc_em'])} | {pct(m['evidence_cells_exact'])} | {pct(m.get('evidence_cells_exact_raw'))} "
+                f"| {pct(m['abstain_recall'])} → {v2('abstain_recall')} | {pct(m['false_abstain_rate'])} → {v2('false_abstain_rate')} | {pct(m['parse_fail_rate'])} | {m['mean_ms_per_example']:.0f} |\n")
+    ev = got[2][1]["meta"]
     out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체 {ev['wall_s']}초(동시 16요청, 끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산, 출처는 `experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`).\n"
-    bench = [load(EXP / "bench" / f"engine_vllm_c{c}.json") for c in (1, 8, 32)]
-    bench = [b for b in bench if b]
+    bench = [(label, load(EXP / "bench" / f"engine_vllm{tag}_c{c}.json")) for label, tag in (("GPU 1장", ""), ("TP=2, GPU 2장", "_tp2")) for c in (1, 8, 32)]
+    bench = [(label, b) for label, b in bench if b]
     if bench:
-        out += "\n**vLLM 엔진 벤치** (`bench/engine_bench.py`, 같은 서버, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)\n\n| 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |\n|---:|---:|---:|---:|---:|---:|---:|\n"
-        for b in bench:
-            out += f"| {b['concurrency']} | {b['n']} | {b['wall_s']} | {b['throughput_req_per_s']} | {b['p50_ms']} | {b['p95_ms']} | {pct(b['parse_ok_rate'])} |\n"
+        out += "\n**vLLM 엔진 벤치** (`bench/engine_bench.py`, 같은 서버, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)\n\n| 구성 | 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |\n|---|---:|---:|---:|---:|---:|---:|---:|\n"
+        for label, b in bench:
+            out += f"| {label} | {b['concurrency']} | {b['n']} | {b['wall_s']} | {b['throughput_req_per_s']} | {b['p50_ms']} | {b['p95_ms']} | {pct(b['parse_ok_rate'])} |\n"
     return out
 
 
@@ -181,6 +185,7 @@ def blocks() -> dict[str, str]:
         "bench_r2": bench_table("inference_r2.json", "2차 최종 모델 = RL v3"),
         "bench_r2b": bench_table("inference_r2b.json", "2차 최종 모델 = RL v3, fp32 대 lm_head만 int8"),
         "pp": pp_table(),
+        "pp_gpu": pp_table("_gpu", "Kaggle Tesla T4 ×2(nccl), 소유자 실행 2026-11-07, 원본 google/mt5-small"),
         "engine": engine_table(),
     }
 

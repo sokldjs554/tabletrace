@@ -8,3 +8,5 @@
 - 평가 클라이언트의 `hardware: x86_64`는 Kaggle CPU를 적은 것이다. 모델은 T4에서 돌았다.
 - `_ec`(검증기 v2 재검증)는 세 번 돌았다. 처음 두 번은 노트북의 재검증 명령이 `--tokenizer`·`--max-in 672`를 빼고 돌아 행 예산이 본 실행과 달랐다(verified EM 50.5%, 50.07%, `truncated_gold_rate` 9.3%·11.3%). 세 번째(07:59, 두 인자 모두)가 `truncated_gold_rate` 3.43%로 본 실행과 같고, 그 파일이 지금의 `../exaone_vllm_ko_test_ec/`다. 앞의 두 값은 폐기.
 - 같은 세션의 `experiments/eval/exaone_sglang_ko_test/`는 빈 폴더였다(SGLang 서버가 뜨지 않아 평가가 시작되지 않음). 저장소에 넣지 않았다.
+- 두 번째 보관 파일(`gpu_results_1.tgz`, 같은 Kaggle 세션, 4번 절 실행 뒤): `../exaone_vllm_tp2_ko_test/`(vLLM `--tensor-parallel-size 2`, 검증기 v1만), `../../bench/engine_vllm_tp2_c{1,8,32}.json`, `../../bench/pp_single_gpu.json`·`pp_2stage_gpu.json`(mT5-small 2-스테이지 파이프라인, NCCL). 첫 파일과 겹치는 항목은 내용이 같았다.
+

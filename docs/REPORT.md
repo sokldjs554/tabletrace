@@ -40,7 +40,7 @@
 | 비동기 처리와 워크플로우 설계 | asyncio 작업 러너(세마포어·큐 제한·타임아웃·상태), LangGraph 분기 | `service/jobs.py`, `agent/graph.py` | 동시 5건·타임아웃·큐 초과(429)·실패 상태 테스트 통과 | 완료 |
 | 프롬프트·컨텍스트 엔지니어링과 검색 결합 | BM25(Kiwi 형태소) 검색, 본문 스니펫+표 직렬화, 컨텍스트→행 예산 | `retrieval/`, `model/serialize.py` | 표 검색 hit@1 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_1:pct -->80.0<!-- /num -->% / hit@5 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_5:pct -->95.7<!-- /num -->%(한국어 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.n_tables_searched -->1,140<!-- /num -->표), 화학 hit@1 <!-- num:experiments/eval/retrieval/metrics.json:chem_custom.hit_at_1:pct -->65.6<!-- /num -->%. 컨텍스트 유무의 모델 정확도 효과는 분리 측정하지 않음 | 완료 |
 | Linux, Python, Hugging Face, PyTorch | Python 3.13 / PyTorch 2.15 / **Hugging Face Transformers·tokenizers 라이브러리**(Hub는 차단되어 사용하지 못함), 자체 학습 루프 | 저장소 전체 | — | 완료 |
-| 멀티 GPU Model Parallelism | 2-스테이지 파이프라인 병렬(인코더 / 디코더+lm_head), torch.distributed | `bench/pipeline_parallel.py`, `experiments/bench/pp_*.json` | GPU 없음. CPU 2프로세스(gloo)로 분할·통신·출력 일치만 검증, 처리량 이득 없음(§9) | 구현 후 미실행 |
+| 멀티 GPU Model Parallelism | 2-스테이지 파이프라인 병렬(인코더 / 디코더+lm_head), torch.distributed | `bench/pipeline_parallel.py`, `experiments/bench/pp_*.json` | CPU 2프로세스(gloo)로 분할·통신·출력 일치 검증 뒤, 소유자가 Kaggle T4 2장에서 NCCL로 실측: 출력 일치, 처리량 1장 <!-- num:experiments/bench/pp_single_gpu.json:throughput_ex_per_s -->14.61<!-- /num --> 대 2-스테이지 <!-- num:experiments/bench/pp_2stage_gpu.json:throughput_ex_per_s -->15.03<!-- /num --> 예제/s(이득 없음), 장치당 메모리 분할(§9). vLLM TP=2는 §18.3 | 완료 |
 | vLLM 또는 SGLang | OpenAI 호환 EnginePlanner + TP/PP 서빙 스크립트 + 엔진 벤치. mT5는 두 엔진이 지원하지 않아(`experiments/serving/engine_support.json`) EXAONE을 같은 데이터로 LoRA 튜닝해 서빙하는 경로 | `service/engines.py`, `scripts/serving/`, `scripts/train/exaone_lora_sft.py`, `notebooks/gpu_experiments.ipynb`, `experiments/serving/sglang_t4_failure.md` | **vLLM**: 소유자가 Colab T4 1장에서 EXAONE-4.0-1.2B LoRA 병합 모델을 vLLM fp16으로 띄우고 ko test 699문항을 같은 검증기로 평가(verified EM <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.verified_em:pct -->52.2<!-- /num -->%, 계산 문항 0%)·동시 요청 1/8/32 벤치(최대 <!-- num:experiments/bench/engine_vllm_c32.json:throughput_req_per_s -->24.61<!-- /num --> 요청/s). 출력을 옮겨 적음, 예측 파일 대기(§18.3). **SGLang**: 같은 T4에서 `sglang==0.5.9`가 모델을 올린 뒤 첫 연산에서 `no kernel image is available for execution on the device`로 두 번 실패(`sgl_kernel`에 sm75 커널 없음, Ampere 이상 필요) | 완료(vLLM) · 실행했으나 실패(SGLang) |
 | Docker | API+콘솔 이미지, compose, 헬스체크 | `Dockerfile`, `docker-compose.yml`, `experiments/docker/smoke.json` | 이 세션에서 이미지 빌드(786 MB) + 컨테이너 smoke 통과(Docker Hub 429로 MCR 베이스 이미지 사용) | 완료 |
 | LangChain 또는 LangGraph | 위 Agent 항목(LangGraph) | `agent/graph.py` | `GET /v1/graph` 가 Mermaid 반환, 조건부 재시도 분기 | 완료 |
@@ -383,7 +383,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 
 ## 9. 멀티 GPU Model Parallelism — 방식·환경·결과
 
-**수행한 것은 CPU 2프로세스 기능 검증이며 GPU 병렬 실험은 하지 못했다.** 이 컨테이너에는 GPU가 없다(`nvidia-smi` 없음, `torch.cuda.is_available()`=False).
+**작성자는 CPU 2프로세스 기능 검증까지 했고, GPU 2장 실측은 소유자가 Kaggle에서 같은 코드를 돌려 보낸 파일이다**(아래 GPU 표, `experiments/bench/pp_*_gpu.json`). 이 컨테이너에는 GPU가 없다(`nvidia-smi` 없음, `torch.cuda.is_available()`=False).
 
 - **방식**: 2-스테이지 **파이프라인 모델 병렬**(`bench/pipeline_parallel.py`). rank 0이 인코더(공유 임베딩 포함), rank 1이 디코더+lm_head를 들고, rank 0이 인코딩한 hidden state를 `torch.distributed` `send/recv`로 rank 1에 보내면 rank 1이 greedy 디코딩 후 토큰 id를 돌려준다. 한 모델을 두 프로세스에 나눈 것이며, GPU마다 모델을 복제하는 DDP가 아니다.
 - **환경**: CPU 4코어, 백엔드 `gloo`, 프로세스당 2 스레드. 모델은 mT5-small 화학 SFT 모델.
@@ -401,10 +401,25 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 
 <!-- results:pp:end -->
 
+**GPU 실측(2026-11-07, 소유자가 Kaggle T4 2장에서 실행, 원본 `google/mt5-small`, 입력 64개)**: 같은 코드를 NCCL로 돌린 값이다. 출력은 단일 GPU와 일치했고 처리량 이득은 없다(두 스테이지가 겹치지 않음). 장치당 메모리는 나뉜다.
+
+<!-- results:pp_gpu:start -->
+조건: Kaggle Tesla T4 ×2(nccl), 소유자 실행 2026-11-07, 원본 google/mt5-small, n=64, bs=8, 단일 프로세스 300,176,768 파라미터
+
+| 구성 | 장치 | 스테이지 파라미터 | 처리량 예제/s | 메모리 MB | 평균 배치 지연 s |
+|---|---|---:|---:|---:|---:|
+| 단일 프로세스 | cuda:0 | 300,176,768 | 14.612 | 1376 | 0.55 |
+| 파이프라인 rank0 (encoder) | cuda:0 | 146,940,608 | 15.033 | 763 | 0.52 |
+| 파이프라인 rank1 (decoder+lm_head) | cuda:1 | 281,293,504 |  | 1265 | 0.52 |
+
+단일 프로세스와 2-스테이지의 생성 출력 일치: **예** (64개 입력)
+
+<!-- results:pp_gpu:end -->
+
 - **분할 확인**: rank 0은 파라미터 <!-- num:experiments/bench/pp_2stage.json:stages.0.stage_params:int -->146,940,608<!-- /num -->개(인코더+임베딩), rank 1은 <!-- num:experiments/bench/pp_2stage.json:stages.1.stage_params:int -->281,293,504<!-- /num -->개(디코더+임베딩+lm_head)를 가졌다. 합이 전체 300,176,768보다 큰 것은 공유 임베딩(약 1.28억)이 인코더 입력과 디코더 입력에 모두 필요해 **양쪽에 복제**되었기 때문이다. 나머지 레이어는 분할되었다.
 - **정확성**: 같은 16개 입력에서 단일 프로세스와 2-스테이지의 생성 출력이 **모두 일치**했다.
 - **성능**: 처리량 이득 **없음**(단일 <!-- num:experiments/bench/pp_single.json:throughput_ex_per_s -->1.47<!-- /num --> vs 2-스테이지 <!-- num:experiments/bench/pp_2stage.json:throughput_ex_per_s -->1.46<!-- /num --> 예제/s). 두 프로세스가 같은 4코어를 나눠 쓰고 마이크로배치 파이프라이닝이 없어 스테이지가 순차 실행되므로 예상된 결과이며, 이 실험은 속도를 보이려는 것이 아니다.
-- **GPU별 메모리·지연·처리량은 측정하지 못했다.** 실행 명령, 필요 자원(GPU 2장, 각 ≥8 GB), 예상 시간(분 단위)과 비용(시간당 $1–3 기준 $1 미만)은 docs/experiments/parallel.md. vLLM 텐서 병렬(`--tensor-parallel-size 2`)은 소유자가 Kaggle T4 2장에서 돌렸다고 보고했으나 결과 파일을 받지 못해 수치가 없다. GPU 1장 vLLM 서빙 결과는 §18.3.
+- **GPU 실측**(T4 ×2, NCCL): 단일 GPU <!-- num:experiments/bench/pp_single_gpu.json:throughput_ex_per_s -->14.61<!-- /num --> 예제/s·<!-- num:experiments/bench/pp_single_gpu.json:mem_mb:int -->1,376<!-- /num --> MB, 2-스테이지 <!-- num:experiments/bench/pp_2stage_gpu.json:throughput_ex_per_s -->15.03<!-- /num --> 예제/s·rank0 <!-- num:experiments/bench/pp_2stage_gpu.json:stages.0.mem_mb:int -->763<!-- /num --> MB + rank1 <!-- num:experiments/bench/pp_2stage_gpu.json:stages.1.mem_mb:int -->1,265<!-- /num --> MB, 64개 입력의 출력 일치. 처리량 이득이 없는 이유는 CPU와 같다(스테이지가 겹치지 않음). 300M 모델은 한 장에 들어가므로 이 분할은 필요가 아니라 기능 검증이다. 비용은 Kaggle 무료 GPU. vLLM 텐서 병렬 TP=2(처리량 약 1.6~2.2배)는 §18.3.
 
 ## 10. 테스트와 반복 검증
 
@@ -471,7 +486,7 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 | (해결됨) GitHub Actions 실행 | 푸시 후 실행·통과 | 위 §3 |
 | GitHub Pages 접속 확인 | 이 세션의 네트워크에서 `github.io`가 차단됨 | 배포 작업 success 기록, 사용자가 주소를 열어 확인해야 함 |
 | (해결됨) EXAONE 다운로드·튜닝·서빙 | 소유자가 Kaggle T4에서 노트북으로 실행(§18.3). 개발 컨테이너에서는 `huggingface.co` 차단·GPU 없음 | 결과 파일 수령(`train_info.json`, 예측 파일, 벤치). 전체 데이터 학습은 하지 않음 |
-| 멀티 GPU 병렬 실측 | 개발 컨테이너에 GPU 없음. 소유자가 Kaggle T4 ×2에서 노트북 4번 절 성공을 보고했으나 결과 파일(`gpu_results.tgz`) 미수령 | 파이프라인 병렬 코드(CPU 2프로세스로 정확성 검증), GPU 명령·예상 자원 |
+| (해결됨) 멀티 GPU 병렬 실측 | 소유자가 Kaggle T4 ×2에서 노트북 4번 절을 돌려 결과 파일을 보냄(§9, §18.3) | 작성자 쪽에는 GPU가 없어 직접 실행은 못 함. DDP는 하지 않음 |
 | (vLLM 해결됨) SGLang 실행 | SGLang 0.5.9는 T4에서 두 번 실패(11-04, 11-07)(`sgl_kernel`에 sm75 커널 없음, `experiments/serving/sglang_t4_failure.md`). Ampere 이상 GPU는 유료라 승인 없이 쓰지 않음 | vLLM은 같은 환경에서 실행 완료(§18.3). SGLang용 스크립트·가상환경 설치 절차는 노트북 3번 절 |
 | 채용 공고·LG 논문 페이지 원문 확인 | `www.lgresearch.ai` 차단 | 사용자 제공 역량 목록 기준으로 진행 |
 | 논문·특허 기반 화학 데이터 | PMC·ChemRxiv·Google Patents 등 차단 | OpenStax 교과서 데이터 표 사용 |
@@ -490,7 +505,7 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 7. **데이터**: 합성 계산·보류는 템플릿이라 표현이 단조롭고 기준선에 유리한 편향이 있다. 화학은 논문이 아니라 교과서 표다. 수작업 평가는 한국어 30·화학 32문항으로 1 표준오차가 6–9%p다.
 8. **검색**: BM25만. 문서를 지정하지 않으면 한국어 질문의 약 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_1:pct -->80.0<!-- /num -->%만 첫 번째 표가 맞다(hit@1). 문서 지정 없는 엔드투엔드 정확도는 측정하지 않았다.
 9. **int8 양자화**: 모든 층 int8은 정확도를 해친다(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%). `lm_head`만 int8은 ko test에서 손실이 검출되지 않지만 본문 테스트에서는 fp32가 <!-- num:experiments/eval/paired_tests.json:int8_lm_head_vs_fp32_text2_test.reference_better:int -->6<!-- /num -->문항, int8이 <!-- num:experiments/eval/paired_tests.json:int8_lm_head_vs_fp32_text2_test.candidate_better:int -->1<!-- /num -->문항 더 맞혔다(비유의). 정확도 확인은 CPU에서만 했다(§8, §18.2).
-10. **하드웨어**: mT5 수치는 CPU 4코어 단일 환경이다. 지연 시간은 공유 VM이라 실행마다 20% 이상 변동한다. GPU 실측은 EXAONE+vLLM 1회(§18.3, 소유자 실행)뿐이고 멀티 GPU 수치는 없다.
+10. **하드웨어**: mT5 수치는 CPU 4코어 단일 환경이다. 지연 시간은 공유 VM이라 실행마다 20% 이상 변동한다. GPU 실측은 소유자가 Kaggle T4에서 돌린 EXAONE+vLLM(1장·TP=2)과 mT5 파이프라인 병렬 각 1회다(§9, §18.3).
 11. **RL**: 120 step·시드 1개의 예비 실험이다. 보상은 검증기가 정의하므로 검증기의 허점이 곧 보상 허점이다(1차에서 실제로 발생). v3의 이득은 본문 근거 없음 문항의 직접 보류에 한정되고 ko test 전체 점수는 그대로다(§18). 시드 반복을 하지 않아 이득의 재현성은 모른다.
 12. **배포**: Pages는 저장된 결과만 보여 주고 실시간 모드는 호스팅하지 않는다. 배포된 페이지는 이 세션에서 열어 확인하지 못했다.
 
@@ -537,7 +552,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
 
-- **멀티 GPU 모델 병렬 실측값**(실행 보고만 있고 파일 없음), SGLang 서빙 성공, 작성자 본인의 GPU 실행 경험(EXAONE LoRA·vLLM 실행은 소유자가 Colab에서 했고 작성자는 스크립트·노트북·분석을 맡음).
+- SGLang 서빙 성공, 데이터 병렬(DDP), 작성자 본인의 GPU 실행 경험(EXAONE LoRA·vLLM·멀티 GPU 실행은 소유자가 Kaggle에서 했고 작성자는 스크립트·노트북·분석을 맡음).
 - "기준선보다 좋은 모델"(전체 평가에서 <!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% 대 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%), "강화학습으로 ko test 점수를 올렸다"(v3도 그대로), "모든 int8로 최적화했다"(정확도 하락), "mT5를 vLLM/SGLang으로 서빙했다"(두 엔진이 mT5를 지원하지 않음. vLLM 서빙은 EXAONE 모델), "EXAONE이 mT5보다 튜닝이 잘 됐다"(모델 크기·사전학습·하드웨어가 달라 같은 조건 비교가 아님).
 - 공개 배포·GitHub Actions 실행·운영 경험, 실제 사용자 트래픽.
 - 논문·특허 화학 문서 처리(교과서 표만 사용), 실사용 질문 분포에서의 일반 성능(수작업 평가는 62문항).
@@ -693,17 +708,21 @@ dev(475문항, 학습과 겹치지 않음)에서 verified EM이 step 0 <!-- num:
 | 휴리스틱 기준선 (CPU) | 699 | **36.2** | **35.9** | 21.7 | 26.2 | 59.1 | 31.6 | 31.6 | 94.0 → 96.0 | 42.4 → 45.8 | 0.0 | 21 |
 | [2차] GRPO RL v3 = mT5-small 300M (CPU 4스레드, bs=1) | 699 | **32.8** | **31.6** | 32.2 | 38.2 | 0.0 | 31.7 | 18.9 | 46.0 → 48.0 | 27.0 → 31.6 | 0.0 | 500 |
 | EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청) | 699 | **52.2** | **51.6** | 55.9 | 66.2 | 0.0 | 54.9 | 29.6 | 16.0 → 42.0 | 13.9 → 20.0 | 0.6 | 2518 |
+| 같은 모델, vLLM 텐서 병렬 TP=2 (Kaggle T4 2장, 동시 16요청) | 699 | **51.9** | **–** | 55.6 | 65.9 | 0.0 | 54.5 | 29.7 | 16.0 → – | 14.0 → – | 0.6 | 1746 |
 
 EXAONE 행의 조건: ko test 699문항 전체 114.2초(동시 16요청, 끝에서 끝까지 6.1문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산, 출처는 `experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`).
 
 **vLLM 엔진 벤치** (`bench/engine_bench.py`, 같은 서버, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)
 
-| 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |
-|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 64 | 28.33 | 2.259 | 430.0 | 549.8 | 98.4 |
-| 8 | 64 | 4.51 | 14.192 | 500.6 | 721.6 | 98.4 |
-| 32 | 64 | 2.6 | 24.613 | 1084.2 | 1500.7 | 98.4 |
+| 구성 | 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| GPU 1장 | 1 | 64 | 28.33 | 2.259 | 430.0 | 549.8 | 98.4 |
+| GPU 1장 | 8 | 64 | 4.51 | 14.192 | 500.6 | 721.6 | 98.4 |
+| GPU 1장 | 32 | 64 | 2.6 | 24.613 | 1084.2 | 1500.7 | 98.4 |
+| TP=2, GPU 2장 | 1 | 64 | 13.0 | 4.922 | 191.4 | 279.0 | 98.4 |
+| TP=2, GPU 2장 | 8 | 64 | 2.88 | 22.184 | 310.7 | 468.6 | 98.4 |
+| TP=2, GPU 2장 | 32 | 64 | 1.6 | 39.976 | 679.3 | 969.0 | 98.4 |
 
 <!-- results:engine:end -->
 
-해석과 한계는 README §10.3과 같다. 요점만 적으면 (1) verified EM <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.verified_em:pct -->52.2<!-- /num -->%는 mT5 최종 <!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->%·기준선 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%보다 높지만 모델 크기(4배)·사전학습 언어·하드웨어가 모두 달라 튜닝 방법의 비교가 아니다. (2) 계산 문항 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.calc_em:pct -->0.0<!-- /num -->%로 mT5와 같은 약점이다. (3) 모델이 인용한 셀 그대로는 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->29.6<!-- /num -->%만 맞고 검증기 보정 뒤 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.evidence_cells_exact:pct -->54.9<!-- /num -->%다. (4) 검증기 v2(같은 토크나이저·행 예산으로 재검증)는 verified EM <!-- num:experiments/eval/exaone_vllm_ko_test_ec/metrics.json:metrics.verified_em:pct -->51.6<!-- /num -->%, 보류 재현율 16% → <!-- num:experiments/eval/exaone_vllm_ko_test_ec/metrics.json:metrics.abstain_recall:pct -->42.0<!-- /num -->%다. 원본 539문항만 보면 <!-- num:experiments/eval/exaone_vllm_ko_test_ec/metrics.json:metrics.by_source.korwikitq.verified_em:pct -->63.1<!-- /num -->%(mT5 최종 <!-- num:experiments/eval/rl_v3_ko_test_ec/metrics.json:metrics.by_source.korwikitq.verified_em:pct -->36.5<!-- /num -->%), 합성 계산 문항은 <!-- num:experiments/eval/exaone_vllm_ko_test_ec/metrics.json:metrics.by_source.synthetic.verified_em:pct -->13.1<!-- /num -->%(mT5 <!-- num:experiments/eval/rl_v3_ko_test_ec/metrics.json:metrics.by_source.synthetic.verified_em:pct -->15.0<!-- /num -->%)로 차이는 조회에서만 난다. (5) 쌍 비교(검증기 v2): mT5 최종보다 나은 문항 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_rl_v3_ko_test_ec.candidate_better:int -->189<!-- /num -->개 대 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_rl_v3_ko_test_ec.reference_better:int -->49<!-- /num -->개(p<!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_rl_v3_ko_test_ec.p_display --><0.001<!-- /num -->), 휴리스틱보다 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_heuristic_ko_test_ec.candidate_better:int -->242<!-- /num -->개 대 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_heuristic_ko_test_ec.reference_better:int -->132<!-- /num -->개(p<!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_heuristic_ko_test_ec.p_display --><0.001<!-- /num -->). 직접 보류 출력은 <!-- num:experiments/eval/exaone_vllm_ko_test/analysis.json:abstain_breakdown.explicit_abstain_outputs:int -->0<!-- /num -->건으로 보류는 전부 검증기가 했다. LoRA는 예제 <!-- num:experiments/exaone_lora/train_info.json:n_examples:int -->300<!-- /num -->개·<!-- num:experiments/exaone_lora/train_info.json:steps:int -->18<!-- /num --> step·1 epoch(bf16 에뮬레이션, 손실 <!-- num:experiments/exaone_lora/train_info.json:loss_log.0.loss -->1.24<!-- /num --> → <!-- num:experiments/exaone_lora/train_info.json:loss_log.17.loss -->0.444<!-- /num -->)이고 전체 데이터 학습은 하지 않았다. (6) SGLang은 같은 T4에서 두 번 실패했다(`experiments/serving/sglang_t4_failure.md`). (7) 멀티 GPU(Kaggle T4 2장, 노트북 4번 절)는 소유자가 성공을 보고했으나 결과 파일을 받지 못해 수치가 없다.
+해석과 한계는 README §10.3과 같다. 요점만 적으면 (1) verified EM <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.verified_em:pct -->52.2<!-- /num -->%는 mT5 최종 <!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->%·기준선 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%보다 높지만 모델 크기(4배)·사전학습 언어·하드웨어가 모두 달라 튜닝 방법의 비교가 아니다. (2) 계산 문항 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.calc_em:pct -->0.0<!-- /num -->%로 mT5와 같은 약점이다. (3) 모델이 인용한 셀 그대로는 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->29.6<!-- /num -->%만 맞고 검증기 보정 뒤 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.evidence_cells_exact:pct -->54.9<!-- /num -->%다. (4) 검증기 v2(같은 토크나이저·행 예산으로 재검증)는 verified EM <!-- num:experiments/eval/exaone_vllm_ko_test_ec/metrics.json:metrics.verified_em:pct -->51.6<!-- /num -->%, 보류 재현율 16% → <!-- num:experiments/eval/exaone_vllm_ko_test_ec/metrics.json:metrics.abstain_recall:pct -->42.0<!-- /num -->%다. 원본 539문항만 보면 <!-- num:experiments/eval/exaone_vllm_ko_test_ec/metrics.json:metrics.by_source.korwikitq.verified_em:pct -->63.1<!-- /num -->%(mT5 최종 <!-- num:experiments/eval/rl_v3_ko_test_ec/metrics.json:metrics.by_source.korwikitq.verified_em:pct -->36.5<!-- /num -->%), 합성 계산 문항은 <!-- num:experiments/eval/exaone_vllm_ko_test_ec/metrics.json:metrics.by_source.synthetic.verified_em:pct -->13.1<!-- /num -->%(mT5 <!-- num:experiments/eval/rl_v3_ko_test_ec/metrics.json:metrics.by_source.synthetic.verified_em:pct -->15.0<!-- /num -->%)로 차이는 조회에서만 난다. (5) 쌍 비교(검증기 v2): mT5 최종보다 나은 문항 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_rl_v3_ko_test_ec.candidate_better:int -->189<!-- /num -->개 대 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_rl_v3_ko_test_ec.reference_better:int -->49<!-- /num -->개(p<!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_rl_v3_ko_test_ec.p_display --><0.001<!-- /num -->), 휴리스틱보다 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_heuristic_ko_test_ec.candidate_better:int -->242<!-- /num -->개 대 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_heuristic_ko_test_ec.reference_better:int -->132<!-- /num -->개(p<!-- num:experiments/eval/paired_tests.json:exaone_vllm_vs_heuristic_ko_test_ec.p_display --><0.001<!-- /num -->). 직접 보류 출력은 <!-- num:experiments/eval/exaone_vllm_ko_test/analysis.json:abstain_breakdown.explicit_abstain_outputs:int -->0<!-- /num -->건으로 보류는 전부 검증기가 했다. LoRA는 예제 <!-- num:experiments/exaone_lora/train_info.json:n_examples:int -->300<!-- /num -->개·<!-- num:experiments/exaone_lora/train_info.json:steps:int -->18<!-- /num --> step·1 epoch(bf16 에뮬레이션, 손실 <!-- num:experiments/exaone_lora/train_info.json:loss_log.0.loss -->1.24<!-- /num --> → <!-- num:experiments/exaone_lora/train_info.json:loss_log.17.loss -->0.444<!-- /num -->)이고 전체 데이터 학습은 하지 않았다. (6) SGLang은 같은 T4에서 두 번 실패했다(`experiments/serving/sglang_t4_failure.md`). (7) 텐서 병렬 TP=2(T4 2장): 동시 1요청 p50 <!-- num:experiments/bench/engine_vllm_c1.json:p50_ms -->430<!-- /num --> → <!-- num:experiments/bench/engine_vllm_tp2_c1.json:p50_ms -->191.4<!-- /num --> ms, 동시 32요청 처리량 <!-- num:experiments/bench/engine_vllm_c32.json:throughput_req_per_s -->24.61<!-- /num --> → <!-- num:experiments/bench/engine_vllm_tp2_c32.json:throughput_req_per_s -->39.98<!-- /num --> 요청/s, verified EM <!-- num:experiments/eval/exaone_vllm_tp2_ko_test/metrics.json:metrics.verified_em:pct -->51.9<!-- /num -->%(1장과 문항 <!-- num:experiments/eval/paired_tests.json:exaone_vllm_tp2_vs_tp1_ko_test.candidate_better:int -->1<!-- /num -->/<!-- num:experiments/eval/paired_tests.json:exaone_vllm_tp2_vs_tp1_ko_test.reference_better:int -->3<!-- /num -->개 뒤집힘, p=<!-- num:experiments/eval/paired_tests.json:exaone_vllm_tp2_vs_tp1_ko_test.p_display -->0.625<!-- /num -->). mT5 파이프라인 병렬 GPU 실측은 §9.

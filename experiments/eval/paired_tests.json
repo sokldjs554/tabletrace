@@ -232,5 +232,14 @@
   "reference_better": 17,
   "p_two_sided": 0.584664711728692,
   "p_display": "0.585"
+ },
+ "exaone_vllm_tp2_vs_tp1_ko_test": {
+  "reference": "exaone_vllm_ko_test",
+  "candidate": "exaone_vllm_tp2_ko_test",
+  "n": 699,
+  "candidate_better": 1,
+  "reference_better": 3,
+  "p_two_sided": 0.625,
+  "p_display": "0.625"
  }
 }
