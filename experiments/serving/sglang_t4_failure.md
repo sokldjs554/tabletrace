@@ -28,3 +28,16 @@ Reading: the prebuilt `sgl_kernel` binary contains no kernel for compute capabil
 Not a workaround: `--disable-cuda-graph` only moves the same call into the first normal forward. In sglang 0.5.9, `MultiPlatformOp.dispatch_forward` returns `forward_cuda` whenever CUDA is present (`sglang/srt/layers/utils/multi_platform.py`), and `RMSNorm.forward_cuda` calls `sgl_kernel`; the package has no switch to the native PyTorch implementation on CUDA. Other layers (rotary embedding, activation, sampling) also use `sgl_kernel`.
 
 Conclusion: **SGLang 0.5.9 does not run on a T4.** It needs an Ampere or newer GPU (sm80+: A100, L4, A10, H100). vLLM 0.32 lists float16 and a Triton attention backend for Turing, so the vLLM path is the one to run on Colab free / Kaggle T4. Status for SGLang in the posting table: executed and failed on this hardware; not tested on sm80+.
+
+## Second run, 2026-11-07 (same hardware, same result)
+
+Same Colab T4, same `sglang==0.5.9` venv, model folder reached by absolute path (the vLLM server in section 2 of the same notebook run served this folder fine). The model loaded, then CUDA-graph capture failed at the first `RMSNorm` of layer 0 (`exaone4.py` line 205, `q_norm`):
+
+```
+File ".../sgl_kernel/elementwise.py", line 45, in rmsnorm
+    torch.ops.sgl_kernel.rmsnorm.default(out, input, weight, eps, enable_pdl)
+RuntimeError: RMSNorm failed with error code no kernel image is available for execution on the device
+Exception: Capture cuda graph failed: RMSNorm failed with error code no kernel image is available for execution on the device
+```
+
+Two runs, three days apart, identical failure point. The notebook now checks the compute capability before installing SGLang and stops with a message instead of spending the install time.
