@@ -16,6 +16,7 @@ import argparse
 import json
 import random
 import sys
+import time
 from pathlib import Path
 
 import torch
@@ -100,6 +101,7 @@ def main() -> None:
     model.train()
     step = micro = 0
     log = []
+    t0 = time.time()
     for _epoch in range(int(a.epochs + 0.999)):
         rnd.shuffle(data)
         for i in range(0, len(data), a.bs):
@@ -139,7 +141,8 @@ def main() -> None:
         tok.save_pretrained(out / "merged")
         portable_model_dir(out / "merged")     # SGLang pins transformers 4.57, which cannot read the 5.x tokenizer_config.json
     portable_model_dir(out)
-    (out / "train_info.json").write_text(json.dumps({"n_examples": len(data), "steps": step, "dtype": str(dtype), "args": vars(a), "loss_log": log}, indent=1))
+    gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
+    (out / "train_info.json").write_text(json.dumps({"n_examples": len(data), "steps": step, "dtype": str(dtype), "wall_s": round(time.time() - t0, 1), "gpu": gpu, "args": vars(a), "loss_log": log}, indent=1))
 
 
 if __name__ == "__main__":
