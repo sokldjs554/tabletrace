@@ -140,7 +140,10 @@ def engine_table() -> str:
     rows = [("휴리스틱 기준선 (CPU)", "heuristic_ko_test"), ("[2차] GRPO RL v3 = mT5-small 300M (CPU 4스레드, bs=1)", "rl_v3_ko_test"),
             ("EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_vllm_ko_test"),
             ("같은 모델, vLLM 텐서 병렬 TP=2 (Kaggle T4 2장, 동시 16요청)", "exaone_vllm_tp2_ko_test"),
-            ("같은 모델, SGLang 0.5.9 + T4 우회 모듈 (Kaggle T4 1장, 동시 8요청)", "exaone_sglang_ko_test")]
+            ("같은 모델, SGLang 0.5.9 + T4 우회 모듈 (Kaggle T4 1장, 동시 8요청)", "exaone_sglang_ko_test"),
+            ("EXAONE-4.0-1.2B + LoRA **전체 3,654개**, vLLM fp16 (Kaggle T4 1장)", "exaone_full_vllm_ko_test"),
+            ("같은 전체 데이터 모델, vLLM TP=2 (T4 2장)", "exaone_full_vllm_tp2_ko_test"),
+            ("같은 전체 데이터 모델, SGLang + T4 우회 모듈", "exaone_full_sglang_ko_test")]
     out = ""
     got = [(name, load(EXP / "eval" / f"{key}" / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
     if not got[2][1]:
@@ -158,12 +161,34 @@ def engine_table() -> str:
                 f"| {pct(m['abstain_recall'])} → {v2('abstain_recall')} | {pct(m['false_abstain_rate'])} → {v2('false_abstain_rate')} | {pct(m['parse_fail_rate'])} | {m['mean_ms_per_example']:.0f} |\n")
     ev = got[2][1]["meta"]
     out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체 {ev['wall_s']}초(동시 16요청, 끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산, 출처는 `experiments/eval/PROVENANCE_exaone.md`).\n"
-    bench = [(label, load(EXP / "bench" / f"engine_{tag}_c{c}.json")) for label, tag in (("vLLM, GPU 1장", "vllm"), ("vLLM TP=2, GPU 2장", "vllm_tp2"), ("SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장", "sglang")) for c in (1, 8, 32)]
+    bench = [(label, load(EXP / "bench" / f"engine_{tag}_c{c}.json")) for label, tag in (("vLLM, GPU 1장", "vllm"), ("vLLM TP=2, GPU 2장", "vllm_tp2"), ("SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장", "sglang"),
+                                                                                      ("전체 데이터 모델, vLLM, GPU 1장", "full_vllm"), ("전체 데이터 모델, vLLM TP=2", "full_vllm_tp2"), ("전체 데이터 모델, SGLang + 우회 모듈", "full_sglang")) for c in (1, 8, 32)]
     bench = [(label, b) for label, b in bench if b]
     if bench:
         out += "\n**엔진 벤치** (`bench/engine_bench.py`, 같은 병합 모델, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)\n\n| 구성 | 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |\n|---|---:|---:|---:|---:|---:|---:|---:|\n"
         for label, b in bench:
             out += f"| {label} | {b['concurrency']} | {b['n']} | {b['wall_s']} | {b['throughput_req_per_s']} | {b['p50_ms']} | {b['p95_ms']} | {pct(b['parse_ok_rate'])} |\n"
+    return out
+
+
+def engine_custom_table() -> str:
+    """The hand-made 30 Korean questions under the EXAONE planners (owner's GPU runs), next to the CPU rows."""
+    rows = [("휴리스틱 기준선", "heuristic_ko_custom"), ("[2차] GRPO RL v3 = mT5-small", "rl_v3_ko_custom"),
+            ("EXAONE LoRA 300개, vLLM", "exaone_vllm_ko_custom"), ("EXAONE LoRA 300개, SGLang(우회)", "exaone_sglang_ko_custom"),
+            ("EXAONE LoRA 전체 3,654개, vLLM", "exaone_full_vllm_ko_custom"), ("EXAONE LoRA 전체, vLLM TP=2", "exaone_full_vllm_tp2_ko_custom"),
+            ("EXAONE LoRA 전체, SGLang(우회)", "exaone_full_sglang_ko_custom")]
+    got = [(name, load(EXP / "eval" / key / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
+    if not any(a for name, a, b in got[2:]):
+        return "_EXAONE 수작업 30문항 산출물 없음_\n"
+    out = "| 플래너 / 모델 | n | verified EM % v1 | verified EM % v2 | raw EM % (답 있는 문항) | 보류 재현율 % v2 | 오보류율 % v2 | 파싱 실패 % |\n|---|---:|---:|---:|---:|---:|---:|---:|\n"
+    for name, a, b in got:
+        if not a:
+            continue
+        m, e = a["metrics"], (b["metrics"] if b else None)
+
+        def v2(k, e=e):
+            return pct(e[k]) if e else "–"
+        out += f"| {name} | {m['n']} | **{pct(m['verified_em'])}** | **{v2('verified_em')}** | {pct(m['raw_answer_em_answerable'])} | {v2('abstain_recall')} | {v2('false_abstain_rate')} | {pct(m['parse_fail_rate'])} |\n"
     return out
 
 
@@ -188,6 +213,7 @@ def blocks() -> dict[str, str]:
         "pp": pp_table(),
         "pp_gpu": pp_table("_gpu", "Kaggle Tesla T4 ×2(nccl), 소유자 실행 2026-11-07, 원본 google/mt5-small"),
         "engine": engine_table(),
+        "engine_custom": engine_custom_table(),
     }
 
 
