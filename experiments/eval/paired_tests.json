@@ -187,5 +187,50 @@
   "reference_better": 1,
   "p_two_sided": 1.0,
   "p_display": "1.000"
+ },
+ "exaone_vllm_vs_rl_v3_ko_test": {
+  "reference": "rl_v3_ko_test",
+  "candidate": "exaone_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 198,
+  "reference_better": 62,
+  "p_two_sided": 9.591156941323681e-18,
+  "p_display": "<0.001"
+ },
+ "exaone_vllm_vs_rl_v3_ko_test_ec": {
+  "reference": "rl_v3_ko_test_ec",
+  "candidate": "exaone_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 189,
+  "reference_better": 49,
+  "p_two_sided": 1.392007467467787e-20,
+  "p_display": "<0.001"
+ },
+ "exaone_vllm_vs_heuristic_ko_test": {
+  "reference": "heuristic_ko_test",
+  "candidate": "exaone_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 257,
+  "reference_better": 145,
+  "p_two_sided": 2.5302243468818653e-08,
+  "p_display": "<0.001"
+ },
+ "exaone_vllm_vs_heuristic_ko_test_ec": {
+  "reference": "heuristic_ko_test_ec",
+  "candidate": "exaone_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 242,
+  "reference_better": 132,
+  "p_two_sided": 1.3777277413671721e-08,
+  "p_display": "<0.001"
+ },
+ "subject_check_on_exaone_vllm_ko_test": {
+  "reference": "exaone_vllm_ko_test",
+  "candidate": "exaone_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 13,
+  "reference_better": 17,
+  "p_two_sided": 0.584664711728692,
+  "p_display": "0.585"
  }
 }

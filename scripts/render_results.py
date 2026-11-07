@@ -136,9 +136,9 @@ def pp_table() -> str:
 
 
 def engine_table() -> str:
-    """EXAONE LoRA served by vLLM (owner's Colab T4 run, transcribed) next to the CPU mT5 rows, same test set, same verifier."""
+    """EXAONE LoRA served by vLLM (owner's Kaggle T4 run, files from gpu_results.tgz) next to the CPU mT5 rows, same test set, same verifier."""
     rows = [("휴리스틱 기준선 (CPU)", "heuristic_ko_test"), ("[2차] GRPO RL v3 = mT5-small 300M (CPU 4스레드, bs=1)", "rl_v3_ko_test"),
-            ("EXAONE-4.0-1.2B + LoRA, vLLM fp16 (Colab T4, 동시 16요청)", "exaone_vllm_ko_test")]
+            ("EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_vllm_ko_test")]
     out = ""
     got = [(name, load(EXP / "eval" / f"{key}" / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
     if not got[-1][1]:

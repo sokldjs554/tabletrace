@@ -31,7 +31,7 @@ Conclusion: **SGLang 0.5.9 does not run on a T4.** It needs an Ampere or newer G
 
 ## Second run, 2026-11-07 (same hardware, same result)
 
-Same Colab T4, same `sglang==0.5.9` venv, model folder reached by absolute path (the vLLM server in section 2 of the same notebook run served this folder fine). The model loaded, then CUDA-graph capture failed at the first `RMSNorm` of layer 0 (`exaone4.py` line 205, `q_norm`):
+Same kind of T4 (this time a Kaggle session with two T4s; the notebook's platform check reported Colab because Kaggle's image also has `/content`), same `sglang==0.5.9` venv, model folder reached by absolute path (the vLLM server in section 2 of the same notebook run served this folder fine). The model loaded, then CUDA-graph capture failed at the first `RMSNorm` of layer 0 (`exaone4.py` line 205, `q_norm`):
 
 ```
 File ".../sgl_kernel/elementwise.py", line 45, in rmsnorm

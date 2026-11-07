@@ -36,6 +36,12 @@ PAIRS = [
     ("int8_lm_head_vs_fp32_text2_test", "rl_v3_text2_test", "final_int8_lm_head_text2_test"),
     ("int8_lm_head_vs_fp32_ko_custom", "rl_v3_ko_custom", "final_int8_lm_head_ko_custom"),
     ("int8_lm_head_vs_fp32_chem_custom", "rl_v3_chem_custom", "final_int8_lm_head_chem_custom"),
+    # EXAONE-4.0-1.2B LoRA served by vLLM on the owner's T4 (different model size, pretraining and hardware; see README 10.3)
+    ("exaone_vllm_vs_rl_v3_ko_test", "rl_v3_ko_test", "exaone_vllm_ko_test"),
+    ("exaone_vllm_vs_rl_v3_ko_test_ec", "rl_v3_ko_test_ec", "exaone_vllm_ko_test_ec"),
+    ("exaone_vllm_vs_heuristic_ko_test", "heuristic_ko_test", "exaone_vllm_ko_test"),
+    ("exaone_vllm_vs_heuristic_ko_test_ec", "heuristic_ko_test_ec", "exaone_vllm_ko_test_ec"),
+    ("subject_check_on_exaone_vllm_ko_test", "exaone_vllm_ko_test", "exaone_vllm_ko_test_ec"),
 ]
 
 

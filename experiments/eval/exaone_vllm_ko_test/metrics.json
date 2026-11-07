@@ -46,6 +46,16 @@
   "truncated_gold_rate": 0.0343,
   "verified_em_untruncated": 0.5407,
   "mean_ms_per_example": 2518.5,
+  "by_source": {
+   "korwikitq": {
+    "n": 539,
+    "verified_em": 0.6623
+   },
+   "synthetic": {
+    "n": 160,
+    "verified_em": 0.05
+   }
+  },
   "gold_subject_fail_rate": 0.0431,
   "entity_check": false
  }
