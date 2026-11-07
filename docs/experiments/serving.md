@@ -39,7 +39,7 @@
 
 ## 실행 결과 (사용자 Colab T4, 2026-11-04)
 
-- **SGLang 0.5.9**: T4에서 **실패**. 서버가 모델을 올린 뒤 첫 연산에서 `no kernel image is available for execution on the device`. `sgl_kernel`에 sm75 커널이 없다. 설정으로 우회할 수 없다. 로그와 해석은 `experiments/serving/sglang_t4_failure.md`. Ampere 이상(L4·A100·H100)에서는 시도하지 않았다.
+- **SGLang 0.5.9**: T4에서 **실패**(11-04, 11-07). 서버가 모델을 올린 뒤 첫 연산에서 `no kernel image is available for execution on the device`. `sgl_kernel`에 sm75 커널이 없다. 서버 설정만으로는 우회할 수 없어, 연산을 PyTorch 구현으로 돌리는 `scripts/serving/sglang_t4_shim.py`를 준비했다(작성자 미실행, 재실행 대기). 로그와 해석은 `experiments/serving/sglang_t4_failure.md`. Ampere 이상(L4·A100·H100)에서는 시도하지 않았다.
 - **vLLM**(가상환경에 `uv pip install vllm`, 2026-11-07): EXAONE-4.0-1.2B LoRA 병합 모델을 fp16·GPU 1장으로 띄워 ko test 699문항을 같은 검증기로 평가하고 동시 요청 1/8/32 벤치를 받았다. 값은 `experiments/eval/exaone_vllm_ko_test*/metrics.json`, `experiments/bench/engine_vllm_c*.json`, 표와 해석은 README §10.3·REPORT §18.3, 출처는 `experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`. 처음에는 상대 경로 모델 폴더를 서버가 못 찾아 `OSError`가 났고(이슈 37), 절대 경로로 고친 뒤 떴다.
 - **vLLM TP=2**(Kaggle T4 2장, 같은 날): `experiments/eval/exaone_vllm_tp2_ko_test/`, `experiments/bench/engine_vllm_tp2_c*.json`. 처리량 약 1.6~2.2배, 점수는 1장과 같은 수준. **NCCL 2-스테이지 파이프라인**(mT5-small): `experiments/bench/pp_*_gpu.json`, 출력 일치·처리량 이득 없음. 표는 README §10.2·§10.3.
 

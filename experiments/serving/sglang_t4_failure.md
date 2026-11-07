@@ -41,3 +41,8 @@ Exception: Capture cuda graph failed: RMSNorm failed with error code no kernel i
 ```
 
 Two runs, three days apart, identical failure point. The notebook now checks the compute capability before installing SGLang and stops with a message instead of spending the install time.
+
+## Workaround prepared (2026-11-07), not yet run
+
+The failing ops are all `MultiPlatformOp` subclasses whose `dispatch_forward` returns `forward_cuda` whenever CUDA is present, and each of them (RMSNorm, RotaryEmbedding, SiluAndMul) also carries a pure-PyTorch `forward_native` (checked in the sglang 0.5.9 wheel source: `sglang/srt/layers/utils/multi_platform.py`, `layernorm.py`, `rotary_embedding.py`, `activation.py`). The Triton attention kernels have an "older architectures" block-size branch (`triton_ops/extend_attention.py`), and `--sampling-backend pytorch` avoids sgl_kernel sampling. `scripts/serving/sglang_t4_shim.py` therefore patches `MultiPlatformOp.dispatch_forward` to return `forward_native` when the compute capability is below 8.0; a `.pth` file loads it in every interpreter of the venv (scheduler subprocesses included) and `SGLANG_T4_SHIM=1` switches it on. Unit-tested against a stub of the module (`tests/test_sglang_t4_shim.py`); whether the whole server then runs on a T4 is only known after the owner runs notebook section 3 again. Expected cost: unfused PyTorch ops instead of fused kernels, so slower than SGLang on sm80+.
+
