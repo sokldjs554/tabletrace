@@ -44,8 +44,14 @@ PAIRS = [
     ("subject_check_on_exaone_vllm_ko_test", "exaone_vllm_ko_test", "exaone_vllm_ko_test_ec"),
     ("exaone_vllm_tp2_vs_tp1_ko_test", "exaone_vllm_ko_test", "exaone_vllm_tp2_ko_test"),   # same model, TP=2 vs 1 GPU: run-to-run variation
     # second LoRA training run (same 300 examples, fp16 instead of emulated bf16) vs the first one: training-run variation
-    ("exaone_vllm_run2_vs_run1_ko_test", "exaone_vllm_ko_test_run1", "exaone_vllm_ko_test"),
-    ("exaone_vllm_run2_vs_run1_ko_test_ec", "exaone_vllm_ko_test_ec_run1", "exaone_vllm_ko_test_ec"),
+    ("exaone_vllm_run2_vs_run1_ko_test", "exaone_vllm_ko_test_run1", "exaone_vllm_ko_test_run2"),
+    ("exaone_vllm_run2_vs_run1_ko_test_ec", "exaone_vllm_ko_test_ec_run1", "exaone_vllm_ko_test_ec_run2"),
+    ("exaone_vllm_run3_vs_run2_ko_test", "exaone_vllm_ko_test_run2", "exaone_vllm_ko_test"),
+    ("exaone_vllm_run3_vs_run1_ko_test", "exaone_vllm_ko_test_run1", "exaone_vllm_ko_test"),
+    # same merged model (run 3) served by SGLang (with the Turing shim) instead of vLLM: engine-to-engine variation
+    ("exaone_sglang_vs_vllm_ko_test", "exaone_vllm_ko_test", "exaone_sglang_ko_test"),
+    ("exaone_sglang_vs_vllm_ko_test_ec", "exaone_vllm_ko_test_ec", "exaone_sglang_ko_test_ec"),
+    ("exaone_sglang_vs_rl_v3_ko_test_ec", "rl_v3_ko_test_ec", "exaone_sglang_ko_test_ec"),
 ]
 
 

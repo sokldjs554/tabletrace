@@ -1,0 +1,72 @@
+{
+ "run": "experiments/eval/exaone_vllm_ko_test_ec",
+ "n": 699,
+ "n_answerable": 649,
+ "pred_status_answerable": {
+  "answered": 522,
+  "abstained": 127
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 84,
+  "not_in_document": 43
+ },
+ "raw_correct_but_blocked": 31,
+ "evidence_repaired": 357,
+ "lookup_citation": {
+  "n": 539,
+  "row_correct": 0.85,
+  "col_correct": 0.347,
+  "both_correct": 0.286
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 50,
+  "explicit_abstain_outputs": 0,
+  "explicit_abstain_on_answerable": 0,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 0.42,
+  "abstained_via_invalid_program_recall": 0.0,
+  "abstained_via_verifier_recall": 0.42
+ },
+ "selective": {
+  "n": 699,
+  "answered": 551,
+  "answered_correct": 347,
+  "answered_wrong": 204,
+  "precision": 0.6298,
+  "wrong_answer_rate": 0.2918
+ },
+ "degenerate_calc_outputs": 0,
+ "degenerate_calc_rate": 0.0,
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   539
+  ],
+  [
+   "diff->lookup",
+   60
+  ],
+  [
+   "abstain->lookup",
+   50
+  ],
+  [
+   "sum->lookup",
+   25
+  ],
+  [
+   "avg->lookup",
+   25
+  ]
+ ],
+ "by_source_verified": {
+  "korwikitq": {
+   "n": 539,
+   "verified_em": 0.644
+  },
+  "synthetic": {
+   "n": 160,
+   "verified_em": 0.131
+  }
+ }
+}

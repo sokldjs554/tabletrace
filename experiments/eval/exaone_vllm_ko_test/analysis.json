@@ -3,44 +3,45 @@
  "n": 699,
  "n_answerable": 649,
  "pred_status_answerable": {
-  "answered": 563,
-  "abstained": 86
+  "answered": 556,
+  "abstained": 93
  },
  "abstain_reason_answerable": {
-  "verification_failed": 68,
-  "not_in_document": 18
+  "verification_failed": 72,
+  "not_in_document": 20,
+  "invalid_program": 1
  },
- "raw_correct_but_blocked": 16,
- "evidence_repaired": 357,
+ "raw_correct_but_blocked": 20,
+ "evidence_repaired": 363,
  "lookup_citation": {
-  "n": 539,
-  "row_correct": 0.85,
-  "col_correct": 0.347,
-  "both_correct": 0.286
+  "n": 538,
+  "row_correct": 0.851,
+  "col_correct": 0.336,
+  "both_correct": 0.279
  },
  "abstain_breakdown": {
   "n_gold_abstain": 50,
   "explicit_abstain_outputs": 0,
   "explicit_abstain_on_answerable": 0,
   "planner_chose_abstain_recall": 0.0,
-  "final_abstain_recall": 0.2,
+  "final_abstain_recall": 0.18,
   "abstained_via_invalid_program_recall": 0.0,
-  "abstained_via_verifier_recall": 0.2
+  "abstained_via_verifier_recall": 0.18
  },
  "selective": {
   "n": 699,
-  "answered": 603,
+  "answered": 597,
   "answered_correct": 362,
-  "answered_wrong": 241,
-  "precision": 0.6003,
-  "wrong_answer_rate": 0.3448
+  "answered_wrong": 235,
+  "precision": 0.6064,
+  "wrong_answer_rate": 0.3362
  },
  "degenerate_calc_outputs": 0,
  "degenerate_calc_rate": 0.0,
  "op_confusion_top": [
   [
    "lookup->lookup",
-   539
+   538
   ],
   [
    "diff->lookup",
@@ -57,6 +58,10 @@
   [
    "avg->lookup",
    25
+  ],
+  [
+   "lookup->None",
+   1
   ]
  ],
  "by_source_verified": {
@@ -66,7 +71,7 @@
   },
   "synthetic": {
    "n": 160,
-   "verified_em": 0.062
+   "verified_em": 0.056
   }
  }
 }

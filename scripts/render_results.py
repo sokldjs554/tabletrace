@@ -139,7 +139,8 @@ def engine_table() -> str:
     """EXAONE LoRA served by vLLM (owner's Kaggle T4 run, files from gpu_results.tgz) next to the CPU mT5 rows, same test set, same verifier."""
     rows = [("휴리스틱 기준선 (CPU)", "heuristic_ko_test"), ("[2차] GRPO RL v3 = mT5-small 300M (CPU 4스레드, bs=1)", "rl_v3_ko_test"),
             ("EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_vllm_ko_test"),
-            ("같은 모델, vLLM 텐서 병렬 TP=2 (Kaggle T4 2장, 동시 16요청)", "exaone_vllm_tp2_ko_test")]
+            ("같은 모델, vLLM 텐서 병렬 TP=2 (Kaggle T4 2장, 동시 16요청)", "exaone_vllm_tp2_ko_test"),
+            ("같은 모델, SGLang 0.5.9 + T4 우회 모듈 (Kaggle T4 1장, 동시 8요청)", "exaone_sglang_ko_test")]
     out = ""
     got = [(name, load(EXP / "eval" / f"{key}" / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
     if not got[2][1]:
@@ -157,10 +158,10 @@ def engine_table() -> str:
                 f"| {pct(m['abstain_recall'])} → {v2('abstain_recall')} | {pct(m['false_abstain_rate'])} → {v2('false_abstain_rate')} | {pct(m['parse_fail_rate'])} | {m['mean_ms_per_example']:.0f} |\n")
     ev = got[2][1]["meta"]
     out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체 {ev['wall_s']}초(동시 16요청, 끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산, 출처는 `experiments/eval/PROVENANCE_exaone.md`).\n"
-    bench = [(label, load(EXP / "bench" / f"engine_vllm{tag}_c{c}.json")) for label, tag in (("GPU 1장", ""), ("TP=2, GPU 2장", "_tp2")) for c in (1, 8, 32)]
+    bench = [(label, load(EXP / "bench" / f"engine_{tag}_c{c}.json")) for label, tag in (("vLLM, GPU 1장", "vllm"), ("vLLM TP=2, GPU 2장", "vllm_tp2"), ("SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장", "sglang")) for c in (1, 8, 32)]
     bench = [(label, b) for label, b in bench if b]
     if bench:
-        out += "\n**vLLM 엔진 벤치** (`bench/engine_bench.py`, 같은 서버, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)\n\n| 구성 | 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |\n|---|---:|---:|---:|---:|---:|---:|---:|\n"
+        out += "\n**엔진 벤치** (`bench/engine_bench.py`, 같은 병합 모델, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)\n\n| 구성 | 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |\n|---|---:|---:|---:|---:|---:|---:|---:|\n"
         for label, b in bench:
             out += f"| {label} | {b['concurrency']} | {b['n']} | {b['wall_s']} | {b['throughput_req_per_s']} | {b['p50_ms']} | {b['p95_ms']} | {pct(b['parse_ok_rate'])} |\n"
     return out

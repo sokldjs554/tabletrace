@@ -20,7 +20,7 @@ TableTrace의 학습된 모델은 **mT5-small(encoder-decoder)** 이다. vLLM 0.
 |---|---|---|
 | EXAONE LoRA 튜닝 | 된다(어림) | T4는 bf16이 없어 fp16 + 손실 스케일링. 스크립트가 자동 선택 |
 | vLLM 서빙·평가·벤치 | 된다(시도) | vLLM 0.32는 T4에서 float16만 지원하고 FlashInfer를 쓰지 않는다(wheel 확인). 메모리가 모자라면 `MAX_LEN`을 줄이거나 `EXTRA_ARGS=--enforce-eager` |
-| SGLang 서빙·평가·벤치 | T4에서는 **우회 모듈**로 시도(작성자 미실행) | `sgl_kernel`에 sm75 커널이 없어 첫 연산에서 `no kernel image is available`(두 번 확인). `scripts/serving/sglang_t4_shim.py`가 연산을 PyTorch 구현으로 돌림. 노트북 3번 절이 T4를 만나면 자동으로 설치·사용. Ampere 이상이면 우회 없이 실행. 근거: `experiments/serving/sglang_t4_failure.md` |
+| SGLang 서빙·평가·벤치 | T4에서 **우회 모듈로 성공**(소유자 실행) | `sgl_kernel`에 sm75 커널이 없어 그대로는 첫 연산에서 `no kernel image is available`. `scripts/serving/sglang_t4_shim.py`가 연산을 PyTorch 구현으로 돌리고, `fix_tokenizer_config.py`가 5.x가 저장한 config.json의 RoPE 키를 복원해야 함(안 하면 엉뚱한 답). 노트북 3번 절이 둘 다 자동으로 함. 점수는 vLLM과 같고 속도는 느림. Ampere 이상이면 우회 없이 실행. 기록: `experiments/serving/sglang_t4_failure.md` |
 | 텐서 병렬 TP=2, 멀티 GPU 모델 병렬 | **안 된다** | Colab은 GPU 1장. **Kaggle 노트북(T4 ×2, 무료 주 30시간)** 이나 GPU 2장 이상 환경이 필요 |
 
 vLLM과 SGLang은 torch 버전을 다르게 고정한다(vLLM 0.32.0은 torch 2.13.0, SGLang 0.5.23은 2.14.1). 같은 환경에 같이 설치하지 말고 노트북처럼 가상환경을 따로 만든다.
