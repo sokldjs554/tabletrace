@@ -152,7 +152,7 @@ def engine_table() -> str:
         out += (f"| {name} | {m['n']} | **{pct(m['verified_em'])}** | **{pct(e['verified_em'])}** | {pct(m['raw_answer_em_answerable'])} | {pct(m['lookup_em'])} | {pct(m['calc_em'])} | {pct(m['evidence_cells_exact'])} | {pct(m.get('evidence_cells_exact_raw'))} "
                 f"| {pct(m['abstain_recall'])} → {pct(e['abstain_recall'])} | {pct(m['false_abstain_rate'])} → {pct(e['false_abstain_rate'])} | {pct(m['parse_fail_rate'])} | {m['mean_ms_per_example']:.0f} |\n")
     ev = got[-1][1]["meta"]
-    out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체 {ev['wall_s']}초(동시 16요청, 끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(EXAONE v2는 행 예산을 근사 토크나이저로 다시 계산한 값, `experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`).\n"
+    out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체 {ev['wall_s']}초(동시 16요청, 끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산, 출처는 `experiments/eval/exaone_vllm_ko_test/PROVENANCE.md`).\n"
     bench = [load(EXP / "bench" / f"engine_vllm_c{c}.json") for c in (1, 8, 32)]
     bench = [b for b in bench if b]
     if bench:
