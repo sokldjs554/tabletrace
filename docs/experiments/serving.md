@@ -37,9 +37,10 @@
 - 정확성: fp32 bs=1 출력과의 문자열 일치율(양자화가 출력을 바꾸는지).
 - 조건: 동일 48개 입력(ko test), max_new_tokens 48, 워밍업 1라운드 + 측정 2라운드, 4 스레드.
 
-## 실행 결과 (사용자 Colab T4, 2026-11-04)
+## 실행 결과 (저장소 소유자가 Kaggle·Colab T4에서 실행, 2026-11-04~08)
 
 - **SGLang 0.5.9**: T4에서 그대로는 **실패**(11-04, 11-07: `sgl_kernel`에 sm75 커널이 없어 첫 연산에서 `no kernel image is available`). 연산을 PyTorch 구현으로 돌리는 `scripts/serving/sglang_t4_shim.py`와 config.json RoPE 키 복원(`fix_tokenizer_config.py`) 뒤 네 번째 시도에 **성공**: 같은 모델로 vLLM과 같은 점수, 속도는 우회 모듈 탓에 느림(`experiments/eval/exaone_sglang_ko_test*/`, `experiments/bench/engine_sglang_c*.json`, README §10.3). 전체 기록은 `experiments/serving/sglang_t4_failure.md`. Ampere 이상(L4·A100·H100)에서는 시도하지 않았다.
 - **vLLM**(가상환경에 `uv pip install vllm`, 2026-11-07): EXAONE-4.0-1.2B LoRA 병합 모델을 fp16·GPU 1장으로 띄워 ko test 699문항을 같은 검증기로 평가하고 동시 요청 1/8/32 벤치를 받았다. 값은 `experiments/eval/exaone_vllm_ko_test*/metrics.json`, `experiments/bench/engine_vllm_c*.json`, 표와 해석은 README §10.3·REPORT §18.3, 출처는 `experiments/eval/PROVENANCE_exaone.md`. 처음에는 상대 경로 모델 폴더를 서버가 못 찾아 `OSError`가 났고(이슈 37), 절대 경로로 고친 뒤 떴다.
+- **전체 데이터 LoRA(3,587개, 2026-11-08)**: 같은 세 구성(vLLM 1장·TP=2·SGLang 우회)으로 ko test verified EM 84.3%(두 번째 학습 87.1%), 수작업 30문항 66.7%. 표와 해석은 README §10.3, 파일은 `experiments/eval/exaone_full_*`, `experiments/bench/engine_full_*`.
 - **vLLM TP=2**(Kaggle T4 2장, 같은 날): `experiments/eval/exaone_vllm_tp2_ko_test/`, `experiments/bench/engine_vllm_tp2_c*.json`. 처리량 약 1.6~2.2배, 점수는 1장과 같은 수준. **NCCL 2-스테이지 파이프라인**(mT5-small): `experiments/bench/pp_*_gpu.json`, 출력 일치·처리량 이득 없음. 표는 README §10.2·§10.3.
 

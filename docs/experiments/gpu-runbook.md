@@ -62,7 +62,7 @@ EXAONE은 비상업 연구용 라이선스(EXAONE AI Model License 1.2-NC)이고
 
 ## 결과를 저장소에 반영하는 법
 
-결과 파일(`experiments/eval/exaone_*`, `experiments/bench/engine_*`, `experiments/bench/pp_*_gpu.json`, `experiments/exaone_lora/train_info.json`)을 저장소에 넣고 `python scripts/render_results.py && python scripts/check_numbers.py --expand` 후 README·보고서의 "구현 후 미실행"을 해당 수치로 바꾼다. 실패하거나 mT5보다 낮게 나와도 그대로 적는다.
+결과 파일(`experiments/eval/exaone_*`, `experiments/bench/engine_*`, `experiments/bench/pp_*_gpu.json`, `experiments/exaone_lora*/train_info.json`)을 저장소에 넣고 `python scripts/render_results.py && python scripts/check_numbers.py --fix --strict`로 README·보고서 표와 숫자를 갱신한다. 2026-11-07~08에 다섯 세션의 결과를 이 절차로 반영했다(`experiments/eval/PROVENANCE_exaone.md`). 실패하거나 mT5보다 낮게 나와도 그대로 적는다.
 
 ## 막혔을 때
 

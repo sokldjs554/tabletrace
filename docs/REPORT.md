@@ -18,10 +18,10 @@
 
 | 항목 | 값 |
 |---|---|
-| 최종 커밋(tabletrace 로컬 저장소) | `e6f9d71`(코드·모델 평가·저장된 실행 결과 기록의 기준 커밋). 이후 변경은 `src/`의 **선택 기능 `column_check`(기본 꺼짐, 평가에 쓰이지 않음)**와 그 테스트, 문서·숫자 표식·결과 표·E2E 스크린샷·테스트 요약이다(`git diff --stat e6f9d71 HEAD -- src scripts tests console Dockerfile .github` 로 확인 가능). 이 보고서를 포함한 **최종 커밋의 SHA는 자기 참조라 파일에 적을 수 없으며** `git log -1`과 최종 응답에 있다 |
+| 최종 커밋 | GitHub `sokldjs554/tabletrace` `main`의 최신 커밋(2026-11-08). 코드와 실험 산출물은 `4f873c5`까지이고 그 뒤는 문서 마무리 커밋뿐이다. 1차 결과의 기준 커밋은 `e6f9d71`, 2차(재학습·RL v3·int8 범위)와 GPU 실측(EXAONE LoRA, vLLM·SGLang, 멀티 GPU)은 11-04~11-08 커밋에 있다 |
 | 패키지 버전 | 0.1.0 (`src/tabletrace/__init__.py`) |
 | 정적 데모에 기록된 커밋 | `e6f9d71` (`console/data/recorded/index.json`, Artifact 페이지에도 같은 데이터) |
-| 배포된 버전 | GitHub Pages: 없음. claude.ai Artifact(저장된 결과, 비공개): 버전 1, 기록 커밋 `e6f9d71` — <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> |
+| 배포된 버전 | GitHub Pages <https://sokldjs554.github.io/tabletrace/>: `main`에 푸시할 때마다 `pages.yml`이 다시 배포한다(최신 실행 성공, 소유자가 브라우저에서 확인). claude.ai Artifact(저장된 결과, 비공개): 버전 1, 기록 커밋 `e6f9d71` — <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> |
 
 ## 3. 공고 대조표
 
@@ -352,7 +352,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 5. **보류 학습은 평가로 전이되지 않았다.** 샘플링 중 명시적 abstain 비율은 올랐지만 탐욕 디코딩 평가에서 답 없는 문항에 직접 낸 `op: abstain`은 0건이고, 낸 것은 모두 답이 있는 문항이었다.
 6. **원인은 검증하지 않았다(추정).** 총 샘플 960개(60 step × 4 프롬프트 × 4 샘플), 낮은 샘플 정답률로 인한 희박한 보상, 그룹 내 보상이 같아 신호가 없는 그룹(§7.4 표). 더 긴 학습, β·학습률·보상 크기 조정은 하지 않았다.
 
-**상태 판단**: 구현·정책 갱신·동일 평가셋 비교까지 수행했으나 목표(검증된 정답률 향상, 올바른 보류)를 달성하지 못해 공고 대조표에는 **실행했으나 실패**로 적었다. 이 결과는 "강화학습으로 성능을 올렸다"는 주장을 뒷받침하지 않는다.
+**상태 판단(1차 시점)**: 구현·정책 갱신·동일 평가셋 비교까지 수행했으나 목표(검증된 정답률 향상, 올바른 보류)를 달성하지 못해 1차 보고에서는 **실행했으나 실패**로 적었다. 2차의 RL v3(§18)가 본문 근거 없음 문항의 직접 보류를 학습해 공고 대조표는 **완료(부분 개선)**로 바꿨다. 두 결과 모두 "강화학습으로 ko test 점수를 올렸다"는 주장을 뒷받침하지 않는다.
 
 
 ## 8. 추론 최적화 — 조건과 측정
@@ -428,7 +428,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->95<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패(모델 가중치가 없으면 모델 테스트는 skip) |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->102<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패(모델 가중치가 없으면 모델 테스트는 skip) |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -547,7 +547,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 | `training/rl_grpo.py`, §7, §18, 이슈 23–24 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->95<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->102<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
