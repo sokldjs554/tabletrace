@@ -6,7 +6,7 @@
 [![pages](https://github.com/sokldjs554/tabletrace/actions/workflows/pages.yml/badge.svg)](https://github.com/sokldjs554/tabletrace/actions/workflows/pages.yml)
 ![license](https://img.shields.io/badge/code-Apache--2.0-blue)
 
-> **데모 상태**: 저장소는 공개이고 **GitHub Pages에 배포했습니다**(Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281), build와 deploy 단계 모두 통과): <https://sokldjs554.github.io/tabletrace/> 이 세션의 네트워크에서는 `github.io`를 열 수 없어 배포된 페이지를 직접 열어 보지는 못했습니다. 같은 내용을 로컬에서 Playwright로 검증했습니다(§13). Pages 화면에는 백엔드가 없어 항상 **저장된 실행 결과** 모드이고, 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). 같은 저장된 결과를 단일 HTML로 만든 claude.ai Artifact 사본도 있습니다(비공개 링크, 소유자만): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM>
+> **데모 상태**: 저장소는 공개이고 **GitHub Pages에 배포했습니다**(Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281), build와 deploy 단계 모두 통과): <https://sokldjs554.github.io/tabletrace/> 저장소 소유자가 2026-11-08 브라우저에서 열리는 것을 확인했습니다(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 열어 보지 못함). 같은 내용을 로컬에서 Playwright로 검증했습니다(§13). Pages 화면에는 백엔드가 없어 항상 **저장된 실행 결과** 모드이고, 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). 같은 저장된 결과를 단일 HTML로 만든 claude.ai Artifact 사본도 있습니다(비공개 링크, 소유자만): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM>
 > **정직한 한 줄 요약**: 튜닝한 mT5-small(300M, CPU 학습)은 미튜닝 모델보다 크게 나아졌고, 2차 재학습과 강화학습(RL v3)으로 본문 답변과 모델 스스로의 보류까지 일부 고쳤습니다. 그러나 한국어 독립 test 전체 점수는 단순한 어휘 겹침 기준선을 넘지 못했습니다(§9). 약점은 셀 **좌표**(열) 생성입니다. 같은 데이터·같은 문법으로 **EXAONE-4.0-1.2B를 LoRA 튜닝해 GPU(Kaggle T4)에서 vLLM·SGLang으로 서빙한 모델**은 같은 test에서 verified EM <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.verified_em:pct -->84.3<!-- /num -->%로 기준선(<!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%)을 넘었습니다(§10.3, 1회 실행, 모델 크기 4배).
 
 ![TableTrace 워크벤치 — 한국어 표 질문의 답변·근거 셀·검증 항목](docs/images/live-desktop-03-result.png)
@@ -699,6 +699,6 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | 콘솔(데스크톱·모바일·상태·키보드) + E2E | 완료 | `docs/images/` |
 | Docker 이미지 | 완료 | 로컬 빌드·컨테이너 smoke |
 | GitHub Actions CI | 완료 | 커밋 `0f38f8d`에서 test·docker 작업 모두 success |
-| GitHub Pages 공개 배포 | 완료(페이지는 직접 열어 보지 못함) | build·deploy 작업 success. 이 세션에서 `github.io`가 차단되어 접속 확인은 못 함 |
+| GitHub Pages 공개 배포 | 완료 | build·deploy 작업 success. 소유자가 2026-11-08 브라우저에서 페이지가 열리는 것을 확인(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 접속하지 못함) |
 | 저장된 결과 데모 호스팅(대체 경로) | 완료(비공개 링크) | 단일 파일 `scripts/build_artifact_page.py` → claude.ai Artifact. 소유자가 공유해야 공개됨, 실시간 모드는 호스팅하지 않음 |
 | gRPC | 미구현(불필요 판단) | §7 |

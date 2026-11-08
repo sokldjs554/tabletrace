@@ -8,7 +8,7 @@
 |---|---|
 | 목표 저장소 | <https://github.com/sokldjs554/tabletrace> (공개). 사용자가 GitHub를 다시 연결한 뒤 `main`에 푸시했다(`0f38f8d`). 이전에는 `403`으로 막혀 있었다 |
 | 지금 코드가 있는 곳 | GitHub `sokldjs554/tabletrace` `main`과 컨테이너의 `/home/user/tabletrace` |
-| 공개 데모 | **GitHub Pages**: <https://sokldjs554.github.io/tabletrace/> — Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281)(build·deploy). 이 세션에서는 `github.io`에 접속할 수 없어 **배포된 페이지를 직접 열어 확인하지는 못했다.** 백엔드가 없어 저장된 실행 결과 모드로만 동작한다. 같은 데이터의 단일 HTML 사본을 claude.ai Artifact로도 올렸다(비공개 링크, 소유자만 열 수 있음): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> |
+| 공개 데모 | **GitHub Pages**: <https://sokldjs554.github.io/tabletrace/> — Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281)(build·deploy). 소유자가 2026-11-08 브라우저에서 열리는 것을 확인했다(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 접속하지 못함). 백엔드가 없어 저장된 실행 결과 모드로만 동작한다. 같은 데이터의 단일 HTML 사본을 claude.ai Artifact로도 올렸다(비공개 링크, 소유자만 열 수 있음): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> |
 | 로컬 실시간 데모 | `docker compose up --build` → http://localhost:8000 (Docker 빌드·컨테이너 smoke는 이 세션에서 실행해 통과) |
 | 정적 데모 | 로컬에서 `scripts/build_static_site.py`(GitHub Pages용 폴더)와 `scripts/build_artifact_page.py`(단일 HTML, Artifact용)로 빌드하고 Playwright로 검증(§10). 단일 HTML은 file:// 로 열어 데스크톱·모바일에서 오류 0, 가로 넘침 없음을 확인 |
 
@@ -45,7 +45,7 @@
 | Docker | API+콘솔 이미지, compose, 헬스체크 | `Dockerfile`, `docker-compose.yml`, `experiments/docker/smoke.json` | 이 세션에서 이미지 빌드(786 MB) + 컨테이너 smoke 통과(Docker Hub 429로 MCR 베이스 이미지 사용) | 완료 |
 | LangChain 또는 LangGraph | 위 Agent 항목(LangGraph) | `agent/graph.py` | `GET /v1/graph` 가 Mermaid 반환, 조건부 재시도 분기 | 완료 |
 | GitHub Actions | `ci.yml`(린트·테스트·데이터·수치·Docker smoke), `pages.yml` | `.github/workflows/` | GitHub Actions에서 실행해 **통과**: [ci](https://github.com/sokldjs554/tabletrace/actions/runs/41213002277)의 `test`·`docker` 작업과 [pages](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281)의 build·deploy 작업이 모두 success(커밋 `0f38f8d`) | 완료 |
-| 공개 데모 배포 | GitHub Pages 정적 데모 | `pages.yml`, `scripts/build_static_site.py` | 배포 작업 success. 접속 확인은 이 세션에서 못 함(`github.io` 차단) | 완료 |
+| 공개 데모 배포 | GitHub Pages 정적 데모 | `pages.yml`, `scripts/build_static_site.py` | 배포 작업 success. 소유자가 브라우저에서 열리는 것을 확인(2026-11-08). 개발 컨테이너에서는 `github.io` 차단 | 완료 |
 | 저장된 결과 데모 호스팅(대체) | 단일 HTML 페이지를 claude.ai Artifact로 호스팅 | `scripts/build_artifact_page.py`, <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> | 데스크톱·모바일 오류 0 확인. 링크는 비공개, 소유자가 공유해야 공개됨 | 완료 |
 
 ## 4. 사용한 기술과 실제 역할
@@ -484,7 +484,7 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 |---|---|---|
 | (해결됨) tabletrace 원격 푸시 | 사용자가 GitHub를 다시 연결해 푸시됨 | 이전 `403`은 Claude GitHub App 미설치 때문이었다 |
 | (해결됨) GitHub Actions 실행 | 푸시 후 실행·통과 | 위 §3 |
-| GitHub Pages 접속 확인 | 이 세션의 네트워크에서 `github.io`가 차단됨 | 배포 작업 success 기록, 사용자가 주소를 열어 확인해야 함 |
+| (해결됨) GitHub Pages 접속 확인 | 소유자가 2026-11-08 브라우저에서 열리는 것을 확인 | 개발 컨테이너의 네트워크에서는 `github.io`가 차단되어 작성자는 Actions 성공 기록만 봄 |
 | (해결됨) EXAONE 다운로드·튜닝·서빙 | 소유자가 Kaggle T4에서 노트북으로 실행(§18.3). 개발 컨테이너에서는 `huggingface.co` 차단·GPU 없음 | 결과 파일 수령(`train_info.json`, 예측 파일, 벤치). 전체 데이터 학습은 하지 않음 |
 | (해결됨) 멀티 GPU 병렬 실측 | 소유자가 Kaggle T4 ×2에서 노트북 4번 절을 돌려 결과 파일을 보냄(§9, §18.3) | 작성자 쪽에는 GPU가 없어 직접 실행은 못 함. DDP는 하지 않음 |
 | (해결됨) SGLang 실행 | T4는 SGLang 미지원(`sgl_kernel`에 sm75 커널 없음)이라 두 번 실패, 세 번째는 config.json 호환 문제. 우회 모듈과 설정 복원으로 네 번째에 성공(§18.3, `experiments/serving/sglang_t4_failure.md`) | Ampere 이상에서의 제 성능 측정은 하지 않음(유료 GPU) |
