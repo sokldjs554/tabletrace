@@ -144,6 +144,10 @@ def engine_table() -> str:
             ("EXAONE-4.0-1.2B + LoRA **전체 3,587개**(3,654개 중 행 예산 안), vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_full_vllm_ko_test"),
             ("같은 전체 데이터 모델, vLLM TP=2 (T4 2장)", "exaone_full_vllm_tp2_ko_test"),
             ("같은 전체 데이터 모델, SGLang + T4 우회 모듈", "exaone_full_sglang_ko_test")]
+    for gtag, gname in (("_l4", "Colab L4"), ("_a100", "Colab A100")):      # Ampere+ session: both engines on their default kernels
+        if (EXP / "eval" / f"exaone_full{gtag}_vllm_ko_test" / "metrics.json").exists():
+            rows += [(f"전체 데이터 LoRA({gname}에서 학습), vLLM 기본 커널 ({gname})", f"exaone_full{gtag}_vllm_ko_test"),
+                     (f"같은 모델, SGLang 기본 커널 ({gname})", f"exaone_full{gtag}_sglang_ko_test")]
     out = ""
     got = [(name, load(EXP / "eval" / f"{key}" / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
     if not got[2][1]:
@@ -162,7 +166,9 @@ def engine_table() -> str:
     ev = got[2][1]["meta"]
     out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체를 vLLM 1장·동시 16요청으로 {ev['wall_s']}초(끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산). 300개 모델은 세 번째 세션, 전체 데이터 모델은 네 번째 세션의 학습이다(출처는 `experiments/eval/PROVENANCE_exaone.md`).\n"
     bench = [(label, load(EXP / "bench" / f"engine_{tag}_c{c}.json")) for label, tag in (("vLLM, GPU 1장", "vllm"), ("vLLM TP=2, GPU 2장", "vllm_tp2"), ("SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장", "sglang"),
-                                                                                      ("전체 데이터 모델, vLLM, GPU 1장", "full_vllm"), ("전체 데이터 모델, vLLM TP=2", "full_vllm_tp2"), ("전체 데이터 모델, SGLang + 우회 모듈", "full_sglang")) for c in (1, 8, 32)]
+                                                                                      ("전체 데이터 모델, vLLM, GPU 1장", "full_vllm"), ("전체 데이터 모델, vLLM TP=2", "full_vllm_tp2"), ("전체 데이터 모델, SGLang + 우회 모듈", "full_sglang"),
+                                                                                      ("**Colab L4**: vLLM 기본 커널", "full_l4_vllm"), ("**Colab L4**: SGLang 기본 커널", "full_l4_sglang"),
+                                                                                      ("**Colab A100**: vLLM 기본 커널", "full_a100_vllm"), ("**Colab A100**: SGLang 기본 커널", "full_a100_sglang")) for c in (1, 8, 32)]
     bench = [(label, b) for label, b in bench if b]
     if bench:
         out += "\n**엔진 벤치** (`bench/engine_bench.py`, 같은 병합 모델, ko test 앞 64문항, OpenAI 호환 API 왕복 지연)\n\n| 구성 | 동시 요청 수 | n | 총 시간 s | 처리량 요청/s | p50 ms | p95 ms | 프로그램 파싱 성공 % |\n|---|---:|---:|---:|---:|---:|---:|---:|\n"
@@ -176,7 +182,9 @@ def engine_custom_table() -> str:
     rows = [("휴리스틱 기준선", "heuristic_ko_custom"), ("[2차] GRPO RL v3 = mT5-small", "rl_v3_ko_custom"),
             ("EXAONE LoRA 300개, vLLM", "exaone_vllm_ko_custom"), ("EXAONE LoRA 300개, SGLang(우회)", "exaone_sglang_ko_custom"),
             ("EXAONE LoRA 전체 3,587개, vLLM", "exaone_full_vllm_ko_custom"), ("EXAONE LoRA 전체, vLLM TP=2", "exaone_full_vllm_tp2_ko_custom"),
-            ("EXAONE LoRA 전체, SGLang(우회)", "exaone_full_sglang_ko_custom")]
+            ("EXAONE LoRA 전체, SGLang(우회)", "exaone_full_sglang_ko_custom"),
+            ("EXAONE LoRA 전체(Colab L4 학습), vLLM", "exaone_full_l4_vllm_ko_custom"), ("같은 모델, SGLang (L4)", "exaone_full_l4_sglang_ko_custom"),
+            ("EXAONE LoRA 전체(Colab A100 학습), vLLM", "exaone_full_a100_vllm_ko_custom"), ("같은 모델, SGLang (A100)", "exaone_full_a100_sglang_ko_custom")]
     got = [(name, load(EXP / "eval" / key / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
     if not any(a for name, a, b in got[2:]):
         return "_EXAONE 수작업 30문항 산출물 없음_\n"
