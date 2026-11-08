@@ -552,7 +552,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
 
-- SGLang의 제 성능(T4 우회 모듈 없이, Ampere 이상), 데이터 병렬(DDP), 작성자 본인의 GPU 실행 경험(EXAONE LoRA·vLLM·멀티 GPU 실행은 소유자가 Kaggle에서 했고 작성자는 스크립트·노트북·분석을 맡음).
+- SGLang의 제 성능(T4 우회 모듈 없이, Ampere 이상), 데이터 병렬(DDP), 문서 작성자(AI 코딩 도구)의 GPU 실행 경험(EXAONE LoRA·vLLM·멀티 GPU 실행은 소유자가 Kaggle·Colab에서 했고 작성자는 스크립트·노트북·분석을 맡음). 역할 구분: 문제 정의·핵심 설계(프로그램 제안→도구 실행→검증→보류 구조, 두 영역, 스택, 보고 원칙)와 실험 범위 결정, GPU 실행은 소유자, 세부 실험 설계·구현·문서는 AI 코딩 도구(`docs/HANDOFF.md` §0).
 - "mT5로 기준선보다 좋은 모델을 만들었다"(전체 평가에서 <!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% 대 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%. 기준선을 넘은 것은 EXAONE 1.2B 전체 데이터 LoRA(<!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.verified_em:pct -->84.3<!-- /num -->%)이며 1회 실행·GPU·4배 모델이다), "EXAONE이 실제 표의 계산을 잘한다"(계산·보류 평가 문항은 학습과 같은 템플릿의 합성), "강화학습으로 ko test 점수를 올렸다"(v3도 그대로), "모든 int8로 최적화했다"(정확도 하락), "mT5를 vLLM/SGLang으로 서빙했다"(두 엔진이 mT5를 지원하지 않음. vLLM 서빙은 EXAONE 모델), "EXAONE이 mT5보다 튜닝이 잘 됐다"(모델 크기·사전학습·하드웨어가 달라 같은 조건 비교가 아님).
 - 공개 배포·GitHub Actions 실행·운영 경험, 실제 사용자 트래픽.
 - 논문·특허 화학 문서 처리(교과서 표만 사용), 실사용 질문 분포에서의 일반 성능(수작업 평가는 62문항).
