@@ -18,7 +18,7 @@ TableTrace의 학습된 모델은 **mT5-small(encoder-decoder)** 이다. vLLM 0.
 
 | 항목 | Colab 무료(T4 1장) | 비고 |
 |---|---|---|
-| EXAONE LoRA 튜닝 | 된다(어림) | T4는 bf16이 없어 fp16 + 손실 스케일링. 스크립트가 자동 선택 |
+| EXAONE LoRA 튜닝 | **된다(실측)** | Kaggle T4 1장에서 300개 18 step은 몇 분, 전체 3,587개 224 step은 **31분**(fp16 + 손실 스케일링, `experiments/exaone_lora_full/train_info.json`). 첫 세션은 `--dtype auto`가 bf16 에뮬레이션을 골라 스크립트를 고침 |
 | vLLM 서빙·평가·벤치 | 된다(시도) | vLLM 0.32는 T4에서 float16만 지원하고 FlashInfer를 쓰지 않는다(wheel 확인). 메모리가 모자라면 `MAX_LEN`을 줄이거나 `EXTRA_ARGS=--enforce-eager` |
 | SGLang 서빙·평가·벤치 | T4에서 **우회 모듈로 성공**(소유자 실행) | `sgl_kernel`에 sm75 커널이 없어 그대로는 첫 연산에서 `no kernel image is available`. `scripts/serving/sglang_t4_shim.py`가 연산을 PyTorch 구현으로 돌리고, `fix_tokenizer_config.py`가 5.x가 저장한 config.json의 RoPE 키를 복원해야 함(안 하면 엉뚱한 답). 노트북 3번 절이 둘 다 자동으로 함. 점수는 vLLM과 같고 속도는 느림. Ampere 이상이면 우회 없이 실행. 기록: `experiments/serving/sglang_t4_failure.md` |
 | 텐서 병렬 TP=2, 멀티 GPU 모델 병렬 | **안 된다** | Colab은 GPU 1장. **Kaggle 노트북(T4 ×2, 무료 주 30시간)** 이나 GPU 2장 이상 환경이 필요 |

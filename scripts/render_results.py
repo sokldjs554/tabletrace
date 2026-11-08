@@ -141,7 +141,7 @@ def engine_table() -> str:
             ("EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_vllm_ko_test"),
             ("같은 모델, vLLM 텐서 병렬 TP=2 (Kaggle T4 2장, 동시 16요청)", "exaone_vllm_tp2_ko_test"),
             ("같은 모델, SGLang 0.5.9 + T4 우회 모듈 (Kaggle T4 1장, 동시 8요청)", "exaone_sglang_ko_test"),
-            ("EXAONE-4.0-1.2B + LoRA **전체 3,654개**, vLLM fp16 (Kaggle T4 1장)", "exaone_full_vllm_ko_test"),
+            ("EXAONE-4.0-1.2B + LoRA **전체 3,587개**(3,654개 중 행 예산 안), vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_full_vllm_ko_test"),
             ("같은 전체 데이터 모델, vLLM TP=2 (T4 2장)", "exaone_full_vllm_tp2_ko_test"),
             ("같은 전체 데이터 모델, SGLang + T4 우회 모듈", "exaone_full_sglang_ko_test")]
     out = ""
@@ -160,7 +160,7 @@ def engine_table() -> str:
         out += (f"| {name} | {m['n']} | **{pct(m['verified_em'])}** | **{v2('verified_em')}** | {pct(m['raw_answer_em_answerable'])} | {pct(m['lookup_em'])} | {pct(m['calc_em'])} | {pct(m['evidence_cells_exact'])} | {pct(m.get('evidence_cells_exact_raw'))} "
                 f"| {pct(m['abstain_recall'])} → {v2('abstain_recall')} | {pct(m['false_abstain_rate'])} → {v2('false_abstain_rate')} | {pct(m['parse_fail_rate'])} | {m['mean_ms_per_example']:.0f} |\n")
     ev = got[2][1]["meta"]
-    out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체 {ev['wall_s']}초(동시 16요청, 끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산, 출처는 `experiments/eval/PROVENANCE_exaone.md`).\n"
+    out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체를 vLLM 1장·동시 16요청으로 {ev['wall_s']}초(끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산). 300개 모델은 세 번째 세션, 전체 데이터 모델은 네 번째 세션의 학습이다(출처는 `experiments/eval/PROVENANCE_exaone.md`).\n"
     bench = [(label, load(EXP / "bench" / f"engine_{tag}_c{c}.json")) for label, tag in (("vLLM, GPU 1장", "vllm"), ("vLLM TP=2, GPU 2장", "vllm_tp2"), ("SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장", "sglang"),
                                                                                       ("전체 데이터 모델, vLLM, GPU 1장", "full_vllm"), ("전체 데이터 모델, vLLM TP=2", "full_vllm_tp2"), ("전체 데이터 모델, SGLang + 우회 모듈", "full_sglang")) for c in (1, 8, 32)]
     bench = [(label, b) for label, b in bench if b]
@@ -175,7 +175,7 @@ def engine_custom_table() -> str:
     """The hand-made 30 Korean questions under the EXAONE planners (owner's GPU runs), next to the CPU rows."""
     rows = [("휴리스틱 기준선", "heuristic_ko_custom"), ("[2차] GRPO RL v3 = mT5-small", "rl_v3_ko_custom"),
             ("EXAONE LoRA 300개, vLLM", "exaone_vllm_ko_custom"), ("EXAONE LoRA 300개, SGLang(우회)", "exaone_sglang_ko_custom"),
-            ("EXAONE LoRA 전체 3,654개, vLLM", "exaone_full_vllm_ko_custom"), ("EXAONE LoRA 전체, vLLM TP=2", "exaone_full_vllm_tp2_ko_custom"),
+            ("EXAONE LoRA 전체 3,587개, vLLM", "exaone_full_vllm_ko_custom"), ("EXAONE LoRA 전체, vLLM TP=2", "exaone_full_vllm_tp2_ko_custom"),
             ("EXAONE LoRA 전체, SGLang(우회)", "exaone_full_sglang_ko_custom")]
     got = [(name, load(EXP / "eval" / key / "metrics.json"), load(EXP / "eval" / f"{key}{V2}" / "metrics.json")) for name, key in rows]
     if not any(a for name, a, b in got[2:]):

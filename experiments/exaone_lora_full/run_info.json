@@ -1,0 +1,10 @@
+{
+ "platform": "kaggle",
+ "gpus": [
+  "Tesla T4",
+  "Tesla T4"
+ ],
+ "limit": 0,
+ "tag": "_full",
+ "finished": "2026-11-08T07:34:14"
+}

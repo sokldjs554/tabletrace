@@ -1,0 +1,62 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "engine:planner",
+  "data": [
+   "data/ko/test.jsonl",
+   "data/ko/synthetic_test.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 699,
+  "wall_s": 461.4,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-08T07:15:48",
+  "quantize": false,
+  "quantize_scope": null
+ },
+ "metrics": {
+  "n": 699,
+  "n_answerable": 649,
+  "n_gold_abstain": 50,
+  "n_calc": 110,
+  "n_lookup": 539,
+  "verified_em": 0.8412,
+  "answer_em_answerable": 0.8552,
+  "raw_answer_em_answerable": 0.792,
+  "evidence_cells_exact": 0.8536,
+  "evidence_cells_exact_raw": 0.8521,
+  "evidence_repaired_rate": 0.0154,
+  "evidence_cells_overlap": 0.869,
+  "op_acc": 0.9714,
+  "lookup_em": 0.8479,
+  "calc_em": 0.8909,
+  "calc_result_correct": 0.8909,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 0.66,
+  "false_abstain_rate": 0.02,
+  "abstain_precision": 0.7174,
+  "parse_fail_rate": 0.0014,
+  "verifier_corrections": 0.0986,
+  "truncated_gold_rate": 0.0343,
+  "verified_em_untruncated": 0.8696,
+  "mean_ms_per_example": 5230.9,
+  "by_source": {
+   "korwikitq": {
+    "n": 539,
+    "verified_em": 0.8479
+   },
+   "synthetic": {
+    "n": 160,
+    "verified_em": 0.8187
+   }
+  },
+  "gold_subject_fail_rate": 0.0431,
+  "entity_check": false
+ }
+}

@@ -36,4 +36,4 @@
 | vLLM TP=2 서빙 벤치(2.4B) | L4 24GB ×2 또는 A100 ×2 | 30분 | $1–3 |
 | GRPO 60 step, 7.8B, G=4 | A100 80GB ×2 | 약 2–3시간 | $10–18 |
 
-추정치는 모델 크기·시퀀스 길이·배치로 계산한 어림값이며 실측이 아니다.
+추정치는 모델 크기·시퀀스 길이·배치로 계산한 어림값이다. **실측(2026-11-08, 소유자, Kaggle T4 1장)**: EXAONE-4.0-1.2B LoRA r16, 3,587개 1 epoch, bs 2×누적 8, fp16, grad checkpointing: 31분(`experiments/exaone_lora_full/train_info.json`). 결과는 README §10.3.

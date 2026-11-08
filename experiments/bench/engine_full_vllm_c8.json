@@ -1,0 +1,11 @@
+{
+ "url": "http://127.0.0.1:8001",
+ "model": "planner",
+ "n": 64,
+ "concurrency": 8,
+ "wall_s": 4.45,
+ "throughput_req_per_s": 14.391,
+ "p50_ms": 502.7,
+ "p95_ms": 654.0,
+ "parse_ok_rate": 1.0
+}

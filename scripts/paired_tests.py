@@ -52,6 +52,16 @@ PAIRS = [
     ("exaone_sglang_vs_vllm_ko_test", "exaone_vllm_ko_test", "exaone_sglang_ko_test"),
     ("exaone_sglang_vs_vllm_ko_test_ec", "exaone_vllm_ko_test_ec", "exaone_sglang_ko_test_ec"),
     ("exaone_sglang_vs_rl_v3_ko_test_ec", "rl_v3_ko_test_ec", "exaone_sglang_ko_test_ec"),
+    # full-data LoRA (3,587 examples, 224 steps) from the fourth Kaggle session
+    ("exaone_full_vs_300_ko_test", "exaone_vllm_ko_test", "exaone_full_vllm_ko_test"),
+    ("exaone_full_vs_300_ko_test_ec", "exaone_vllm_ko_test_ec", "exaone_full_vllm_ko_test_ec"),
+    ("exaone_full_vs_rl_v3_ko_test_ec", "rl_v3_ko_test_ec", "exaone_full_vllm_ko_test_ec"),
+    ("exaone_full_vs_heuristic_ko_test_ec", "heuristic_ko_test_ec", "exaone_full_vllm_ko_test_ec"),
+    ("exaone_full_sglang_vs_vllm_ko_test", "exaone_full_vllm_ko_test", "exaone_full_sglang_ko_test"),
+    ("exaone_full_tp2_vs_tp1_ko_test", "exaone_full_vllm_ko_test", "exaone_full_vllm_tp2_ko_test"),
+    ("subject_check_on_exaone_full_ko_test", "exaone_full_vllm_ko_test", "exaone_full_vllm_ko_test_ec"),
+    ("exaone_full_vs_rl_v3_ko_custom_ec", "rl_v3_ko_custom_ec", "exaone_full_vllm_ko_custom_ec"),
+    ("exaone_full_vs_heuristic_ko_custom_ec", "heuristic_ko_custom_ec", "exaone_full_vllm_ko_custom_ec"),
 ]
 
 

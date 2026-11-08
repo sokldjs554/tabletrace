@@ -304,5 +304,86 @@
   "reference_better": 49,
   "p_two_sided": 5.237136746481225e-22,
   "p_display": "<0.001"
+ },
+ "exaone_full_vs_300_ko_test": {
+  "reference": "exaone_vllm_ko_test",
+  "candidate": "exaone_full_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 242,
+  "reference_better": 24,
+  "p_two_sided": 1.629001669884548e-46,
+  "p_display": "<0.001"
+ },
+ "exaone_full_vs_300_ko_test_ec": {
+  "reference": "exaone_vllm_ko_test_ec",
+  "candidate": "exaone_full_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 225,
+  "reference_better": 22,
+  "p_two_sided": 1.448539341630971e-43,
+  "p_display": "<0.001"
+ },
+ "exaone_full_vs_rl_v3_ko_test_ec": {
+  "reference": "rl_v3_ko_test_ec",
+  "candidate": "exaone_full_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 367,
+  "reference_better": 18,
+  "p_two_sided": 9.613497774899561e-86,
+  "p_display": "<0.001"
+ },
+ "exaone_full_vs_heuristic_ko_test_ec": {
+  "reference": "heuristic_ko_test_ec",
+  "candidate": "exaone_full_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 344,
+  "reference_better": 25,
+  "p_two_sided": 7.539840769252099e-73,
+  "p_display": "<0.001"
+ },
+ "exaone_full_sglang_vs_vllm_ko_test": {
+  "reference": "exaone_full_vllm_ko_test",
+  "candidate": "exaone_full_sglang_ko_test",
+  "n": 699,
+  "candidate_better": 0,
+  "reference_better": 1,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "exaone_full_tp2_vs_tp1_ko_test": {
+  "reference": "exaone_full_vllm_ko_test",
+  "candidate": "exaone_full_vllm_tp2_ko_test",
+  "n": 699,
+  "candidate_better": 0,
+  "reference_better": 0,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "subject_check_on_exaone_full_ko_test": {
+  "reference": "exaone_full_vllm_ko_test",
+  "candidate": "exaone_full_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 1,
+  "reference_better": 20,
+  "p_two_sided": 2.09808349609375e-05,
+  "p_display": "<0.001"
+ },
+ "exaone_full_vs_rl_v3_ko_custom_ec": {
+  "reference": "rl_v3_ko_custom_ec",
+  "candidate": "exaone_full_vllm_ko_custom_ec",
+  "n": 30,
+  "candidate_better": 18,
+  "reference_better": 2,
+  "p_two_sided": 0.0004024505615234375,
+  "p_display": "<0.001"
+ },
+ "exaone_full_vs_heuristic_ko_custom_ec": {
+  "reference": "heuristic_ko_custom_ec",
+  "candidate": "exaone_full_vllm_ko_custom_ec",
+  "n": 30,
+  "candidate_better": 9,
+  "reference_better": 4,
+  "p_two_sided": 0.266845703125,
+  "p_display": "0.267"
  }
 }

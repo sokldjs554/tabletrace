@@ -10,16 +10,16 @@
    "n": 64,
    "bs": 8,
    "batch_latency_s": [
-    1.817,
-    0.217,
-    0.871,
-    0.144,
-    0.294,
-    0.26,
-    0.247,
-    0.616
+    1.79,
+    0.215,
+    0.881,
+    0.172,
+    0.313,
+    0.259,
+    0.255,
+    0.609
    ],
-   "throughput_ex_per_s": 14.098,
+   "throughput_ex_per_s": 14.029,
    "mem_mb": 763.1,
    "threads": 2
   },
@@ -33,25 +33,25 @@
    "n": 64,
    "bs": 8,
    "batch_latency_s": [
-    1.816,
-    0.217,
-    0.872,
-    0.142,
-    0.296,
-    0.26,
-    0.246,
-    0.616
+    1.789,
+    0.215,
+    0.882,
+    0.171,
+    0.312,
+    0.259,
+    0.255,
+    0.608
    ],
-   "throughput_ex_per_s": 14.099,
+   "throughput_ex_per_s": 14.029,
    "mem_mb": 1264.9,
    "threads": 2
   }
  ],
  "n": 64,
  "bs": 8,
- "wall_s": 4.54,
- "throughput_ex_per_s": 14.098,
- "mean_batch_latency_s": 0.558,
+ "wall_s": 4.562,
+ "throughput_ex_per_s": 14.029,
+ "mean_batch_latency_s": 0.562,
  "outputs": [
   "<extra_id_0> -",
   "<extra_id_0> -",
