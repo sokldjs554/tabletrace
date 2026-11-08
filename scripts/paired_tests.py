@@ -62,6 +62,11 @@ PAIRS = [
     ("subject_check_on_exaone_full_ko_test", "exaone_full_vllm_ko_test", "exaone_full_vllm_ko_test_ec"),
     ("exaone_full_vs_rl_v3_ko_custom_ec", "rl_v3_ko_custom_ec", "exaone_full_vllm_ko_custom_ec"),
     ("exaone_full_vs_heuristic_ko_custom_ec", "heuristic_ko_custom_ec", "exaone_full_vllm_ko_custom_ec"),
+    # second full-data training (Colab free T4, same settings): training-run variation of the full model
+    ("exaone_full_run2_vs_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_full_vllm_ko_test_run2"),
+    ("exaone_full_run2_vs_run1_ko_test_ec", "exaone_full_vllm_ko_test_ec", "exaone_full_vllm_ko_test_ec_run2"),
+    ("exaone_full_run2_sglang_vs_vllm_ko_test", "exaone_full_vllm_ko_test_run2", "exaone_full_sglang_ko_test_run2"),
+    ("exaone_full_run2_vs_run1_ko_custom", "exaone_full_vllm_ko_custom", "exaone_full_vllm_ko_custom_run2"),
 ]
 
 
