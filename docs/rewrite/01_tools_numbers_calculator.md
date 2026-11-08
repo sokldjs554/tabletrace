@@ -1,0 +1,82 @@
+# 1단계 명세 — `tools/numbers.py`, `tools/calculator.py`
+
+테스트: `tests/test_numbers_calculator.py`. 픽스처(`medal_table`, `sales_table`, `chem_table`)는 `tests/conftest.py`에 있다. 자료형은 `src/tabletrace/schema.py`의 `CellRef`, `Table`, `CalcInput`, `Calculation`을 그대로 쓴다(이 파일은 고치지 않는다).
+
+이 문서는 "무엇을 해야 하는지"만 적는다. 어떻게 할지(정규식을 쓸지, 한 글자씩 읽을지)는 소유자가 정한다.
+
+## `tools/numbers.py`
+
+다른 모듈이 쓰는 공개 이름: `ParsedNumber`, `parse_number`, `header_unit`, `format_number`, `normalize_minus`, `UNIT_TOKENS`.
+
+### `ParsedNumber`
+값(`value: float`), 단위(`unit: str | None`), 원문(`raw: str`)을 담는 작은 자료형. dataclass면 충분하다.
+
+### `normalize_minus(s: str) -> str`
+유니코드 빼기 기호(`−` U+2212)와 en dash(`–` U+2013)를 ASCII `-`로 바꾼다. 표 데이터에 둘 다 섞여 있다.
+
+### `parse_number(text: str, default_unit: str | None = None) -> ParsedNumber | None`
+문자열 **전체**가 "숫자 하나(+ 선택적 단위)"일 때만 값을 돌려주고, 아니면 `None`.
+
+받아들여야 하는 것(테스트에 있음):
+- 천 단위 쉼표 `1,234`, `22,000`; 소수 `0.451`; 앞뒤 공백 `  7 `.
+- 음수: ASCII `-`뿐 아니라 `−3.2`.
+- 과학 표기 두 가지: `6.60 × 10−5`(곱셈 기호 `×` 또는 `x`, 10, 지수. `^`나 `**`가 끼어도 됨), `1e-6` 꼴.
+- 단위가 붙은 것: `12.5%`, `−3.2 kJ/mol`, `60명`, `457 K`, `38 g/mol`. 단위는 미리 정한 목록(`UNIT_TOKENS`)에 있는 것만 인정한다. 목록에는 적어도 `%`, `명`, `K`, `°C`, `kJ/mol`, `g/mol`, `g/mL`, `kPa`, `억원`, `백만원`, `M`이 들어가야 하고, 긴 토큰을 먼저 맞춰야 `g/mol`이 `g`로 잘리지 않는다.
+- 단위가 없으면 `unit`은 `None`이고, `default_unit`이 주어졌으면 그 값을 쓴다(열 헤더의 단위를 셀에 물려주는 용도. `compute`가 이 인자를 쓴다).
+
+거부해야 하는 것(`None`):
+- 범위 `1994–2010`, 날짜 `2017년 12월 20일`, 글자 `abc`, `서울`, 빈 문자열, 점이 둘인 `1.2.3`, 숫자가 둘인 `12 and 13`.
+- 지수가 너무 커서 float이 무한대가 되는 `3 × 10^999`. 값을 만든 뒤 유한한지 확인하면 된다.
+
+### `header_unit(header: str) -> str | None`
+열 헤더 끝에서 단위를 뽑는다.
+- 괄호 안: `매출액 (억원)` → `억원`, `Density (g/mL)` → `g/mL`, `관객수 (명)` → `명`, `득표율(%)` → `%`, `[H2O2] (M)` → `M`. 전각 괄호 `（ ）`도 같이 본다. `(단위: 억원)`처럼 "단위:" 접두가 있어도 된다.
+- 쉼표 뒤: `Temperature, °C` → `°C`.
+- 단위가 아닌 것은 `None`: `Radial nodes (no.)`, `Year (2015)`(숫자), `ln[H2O2]`(대괄호는 화학식). 괄호 안이 `no`, `no.`, `approx`, `est` 같은 약어이거나 숫자만이면 단위가 아니다.
+- 반환하는 단위는 `parse_number`의 단위 목록과 같은 글자여야 한다(그래야 셀 단위와 열 단위를 비교할 수 있다).
+
+### `format_number(value: float) -> str`
+- 정수 값이면 소수 없이 천 단위 쉼표: `1062201.0` → `1,062,201`.
+- 그 외는 소수 넷째 자리까지 반올림하고 끝의 0은 지운다: `4.51` → `4.51`, `3.92805755` → `3.9281`.
+- 아주 작은 값은 과학 표기 세 자리: `6.6e-5` → `6.600e-05`(파이썬 `f"{v:.3e}"` 형식). "아주 작은"의 경계는 절댓값 0.001 미만이면 된다. 0은 `0`.
+
+## `tools/calculator.py`
+
+공개 이름: `CalcError`, `evaluate_expression`, `compute`.
+
+### `CalcError(ValueError)`
+계산기가 거부할 때 던지는 예외. 메시지 문구가 테스트에서 검사된다: `"unit mismatch"`, `"not a single number"`, `"belongs to table"`이 들어가야 한다.
+
+### `evaluate_expression(expr: str) -> float`
+모델이 만든 식이 아니라 **우리가 만든 식**을 계산하는 함수지만, 그래도 코드 실행이 되지 않게 막는다. `eval`을 쓰지 않는다. 파이썬 `ast` 모듈로 파싱해서 허용 목록만 계산한다.
+- 허용: 숫자 리터럴, 괄호, 이항 `+ - * /`, 단항 `-`/`+`.
+- 거부(`CalcError`): 이름(`a + 1`), 함수 호출(`max(1,2)`, `__import__('os')`), 거듭제곱(`2 ** 100000`), 조건식(`1 if 1 else 2`), 문장 여러 개(`1; 2`), 그 밖의 모든 노드.
+- 0으로 나누기(`1 / 0`)도 `CalcError`. 결과는 유한한 float.
+- `(60 - 40) / 40 * 100` → `50.0`.
+
+### `compute(table: Table, op: str, cells: list[CellRef]) -> Calculation`
+표의 셀들로 계산을 실행한다. 순서대로 검사하고, 하나라도 걸리면 `CalcError`.
+
+1. 모든 셀의 `table_id`가 `table.id`와 같아야 한다. 아니면 `"... belongs to table ..."`.
+2. 각 셀의 원문을 `parse_number`로 읽는다. 단위가 없으면 그 열의 단위 `table.units.get(col)`을 `default_unit`으로 넘긴다. 숫자 하나로 읽히지 않으면(빈 칸, 글자, 범위) `"not a single number"`.
+3. 모든 입력의 단위가 같아야 한다(`None`끼리도 같은 것으로 본다). 다르면 `"unit mismatch"`. 예: 억원 열과 백만원 열을 빼면 거부.
+4. 연산:
+   - `diff`: 셀 2개, `a - b`(앞 셀에서 뒤 셀을 뺀다). 식 문자열은 `"112.0 - 60.0"`처럼 값 그대로.
+   - `sum`: 2개 이상, 모두 더한다.
+   - `avg`: 2개 이상, 평균.
+   - `ratio`: 셀 2개, `a / b`. 단위는 약분되어 `None`.
+   - 모르는 `op`이거나 셀 개수가 맞지 않으면 `CalcError`.
+5. 계산은 식 문자열을 만들어 `evaluate_expression`에 넘겨서 한다(그래야 식과 결과가 항상 일치한다).
+6. 반환 `Calculation(op, expression, inputs, result, unit, formatted)`. `inputs`는 셀마다 `CalcInput(cell, raw, value, unit)`. `unit`은 공통 단위(ratio는 `None`). `formatted`는 `format_number(result)`에 단위가 있으면 한 칸 띄우고 단위를 붙인 것: `"52"`, `"150 억원"`.
+
+테스트의 기대값 몇 가지: 메달표 112 − 60 = 52(`expression == "112.0 - 60.0"`, `formatted == "52"`); 48 + 36 = 84; 평균 42; 매출표 1,350 − 1,200 = `"150 억원"`; 화학표 374.0 − 31.1 ≈ 342.9(단위 °C, 원문은 `−240.0`처럼 유니코드 빼기); ratio 22,000 / 1,300.
+
+## 끝났는지 확인
+
+```bash
+pytest tests/test_numbers_calculator.py -q    # 전부 통과
+pytest -q                                       # 전체. verifier·heuristic·metrics가 이 모듈을 쓴다
+ruff check src tests scripts
+```
+
+전체 테스트까지 통과하면 `_ref_numbers.py`, `_ref_calculator.py`를 지우고 커밋한다.
