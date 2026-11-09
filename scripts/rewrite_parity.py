@@ -1,0 +1,135 @@
+"""Behaviour check for the owner's rewrite of a core module (docs/rewrite/README.md).
+
+Unit tests check a few examples; this script runs the reference implementation (taken from a git ref,
+default origin/main) and the working-tree implementation over the project's REAL data and stored model
+outputs, and reports every input on which they disagree. A rewrite that passes the tests but parses
+2,000 corpus cells differently would change the saved evaluation results; this is how that shows up.
+
+  python scripts/rewrite_parity.py numbers      # tools/numbers.py: parse_number on every table cell, header_unit on every header, format_number
+  python scripts/rewrite_parity.py calculator   # tools/calculator.py: compute() on every gold calculation in the datasets
+  python scripts/rewrite_parity.py program      # agent/program.py: parse()+serialize() on every stored model output and gold program
+  python scripts/rewrite_parity.py numbers --ref <commit>     # compare against another commit
+
+Each side runs in its own Python process (reference from `git archive <ref> src`), so the two packages
+never mix. Exit code 1 when anything differs. Written by the AI coding tool as review tooling; it is
+not part of the rewrite.
+"""
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+CORPORA = ["data/ko/documents.jsonl", "data/chem/documents.jsonl"]
+CALC_RECORDS = ["data/ko/synthetic_train.jsonl", "data/ko/synthetic_dev.jsonl", "data/ko/synthetic_test.jsonl",
+                "data/chem/synthetic_train.jsonl", "data/chem/synthetic_dev.jsonl", "data/ko/custom_eval.jsonl",
+                "data/chem/custom_eval.jsonl"]
+
+# Runs inside the child process with PYTHONPATH pointing at one implementation. Prints one JSON object.
+CHILD = r'''
+import glob, json, sys
+mode, root = sys.argv[1], sys.argv[2]
+out = {}
+def tables():
+    for path in __CORPORA__:
+        for line in open(f"{root}/{path}", encoding="utf-8"):
+            for t in json.loads(line).get("tables", []):
+                yield t
+if mode == "numbers":
+    from tabletrace.tools.numbers import format_number, header_unit, parse_number
+    values = set()
+    for t in tables():
+        for h in t["header"]:
+            out["header:" + h] = header_unit(h)
+        for row in t["rows"]:
+            for c in row:
+                p = parse_number(c)
+                out["cell:" + c] = None if p is None else [round(p.value, 9), p.unit]
+                if p is not None:
+                    values.add(p.value)
+    for v in sorted(values) + [0.0, 1e-4, 9.99e-4, 1e-3, 99999.5, 1e5 + 0.5, 123456.7, 1e15, 2.5e15, -0.5, -123456.7]:
+        out["format:" + repr(v)] = format_number(v)
+elif mode == "calculator":
+    from tabletrace.schema import CellRef, Table
+    from tabletrace.tools.calculator import CalcError, compute
+    by_id = {t["id"]: Table(**t) for t in tables()}
+    for path in __RECORDS__:
+        try:
+            lines = open(f"{root}/{path}", encoding="utf-8").readlines()
+        except FileNotFoundError:
+            continue
+        for line in lines:
+            r = json.loads(line)
+            op, cells, tid = r.get("op"), r.get("gold_cells") or [], r.get("table_id")
+            if op not in ("diff", "sum", "avg", "ratio", "pct_change", "count") or tid not in by_id:
+                continue
+            refs = [CellRef(table_id=tid, row=a, col=b) for a, b in cells]
+            key = f"{r['qid']}:{op}"
+            try:
+                c = compute(by_id[tid], op, refs)
+                out[key] = [c.expression, round(c.result, 9), c.unit, c.formatted]
+            except CalcError as e:
+                out[key] = ["CalcError", str(e).split(":")[0][:40]]
+            # every op on the same cells too, so ops the datasets never use are exercised
+            for other in ("diff", "sum", "avg", "ratio", "pct_change", "count"):
+                try:
+                    c = compute(by_id[tid], other, refs)
+                    out[f"{key}->{other}"] = [c.expression, round(c.result, 9), c.unit, c.formatted]
+                except CalcError:
+                    out[f"{key}->{other}"] = "CalcError"
+elif mode == "program":
+    from tabletrace.agent.program import ProgramParseError, parse, serialize
+    raws = set()
+    for path in glob.glob(f"{root}/experiments/eval/*/predictions.jsonl"):
+        for line in open(path, encoding="utf-8"):
+            raws.add(json.loads(line).get("raw_output") or "")
+    for raw in sorted(raws):
+        try:
+            p = parse(raw, "t")
+            out["raw:" + raw] = serialize(p)
+        except ProgramParseError:
+            out["raw:" + raw] = "ProgramParseError"
+print(json.dumps(out, ensure_ascii=False))
+'''.replace("__CORPORA__", repr(CORPORA)).replace("__RECORDS__", repr(CALC_RECORDS))
+
+
+def run(mode: str, src: Path) -> dict:
+    r = subprocess.run([sys.executable, "-c", CHILD, mode, str(ROOT)], capture_output=True, text=True,
+                       env={"PYTHONPATH": str(src), "PATH": "/usr/bin:/bin:/usr/local/bin"}, cwd=ROOT)
+    if r.returncode != 0:
+        sys.exit(f"{src}: child failed\n{r.stderr[-2000:]}")
+    return json.loads(r.stdout)
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    if not args or args[0] not in ("numbers", "calculator", "program"):
+        sys.exit(__doc__)
+    mode = args[0]
+    ref = args[args.index("--ref") + 1] if "--ref" in args else "origin/main"
+    with tempfile.TemporaryDirectory() as tmp:
+        archive = subprocess.run(["git", "archive", ref, "src"], capture_output=True, cwd=ROOT)
+        if archive.returncode != 0:
+            sys.exit(f"git archive {ref} failed: {archive.stderr.decode()[-500:]}")
+        subprocess.run(["tar", "-x", "-C", tmp], input=archive.stdout, check=True)
+        reference = run(mode, Path(tmp) / "src")
+    current = run(mode, ROOT / "src")
+    keys = sorted(set(reference) | set(current))
+    diffs = [(k, reference.get(k, "<missing>"), current.get(k, "<missing>")) for k in keys if reference.get(k) != current.get(k)]
+    kinds: dict[str, int] = {}
+    for k, _, _ in diffs:
+        kind = ("other op " + k.split("->")[1]) if "->" in k else ("gold op " + k.rsplit(":", 1)[1]) if mode == "calculator" else k.split(":")[0]
+        kinds[kind] = kinds.get(kind, 0) + 1
+    print(f"{mode}: {len(keys)} inputs compared against {ref}, {len(diffs)} differ {kinds or ''}")
+    for k, a, b in diffs[:25]:
+        print(f"  {k[:90]!r}\n      reference: {a}\n      yours:     {b}")
+    if len(diffs) > 25:
+        print(f"  ... {len(diffs) - 25} more")
+    sys.exit(1 if diffs else 0)
+
+
+if __name__ == "__main__":
+    main()

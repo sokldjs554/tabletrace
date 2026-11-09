@@ -26,24 +26,38 @@
 
 1~4단계(약 640줄)가 끝나면 "검증 파이프라인의 핵심을 직접 구현했다"가 사실이 된다. 9단계까지 가면 서비스 계층도 포함된다. 학습·벤치 스크립트(`training/`, `bench/`, `scripts/`)와 문서는 이 계획에 없다.
 
-## 환경 준비
-
-로컬(Python 3.11 이상):
+## 환경 준비 (맥북, 처음 한 번)
 
 ```bash
+xcode-select --install                     # git이 없으면 설치 창이 뜬다. 이미 있으면 'already installed'
+python3 --version                          # 3.11 이상이어야 한다. 아니면 python.org에서 3.12 설치 파일을 받거나 brew install python@3.12
+brew install gh && gh auth login           # GitHub 로그인(GitHub.com → HTTPS → Login with a web browser). Homebrew가 없으면 brew.sh에서 먼저 설치
+git config --global user.name "본인 이름"
+git config --global user.email "GitHub 계정에 등록된 이메일"   # GitHub → Settings → Emails에 있는 주소(또는 ...@users.noreply.github.com). 그래야 커밋이 본인 계정으로 표시된다
+
 git clone https://github.com/sokldjs554/tabletrace && cd tabletrace
-python -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest tests/test_numbers_calculator.py -q               # 지금은 전부 통과해야 한다
+pytest tests/test_numbers_calculator.py -q  # 지금은 전부 통과해야 한다
 ```
 
-GitHub Codespaces(설치 없이 브라우저에서): 저장소 페이지 → Code → Codespaces → Create. 터미널에서 `pip install -e ".[dev]"` 뒤 위와 같다. 개인 계정은 매달 일정 시간 무료다.
+GitHub Codespaces(설치 없이 브라우저에서)도 된다: 저장소 페이지 → Code → Codespaces → Create, 터미널에서 `pip install -e ".[dev]"`.
 
 ## 한 단계의 흐름
 
 1. `docs/rewrite/NN_*.md` 명세와 해당 테스트 파일을 읽는다.
 2. 기존 파일을 `git mv src/tabletrace/tools/numbers.py src/tabletrace/tools/_ref_numbers.py`처럼 옆으로 치운다(참고용, 마지막에 지운다). import 경로는 그대로이므로 새 파일을 같은 이름으로 만든다.
 3. 테스트가 통과할 때까지 쓴다. `pytest tests/<파일> -q`.
-4. 전체 테스트 `pytest -q`와 `ruff check src tests scripts`를 돌린다. 다른 모듈이 이 모듈을 쓰기 때문이다.
-5. `_ref_*.py`를 지우고 커밋한다. 커밋 메시지에 "rewrite: <모듈> (owner)"처럼 적는다.
-6. `docs/rewrite/LOG.md`에 한 줄 적는다.
+4. **동작 비교**: `python scripts/rewrite_parity.py <numbers|calculator|program>`. 원본(`origin/main`)과 새 코드를 실제 데이터 전체(표 셀 6만여 개, 데이터셋의 모든 계산, 저장된 모델 출력)에 돌려 차이를 보여 준다. 테스트는 일부 예만 보므로, 테스트를 통과해도 여기서 차이가 나면 저장된 평가 결과가 재현되지 않는다. 차이 0개여야 한다(의도한 개선이라면 먼저 이유를 적고 합의).
+5. 전체 테스트 `pytest -q`와 `ruff check src tests scripts`를 돌린다. 다른 모듈이 이 모듈을 쓰기 때문이다.
+6. `_ref_*.py`를 지우고 커밋·푸시한다.
+
+```bash
+git switch -c rewrite/01-numbers                                   # 단계마다 새 브랜치
+git add src/tabletrace/tools/numbers.py src/tabletrace/tools/calculator.py
+git commit -m "rewrite: tools/numbers.py, tools/calculator.py (owner)"   # AI 공동 작성 표식(Co-Authored-By)을 넣지 않는다
+git push -u origin rewrite/01-numbers
+```
+
+7. 푸시했다고 알리면 AI 도구가 GitHub에서 브랜치를 읽고 테스트·동작 비교를 다시 돌려 리뷰한다. 통과하면 소유자가 GitHub에서 Pull request를 만들어 `main`에 합친다(Compare & pull request → Create → Merge).
+8. `docs/rewrite/LOG.md`에 한 줄 적는다(날짜, 모듈, 커밋, 메모).
