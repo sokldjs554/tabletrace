@@ -9,6 +9,7 @@ outputs, and reports every input on which they disagree. A rewrite that passes t
   python scripts/rewrite_parity.py calculator   # tools/calculator.py: compute() on every gold calculation in the datasets
   python scripts/rewrite_parity.py program      # agent/program.py: parse()+serialize() on every stored model output and gold program
   python scripts/rewrite_parity.py cells        # tools/cells.py: normalize_text, lookup_cell, find_cells, row/column overlap scores over the corpora and every question
+  python scripts/rewrite_parity.py verifier     # verify/verifier.py: resolve() on every stored model output (8.6k) and gold program, 3 settings each; find_span probes
   python scripts/rewrite_parity.py numbers --ref <commit>     # compare against another commit
 
 Each side runs in its own Python process (reference from `git archive <ref> src`), so the two packages
@@ -122,6 +123,55 @@ elif mode == "cells":
             for probe in (str(r.get("answer", "")), q[:6], " " + str(r.get("answer", "")).upper() + " ", ""):
                 out[f"find:{r['qid']}:{probe}:exact"] = [c.cid for c in find_cells(tab, probe)]
                 out[f"find:{r['qid']}:{probe}:contains"] = [c.cid for c in find_cells(tab, probe, exact=False)]
+elif mode == "verifier":
+    from pathlib import Path
+    from tabletrace.agent.program import ProgramParseError, parse
+    from tabletrace.model.approx_tokenizer import ApproxTokenizer
+    from tabletrace.training.data import build_examples, load_docs
+    from tabletrace.verify.verifier import find_span, resolve
+    def summary(res):
+        return {"status": res.status, "answer": res.answer, "cells": [c.cid for c in res.cells],
+                "reason": res.verdict.reason, "checks": [[c.name, c.passed] for c in res.verdict.checks],
+                "calc": None if res.calculation is None else [res.calculation.op, res.calculation.expression, res.calculation.formatted],
+                "spans": [[s.passage_id, s.start, s.end, s.text] for s in res.spans],
+                "trace": [[t.step, t.tool, t.status, json.dumps(t.input, sort_keys=True, ensure_ascii=False)] for t in res.trace]}
+    sets = [(["data/ko/test.jsonl", "data/ko/synthetic_test.jsonl", "data/ko/dev.jsonl", "data/ko/synthetic_dev.jsonl", "data/ko/custom_eval.jsonl"], ["data/ko/documents.jsonl"]),
+            (["data/chem/custom_eval.jsonl", "data/chem/synthetic_dev.jsonl"], ["data/chem/documents.jsonl"])]
+    examples = {}
+    tok = ApproxTokenizer()
+    for recs_paths, corpus in sets:
+        docs = load_docs(*[Path(root) / c for c in corpus])
+        recs = [json.loads(line) for p in recs_paths for line in open(f"{root}/{p}", encoding="utf-8")]
+        for e in build_examples(recs, docs, tok, 512):
+            examples[e.qid] = e
+    raws = {}
+    for path in sorted(glob.glob(f"{root}/experiments/eval/*/predictions.jsonl")):
+        for line in open(path, encoding="utf-8"):
+            r = json.loads(line)
+            if r["qid"] in examples:
+                raws.setdefault((r["qid"], r.get("raw_output") or ""), None)
+    for (qid, raw) in sorted(raws):
+        e = examples[qid]
+        try:
+            prog = parse(raw, e.table.id)
+        except ProgramParseError:
+            prog = None
+        for name, kw in (("v1", {"entity_check": False}), ("v2", {"entity_check": True}), ("v2col", {"entity_check": True, "column_check": True})):
+            out[f"pred:{name}:{qid}:{raw}"] = summary(resolve(e.question, e.table, prog, context=e.context, **kw))
+    for qid, e in sorted(examples.items()):
+        out[f"gold:{qid}"] = summary(resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=True))
+        out[f"noretrieval:{qid}"] = summary(resolve(e.question, e.table, e.gold, retrieval_ok=False))
+        out[f"notable:{qid}"] = summary(resolve(e.question, None, e.gold))
+    # find_span: passages from the corpora, probed with exact, case-changed, whitespace-changed and absent strings
+    for c in __CORPORA__ + ["data/ko/documents.jsonl"]:
+        for line in open(f"{root}/{c}", encoding="utf-8"):
+            for ps in json.loads(line).get("passages", [])[:2]:
+                t = ps.get("text", "")[:600]
+                if len(t) < 40:
+                    continue
+                for probe in (t[10:30], t[10:30].upper(), t[10:30].replace(" ", ""), t[10:30].replace(" ", "  "), " " + t[200:215] + " ", "zzz_not_there", "", t[:5] * 50):
+                    sp = find_span(probe, t, "p")
+                    out[f"span:{t[:20]}:{probe[:40]}"] = None if sp is None else [sp.passage_id, sp.start, sp.end, sp.text]
 elif mode == "program":
     from tabletrace.agent.program import ProgramParseError, parse, serialize
     raws = set()
@@ -148,7 +198,7 @@ def run(mode: str, src: Path) -> dict:
 
 def main() -> None:
     args = sys.argv[1:]
-    if not args or args[0] not in ("numbers", "calculator", "program", "cells"):
+    if not args or args[0] not in ("numbers", "calculator", "program", "cells", "verifier"):
         sys.exit(__doc__)
     mode = args[0]
     ref = args[args.index("--ref") + 1] if "--ref" in args else "origin/main"
