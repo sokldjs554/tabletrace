@@ -8,6 +8,7 @@ outputs, and reports every input on which they disagree. A rewrite that passes t
   python scripts/rewrite_parity.py numbers      # tools/numbers.py: parse_number on every table cell, header_unit on every header, format_number
   python scripts/rewrite_parity.py calculator   # tools/calculator.py: compute() on every gold calculation in the datasets
   python scripts/rewrite_parity.py program      # agent/program.py: parse()+serialize() on every stored model output and gold program
+  python scripts/rewrite_parity.py cells        # tools/cells.py: normalize_text, lookup_cell, find_cells, row/column overlap scores over the corpora and every question
   python scripts/rewrite_parity.py numbers --ref <commit>     # compare against another commit
 
 Each side runs in its own Python process (reference from `git archive <ref> src`), so the two packages
@@ -80,6 +81,47 @@ elif mode == "calculator":
                     out[f"{key}->{other}"] = [c.expression, round(c.result, 9), c.unit, c.formatted]
                 except CalcError:
                     out[f"{key}->{other}"] = "CalcError"
+elif mode == "cells":
+    import re
+    from tabletrace.schema import Table
+    from tabletrace.tools.cells import column_overlap_scores, find_cells, lookup_cell, normalize_text, row_overlap_scores
+    by_id = {}
+    for t in tables():
+        tab = Table(**t)
+        by_id[tab.id] = tab
+        for h in tab.header:
+            out["norm:" + h] = normalize_text(h)
+        for row in tab.rows:
+            for c in row:
+                out["norm:" + c] = normalize_text(c)
+        # every row's first and last cell, plus one cell past each edge
+        for r in range(-1, len(tab.rows) + 1):
+            for c in (-1, 0, len(tab.header) - 1, len(tab.header)):
+                try:
+                    out[f"lookup:{tab.id}:{r}:{c}"] = lookup_cell(tab, r, c)
+                except Exception as e:
+                    out[f"lookup:{tab.id}:{r}:{c}"] = type(e).__name__
+    qfiles = ["data/ko/test.jsonl", "data/ko/synthetic_test.jsonl", "data/ko/dev.jsonl", "data/ko/custom_eval.jsonl",
+              "data/chem/custom_eval.jsonl", "data/chem/synthetic_dev.jsonl"]
+    for path in qfiles:
+        try:
+            lines = open(f"{root}/{path}", encoding="utf-8").readlines()
+        except FileNotFoundError:
+            continue
+        for line in lines:
+            r = json.loads(line)
+            tab = by_id.get(r.get("table_id"))
+            if tab is None:
+                continue
+            q = r.get("question", "")
+            out["normq:" + q] = normalize_text(q)
+            toks = {normalize_text(t) for t in q.split()} | {normalize_text(t) for t in re.findall(r"[A-Za-z0-9][A-Za-z0-9\.\-]+", q)} | {""}
+            out[f"rows:{r['qid']}"] = row_overlap_scores(tab, toks)
+            out[f"rows-ex0:{r['qid']}"] = row_overlap_scores(tab, toks, exclude_col=0)
+            out[f"cols:{r['qid']}"] = column_overlap_scores(tab, toks)
+            for probe in (str(r.get("answer", "")), q[:6], " " + str(r.get("answer", "")).upper() + " ", ""):
+                out[f"find:{r['qid']}:{probe}:exact"] = [c.cid for c in find_cells(tab, probe)]
+                out[f"find:{r['qid']}:{probe}:contains"] = [c.cid for c in find_cells(tab, probe, exact=False)]
 elif mode == "program":
     from tabletrace.agent.program import ProgramParseError, parse, serialize
     raws = set()
@@ -106,7 +148,7 @@ def run(mode: str, src: Path) -> dict:
 
 def main() -> None:
     args = sys.argv[1:]
-    if not args or args[0] not in ("numbers", "calculator", "program"):
+    if not args or args[0] not in ("numbers", "calculator", "program", "cells"):
         sys.exit(__doc__)
     mode = args[0]
     ref = args[args.index("--ref") + 1] if "--ref" in args else "origin/main"

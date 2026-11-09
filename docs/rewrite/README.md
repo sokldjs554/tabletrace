@@ -16,7 +16,7 @@
 |---|---|---:|---|---|
 | 1 | `tools/numbers.py`, `tools/calculator.py` | 94 + 108 | `tests/test_numbers_calculator.py` | 순수 함수. 숫자·단위 파싱과 안전한 계산기. 다른 모든 것이 이 위에 있다 |
 | 2 | `agent/program.py` | 85 | `tests/test_program_verifier.py`(파서 부분) | 프로그램 문법 `op ; cells ; answer` 파서 |
-| 3 | `tools/cells.py` | 62 | 같은 파일 | 셀 주소 해석·읽기 |
+| 3 | `tools/cells.py` | 62 | 간접(`pytest -q` 전체) + `rewrite_parity.py cells` | 셀 읽기·찾기, 질문과 행·열의 겹침 점수 |
 | 4 | `verify/verifier.py` | 289 | `tests/test_program_verifier.py` | 프로젝트의 핵심. 답·근거·계산 검증과 보류 결정, 개체 일치 검사 |
 | 5 | `agent/heuristic.py` | 113 | `tests/test_api.py` 일부 | 어휘 겹침 기준선 |
 | 6 | `retrieval/tokenize.py`, `bm25.py`, `index.py` | 66 + 50 + 66 | `tests/test_retrieval.py` | 검색 |
