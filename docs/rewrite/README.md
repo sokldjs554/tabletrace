@@ -31,11 +31,14 @@
 ```bash
 xcode-select --install                     # git이 없으면 설치 창이 뜬다. 이미 있으면 'already installed'
 python3 --version                          # 3.11 이상이어야 한다. 아니면 python.org에서 3.12 설치 파일을 받거나 brew install python@3.12
-brew install gh && gh auth login           # GitHub 로그인(GitHub.com → HTTPS → Login with a web browser). Homebrew가 없으면 brew.sh에서 먼저 설치
+# GitHub 로그인(푸시 권한): SSH 키 한 번 등록. macOS 버전과 상관없이 된다 (brew의 gh는 macOS 12 Monterey 이상만 설치됨)
+ssh-keygen -t ed25519 -C "GitHub 이메일"     # 질문 세 번은 Enter
+pbcopy < ~/.ssh/id_ed25519.pub              # 공개 키를 클립보드로 → GitHub → Settings → SSH and GPG keys → New SSH key → 붙여넣기 → Add
+ssh -T git@github.com                       # 처음 묻는 질문에 yes. "Hi <아이디>! You've successfully authenticated" 가 나오면 성공
 git config --global user.name "본인 이름"
 git config --global user.email "GitHub 계정에 등록된 이메일"   # GitHub → Settings → Emails에 있는 주소(또는 ...@users.noreply.github.com). 그래야 커밋이 본인 계정으로 표시된다
 
-git clone https://github.com/sokldjs554/tabletrace && cd tabletrace
+git clone git@github.com:sokldjs554/tabletrace.git && cd tabletrace     # 이미 https로 받았다면: git remote set-url origin git@github.com:sokldjs554/tabletrace.git
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pytest tests/test_numbers_calculator.py -q  # 지금은 전부 통과해야 한다
