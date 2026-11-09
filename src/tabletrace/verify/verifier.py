@@ -73,8 +73,10 @@ def subject_check(question, table, cells, context=None):
     if any(_mentions(evidence, subject) for subject in subjects):
         return Check(name="subject_in_evidence", passed=True, detail="질문 대상이 근거에 있습니다."), None
     all_rows = _compact(" ".join(" ".join(row) for row in table.rows))
-    reason = "verification_failed" if any(_mentions(all_rows, subject) for subject in subjects) else "not_in_document"
-    return Check(name="subject_in_evidence", passed=False, detail=f"질문 대상 {', '.join(subjects)}을 인용한 근거에서 찾지 못했습니다."), reason
+    in_table = any(_mentions(all_rows, subject) for subject in subjects)
+    reason = "verification_failed" if in_table else "not_in_document"
+    location = "다른 행에는 있음" if in_table else "표에 없음"
+    return Check(name="subject_in_evidence", passed=False, detail=f"질문 대상 {', '.join(subjects)}: 인용 행 {rows}에서 찾지 못함 ({location})."), reason
 
 
 def header_column(question, table, cited):
@@ -108,7 +110,16 @@ def resolve(question, table, program, retrieval_ok=True, context=None, passage_i
         checks.append(Check(name=name, passed=passed, detail=detail))
 
     def abstain(reason):
-        check("abstain", True, "답변을 보류합니다.")
+        reasons = {
+            "retrieval_low": "표가 없거나 검색 결과가 충분하지 않아 보류합니다.",
+            "invalid_program": "프로그램 또는 근거 셀이 유효하지 않아 보류합니다.",
+            "not_in_document": "필요한 답이나 근거를 문서에서 찾지 못해 보류합니다.",
+            "ambiguous_question": "근거를 하나로 정할 수 없어 보류합니다.",
+            "verification_failed": "제안한 답이나 근거를 확인하지 못해 보류합니다.",
+            "unit_mismatch": "입력 단위가 서로 달라 계산을 보류합니다.",
+            "timeout": "처리 시간이 초과되어 보류합니다.",
+        }
+        check("abstain", True, reasons.get(reason, f"사유 {reason}으로 보류합니다."))
         return Resolution("abstained", None, [], None, Verdict(status="abstained", reason=reason, checks=checks), trace)
 
     def answered(answer, cells=None, calculation=None, spans=None):
@@ -131,14 +142,17 @@ def resolve(question, table, program, retrieval_ok=True, context=None, passage_i
             return answered(span.text, spans=[span])
 
         cells = program.cells
-        valid = all(c.row < len(table.rows) and c.col < len(table.header) for c in cells)
-        check("cells_in_range", valid, "근거 셀의 범위를 확인합니다.")
+        outside = [c.cid for c in cells if c.row >= len(table.rows) or c.col >= len(table.header)]
+        valid = not outside
+        detail = f"범위 밖 셀: {', '.join(outside)}" if outside else f"셀 {len(cells)}개, 표 크기 {len(table.rows)}×{len(table.header)}"
+        check("cells_in_range", valid, detail)
         if not valid:
             return abstain("invalid_program")
         question_years = _years(question)
         if question_years:
             evidence_years = _years(table.title + " " + " ".join(" ".join(table.rows[c.row]) for c in cells))
-            check("period_consistent", not evidence_years or bool(question_years & evidence_years), "질문과 근거의 기간을 확인합니다.")
+            check("period_consistent", not evidence_years or bool(question_years & evidence_years),
+                  f"질문 연도: {sorted(question_years)}, 근거 연도: {sorted(evidence_years)}")
 
         if program.op == "lookup":
             if len(cells) != 1:
@@ -151,7 +165,7 @@ def resolve(question, table, program, retrieval_ok=True, context=None, passage_i
                 column = header_column(question, table, ref.col)
                 if column is not None and table.cell(ref.row, column).strip():
                     corrected = CellRef(table_id=table.id, row=ref.row, col=column)
-                    check("column_repaired", False, "질문에 맞는 열로 수정했습니다.")
+                    check("column_repaired", False, f"인용 셀 {ref.cid} → {corrected.cid} (열: {table.header[column]})")
                     return answered(table.cell(ref.row, column), [corrected])
             proposed = normalize_text(program.answer or "")
             cell_text = normalize_text(value)
@@ -162,12 +176,12 @@ def resolve(question, table, program, retrieval_ok=True, context=None, passage_i
                 b = parse_number(value)
                 if a is not None and b is not None and abs(a.value - b.value) > 1e-9:
                     contained = False
-            check("answer_matches_cell", same, "제안된 답과 셀을 비교합니다.")
+            check("answer_matches_cell", same, f"제안 답: {program.answer!r}, 셀 {ref.cid}: {value!r}")
             if not same and not contained and proposed:
                 found = REGISTRY.call("cell_find", table, {"text": program.answer, "exact": True}, trace)
                 if len(found) == 1 and len(proposed) >= 2:
                     replacement = found[0]
-                    check("evidence_repaired", False, "답과 일치하는 근거로 수정했습니다.")
+                    check("evidence_repaired", False, f"인용 셀 {ref.cid} → 답과 일치하는 셀 {replacement.cid}")
                     return answered(table.cell(replacement.row, replacement.col), [replacement])
                 return abstain("verification_failed")
             return answered(value, cells)
@@ -180,12 +194,13 @@ def resolve(question, table, program, retrieval_ok=True, context=None, passage_i
         except ToolError as exc:
             check("calculation", False, str(exc))
             return abstain("unit_mismatch" if "unit mismatch" in str(exc) else "invalid_program")
-        check("calculation", True, "계산을 완료했습니다.")
+        check("calculation", True, f"{calc.expression} = {calc.formatted}")
         units_ok = len({item.unit for item in calc.inputs}) == 1 or program.op in ("ratio", "count")
-        check("units_consistent", units_ok, "입력 단위를 확인합니다.")
+        check("units_consistent", units_ok, f"입력 단위: {[item.unit for item in calc.inputs]}")
         if program.answer:
             proposed = parse_number(program.answer)
-            check("answer_matches_calc", proposed is not None and _close(proposed.value, calc.result), "제안된 답과 계산 결과를 비교합니다.")
+            check("answer_matches_calc", proposed is not None and _close(proposed.value, calc.result),
+                  f"제안 답: {program.answer!r}, 계산 값: {calc.result} ({calc.formatted})")
         return answered(calc.formatted, cells, calc)
 
     result = decide()
@@ -194,6 +209,6 @@ def resolve(question, table, program, retrieval_ok=True, context=None, passage_i
         if subject is not None:
             result.verdict.checks.append(subject)
             if reason is not None:
-                result.verdict.checks.append(Check(name="abstain", passed=True, detail="질문 대상이 근거와 맞지 않습니다."))
+                result.verdict.checks.append(Check(name="abstain", passed=True, detail=f"질문 대상이 근거와 맞지 않아 보류합니다 (사유: {reason})."))
                 return Resolution("abstained", None, [], None, Verdict(status="abstained", reason=reason, checks=result.verdict.checks), result.trace)
     return result
