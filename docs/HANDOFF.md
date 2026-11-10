@@ -1,6 +1,6 @@
 # 자소서·포트폴리오 작성용 전달 문서 (TableTrace)
 
-이 문서는 자기소개서와 포트폴리오를 쓰는 사람(또는 AI 도구)에게 넘기는 사실 정리다. **여기 없는 숫자는 쓰지 말고, 여기 있는 숫자도 괄호의 출처 파일로 다시 확인한 뒤 쓴다.** 저장소에서 `python scripts/check_numbers.py --strict`와 `python scripts/render_results.py --check`를 돌리면 README·보고서의 모든 숫자가 산출물과 일치하는지 검사된다(2026-11-10 기준 951개 일치).
+이 문서는 자기소개서와 포트폴리오를 쓰는 사람(또는 AI 도구)에게 넘기는 사실 정리다. **여기 없는 숫자는 쓰지 말고, 여기 있는 숫자도 괄호의 출처 파일로 다시 확인한 뒤 쓴다.** 저장소에서 `python scripts/check_numbers.py --strict`와 `python scripts/render_results.py --check`를 돌리면 README·보고서의 모든 숫자가 산출물과 일치하는지 검사된다(2026-11-10 기준 960개 일치).
 
 ## 0. 반드시 지킬 규칙
 
@@ -65,7 +65,7 @@
 | vLLM 텐서 병렬 TP=2 (T4 2장) | 41.0 요청/s, p50 678 ms; 점수는 1장과 같음 | `experiments/bench/engine_vllm_tp2_c32.json`, `experiments/eval/exaone_vllm_tp2_ko_test/metrics.json` |
 | SGLang (T4, 우회 모듈) | vLLM과 같은 답(699문항 중 1개 차이), 속도는 8.3 요청/s | `experiments/eval/exaone_sglang_ko_test/metrics.json`, `experiments/bench/engine_sglang_c32.json` |
 | mT5 2-스테이지 파이프라인 병렬 (T4 2장, NCCL) | 출력 일치, 처리량 이득 없음(설계상 겹치지 않음), 장치당 메모리 분할 | `experiments/bench/pp_*_gpu.json` |
-| 테스트·검증 | pytest 120개 통과, E2E 실시간 18/18·정적 21/21, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
+| 테스트·검증 | pytest 127개 통과(검증기 옵션 테스트 8개는 구현 전이라 건너뜀), E2E 실시간 18/18·정적 21/21, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
 
 ## 4. 포트폴리오에 쓸 만한 과정 (전부 기록이 있음)
 
@@ -74,7 +74,7 @@
 3. **검증기 v2(개체 일치 검사)**: 표에 없는 대상에도 셀을 인용해 답하는 문제를 검증기 단계에서 잡았고, 정답을 오탐 보류하는 비용(4.3%)을 함께 측정했다. 잘하는 모델(EXAONE 전체)에서는 순효과가 음수에 가깝다는 것도 적었다.
 4. **int8 "lm_head는 fp32"라는 문서의 오류를 스스로 발견**하고 양자화 범위별로 다시 측정해, 속도 이득은 lm_head에서 나오고 정확도 붕괴는 전체 양자화에서만 난다는 것을 보였다. (§8, §18.2)
 5. **SGLang을 미지원 GPU(T4)에서 돌림**: sgl_kernel에 sm75 커널이 없어 두 번 실패 → 소스를 읽고 `MultiPlatformOp`를 PyTorch 구현으로 돌리는 우회 모듈 작성 → 세 번째는 transformers 5.x가 저장한 config.json의 RoPE 키를 4.57이 못 읽어 엉뚱한 답 → 설정 복원 → 네 번째 성공, vLLM과 답 일치. (`experiments/serving/sglang_t4_failure.md`, 이슈 37~39)
-6. **숫자 정합성 도구**: 문서의 모든 숫자를 산출물 JSON에 묶는 표식과 검사 스크립트(`scripts/check_numbers.py`, `scripts/render_results.py`)로 951개 숫자를 자동 검증한다.
+6. **숫자 정합성 도구**: 문서의 모든 숫자를 산출물 JSON에 묶는 표식과 검사 스크립트(`scripts/check_numbers.py`, `scripts/render_results.py`)로 960개 숫자를 자동 검증한다.
 7. **학습 실행 간 변동을 측정**: 같은 설정의 LoRA를 300개 3회, 전체 2회 돌려 300개는 1점 안, 전체는 약 3점(p=0.013) 움직임을 기록하고 점수를 범위로 적었다.
 8. **자기 주장을 측정으로 다시 확인하고 줄임** (2026-11-10): "공개 분할이 표 1,755개를 공유한다"는 문장이 실은 페이지 수였음을 찾아 고쳤다(같은 표는 1,578개). "표 겹침이 점수를 부풀린다"는 가정은 직접 재 보니 mT5에서 검출되지 않았고, 그 결과를 그대로 적었다. (`docs/REPORT.md` §19.3, 이슈 42)
 9. **가까운 논문 12편을 원문으로 읽고 주장 범위를 정함**: 답과 근거의 불일치, 셀 인용 강화학습, 근거 셀 보상은 이미 연구가 있다는 것을 확인하고 "새롭다"는 표현을 빼고 "한국어 표에서의 측정"으로 좁혔다. KorWikiTQ 원논문이 분할 방식을 밝히지 않는다는 것도 원문에서 확인했다. (§8, `docs/research/papers.md`)
@@ -91,6 +91,8 @@
 - "처음", "최초", "새로운 방법" (가까운 논문 12편을 원문으로 읽었다. 답과 근거의 불일치는 TrustTable(ACL 2026)과 ViTaB-A가, 작은 모델의 셀 인용 강화학습은 RSAT가, 근거 셀 보상과 그 위험은 Reasoning-Table이 이미 다룬다. §8 참고).
 - "표 1,755개가 겹친다" (1,755는 페이지 수다. 셀까지 같은 표는 1,578개다).
 - "검증기가 틀린 근거를 걸러 낸다" (답 텍스트가 표의 한 셀과 같으면 검증기는 근거를 그 셀로 고쳐서 답한다. 걸러 내는 것은 답과 셀이 안 맞는 경우다).
+- "열 번호 형식으로 근거 오류를 줄였다" (형식 옵션은 구현했고 토큰 비용만 쟀다. 정확도는 아직 재지 않았다. `docs/REPORT.md` §19.7).
+- "검증기에 근거 복구를 끄는 옵션이 있다" (명세와 테스트만 있다. 소유자가 구현해 병합한 뒤에 쓸 수 있다. §19.8).
 - "공고의 모든 항목을 구현했다" (원문에만 있는 gRPC, 챗봇, 메모리 결합, Personal Agent, 구조 전용 PLM 구현은 하지 않았다. 프로젝트는 원문을 읽기 전에 만들어졌고 원문 대조는 2026-11-10에 했다).
 
 ## 6. 공고 항목과 대응 (근거는 `docs/REPORT.md` §3, 원문 항목별 표는 `docs/research/job-posting.md`)

@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->120<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패(모델 가중치가 없으면 모델 테스트는 skip) |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->127<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->8<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패(모델 가중치가 없으면 모델 테스트는 skip) |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 | `training/rl_grpo.py`, §7, §18, 이슈 23–24 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->120<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->127<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -911,7 +911,7 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 - **반복 수.** mT5 단계별 모델은 시드 1개다. EXAONE은 300개 설정 3회, 전체 데이터 설정 2회다. 구간은 문항 표본의 불확실성만 담고 학습 시드의 변동은 담지 않는다. 전체 데이터 두 번의 학습 사이 verified EM 차이는 약 3%p였다(§18.3).
 - **한 데이터셋.** 근거 오류와 겹침 효과는 KorWikiTQ에서만 쟀다. 16행·7열·900자 이하 표만 남긴 필터를 거친 부분집합이다.
 - **정답 셀의 출처.** KorWikiTQ는 정답 셀을 주지 않는다. 답 텍스트와 같은 셀을 찾아 정답 셀로 삼았고, 여러 개면 질문과 겹치는 행을 골랐으며 답이 어느 셀인지 정할 수 없는 421건은 뺐다.
-- **검증기의 근거 복구.** 약한 모델의 verified EM은 복구된 근거에 기대고 있다(§19.1의 5번, §19.2의 5번). 복구를 끈 조건은 검증기를 다시 돌린 값이 아니다. 검증기 코드에서 복구 분기 다음이 보류라는 점에 근거해 저장된 출력에서 계산했다.
+- **검증기의 근거 복구.** 약한 모델의 verified EM은 복구된 근거에 기대고 있다(§19.1의 5번, §19.2의 5번). 복구를 끈 조건은 저장소의 검증기를 다시 돌린 값이 아니다. 검증기 코드에서 복구 분기 다음이 보류라는 점에 근거해 저장된 출력에서 계산했다. 다만 명세대로 옵션을 넣은 검증기 사본(저장소에 넣지 않았다)으로 세 평가(mT5 최종, EXAONE 300개, EXAONE 전체)를 다시 검증해 699문항 모두 계산값과 같음을 확인했다. 저장소의 검증기에 옵션이 들어가면(§19.8) 그 측정값으로 바꾼다.
 - **겹침 효과는 mT5로만 쟀다.** 가장 좋은 모델(EXAONE 전체 데이터)의 겹침 효과는 GPU가 필요해 재지 않았다. 질문 세트는 저장소에 있다(`data/ko/leak_probe_*.jsonl`).
 
 ### 19.6 데모에 반영한 것 (2026-11-10)
@@ -924,4 +924,27 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 4. **모바일 배치 오류 수정.** 좁은 화면에서 푸터가 문서 목록 위에 겹쳐 아래쪽 문서를 누를 수 없었다. 페이지 높이를 화면에 고정한 규칙 때문이었고 이전 판에도 있던 문제다(이슈 45). E2E에 겹침 검사를 넣었다.
 
 E2E는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 통과다. 데모의 EXAONE 답 가운데에는 틀린 답도 있다. 본문에 답이 있는 질문에 표의 셀을 답한 것(수작업 평가의 본문 범주 0/5와 같은 현상)이 검증을 통과해 나온다. 데모는 이것을 숨기지 않는다.
+
+### 19.7 표 입력에 열 번호를 넣는 형식 — 구현 후 미실행
+
+§19.1에서 근거 오류는 거의 전부 "행은 맞고 열이 틀림"이었다. 모델이 받는 표는 `r0: 2011 | MBC | 놀러와` 형태다. 행에는 번호가 붙어 있지만 열 번호는 구분자를 세어야 알 수 있다. 그래서 셀마다 열 번호를 붙이는 형식을 옵션으로 추가했다(`src/tabletrace/model/serialize.py`).
+
+| 형식 | 모델이 받는 표 |
+|---|---|
+| `plain` (기본, 저장된 모든 결과) | `header: 연도 \| 방송사 \| 제목 ; r0: 2011 \| MBC \| 놀러와` |
+| `colid` (추가) | `header: c0 연도 \| c1 방송사 \| c2 제목 ; r0: c0 2011 \| c1 MBC \| c2 놀러와` |
+
+학습(`scripts/train/exaone_lora_sft.py`, `training/sft.py`), 평가(`eval/run.py`), 엔진 벤치, 서비스(환경 변수 `TABLETRACE_TABLE_FORMAT`)에 `--table-format`으로 연결했고 평가 결과의 `meta.table_format`에 기록된다. 기본값은 `plain`이라 저장된 결과는 그대로 재현된다.
+
+**실행한 것: 토큰 비용.** EXAONE-4.0-1.2B 토크나이저로 세면 `colid`는 입력이 <!-- num:experiments/serialize/table_format_cost.json:colid_extra_tokens_rate:pct -->26.0<!-- /num -->% 길다(문항당 중앙값 <!-- num:experiments/serialize/table_format_cost.json:cases.plain_672.whole_input_tokens_median:int -->438<!-- /num --> → <!-- num:experiments/serialize/table_format_cost.json:cases.colid_672.whole_input_tokens_median:int -->552<!-- /num --> 토큰). 입력 예산을 그대로 672로 두면 test에서 정답 행이 잘리는 문항이 <!-- num:experiments/serialize/table_format_cost.json:cases.plain_672.test_gold_row_cut:int -->24<!-- /num -->개에서 <!-- num:experiments/serialize/table_format_cost.json:cases.colid_672.test_gold_row_cut:int -->63<!-- /num -->개로 늘어 불공정한 비교가 된다. 예산을 800으로 올리면 <!-- num:experiments/serialize/table_format_cost.json:cases.colid_800.test_gold_row_cut:int -->27<!-- /num -->개, 학습 예제는 <!-- num:experiments/serialize/table_format_cost.json:cases.colid_800.train_examples_kept:int -->3,588<!-- /num -->개로 `plain`의 <!-- num:experiments/serialize/table_format_cost.json:cases.plain_672.train_examples_kept:int -->3,587<!-- /num -->개와 거의 같다(`scripts/table_format_cost.py`). 그래서 노트북은 `colid`일 때 `--max-len 896`, 평가 `--max-in 800`을 쓴다.
+
+**실행하지 않은 것: 정확도.** 열 번호를 붙이면 근거 오류가 줄어드는지는 재지 않았다. GPU 학습이 필요하다. 노트북에서 `LIMIT = 300`, `TABLE_FORMAT = "colid"`로 0·1·2·5번 절만 돌리면 된다(무료 T4에서 20~30분). 비교 대상은 저장소에 있는 `plain` 300개 결과 세 번(인용 셀에 답이 없는 비율 53~65%)이다. 줄어들면 "데이터를 12배 늘리지 않고 입력 형식만으로 근거 오류를 줄였다"는 결과가 되고, 그대로면 "열 번호를 보여 줘도 300개로는 못 배운다"는 결과가 된다. 어느 쪽이든 적는다.
+
+### 19.8 검증기의 근거 복구 끄기 옵션 — 명세와 테스트 준비, 구현은 소유자 몫
+
+§19.2의 5번에서 근거 복구는 점수와 오답을 함께 올렸다. 끌 방법이 지금은 없다. `verify/verifier.py`는 소유자가 직접 쓴 모듈이므로 AI 도구는 코드를 쓰지 않고 다음만 준비했다.
+
+- 명세 `docs/rewrite/05_verifier_repair_option.md`: `resolve(..., repair=True)` 인자 하나. 끄면 복구 대신 `verification_failed`로 보류한다.
+- 테스트 `tests/test_verifier_repair_option.py`: 인자가 생기기 전에는 건너뛰고, 생기면 실행된다(기본 동작 유지, 끈 경우의 보류, 다른 경로에 영향 없음, 저장된 모델 출력에서의 일치).
+- 평가 스크립트의 `--no-repair`와, 재검증 결과를 계산값과 문항 단위로 대조하는 `scripts/evidence_error.py --compare-no-repair`.
 

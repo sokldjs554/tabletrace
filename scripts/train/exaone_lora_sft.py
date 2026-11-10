@@ -24,6 +24,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "serving"))
 from fix_tokenizer_config import portable_model_dir
 
+from tabletrace.model.serialize import TABLE_FORMATS, set_table_format
 from tabletrace.service.engines import SYSTEM_PROMPT
 from tabletrace.training.data import build_examples, load_docs, read_records
 
@@ -57,6 +58,9 @@ def main() -> None:
     ap.add_argument("--merge", action="store_true", help="also save the merged model to <out>/merged")
     ap.add_argument("--limit", type=int, default=0, help="use only the first N training examples (smoke tests)")
     ap.add_argument("--tokenizer", default=None, help="defaults to --model")
+    ap.add_argument("--table-format", choices=TABLE_FORMATS, default="plain",
+                    help="plain: cells separated by ' | ' (all stored results). colid: every cell carries its column index "
+                         "(about 26%% more tokens: use --max-len 896 for the same row budget as plain at 768)")
     a = ap.parse_args()
     from peft import LoraConfig, get_peft_model
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -80,6 +84,7 @@ def main() -> None:
         raise
     model.print_trainable_parameters()
     docs = load_docs(*[Path(c) for c in a.corpus])
+    set_table_format(a.table_format)
     exs = build_examples(read_records([Path(p) for p in a.train]), docs, tok, a.max_len - 96, drop_truncated_gold=True)
     if a.limit:
         exs = exs[: a.limit]

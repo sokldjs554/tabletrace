@@ -31,6 +31,7 @@ from pydantic import BaseModel, Field
 from tabletrace import __version__
 from tabletrace.agent.graph import AgentRuntime
 from tabletrace.corpus.store import CorpusStore
+from tabletrace.model.serialize import get_table_format
 from tabletrace.retrieval.index import CorpusIndex
 from tabletrace.schema import CellRef, Corpus
 from tabletrace.service.jobs import JobRunner
@@ -113,7 +114,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         rt: AgentRuntime = state["runtime"]
         return {"version": __version__, "commit": git_commit(), "release": settings.release,
                 "planner": "neural" if rt.neural else "heuristic", "model_id": rt.neural.model_id if rt.neural else None,
-                "quantized": bool(rt.neural and rt.neural.quantized), "entity_check": rt.entity_check, "max_concurrent_jobs": settings.max_concurrent_jobs,
+                "quantized": bool(rt.neural and rt.neural.quantized), "table_format": get_table_format(), "entity_check": rt.entity_check, "max_concurrent_jobs": settings.max_concurrent_jobs,
                 "job_timeout_s": settings.job_timeout_s}
 
     @app.get("/v1/corpora")

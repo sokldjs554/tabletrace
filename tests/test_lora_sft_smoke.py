@@ -57,6 +57,20 @@ def test_lora_sft_runs_and_merges(tmp_path):
     assert not isinstance(tcfg.get("extra_special_tokens"), list) and tcfg.get("tokenizer_class") != "TokenizersBackend"
 
 
+def test_lora_sft_accepts_the_column_id_table_format(tmp_path):
+    """--table-format colid trains end to end and is recorded with the run (the serving side must use the same format)."""
+    model_dir = _tiny_model(tmp_path)
+    out = tmp_path / "lora_colid"
+    r = subprocess.run([sys.executable, str(ROOT / "scripts/train/exaone_lora_sft.py"), "--model", str(model_dir), "--dtype", "fp32",
+                        "--train", str(ROOT / "data/chem/synthetic_train.jsonl"), "--corpus", str(ROOT / "data/chem/documents.jsonl"),
+                        "--out", str(out), "--epochs", "1", "--bs", "2", "--grad-accum", "2", "--limit", "8", "--lora-r", "4",
+                        "--max-len", "1536", "--table-format", "colid"], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-2000:]
+    info = json.loads((out / "train_info.json").read_text())
+    assert info["args"]["table_format"] == "colid" and info["steps"] >= 1
+    assert all(x["loss"] == x["loss"] for x in info["loss_log"])
+
+
 def test_tokenizer_config_is_made_portable(tmp_path):
     """transformers 5 saves extra_special_tokens as a list and names the class TokenizersBackend; SGLang's 4.57 cannot read that."""
     sys.path.insert(0, str(ROOT / "scripts" / "serving"))

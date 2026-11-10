@@ -24,6 +24,8 @@
 | 8 | `tools/registry.py`, `agent/graph.py` | 94 + 177 | `tests/test_api.py` | 도구 등록과 LangGraph 그래프 |
 | 9 | `service/jobs.py`, `service/app.py` | 96 + 220 | `tests/test_api.py` | 비동기 작업 러너와 FastAPI |
 
+**4b (추가 과제)**: 4단계에서 쓴 검증기에 "근거 복구 끄기" 옵션을 더한다. 명세는 `docs/rewrite/05_verifier_repair_option.md`, 테스트는 `tests/test_verifier_repair_option.py`(옵션이 생기기 전에는 건너뜀). 5단계보다 먼저 해도 된다.
+
 1~4단계(약 640줄)가 끝나면 "검증 파이프라인의 핵심을 직접 구현했다"가 사실이 된다. 9단계까지 가면 서비스 계층도 포함된다. 학습·벤치 스크립트(`training/`, `bench/`, `scripts/`)와 문서는 이 계획에 없다.
 
 ## 환경 준비 (맥북, 처음 한 번)

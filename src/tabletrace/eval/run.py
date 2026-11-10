@@ -9,6 +9,7 @@ service would actually see.
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import platform
 import time
@@ -17,6 +18,7 @@ from pathlib import Path
 from tabletrace.agent.heuristic import plan as heuristic_plan
 from tabletrace.agent.program import ProgramParseError, parse, serialize
 from tabletrace.eval.metrics import answer_match, cells_match, summarize
+from tabletrace.model.serialize import TABLE_FORMATS, get_table_format, set_table_format
 from tabletrace.training.data import build_examples, load_docs, read_records
 from tabletrace.verify.verifier import resolve
 
@@ -41,8 +43,23 @@ def main() -> None:
     ap.add_argument("--label", default=None)
     ap.add_argument("--no-entity-check", action="store_true", help="verifier without the subject check (the evaluation before it existed)")
     ap.add_argument("--column-check", action="store_true", help="verifier moves a lookup to the column the question names")
+    ap.add_argument("--no-repair", action="store_true",
+                    help="verifier withholds a lookup whose cited cell does not hold the answer instead of repairing the evidence "
+                         "(needs resolve(..., repair=False), docs/rewrite/05_verifier_repair_option.md)")
     ap.add_argument("--replay-from", default=None, help="eval dir whose predictions.jsonl raw outputs are re-verified (no model run)")
+    ap.add_argument("--table-format", choices=TABLE_FORMATS, default=None,
+                    help="how tables are written into the model input (model/serialize.py); must be the format the planner was trained on. "
+                         "Default: the replayed run's format with --replay-from, else TABLETRACE_TABLE_FORMAT, else plain")
     a = ap.parse_args()
+    if a.table_format is None and a.replay_from:      # a replay must rebuild the same inputs (row budget) as the run it replays
+        a.table_format = json.loads((Path(a.replay_from) / "metrics.json").read_text(encoding="utf-8"))["meta"].get("table_format")
+    if a.table_format:
+        set_table_format(a.table_format)
+    verify_opts = {}
+    if a.no_repair:
+        if "repair" not in inspect.signature(resolve).parameters:
+            raise SystemExit("--no-repair: this verifier has no `repair` option yet (docs/rewrite/05_verifier_repair_option.md)")
+        verify_opts["repair"] = False
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     docs = load_docs(*[Path(c) for c in a.corpus])
@@ -96,7 +113,7 @@ def main() -> None:
     rec_by_qid = {r["qid"]: r for r in recs}
     for e, (prog, raw, _n, ms) in zip(examples, plans, strict=True):
         gold_res = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=False)
-        res = resolve(e.question, e.table, prog, context=e.context, entity_check=not a.no_entity_check, column_check=a.column_check)
+        res = resolve(e.question, e.table, prog, context=e.context, entity_check=not a.no_entity_check, column_check=a.column_check, **verify_opts)
         # what the subject check alone would do to the GOLD program: the abstention rate a perfect planner would suffer
         gold_chk = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=True)
         gold_subject_fail = gold_res.status == "answered" and gold_chk.status == "abstained"
@@ -133,7 +150,7 @@ def main() -> None:
     metrics["entity_check"] = not a.no_entity_check
     meta = {"planner": a.planner, "model": planner_id, "data": a.data, "corpus": a.corpus, "n": len(rows),
             "wall_s": round(time.time() - t0, 1), "hardware": platform.processor() or platform.machine(),
-            "label": a.label, "entity_check": not a.no_entity_check, "column_check": a.column_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None}
+            "label": a.label, "table_format": get_table_format(), "evidence_repair": not a.no_repair, "entity_check": not a.no_entity_check, "column_check": a.column_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None}
     (out / "metrics.json").write_text(json.dumps({"meta": meta, "metrics": metrics}, ensure_ascii=False, indent=1))
     with open(out / "predictions.jsonl", "w", encoding="utf-8") as f:
         for r in rows:

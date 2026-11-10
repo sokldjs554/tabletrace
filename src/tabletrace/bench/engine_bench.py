@@ -8,6 +8,7 @@ import statistics
 import time
 from pathlib import Path
 
+from tabletrace.model.serialize import TABLE_FORMATS, get_table_format, set_table_format
 from tabletrace.service.engines import EnginePlanner
 from tabletrace.training.data import build_examples, load_docs, read_records
 
@@ -22,7 +23,10 @@ def main() -> None:
     ap.add_argument("--tokenizer", default=None, help="approx | hub name | path (default: models/mt5-small-base if present, else approx)")
     ap.add_argument("--concurrency", type=int, default=8)
     ap.add_argument("--out", default="experiments/bench/engine.json")
+    ap.add_argument("--table-format", choices=TABLE_FORMATS, default=None, help="table format the served model was trained on (default: TABLETRACE_TABLE_FORMAT or plain)")
     a = ap.parse_args()
+    if a.table_format:
+        set_table_format(a.table_format)
     planner = EnginePlanner(a.url, a.model)
     from tabletrace.model.approx_tokenizer import load_tokenizer
 
@@ -34,7 +38,7 @@ def main() -> None:
         res = list(pool.map(lambda e: planner.plan(e.question, e.table, e.context), exs))
     wall = time.perf_counter() - t0
     lat = sorted(r[3] for r in res)
-    out = {"url": a.url, "model": a.model, "n": len(exs), "concurrency": a.concurrency, "wall_s": round(wall, 2),
+    out = {"url": a.url, "model": a.model, "table_format": get_table_format(), "n": len(exs), "concurrency": a.concurrency, "wall_s": round(wall, 2),
            "throughput_req_per_s": round(len(exs) / wall, 3), "p50_ms": round(statistics.median(lat), 1), "p95_ms": round(lat[int(0.95 * len(lat)) - 1], 1),
            "parse_ok_rate": round(sum(1 for r in res if r[0] is not None) / len(res), 3)}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)

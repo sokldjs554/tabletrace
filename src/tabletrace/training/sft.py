@@ -21,6 +21,7 @@ from pathlib import Path
 import psutil
 import torch
 
+from tabletrace.model.serialize import TABLE_FORMATS, set_table_format
 from tabletrace.training.data import build_examples, load_docs, read_records
 
 
@@ -84,6 +85,7 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--threads", type=int, default=0)
     ap.add_argument("--log-every", type=int, default=10)
+    ap.add_argument("--table-format", choices=TABLE_FORMATS, default="plain", help="see model/serialize.py; recorded in config.json")
     a = ap.parse_args()
     if a.threads:
         torch.set_num_threads(a.threads)
@@ -98,6 +100,7 @@ def main() -> None:
     docs = load_docs(*[Path(c) for c in a.corpus])
     train_recs = read_records([Path(p) for p in a.train])
     dev_recs = read_records([Path(p) for p in a.dev])
+    set_table_format(a.table_format)
     train = build_examples(train_recs, docs, tok, a.max_in, drop_truncated_gold=True)
     dev = build_examples(dev_recs, docs, tok, a.max_in, drop_truncated_gold=False)
     random.shuffle(train)

@@ -77,3 +77,25 @@ EXAONE은 비상업 연구용 라이선스(EXAONE AI Model License 1.2-NC)이고
 | SGLang이 모델을 올린 뒤 `Capture cuda graph failed: RMSNorm failed with error code no kernel image is available for execution on the device` | T4(sm75)용 커널이 `sgl_kernel` 바이너리에 없음. 설정으로 우회할 수 없음(`--disable-cuda-graph`도 같은 호출이 첫 추론으로 옮겨갈 뿐) | Ampere 이상 GPU에서 실행. T4에서는 vLLM만 사용 |
 | `torchrun ... pipeline_parallel --backend nccl`에서 rank 1이 `exitcode 1`로 먼저 죽고 rank 0이 SIGTERM으로 끝남 | NCCL은 CUDA 텐서만 주고받는데, 스크립트의 제어용 작은 텐서(크기, 어텐션 마스크, 토큰 수)가 CPU 텐서였음. gloo(CPU)에서는 되고 nccl에서만 실패 | 프로세스 그룹을 `cpu:gloo,cuda:nccl`로 초기화(CPU 텐서는 gloo, CUDA 텐서는 NCCL). 코드에 반영됨. 그래도 멈추면 `NCCL_P2P_DISABLE=1` |
 
+## 열 번호 형식 실험 (선택, 무료 T4에서 20~30분)
+
+표의 모든 셀 앞에 열 번호를 붙인 입력 형식(`colid`)이 "행은 맞고 열이 틀리는" 근거 오류를 줄이는지 보는 실험이다. 배경과 토큰 비용은 `docs/REPORT.md` §19.7.
+
+1. `notebooks/gpu_experiments.ipynb`의 1번 절 셀에서 `LIMIT = 300`, `TABLE_FORMAT = "colid"`로 바꾼다. `MAX_LEN`은 자동으로 896이 된다.
+2. 0번 절(준비), 1번 절(LoRA), 2번 절(vLLM 평가), 5번 절(결과 압축)만 실행한다. 3·4번 절은 건너뛴다.
+3. 결과 파일 이름에 `_colid`가 붙는다(`experiments/eval/exaone_colid_vllm_ko_test` 등). 기존 결과를 덮어쓰지 않는다.
+4. `gpu_results.tgz`를 올리면 `python scripts/evidence_error.py`가 같은 표(§19.1)에 새 행을 더한다.
+
+같은 명령을 직접 돌리려면:
+
+```bash
+python scripts/train/exaone_lora_sft.py --model LGAI-EXAONE/EXAONE-4.0-1.2B --dtype auto --grad-ckpt --merge \
+    --train data/ko/train.jsonl data/ko/synthetic_train.jsonl --corpus data/ko/documents.jsonl \
+    --epochs 1 --bs 2 --grad-accum 8 --limit 300 --max-len 896 --table-format colid --out experiments/exaone_lora_colid
+python -m tabletrace.eval.run --planner engine --engine-url http://127.0.0.1:8001 --engine-model planner \
+    --tokenizer experiments/exaone_lora_colid/merged --max-in 800 --table-format colid --no-entity-check \
+    --corpus data/ko/documents.jsonl --data data/ko/test.jsonl data/ko/synthetic_test.jsonl --out experiments/eval/exaone_colid_vllm_ko_test
+```
+
+서버는 모델을 학습한 형식과 같은 형식으로 띄워야 한다. FastAPI 서비스는 환경 변수 `TABLETRACE_TABLE_FORMAT=colid`로 고른다.
+

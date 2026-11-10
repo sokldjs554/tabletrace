@@ -1,0 +1,44 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "test_questions": 699,
+ "train_questions": 3654,
+ "cases": {
+  "plain_672": {
+   "format": "plain",
+   "max_in": 672,
+   "test_gold_row_cut": 24,
+   "test_gold_row_cut_rate": 0.0343,
+   "test_tables_with_rows_cut": 101,
+   "train_examples_kept": 3587,
+   "whole_input_tokens_median": 438
+  },
+  "colid_672": {
+   "format": "colid",
+   "max_in": 672,
+   "test_gold_row_cut": 63,
+   "test_gold_row_cut_rate": 0.0901,
+   "test_tables_with_rows_cut": 240,
+   "train_examples_kept": 3485,
+   "whole_input_tokens_median": 552
+  },
+  "colid_800": {
+   "format": "colid",
+   "max_in": 800,
+   "test_gold_row_cut": 27,
+   "test_gold_row_cut_rate": 0.0386,
+   "test_tables_with_rows_cut": 110,
+   "train_examples_kept": 3588,
+   "whole_input_tokens_median": 552
+  },
+  "colid_928": {
+   "format": "colid",
+   "max_in": 928,
+   "test_gold_row_cut": 12,
+   "test_gold_row_cut_rate": 0.0172,
+   "test_tables_with_rows_cut": 48,
+   "train_examples_kept": 3636,
+   "whole_input_tokens_median": 552
+  }
+ },
+ "colid_extra_tokens_rate": 0.2603
+}

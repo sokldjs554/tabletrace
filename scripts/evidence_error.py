@@ -16,6 +16,8 @@ Both come with Wilson 95% intervals. The file also records what the verifier the
 the verifier, the verifier with the subject check, and the verifier with evidence repair switched off.
 
   python scripts/evidence_error.py            # writes experiments/eval/evidence_error.json
+  python scripts/evidence_error.py --compare-no-repair RUN_DIR REPLAY_DIR
+      # check the counterfactual against a real re-verification made with `eval.run --replay-from RUN_DIR --no-repair`
 """
 from __future__ import annotations
 
@@ -147,7 +149,31 @@ def one_run(run: Path) -> dict | None:
     return out
 
 
+def compare_no_repair(run: Path, replay: Path) -> dict:
+    """Counterfactual (repaired answers counted as withheld) against a real re-verification with repair switched off."""
+    rows = {r["qid"]: r for r in map(json.loads, open(run / "predictions.jsonl", encoding="utf-8"))}
+    real = {r["qid"]: r for r in map(json.loads, open(replay / "predictions.jsonl", encoding="utf-8"))}
+    differ = []
+    for qid, r in rows.items():
+        repaired = r["pred_status"] == "answered" and r["evidence_repaired"]
+        expected = ("abstained", None) if repaired else (r["pred_status"], r["pred_answer"])
+        got = (real[qid]["pred_status"], real[qid]["pred_answer"])
+        if expected != got:
+            differ.append({"qid": qid, "expected": expected, "replayed": got})
+    n = len(rows)
+    return {"questions": n, "repaired_in_original": sum(1 for r in rows.values() if r["pred_status"] == "answered" and r["evidence_repaired"]),
+            "repaired_in_replay": sum(1 for r in real.values() if r["evidence_repaired"]),
+            "verified_em_counterfactual": one_run(run)["verified_em_no_repair"],
+            "verified_em_replayed": round(sum(1 for r in real.values() if r["verified_correct"]) / n, 4),
+            "questions_that_differ": len(differ), "examples": differ[:5]}
+
+
 def main() -> None:
+    if "--compare-no-repair" in sys.argv:
+        i = sys.argv.index("--compare-no-repair")
+        res = compare_no_repair(Path(sys.argv[i + 1]), Path(sys.argv[i + 2]))
+        print(json.dumps(res, ensure_ascii=False, indent=1))
+        sys.exit(1 if res["questions_that_differ"] or res["repaired_in_replay"] else 0)
     out = {}
     for run in sorted(EVAL.iterdir()):
         if not (run / "predictions.jsonl").exists() or run.name.endswith("_ec") or "_ec_" in run.name:

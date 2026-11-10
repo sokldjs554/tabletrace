@@ -1,19 +1,56 @@
 """Turn (question, table, optional context) into the model input string, with a row budget so
 inputs stay within `max_tokens`. The format is language-neutral and mirrors the console's
-r/c cell ids so the model's evidence ids map 1:1 to what the user sees."""
+r/c cell ids so the model's evidence ids map 1:1 to what the user sees.
+
+Two table formats:
+
+  plain   header: 연도 | 방송사 | 제목 ; r0: 2011 | MBC | 놀러와 ; r1: ...
+          Rows carry their index; the column index of a cell has to be counted from the separators.
+  colid   header: c0 연도 | c1 방송사 | c2 제목 ; r0: c0 2011 | c1 MBC | c2 놀러와 ; r1: ...
+          Every cell carries its column index, so the id `r0c2` can be read off next to the value.
+
+`plain` is the format every stored result was produced with and stays the default. A model must be served with the
+format it was trained on, so the choice is one process-wide setting: the environment variable
+TABLETRACE_TABLE_FORMAT, or `set_table_format()` (the training / evaluation scripts expose it as --table-format).
+"""
 from __future__ import annotations
+
+import os
 
 from tabletrace.schema import Table
 
 ROW_SEP = " ; "
 COL_SEP = " | "
+TABLE_FORMATS = ("plain", "colid")
+_table_format = os.environ.get("TABLETRACE_TABLE_FORMAT", "plain")
 
 
-def table_to_text(table: Table, max_rows: int | None = None) -> str:
-    header = COL_SEP.join(h.strip() for h in table.header)
+def set_table_format(name: str) -> None:
+    global _table_format
+    if name not in TABLE_FORMATS:
+        raise ValueError(f"unknown table format {name!r}; choose one of {TABLE_FORMATS}")
+    _table_format = name
+
+
+def get_table_format() -> str:
+    if _table_format not in TABLE_FORMATS:      # a bad environment value must not silently fall back
+        raise ValueError(f"TABLETRACE_TABLE_FORMAT={_table_format!r}; choose one of {TABLE_FORMATS}")
+    return _table_format
+
+
+def table_to_text(table: Table, max_rows: int | None = None, table_format: str | None = None) -> str:
+    fmt = table_format or get_table_format()
+    if fmt not in TABLE_FORMATS:
+        raise ValueError(f"unknown table format {fmt!r}; choose one of {TABLE_FORMATS}")
     rows = table.rows if max_rows is None else table.rows[:max_rows]
-    body = ROW_SEP.join(f"r{i}: " + COL_SEP.join((c or "").strip() for c in r) for i, r in enumerate(rows))
-    return f"header: {header}{ROW_SEP}{body}"
+    if fmt == "colid":
+        def cells(values) -> str:
+            return COL_SEP.join(f"c{j} {(v or '').strip()}".rstrip() for j, v in enumerate(values))
+    else:
+        def cells(values) -> str:
+            return COL_SEP.join((v or "").strip() for v in values)
+    body = ROW_SEP.join(f"r{i}: " + cells(r) for i, r in enumerate(rows))
+    return f"header: {cells(table.header)}{ROW_SEP}{body}"
 
 
 def build_input(question: str, table: Table, context: str | None = None, max_rows: int | None = None) -> str:
