@@ -4,7 +4,7 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "실시간 실행 · 모델 mt5-small-tabletrace · 0.1.0 (e6f9d71)"
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (ae298b7)"
   },
   {
    "name": "desktop: document + examples rendered",
@@ -14,7 +14,7 @@
   {
    "name": "desktop: first example produced a result",
    "ok": true,
-   "detail": "완료 · 1.55 s · 작업 3b2817911e95"
+   "detail": "완료 · 22 ms · 작업 208c164f1f8b"
   },
   {
    "name": "desktop: evidence highlighted in table",
@@ -27,6 +27,11 @@
    "detail": ""
   },
   {
+   "name": "desktop: footer below the workbench",
+   "ok": true,
+   "detail": "gap 0px"
+  },
+  {
    "name": "desktop: too-short question shows an error",
    "ok": true,
    "detail": ""
@@ -34,7 +39,7 @@
   {
    "name": "desktop: typed question executed",
    "ok": true,
-   "detail": "완료 · 1.82 s · 작업 6bd6e5756846"
+   "detail": "완료 · 7 ms · 작업 33e8ffdabf0b"
   },
   {
    "name": "desktop: chemistry example produced a result",
@@ -49,7 +54,7 @@
   {
    "name": "mobile: mode badge",
    "ok": true,
-   "detail": "실시간 실행 · 모델 mt5-small-tabletrace · 0.1.0 (e6f9d71)"
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (ae298b7)"
   },
   {
    "name": "mobile: document + examples rendered",
@@ -59,7 +64,7 @@
   {
    "name": "mobile: first example produced a result",
    "ok": true,
-   "detail": "완료 · 1.48 s · 작업 d25d29ed4e2a"
+   "detail": "완료 · 10 ms · 작업 4d31ffa02057"
   },
   {
    "name": "mobile: evidence highlighted in table",
@@ -70,6 +75,11 @@
    "name": "mobile: abstain state renders 답변 보류 (heuristic planner)",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "mobile: footer below the workbench",
+   "ok": true,
+   "detail": "gap 0px"
   },
   {
    "name": "mobile: research view renders",

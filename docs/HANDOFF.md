@@ -1,6 +1,6 @@
 # 자소서·포트폴리오 작성용 전달 문서 (TableTrace)
 
-이 문서는 자기소개서와 포트폴리오를 쓰는 사람(또는 AI 도구)에게 넘기는 사실 정리다. **여기 없는 숫자는 쓰지 말고, 여기 있는 숫자도 괄호의 출처 파일로 다시 확인한 뒤 쓴다.** 저장소에서 `python scripts/check_numbers.py --strict`와 `python scripts/render_results.py --check`를 돌리면 README·보고서의 모든 숫자가 산출물과 일치하는지 검사된다(2026-11-10 기준 947개 일치).
+이 문서는 자기소개서와 포트폴리오를 쓰는 사람(또는 AI 도구)에게 넘기는 사실 정리다. **여기 없는 숫자는 쓰지 말고, 여기 있는 숫자도 괄호의 출처 파일로 다시 확인한 뒤 쓴다.** 저장소에서 `python scripts/check_numbers.py --strict`와 `python scripts/render_results.py --check`를 돌리면 README·보고서의 모든 숫자가 산출물과 일치하는지 검사된다(2026-11-10 기준 951개 일치).
 
 ## 0. 반드시 지킬 규칙
 
@@ -19,10 +19,10 @@
 | 항목 | 값 |
 |---|---|
 | 저장소 (공개) | <https://github.com/sokldjs554/tabletrace> (`main`) |
-| 공개 데모 (GitHub Pages, 저장된 실행 결과 모드) | <https://sokldjs554.github.io/tabletrace/> — 소유자가 2026-11-08 브라우저에서 열리는 것을 확인 |
+| 공개 데모 (GitHub Pages, 저장된 실행 결과 모드) | <https://sokldjs554.github.io/tabletrace/> — 소유자가 2026-11-08 브라우저에서 열리는 것을 확인. 2026-11-10부터 EXAONE 전체 데이터 모델의 저장 출력(한국어 대표 질문 16개)을 볼 수 있고, 모델이 인용한 셀과 검증기가 고친 근거 셀이 표에 따로 표시된다 |
 | 최종 보고서 | `docs/REPORT.md` (공고 대조표 §3, 확인 가능한 사실 §17, 2차 시도 §18) |
 | README | `README.md` (결과 표 §9·§10, 수행/미수행 표 §14) |
-| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (44건) |
+| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (46건) |
 | GPU 실험 출처 | `experiments/eval/PROVENANCE_exaone.md`, `experiments/serving/sglang_t4_failure.md` |
 | 로컬 실행 | `docker compose up --build` → <http://localhost:8000> |
 
@@ -65,7 +65,7 @@
 | vLLM 텐서 병렬 TP=2 (T4 2장) | 41.0 요청/s, p50 678 ms; 점수는 1장과 같음 | `experiments/bench/engine_vllm_tp2_c32.json`, `experiments/eval/exaone_vllm_tp2_ko_test/metrics.json` |
 | SGLang (T4, 우회 모듈) | vLLM과 같은 답(699문항 중 1개 차이), 속도는 8.3 요청/s | `experiments/eval/exaone_sglang_ko_test/metrics.json`, `experiments/bench/engine_sglang_c32.json` |
 | mT5 2-스테이지 파이프라인 병렬 (T4 2장, NCCL) | 출력 일치, 처리량 이득 없음(설계상 겹치지 않음), 장치당 메모리 분할 | `experiments/bench/pp_*_gpu.json` |
-| 테스트·검증 | pytest 116개 통과, E2E 실시간 16/16·정적 13/13, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
+| 테스트·검증 | pytest 120개 통과, E2E 실시간 18/18·정적 21/21, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
 
 ## 4. 포트폴리오에 쓸 만한 과정 (전부 기록이 있음)
 
@@ -74,7 +74,7 @@
 3. **검증기 v2(개체 일치 검사)**: 표에 없는 대상에도 셀을 인용해 답하는 문제를 검증기 단계에서 잡았고, 정답을 오탐 보류하는 비용(4.3%)을 함께 측정했다. 잘하는 모델(EXAONE 전체)에서는 순효과가 음수에 가깝다는 것도 적었다.
 4. **int8 "lm_head는 fp32"라는 문서의 오류를 스스로 발견**하고 양자화 범위별로 다시 측정해, 속도 이득은 lm_head에서 나오고 정확도 붕괴는 전체 양자화에서만 난다는 것을 보였다. (§8, §18.2)
 5. **SGLang을 미지원 GPU(T4)에서 돌림**: sgl_kernel에 sm75 커널이 없어 두 번 실패 → 소스를 읽고 `MultiPlatformOp`를 PyTorch 구현으로 돌리는 우회 모듈 작성 → 세 번째는 transformers 5.x가 저장한 config.json의 RoPE 키를 4.57이 못 읽어 엉뚱한 답 → 설정 복원 → 네 번째 성공, vLLM과 답 일치. (`experiments/serving/sglang_t4_failure.md`, 이슈 37~39)
-6. **숫자 정합성 도구**: 문서의 모든 숫자를 산출물 JSON에 묶는 표식과 검사 스크립트(`scripts/check_numbers.py`, `scripts/render_results.py`)로 947개 숫자를 자동 검증한다.
+6. **숫자 정합성 도구**: 문서의 모든 숫자를 산출물 JSON에 묶는 표식과 검사 스크립트(`scripts/check_numbers.py`, `scripts/render_results.py`)로 951개 숫자를 자동 검증한다.
 7. **학습 실행 간 변동을 측정**: 같은 설정의 LoRA를 300개 3회, 전체 2회 돌려 300개는 1점 안, 전체는 약 3점(p=0.013) 움직임을 기록하고 점수를 범위로 적었다.
 8. **자기 주장을 측정으로 다시 확인하고 줄임** (2026-11-10): "공개 분할이 표 1,755개를 공유한다"는 문장이 실은 페이지 수였음을 찾아 고쳤다(같은 표는 1,578개). "표 겹침이 점수를 부풀린다"는 가정은 직접 재 보니 mT5에서 검출되지 않았고, 그 결과를 그대로 적었다. (`docs/REPORT.md` §19.3, 이슈 42)
 9. **가까운 논문 12편을 원문으로 읽고 주장 범위를 정함**: 답과 근거의 불일치, 셀 인용 강화학습, 근거 셀 보상은 이미 연구가 있다는 것을 확인하고 "새롭다"는 표현을 빼고 "한국어 표에서의 측정"으로 좁혔다. KorWikiTQ 원논문이 분할 방식을 밝히지 않는다는 것도 원문에서 확인했다. (§8, `docs/research/papers.md`)

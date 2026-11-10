@@ -32,7 +32,7 @@
 |---|---|
 | 최종 커밋 | GitHub `sokldjs554/tabletrace` `main`의 최신 커밋(2026-11-08). 코드와 실험 산출물은 `4f873c5`까지이고 그 뒤는 문서 마무리 커밋뿐이다. 1차 결과의 기준 커밋은 `e6f9d71`, 2차(재학습·RL v3·int8 범위)와 GPU 실측(EXAONE LoRA, vLLM·SGLang, 멀티 GPU)은 11-04~11-08 커밋에 있다 |
 | 패키지 버전 | 0.1.0 (`src/tabletrace/__init__.py`) |
-| 정적 데모에 기록된 커밋 | `e6f9d71` (`console/data/recorded/index.json`, Artifact 페이지에도 같은 데이터) |
+| 정적 데모에 기록된 커밋 | `ae298b7`, 2026-11-10 생성(`console/data/recorded/index.json`). EXAONE 저장 출력 플래너가 추가됐다(§19.6). claude.ai Artifact 사본은 그 전 판(`e6f9d71`, mT5·휴리스틱만)에 머물러 있다 |
 | 배포된 버전 | GitHub Pages <https://sokldjs554.github.io/tabletrace/>: `main`에 푸시할 때마다 `pages.yml`이 다시 배포한다(최신 실행 성공, 소유자가 브라우저에서 확인). claude.ai Artifact(저장된 결과, 비공개): 버전 1, 기록 커밋 `e6f9d71` — <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM> |
 
 ## 3. 공고 대조표
@@ -454,8 +454,8 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->116<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패(모델 가중치가 없으면 모델 테스트는 skip) |
-| 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->120<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패(모델 가중치가 없으면 모델 테스트는 skip) |
+| 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
 | 추론 최적화 | 정밀도별 별도 프로세스, 워밍업 1 + 측정 2라운드, 양자화 모델의 정확도 평가 | §8. 첫 실행은 메모리 비교가 무효이고 측정 중 테스트를 돌려 오염되어 **폐기하고 재실행** |
@@ -551,7 +551,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 ```
 모델 가중치(`models/`, `experiments/*/model`)는 git에 없다. 재학습 명령은 scripts/train/README.md.
 
-**D. 화면에서 볼 것**: ① 한국어 표 → 「2018년 한국영화 박스 오피스」 → 대표 질문 7개 ② 근거 배지 클릭 → 셀 강조 ③ 계산 카드의 입력 값·단위 ④ 보류 질문의 사유 ⑤ 영어 화학 문서 → 「Phase Diagrams」「Non-Ideal Gas Behavior」「Rate Laws」 ⑥ **플래너 선택을 "모델"과 "휴리스틱"으로 바꿔 같은 질문의 결과를 비교** — 모델은 답이 없는 질문에도 답하는 사례와 근거 복구(검사 목록에 ✗로 표시) 사례가 보이고, 휴리스틱은 보류하는 사례가 보인다 ⑦ 연구 결과 탭 ⑧ 작동 방식 탭의 그래프와 신뢰 경계.
+**D. 화면에서 볼 것**: ① 한국어 표 → 「2018년 한국영화 박스 오피스」 → 대표 질문 7개 ② 근거 배지 클릭 → 셀 강조 ③ 계산 카드의 입력 값·단위 ④ 보류 질문의 사유 ⑤ 영어 화학 문서 → 「Phase Diagrams」「Non-Ideal Gas Behavior」「Rate Laws」 ⑥ **플래너 선택을 바꿔 같은 질문의 결과를 비교**(공개 데모에는 EXAONE 저장 출력, mT5, 휴리스틱이 있다. 「국도 1호 자동차 전용도로 구간」의 본문 질문을 EXAONE으로 열면 모델이 인용한 셀과 검증기가 고친 근거 셀이 따로 표시된다) — 모델은 답이 없는 질문에도 답하는 사례와 근거 복구(검사 목록에 ✗로 표시) 사례가 보이고, 휴리스틱은 보류하는 사례가 보인다 ⑦ 연구 결과 탭 ⑧ 작동 방식 탭의 그래프와 신뢰 경계.
 
 **E. 수치 확인**: `experiments/eval/*/metrics.json`(지표), `predictions.jsonl`(문항별 모델 원문 출력·예측 셀·검사), `analysis.json`(오류 분석), `experiments/*/train_log.jsonl`(학습 곡선), `experiments/bench/*.json`, `docs/images/e2e-*.json`, `python scripts/check_numbers.py --strict && python scripts/render_results.py --check`.
 
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 | `training/rl_grpo.py`, §7, §18, 이슈 23–24 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->116<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->120<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -913,3 +913,15 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 - **정답 셀의 출처.** KorWikiTQ는 정답 셀을 주지 않는다. 답 텍스트와 같은 셀을 찾아 정답 셀로 삼았고, 여러 개면 질문과 겹치는 행을 골랐으며 답이 어느 셀인지 정할 수 없는 421건은 뺐다.
 - **검증기의 근거 복구.** 약한 모델의 verified EM은 복구된 근거에 기대고 있다(§19.1의 5번, §19.2의 5번). 복구를 끈 조건은 검증기를 다시 돌린 값이 아니다. 검증기 코드에서 복구 분기 다음이 보류라는 점에 근거해 저장된 출력에서 계산했다.
 - **겹침 효과는 mT5로만 쟀다.** 가장 좋은 모델(EXAONE 전체 데이터)의 겹침 효과는 GPU가 필요해 재지 않았다. 질문 세트는 저장소에 있다(`data/ko/leak_probe_*.jsonl`).
+
+### 19.6 데모에 반영한 것 (2026-11-10)
+
+공개 데모(GitHub Pages)는 2026-10-30 상태에 머물러 있었다. 저장된 실행은 mT5-small과 휴리스틱뿐이었고, "연구 결과" 탭은 vLLM·SGLang을 "GPU가 없어 실행하지 못함"으로 적고 있었다. README와 어긋나서 다음을 고쳤다.
+
+1. **EXAONE 저장 출력 플래너.** 수작업 30문항 평가에서 받아 둔 EXAONE 전체 데이터 모델의 원문 출력을 대표 질문 16개(한국어)에 대해 실제 그래프·도구·검증기에 다시 넣어 저장했다(`scripts/make_recorded_runs.py --stored`). GPU 없이 재현된다. 화면의 상태 줄과 답변 카드에 "모델 출력은 2026-11-08에 Kaggle T4의 vLLM 서버에서 받아 저장한 것"이라고 표시한다. 저장된 출력이 평가 파일의 출력과 글자까지 같은지는 `tests/test_recorded_demo.py`가 검사한다. 화학 문서에는 EXAONE 기록이 없고 화면이 그렇게 안내한다. 기존 mT5·휴리스틱 실행 32개씩은 다시 돌려 이전 결과와 상태·답·근거·검사가 모두 같음을 확인했다.
+2. **모델이 인용한 셀과 근거 셀의 구분.** 첫 제안의 인용 셀이 최종 근거와 다르면 표에 붉은 점선과 "모델" 표시로 따로 그린다. 검증기가 근거를 고쳐 답한 경우 배지는 "검증 통과"가 아니라 "근거를 고쳐 답함"이다. §19.1의 측정을 화면에서 볼 수 있게 한 것이다.
+3. **연구 결과 탭 갱신.** §19.1~§19.3의 세 표, EXAONE 행, vLLM·SGLang 벤치, 멀티 GPU 실측을 산출물에서 다시 생성했다(`scripts/build_research.py`).
+4. **모바일 배치 오류 수정.** 좁은 화면에서 푸터가 문서 목록 위에 겹쳐 아래쪽 문서를 누를 수 없었다. 페이지 높이를 화면에 고정한 규칙 때문이었고 이전 판에도 있던 문제다(이슈 45). E2E에 겹침 검사를 넣었다.
+
+E2E는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 통과다. 데모의 EXAONE 답 가운데에는 틀린 답도 있다. 본문에 답이 있는 질문에 표의 셀을 답한 것(수작업 평가의 본문 범주 0/5와 같은 현상)이 검증을 통과해 나온다. 데모는 이것을 숨기지 않는다.
+

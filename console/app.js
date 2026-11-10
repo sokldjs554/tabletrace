@@ -16,18 +16,25 @@
     cells_in_range: "셀 좌표가 표 범위 안", period_consistent: "질문의 연도와 근거 행의 연도 일치", answer_matches_cell: "답이 근거 셀의 텍스트와 일치",
     calculation: "제한 계산기 재계산", units_consistent: "계산 입력의 단위 일치", answer_matches_calc: "모델의 숫자와 계산값 일치",
     answer_in_passage: "답이 본문 문장에 존재", abstain: "보류 판정",
+    evidence_repaired: "모델이 인용한 셀에 답이 없어 근거를 고침", subject_in_evidence: "질문의 대상이 근거 행에 있음",
+    column_repaired: "질문이 가리키는 열로 근거를 옮김", distinct_cells: "계산에 쓴 셀이 서로 다름",
   };
   const CATS = { cell: "셀 근거", calc: "계산", text_table: "본문+표", unit_period: "단위·기간 주의", abstain: "답 없음 → 보류" };
 
   const state = { mode: null, corpus: "ko_tables", docs: [], doc: null, tableId: null, examples: [], recorded: null, release: null, busy: false, timer: null, lastEvidence: null };
 
-  // Recorded mode: runs are stored per planner ({planners: {neural: {...runs}, heuristic: {...runs}}}).
-  function recordedSet() {
+  // Recorded mode: runs are stored per planner ({planners: {exaone: {...runs}, neural: {...runs}, heuristic: {...runs}}}).
+  // "auto" shows, for each question, the result of the strongest planner that has one.
+  const PLANNER_ORDER = ["exaone", "neural", "heuristic"];
+  const plannerName = (k, v) => (k === "heuristic" ? "휴리스틱" : "모델 " + ((v && (v.short || v.model_id)) || ""));
+  function recordedRun(exId) {
     const r = state.recorded; if (!r || !r.planners) return null;
-    let sel = $("#planner").value;
-    if (sel === "auto") sel = r.planners.neural ? "neural" : "heuristic";
-    if (!r.planners[sel]) sel = Object.keys(r.planners)[0];
-    return { key: sel, ...r.planners[sel] };
+    const sel = $("#planner").value;
+    for (const k of (sel === "auto" ? PLANNER_ORDER : [sel])) {
+      const set = r.planners[k]; const run = set && set.runs.find((x) => x.id === exId);
+      if (run) return { run, key: k, set };
+    }
+    return null;
   }
 
   async function fetchJSON(url, opts = {}, timeoutMs = 8000) {
@@ -74,14 +81,18 @@
       t.textContent = `실시간 실행 · ${r.planner === "neural" ? "모델 " + r.model_id : "휴리스틱 플래너"} · ${r.version} (${r.commit})`;
       $("#apidocs").hidden = false;
       $("#footrelease").textContent = `백엔드 ${r.version} · commit ${r.commit} · 동시 작업 ${r.max_concurrent_jobs} · 작업 시간 제한 ${r.job_timeout_s}s`;
+      Array.from($("#planner").options).forEach((o) => { if (o.value === "exaone") o.disabled = true; });   // stored outputs exist only in recorded mode
     } else if (state.recorded) {
       const r = state.recorded;
       b.className = "modebadge rec";
-      const avail = Object.entries(r.planners || {}).map(([k, v]) => (k === "neural" ? "모델 " + (v.model_id || "") : "휴리스틱")).join(" / ");
-      t.textContent = `저장된 실행 결과 · ${avail} · ${r.generated_at} · commit ${r.commit}`;
+      const avail = PLANNER_ORDER.filter((k) => r.planners && r.planners[k]).map((k) => plannerName(k, r.planners[k])).join(" / ");
+      t.textContent = `저장된 실행 결과 · ${r.generated_at} · commit ${r.commit}`;
+      t.title = avail;
       Array.from($("#planner").options).forEach((o) => { if (o.value !== "auto") o.disabled = !(r.planners && r.planners[o.value]); });
+      const ex = r.planners && r.planners.exaone;
+      if (ex) $("#planner").options[0].textContent = "자동(가장 강한 저장 결과)";
       $("#recordednotice").hidden = false;
-      $("#footrelease").textContent = `정적 데모: 결과는 ${r.generated_at}에 저장소의 플래너로 실제 실행해 저장한 것입니다(${avail}). 플래너 선택으로 두 결과를 비교할 수 있습니다.`;
+      $("#footrelease").textContent = `정적 데모: 결과는 ${r.generated_at}에 저장소의 플래너로 실제 실행해 저장한 것입니다(${avail}). 플래너 선택으로 결과를 비교할 수 있습니다.`;
     } else {
       b.className = "modebadge";
       t.textContent = "백엔드도 저장된 결과도 없음";
@@ -106,7 +117,7 @@
     });
     $("#askform").addEventListener("submit", (e) => { e.preventDefault(); ask($("#question").value.trim()); });
     $("#question").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#askform").requestSubmit(); } });
-    $("#planner").addEventListener("change", () => { if (state.mode === "recorded" && state.lastRecordedId) showRecorded(state.lastRecordedId); });
+    $("#planner").addEventListener("change", () => { if (state.mode === "recorded") { renderExamples(); if (state.lastRecordedId) showRecorded(state.lastRecordedId); } });
     window.addEventListener("hashchange", route);
     $$(".navlink[data-view]").forEach((a) => a.addEventListener("click", () => setTimeout(route, 0)));
   }
@@ -212,13 +223,14 @@
     const box = $("#examples");
     if (!state.doc) { box.innerHTML = '<p class="muted">문서를 고르면 그 문서의 대표 질문이 나옵니다.</p>'; return; }
     let ex = state.examples.filter((x) => x.doc_id === state.doc.id);
+    let none = '<p class="muted">이 문서에는 대표 질문이 없습니다. 직접 질문해 보세요.</p>';
     if (state.mode === "recorded" && state.recorded) {
-      const set = recordedSet();
-      const have = new Set(((set && set.runs) || []).map((r) => r.id));
-      ex = ex.filter((x) => have.has(x.id));
+      const all = ex.length;
+      ex = ex.filter((x) => recordedRun(x.id));
+      if (all && !ex.length) none = '<p class="muted">선택한 플래너로 저장된 결과가 이 문서에는 없습니다. 플래너를 "자동"으로 바꾸면 다른 플래너의 결과를 볼 수 있습니다.</p>';
     }
     box.innerHTML = ex.length ? ex.map((x) => `<button type="button" class="chip" data-ex="${esc(x.id)}"><span class="cat">${esc(CATS[x.category] || x.category)} · ${esc(x.label || "")}</span><br>${esc(x.question)}</button>`).join("")
-      : '<p class="muted">이 문서에는 대표 질문이 없습니다. 직접 질문해 보세요.</p>';
+      : none;
     $$(".chip", box).forEach((b) => b.addEventListener("click", () => {
       const x = state.examples.find((y) => y.id === b.dataset.ex);
       $("#question").value = x.question; state.tableId = x.table_id;
@@ -228,7 +240,7 @@
   }
 
   // ---------- asking ----------
-  function clearResult() { $("#result").hidden = true; $("#result").innerHTML = ""; $("#resultempty").hidden = false; $("#status").hidden = true; $("#errorbar").hidden = true; clearEvidence(); }
+  function clearResult() { state.lastRecordedId = null; $("#result").hidden = true; $("#result").innerHTML = ""; $("#resultempty").hidden = false; $("#status").hidden = true; $("#errorbar").hidden = true; clearEvidence(); }
   function showError(msg, retry) {
     const bar = $("#errorbar"); bar.hidden = false;
     bar.innerHTML = `<span>${esc(msg)}</span>${retry ? '<button type="button" class="btn" id="retrybtn">다시 시도</button>' : ""}`;
@@ -263,13 +275,14 @@
   }
 
   function showRecorded(exId) {
-    const set = recordedSet();
-    const run = set && set.runs.find((r) => r.id === exId);
-    if (!run) return;
+    const hit = recordedRun(exId);
+    if (!hit) { clearResult(); state.lastRecordedId = exId; setStatus("선택한 플래너로 저장된 결과가 없습니다", false); return; }
     state.lastRecordedId = exId;
+    const { run, key, set } = hit, src = set.source;
     $("#errorbar").hidden = true; $("#resultempty").hidden = true;
-    setStatus(`저장된 결과 · 기록 ${state.recorded.generated_at} · ${fmtMs(run.result.elapsed_ms)}`, false);
-    renderResult(run.result, { kind: "recorded", at: state.recorded.generated_at, model: set.model_id, commit: state.recorded.commit, planner: set.key });
+    setStatus(src ? `저장된 결과 · 모델 출력 ${src.generated}${run.engine_ms ? " (요청 지연 " + fmtMs(run.engine_ms) + ")" : ""} · 검증 ${state.recorded.generated_at}`
+      : `저장된 결과 · 기록 ${state.recorded.generated_at} · ${fmtMs(run.result.elapsed_ms)}`, false);
+    renderResult(run.result, { kind: "recorded", at: state.recorded.generated_at, model: set.model_id, commit: state.recorded.commit, planner: key, source: src });
   }
 
   // ---------- result rendering ----------
@@ -279,7 +292,9 @@
     const plannerBadge = res.planner ? `<span class="badge badge-mode">${res.planner.mode === "neural" ? "모델 " + esc(res.planner.model_id || "") : "휴리스틱"}${res.trace && res.trace.some((s) => s.input && s.input.fallback) ? " → 휴리스틱 보완" : ""}</span>` : "";
     let head, bodyHtml;
     if (res.status === "answered") {
-      head = '<span class="badge badge-ok">완료 · 검증 통과</span>';
+      // An answer whose evidence the verifier had to repair is not the same as one that passed as proposed.
+      const fixed = res.verdict && (res.verdict.checks || []).some((c) => c.name === "evidence_repaired" || c.name === "column_repaired");
+      head = fixed ? '<span class="badge badge-fix" title="모델이 인용한 셀에 답이 없어 검증기가 근거를 고쳤습니다">완료 · 근거를 고쳐 답함</span>' : '<span class="badge badge-ok">완료 · 검증 통과</span>';
       bodyHtml = `<div class="answer">${esc(res.answer)}</div>`;
     } else if (res.status === "abstained") {
       head = '<span class="badge badge-hold">답변 보류</span>';
@@ -295,7 +310,8 @@
     const trace = (res.trace || []).map((s) => `<li><details><summary><b>${esc(s.step)}</b>${s.tool ? ` <span class="muted">${esc(s.tool)}</span>` : ""}${s.status !== "ok" ? ` <span class="badge badge-err">${esc(s.status)}</span>` : ""}<span class="ms">${fmtMs(s.ms || 0)}</span></summary><pre>${esc(JSON.stringify({ input: s.input, output: s.output }, null, 1))}</pre></details></li>`).join("");
     box.innerHTML = `
       <div class="card"><div class="card-head"><span>답변 ${modeBadge} ${plannerBadge}</span>${head}</div><div class="card-body">${bodyHtml}
-        <p class="muted" style="margin:8px 0 0;font-size:12px">질문: ${esc(res.question)} · 표 ${esc(res.table_id || "-")} · ${fmtMs(res.elapsed_ms || 0)}</p></div></div>
+        <p class="muted" style="margin:8px 0 0;font-size:12px">질문: ${esc(res.question)} · 표 ${esc(res.table_id || "-")} · ${fmtMs(res.elapsed_ms || 0)}</p>
+        ${meta.source ? `<p class="muted provenance">모델 출력은 ${esc(meta.source.generated)}에 ${esc(meta.source.where)}에서 받아 저장한 것입니다. 검증·근거·실행 추적은 그 출력을 같은 파이프라인에 다시 넣은 결과입니다.</p>` : ""}</div></div>
       <div class="card"><div class="card-head"><span>근거</span><span>${res.evidence_cells.length}개 셀 · ${res.evidence_spans.length}개 문장</span></div><div class="card-body">${evidence}</div></div>
       ${calc ? `<div class="card"><div class="card-head"><span>계산</span><span>제한 계산기(사칙연산, 단위 검사)</span></div><div class="card-body calc">${calc}</div></div>` : ""}
       <div class="card"><div class="card-head"><span>검증 항목</span><span>${res.verdict ? res.verdict.checks.filter((c) => c.passed).length + "/" + res.verdict.checks.length + " 통과" : ""}</span></div><div class="card-body">${checks}</div></div>
@@ -314,7 +330,29 @@
     (res.evidence_spans || []).forEach((s, i) => {
       items.push(`<li><button type="button" class="evbtn" data-kind="span" data-target="${esc(s.passage_id)}" aria-label="근거 문장으로 이동">문장</button><span class="evtext">“${esc(s.text)}”<br><span class="h">문단 ${esc(s.passage_id)} · 위치 ${s.start}–${s.end}</span></span></li>`);
     });
-    return items.length ? `<ul class="evlist">${items.join("")}</ul>` : '<p class="muted">근거가 제시되지 않았습니다(보류).</p>';
+    const list = items.length ? `<ul class="evlist">${items.join("")}</ul>` : '<p class="muted">근거가 제시되지 않았습니다(보류).</p>';
+    return list + renderCited(res);
+  }
+
+  // Cells the model itself cited that did not become evidence: the verifier repaired the evidence, replaced the
+  // proposal with the fallback planner's, or withheld the answer. Read from the first proposal in the trace.
+  function citedOnly(res) {
+    const first = (res.trace || []).find((s) => s.step === "propose" && s.output && s.output.parsed);
+    const cells = (first && first.output.parsed.cells) || [];
+    const ev = new Set((res.evidence_cells || []).map((c) => `${c.table_id}|${c.row}|${c.col}`));
+    return cells.filter((c) => !ev.has(`${c.table_id}|${c.row}|${c.col}`));
+  }
+  function renderCited(res) {
+    const cited = citedOnly(res); if (!cited.length) return "";
+    const repaired = res.verdict && (res.verdict.checks || []).some((c) => c.name === "evidence_repaired" || c.name === "column_repaired");
+    const why = repaired ? "이 셀에는 답이 없어 검증기가 근거를 위의 셀로 고쳤습니다."
+      : res.status === "answered" ? "이 제안은 검증을 통과하지 못했고, 보완 제안의 셀이 근거가 됐습니다."
+      : "검증을 통과하지 못해 근거로 쓰지 않았습니다.";
+    const btns = cited.map((c) => {
+      const td = findCell(c); const v = td ? td.dataset.text : "";
+      return `<button type="button" class="evbtn evbtn-cited" data-kind="cell" data-target="${esc(c.table_id)}|r${c.row}c${c.col}" aria-label="모델이 인용한 셀로 이동">r${c.row}c${c.col}</button>${v ? ` <span class="citedval">${esc(v)}</span>` : ""}`;
+    }).join(" ");
+    return `<div class="citednote"><b>모델이 인용한 셀</b> ${btns}<br><span class="h">${why}</span></div>`;
   }
 
   function renderCalc(c) {
@@ -325,11 +363,13 @@
   function findCell(c) { return document.querySelector(`#t-${CSS.escape(c.table_id)} td[data-rc="r${c.row}c${c.col}"]`); }
   function clearEvidence() {
     $$("td.is-evidence").forEach((td) => { td.classList.remove("is-evidence", "is-focus"); const n = $(".evn", td); if (n) n.remove(); });
+    $$("td.is-cited").forEach((td) => { td.classList.remove("is-cited", "is-focus"); const n = $(".citedn", td); if (n) n.remove(); });
     $$(".passage.is-evidence").forEach((p) => { p.classList.remove("is-evidence"); const t = $(".ptext", p); if (t) t.textContent = t.textContent; });
   }
   function highlightEvidence(res) {
     clearEvidence();
     (res.evidence_cells || []).forEach((c, i) => { const td = findCell(c); if (td) { td.classList.add("is-evidence"); td.insertAdjacentHTML("beforeend", `<span class="evn">${i + 1}</span>`); } });
+    citedOnly(res).forEach((c) => { const td = findCell(c); if (td) { td.classList.add("is-cited"); td.insertAdjacentHTML("beforeend", '<span class="citedn" title="모델이 인용했지만 근거가 되지 못한 셀">모델</span>'); } });
     (res.evidence_spans || []).forEach((s) => {
       const p = document.getElementById("p-" + s.passage_id); if (!p) return;
       p.classList.add("is-evidence");

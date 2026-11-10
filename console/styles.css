@@ -93,6 +93,9 @@ table.tt th .unit { color: var(--muted); font-weight: 400; margin-left: 4px; }
 table.tt .rc { color: #9aa4ae; font-family: var(--mono); font-size: 11px; width: 36px; }
 table.tt td.is-evidence { background: var(--evidence); outline: 2px solid var(--evidence-line); outline-offset: -2px; position: relative; }
 table.tt td.is-focus { outline-color: var(--accent); }
+table.tt td.is-cited { background: var(--err-soft); outline: 2px dashed var(--err); outline-offset: -2px; position: relative; }
+table.tt td.is-cited.is-focus { outline-color: var(--accent); }
+table.tt td .citedn { position: absolute; top: -8px; right: -6px; background: var(--err); color: #fff; border-radius: 4px; font-size: 10px; line-height: 16px; height: 16px; padding: 0 4px; }
 table.tt td .evn { position: absolute; top: -8px; right: -6px; background: var(--evidence-line); color: #fff; border-radius: 999px; font-size: 10px; width: 16px; height: 16px; display: grid; place-items: center; font-family: var(--mono); }
 .cellinfo { margin: -6px 0 12px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
 
@@ -119,10 +122,16 @@ table.tt td .evn { position: absolute; top: -8px; right: -6px; background: var(-
 .badge-err { background: var(--err-soft); color: var(--err); border-color: #efb9bc; }
 .badge-live { background: var(--ok-soft); color: var(--ok); }
 .badge-rec { background: var(--rec-soft); color: var(--rec); }
+.badge-fix { background: var(--err-soft); color: var(--err); }
 .badge-mode { background: #eef1f4; color: var(--muted); }
 .evlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .evlist li { display: flex; gap: 8px; align-items: flex-start; }
+.citednote { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 13px; }
+.citednote .h { color: var(--muted); font-size: 12px; }
+.citednote .citedval { color: var(--muted); }
+.provenance { margin: 6px 0 0; font-size: 12px; }
 .evbtn { font: inherit; border: 1px solid var(--evidence-line); background: var(--evidence); border-radius: 6px; padding: 2px 7px; cursor: pointer; font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+.evbtn.evbtn-cited { border: 1px dashed var(--err); background: var(--err-soft); }
 .evtext { min-width: 0; }
 .evtext .h { color: var(--muted); font-size: 12px; }
 .calc { font-family: var(--mono); font-size: 13px; }
@@ -161,6 +170,8 @@ table.res td.num { text-align: right; font-family: var(--mono); }
 .foot { display: flex; justify-content: space-between; gap: 10px; padding: 8px 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); background: var(--panel); flex-wrap: wrap; }
 
 @media (max-width: 1000px) {
+  html, body { height: auto; }   /* the page scrolls as a whole; with a fixed height the footer overlapped the panes */
+  .layout, .view { flex: 1 0 auto; min-height: auto; }
   .view-workbench { display: block; height: auto; }
   .pane { border-right: 0; border-bottom: 1px solid var(--line); display: none; }
   .pane.is-visible { display: block; }

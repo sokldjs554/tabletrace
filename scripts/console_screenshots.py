@@ -100,7 +100,7 @@ def main() -> None:
                     chips.nth(0).click()
                     page.wait_for_function("() => !document.querySelector('#result').hidden || !document.querySelector('#errorbar').hidden", timeout=120000)
                     status = page.text_content("#status") or ""
-                    has_badge = page.locator(".badge-ok, .badge-hold").count() > 0
+                    has_badge = page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0
                     check(f"{label}: first example produced a result", has_badge, status)
                     page.screenshot(path=str(out / f"{tag}-{label}-03-result.png"), full_page=(label == "mobile"))
                     ev = page.locator(".evbtn")
@@ -130,6 +130,40 @@ def main() -> None:
                     if label == "mobile":
                         page.click(".mtab[data-pane='right']")
                     page.select_option("#planner", "auto")
+                    # the footer must sit below the panes (with a fixed page height it used to overlap them on narrow screens)
+                    gap = page.evaluate("() => document.querySelector('.foot').getBoundingClientRect().top - document.querySelector('#main').getBoundingClientRect().bottom")
+                    check(f"{label}: footer below the workbench", gap >= -1, f"gap {gap:.0f}px")
+                    if tag == "static":
+                        # stored outputs of the GPU-served model, and an answer whose evidence the verifier repaired
+                        target = page.evaluate("""async () => {
+                            const idx = await (await fetch('data/recorded/index.json')).json();
+                            const set = idx.planners.exaone; if (!set) return null;
+                            const run = set.runs.find((r) => r.result.verdict.checks.some((c) => c.name === 'evidence_repaired'));
+                            return run ? { id: run.id, doc: run.doc_id } : null; }""")
+                        check(f"{label}: stored EXAONE outputs are present", target is not None)
+                        if target:
+                            if label == "mobile":
+                                page.click(".mtab[data-pane='right']")
+                            page.select_option("#planner", "exaone")
+                            if label == "mobile":
+                                page.click(".mtab[data-pane='left']")
+                            page.click(f"li[data-id='{target['doc']}']")
+                            if label == "mobile":
+                                page.click(".mtab[data-pane='left']")
+                            page.click(f".chip[data-ex='{target['id']}']")
+                            page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=30000)
+                            page.wait_for_timeout(300)
+                            check(f"{label}: stored EXAONE result is labelled with its model", "EXAONE" in (page.text_content(".badge-mode") or ""), page.text_content("#status") or "")
+                            cited = page.eval_on_selector_all("td.is-cited", "els => els.map(e => e.dataset.rc)")
+                            shown = page.eval_on_selector_all("td.is-evidence", "els => els.map(e => e.dataset.rc)")
+                            check(f"{label}: repaired answer shows the model-cited cell apart from the evidence cell",
+                                  bool(cited) and bool(shown) and not set(cited) & set(shown) and page.locator(".badge-fix").count() > 0, f"cited {cited}, evidence {shown}")
+                            if label == "mobile":
+                                page.click(".mtab[data-pane='center']")
+                            page.screenshot(path=str(out / f"{tag}-{label}-08-repaired.png"), full_page=False)
+                            if label == "mobile":
+                                page.click(".mtab[data-pane='right']")
+                            page.select_option("#planner", "auto")
                     if tag == "live" and label == "desktop":
                         # typed question + keyboard submit + invalid input handling
                         page.fill("#question", "x")
@@ -147,7 +181,7 @@ def main() -> None:
                         page.locator(".chip").nth(0).click()
                         page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=120000)
                         page.wait_for_timeout(300)
-                        check("desktop: chemistry example produced a result", page.locator(".badge-ok, .badge-hold").count() > 0)
+                        check("desktop: chemistry example produced a result", page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0)
                         page.screenshot(path=str(out / f"{tag}-{label}-06-chem.png"))
                     # research view
                     page.goto(base + "#research", wait_until="networkidle")

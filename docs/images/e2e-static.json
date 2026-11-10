@@ -4,7 +4,7 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 모델 mt5-small-tabletrace / 휴리스틱 · 2026-10-30 15:29 UTC · commit e6f9d71"
+   "detail": "저장된 실행 결과 · 2026-11-10 10:04 UTC · commit ae298b7"
   },
   {
    "name": "desktop: document + examples rendered",
@@ -14,7 +14,7 @@
   {
    "name": "desktop: first example produced a result",
    "ok": true,
-   "detail": "저장된 결과 · 기록 2026-10-30 15:29 UTC · 1.05 s"
+   "detail": "저장된 결과 · 모델 출력 2026-11-08 (요청 지연 3.30 s) · 검증 2026-11-10 10:04 UTC"
   },
   {
    "name": "desktop: evidence highlighted in table",
@@ -27,6 +27,26 @@
    "detail": ""
   },
   {
+   "name": "desktop: footer below the workbench",
+   "ok": true,
+   "detail": "gap 0px"
+  },
+  {
+   "name": "desktop: stored EXAONE outputs are present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: stored EXAONE result is labelled with its model",
+   "ok": true,
+   "detail": "저장된 결과 · 모델 출력 2026-11-08 (요청 지연 2.88 s) · 검증 2026-11-10 10:04 UTC"
+  },
+  {
+   "name": "desktop: repaired answer shows the model-cited cell apart from the evidence cell",
+   "ok": true,
+   "detail": "cited ['r0c1'], evidence ['r0c0']"
+  },
+  {
    "name": "desktop: research view renders",
    "ok": true,
    "detail": ""
@@ -34,7 +54,7 @@
   {
    "name": "mobile: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 모델 mt5-small-tabletrace / 휴리스틱 · 2026-10-30 15:29 UTC · commit e6f9d71"
+   "detail": "저장된 실행 결과 · 2026-11-10 10:04 UTC · commit ae298b7"
   },
   {
    "name": "mobile: document + examples rendered",
@@ -44,7 +64,7 @@
   {
    "name": "mobile: first example produced a result",
    "ok": true,
-   "detail": "저장된 결과 · 기록 2026-10-30 15:29 UTC · 1.05 s"
+   "detail": "저장된 결과 · 모델 출력 2026-11-08 (요청 지연 3.30 s) · 검증 2026-11-10 10:04 UTC"
   },
   {
    "name": "mobile: evidence highlighted in table",
@@ -55,6 +75,26 @@
    "name": "mobile: abstain state renders 답변 보류 (heuristic planner)",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "mobile: footer below the workbench",
+   "ok": true,
+   "detail": "gap 0px"
+  },
+  {
+   "name": "mobile: stored EXAONE outputs are present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: stored EXAONE result is labelled with its model",
+   "ok": true,
+   "detail": "저장된 결과 · 모델 출력 2026-11-08 (요청 지연 2.88 s) · 검증 2026-11-10 10:04 UTC"
+  },
+  {
+   "name": "mobile: repaired answer shows the model-cited cell apart from the evidence cell",
+   "ok": true,
+   "detail": "cited ['r0c1'], evidence ['r0c0']"
   },
   {
    "name": "mobile: research view renders",

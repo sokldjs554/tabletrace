@@ -92,6 +92,7 @@
           <label class="plannerlabel">플래너
             <select id="planner" class="select" aria-label="플래너">
               <option value="auto">자동(모델 → 보완)</option>
+              <option value="exaone" title="저장된 실행 결과에서만 볼 수 있습니다">EXAONE 1.2B LoRA(저장된 출력)</option>
               <option value="neural">신경망(mT5)</option>
               <option value="heuristic">휴리스틱(어휘 겹침)</option>
             </select>
@@ -117,12 +118,12 @@
   <section class="view view-about" id="view-about" hidden>
     <div class="about">
       <h2>작동 방식</h2>
-      <p>질문은 <b>LangGraph</b>로 짜인 그래프를 지납니다: <code>retrieve</code>(BM25로 표·문단 검색) → <code>propose</code>(mT5-small이 <code>op / cells / answer</code> 프로그램을 제안; 모델이 없으면 어휘 겹침 휴리스틱) → <code>tool</code>(셀 조회·제한 산술 계산) → <code>verify</code>(셀 범위·답-셀 일치·재계산·단위·기간 검사) → 답변 또는 보류. 모델 출력이 해석되지 않거나 검증에 실패하면 휴리스틱으로 한 번 더 제안합니다.</p>
+      <p>질문은 <b>LangGraph</b>로 짜인 그래프를 지납니다: <code>retrieve</code>(BM25로 표·문단 검색) → <code>propose</code>(모델이 <code>op / cells / answer</code> 프로그램을 제안. 모델은 CPU에서 도는 mT5-small이거나 vLLM·SGLang 서버의 EXAONE-4.0-1.2B LoRA이고, 모델이 없으면 어휘 겹침 휴리스틱) → <code>tool</code>(셀 조회·제한 산술 계산) → <code>verify</code>(셀 범위·답-셀 일치·재계산·단위·기간 검사) → 답변 또는 보류. 모델 출력이 해석되지 않거나 검증에 실패하면 휴리스틱으로 한 번 더 제안합니다.</p>
       <pre class="mermaid-src" id="graphsrc"></pre>
       <h3>신뢰 경계</h3>
       <ul>
         <li>문서 본문·셀·질문은 <b>데이터</b>입니다. 어떤 문자열도 명령으로 해석되지 않고, 계산기는 숫자·사칙연산·괄호만 받는 AST 평가기입니다. 임의 코드 실행은 없습니다.</li>
-        <li>모델이 낸 셀 좌표는 표 범위를 검사하고, 답은 그 셀의 텍스트와 비교합니다. 셀에 없는 값을 답으로 내면 <b>검증 실패로 보류</b>합니다.</li>
+        <li>모델이 낸 셀 좌표는 표 범위를 검사하고, 답은 그 셀의 텍스트와 비교합니다. 인용한 셀에 답이 없으면, 답과 같은 셀이 표에 하나뿐일 때만 근거를 그 셀로 고치고 그 사실을 실패한 검사로 남깁니다. 그렇지 않으면 <b>검증 실패로 보류</b>합니다. 표에는 근거가 된 셀과 모델이 인용했지만 근거가 되지 못한 셀(점선, "모델" 표시)이 따로 나옵니다.</li>
         <li>계산은 모델의 숫자가 아니라 도구가 다시 계산한 값을 씁니다. 단위가 다른 셀끼리는 계산을 거부합니다.</li>
       </ul>
       <h3>실시간 실행과 저장된 결과</h3>
