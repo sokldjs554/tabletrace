@@ -1,0 +1,10 @@
+{
+ "platform": "kaggle",
+ "gpus": [
+  "Tesla T4",
+  "Tesla T4"
+ ],
+ "limit": 300,
+ "tag": "_colid",
+ "finished": "2026-11-10T13:50:19"
+}

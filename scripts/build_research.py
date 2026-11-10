@@ -43,7 +43,8 @@ def measurement_sections() -> list[dict]:
     if ev:
         names = [("mT5-small SFT stage2", "sft_ko2_ko_test"), ("mT5-small 최종 (RL v3)", "rl_v3_ko_test"),
                  ("EXAONE-4.0-1.2B LoRA 300개, 1번째 학습", "exaone_vllm_ko_test_run1"), ("같은 설정, 2번째 학습", "exaone_vllm_ko_test_run2"),
-                 ("같은 설정, 3번째 학습", "exaone_vllm_ko_test"), ("EXAONE-4.0-1.2B LoRA 전체 데이터, 1번째 학습", "exaone_full_vllm_ko_test"),
+                 ("같은 설정, 3번째 학습", "exaone_vllm_ko_test"), ("같은 300개, 표 입력에 열 번호(colid)", "exaone_colid_vllm_ko_test"),
+                 ("EXAONE-4.0-1.2B LoRA 전체 데이터, 1번째 학습", "exaone_full_vllm_ko_test"),
                  ("같은 설정, 2번째 학습", "exaone_full_vllm_ko_test_run2")]
         rows = [[n, o["correct_lookup_answers"], o["cited_gold"], o["no_answer_in_cell"], ci(o["strict"]), o["strict_where"].get("same_row", 0),
                  pct(o["verified_em"]), pct(o["verified_em_no_repair"])] for n, k in names if (o := ev.get(k))]
@@ -53,12 +54,13 @@ def measurement_sections() -> list[dict]:
                     "columns": ["모델", "답이 맞은 조회 답", "인용 셀 = 정답 셀", "인용 셀에 답이 없음", "비율 (95% 구간)", "그중 행은 맞고 열이 틀림", "verified EM", "근거 복구 없이"],
                     "rows": rows,
                     "notes": ["약한 모델은 맞힌 답의 절반 이상에서 답이 없는 셀을 인용한다. 거의 전부 행은 맞고 열이 틀린 경우다.",
+                              "같은 300개 학습에서 표의 셀마다 열 번호를 붙여 주면(colid) 이 비율이 3%대로 내려간다. 답 정확도는 오르지 않았다(1회 실행).",
                               "전체 데이터로 학습한 EXAONE은 두 번의 학습 모두 1%대다.",
                               "검증기는 이 경우 답 텍스트와 같은 셀을 찾아 근거를 고친다. 워크벤치에서는 그런 답에 \"근거를 고쳐 답함\" 배지가 붙고, 모델이 인용한 셀이 점선으로 따로 표시된다."],
                     "artifact": "experiments/eval/evidence_error.json (scripts/evidence_error.py)"})
         rows = []
         for n, k in [("휴리스틱 기준선", "heuristic_ko_test"), ("mT5-small 최종 (RL v3)", "rl_v3_ko_test"), ("EXAONE LoRA 300개 (3번째 학습)", "exaone_vllm_ko_test"),
-                     ("EXAONE LoRA 전체 데이터 (1번째 학습)", "exaone_full_vllm_ko_test"), ("EXAONE LoRA 전체 데이터 (2번째 학습)", "exaone_full_vllm_ko_test_run2")]:
+                     ("EXAONE LoRA 300개, 열 번호 형식(colid)", "exaone_colid_vllm_ko_test"), ("EXAONE LoRA 전체 데이터 (1번째 학습)", "exaone_full_vllm_ko_test"), ("EXAONE LoRA 전체 데이터 (2번째 학습)", "exaone_full_vllm_ko_test_run2")]:
             o = ev.get(k)
             for label, pt in (("모델 출력 그대로", "raw"), ("검증기 v1", "verifier"), ("검증기 v2(개체 일치 검사)", "verifier_subject_check"), ("검증기 v1, 근거 복구 없이 보류", "verifier_no_repair")):
                 if o and o.get(pt):
@@ -131,6 +133,7 @@ def main() -> None:
               ("SFT stage2(+본문, 1차)", "sft_ko2", False), ("GRPO RL v2(1차)", "rl_ko", False), ("화학 SFT(1차 최종)", "sft_chem", False),
               ("[2차] 화학 SFT v2", "sft_chem2", False), ("[2차] GRPO RL v3 (mT5 최종)", "rl_v3", False), ("[2차] RL v3 + 검증기 v2(개체 일치 검사)", "rl_v3", True),
               ("[GPU] EXAONE-4.0-1.2B LoRA 300개 (Kaggle T4, vLLM)", "exaone_vllm", False),
+              ("[GPU] 같은 300개, 표 입력에 열 번호(colid)", "exaone_colid_vllm", False),
               ("[GPU] EXAONE-4.0-1.2B LoRA 전체 데이터 (Kaggle T4, vLLM)", "exaone_full_vllm", False),
               ("[GPU] EXAONE 전체 데이터 + 검증기 v2(개체 일치 검사)", "exaone_full_vllm", True)]
     for title, suffix, desc in [("한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160)", "ko_test", "표가 학습 분할과 겹치지 않는 539문항(원 데이터, lookup) + 합성 160문항(계산·보류)."),

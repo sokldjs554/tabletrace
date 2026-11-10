@@ -6,7 +6,7 @@
 
 대상 공고는 LG AI연구원 NLP Research Engineer Internship이고, 이 프로젝트가 맞춘 업무 묶음은 **테이블이해 기술(Table MRC)** 이다(§3). 한국어 표 질의응답에서 모델이 답과 근거 셀을 함께 내고, 고정 규칙 검증기가 인용 셀로 답을 다시 확인해 실패하면 보류한다. 아래 수치는 모두 한국어 독립 test(표 단위 재분할)에서 나왔다.
 
-1. **답이 맞아도 근거 셀은 절반 넘게 틀린다. 전체 데이터로 학습하면 1%대가 된다.** 답 텍스트가 맞은 조회 답 가운데 모델이 인용한 셀에 그 답이 없는 비율은 mT5-small 최종 모델 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.strict.rate:pct -->52.6<!-- /num -->%, EXAONE-4.0-1.2B LoRA 300개 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict.rate:pct -->65.2<!-- /num -->%, 같은 모델 전체 데이터 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.strict.rate:pct -->1.3<!-- /num -->%다(§19.1, 95% 구간 포함).
+1. **답이 맞아도 근거 셀은 절반 넘게 틀린다. 전체 데이터로 학습하거나, 표 입력에 열 번호를 붙이면 1~3%대가 된다.** 답 텍스트가 맞은 조회 답 가운데 모델이 인용한 셀에 그 답이 없는 비율은 mT5-small 최종 모델 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.strict.rate:pct -->52.6<!-- /num -->%, EXAONE-4.0-1.2B LoRA 300개 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict.rate:pct -->65.2<!-- /num -->%, 같은 모델 전체 데이터 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.strict.rate:pct -->1.3<!-- /num -->%다(§19.1, 95% 구간 포함). 같은 300개 학습에서 표의 셀마다 열 번호를 붙여 주기만 해도 <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.strict.rate:pct -->3.2<!-- /num -->%가 된다. 답 정확도는 그대로였고 검증기를 통과하는 오답은 오히려 늘었다(§19.7).
 2. **검증기는 오답 유출을 줄인다.** 전체 데이터 EXAONE의 출력을 그대로 내보내면 전체 문항의 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.raw.wrong_answer_rate.rate:pct -->21.6<!-- /num -->%가 오답이고, 검증기를 거치면 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier.wrong_answer_rate.rate:pct -->13.9<!-- /num -->%(v1), <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier_subject_check.wrong_answer_rate.rate:pct -->12.0<!-- /num -->%(v2)다. 대가는 답하는 비율 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.raw.coverage:pct -->95.3<!-- /num -->% → <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier_subject_check.coverage:pct -->88.7<!-- /num -->%다(§19.2).
 3. **공개 분할은 표가 겹친다.** KorWikiTQ 공개 dev 질문의 <!-- num:data/ko/official_split_profile.json:dev_on_train_table.rate:pct -->42.9<!-- /num -->%가 train에도 있는 표를 묻는다. 표 단위로 다시 나눴다. 겹침이 점수에 주는 영향도 쟀는데, mT5-small에서는 학습 때 본 표라고 점수가 오르지 않았다(차이 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff:pct -->-2.3<!-- /num -->%p, 95% 구간 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff_lo:pct -->-6.0<!-- /num --> ~ <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff_hi:pct -->1.4<!-- /num -->%p, §19.3).
 4. **강화학습은 점수를 올리지 못했고, 보상 허점을 하나 찾아 고쳤다.** 검증기가 거부해 보류된 쓰레기 출력이 의도한 보류와 같은 보상을 받고 있었다. 같은 셀을 두 번 쓰는 퇴화 출력은 SFT <!-- num:experiments/eval/sft_ko2_ko_test/analysis.json:degenerate_calc_outputs:int -->101<!-- /num -->건에서 RL v1 <!-- num:experiments/eval/rl_ko_v1_ko_test/analysis.json:degenerate_calc_outputs:int -->160<!-- /num -->건으로 늘었고, 보상만 고친 v2에서도 <!-- num:experiments/eval/rl_ko_ko_test/analysis.json:degenerate_calc_outputs:int -->146<!-- /num -->건이 남았다. 학습 데이터까지 고친 최종 모델에서 <!-- num:experiments/eval/rl_v3_ko_test/analysis.json:degenerate_calc_outputs:int -->0<!-- /num -->건이 됐다(§7, §18).
@@ -736,6 +736,7 @@ dev(475문항, 학습과 겹치지 않음)에서 verified EM이 step 0 <!-- num:
 | EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청) | 699 | **53.1** | **52.5** | 58.1 | 67.2 | 0.0 | 55.6 | 23.1 | 18.0 → 42.0 | 14.3 → 20.3 | 0.1 | 2355 |
 | 같은 모델, vLLM 텐서 병렬 TP=2 (Kaggle T4 2장, 동시 16요청) | 699 | **53.1** | **–** | 58.1 | 67.2 | 0.0 | 55.6 | 23.0 | 18.0 → – | 14.3 → – | 0.1 | 1718 |
 | 같은 모델, SGLang 0.5.9 + T4 우회 모듈 (Kaggle T4 1장, 동시 8요청) | 699 | **53.2** | **52.6** | 58.1 | 67.3 | 0.0 | 55.8 | 22.7 | 18.0 → 42.0 | 14.0 → 20.0 | 0.1 | 5161 |
+| EXAONE-4.0-1.2B + LoRA 300개, **표 입력에 열 번호(`colid`)**, vLLM fp16 (Kaggle T4 1장, 동시 16요청, 입력 예산 800) | 699 | **51.1** | **51.2** | 53.6 | 64.9 | 0.9 | 53.8 | 54.5 | 12.0 → 38.0 | 3.5 → 12.3 | 0.9 | 3173 |
 | EXAONE-4.0-1.2B + LoRA **전체 3,587개**(3,654개 중 행 예산 안), vLLM fp16 (Kaggle T4 1장, 동시 16요청) | 699 | **84.3** | **81.5** | 79.3 | 85.0 | 89.1 | 85.5 | 85.5 | 66.0 → 68.0 | 2.0 → 6.9 | 0.1 | 2511 |
 | 같은 전체 데이터 모델, vLLM TP=2 (T4 2장) | 699 | **84.3** | **81.5** | 79.3 | 85.0 | 89.1 | 85.5 | 85.5 | 66.0 → 68.0 | 2.0 → 6.9 | 0.1 | 1737 |
 | 같은 전체 데이터 모델, SGLang + T4 우회 모듈 | 699 | **84.1** | **81.4** | 79.2 | 84.8 | 89.1 | 85.4 | 85.2 | 66.0 → 68.0 | 2.0 → 6.9 | 0.1 | 5231 |
@@ -755,6 +756,9 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 | SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장 | 1 | 64 | 50.58 | 1.265 | 828.9 | 1004.5 | 100.0 |
 | SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장 | 8 | 64 | 9.45 | 6.774 | 1104.7 | 1458.6 | 100.0 |
 | SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장 | 32 | 64 | 7.68 | 8.331 | 3506.0 | 6017.5 | 100.0 |
+| 열 번호 형식 300개 모델, vLLM, GPU 1장 | 1 | 64 | 28.51 | 2.245 | 425.7 | 573.8 | 100.0 |
+| 열 번호 형식 300개 모델, vLLM, GPU 1장 | 8 | 64 | 4.57 | 14.006 | 519.8 | 677.2 | 100.0 |
+| 열 번호 형식 300개 모델, vLLM, GPU 1장 | 32 | 64 | 2.74 | 23.335 | 1130.9 | 1530.8 | 100.0 |
 | 전체 데이터 모델, vLLM, GPU 1장 | 1 | 64 | 26.42 | 2.422 | 410.2 | 504.5 | 100.0 |
 | 전체 데이터 모델, vLLM, GPU 1장 | 8 | 64 | 4.45 | 14.391 | 502.7 | 654.0 | 100.0 |
 | 전체 데이터 모델, vLLM, GPU 1장 | 32 | 64 | 2.58 | 24.836 | 1064.3 | 1482.8 | 100.0 |
@@ -774,6 +778,7 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 |---|---:|---:|---:|---:|---:|---:|---:|
 | 휴리스틱 기준선 | 30 | **50.0** | **50.0** | 20.0 | 100.0 | 40.0 | 0.0 |
 | [2차] GRPO RL v3 = mT5-small | 30 | **13.3** | **13.3** | 4.0 | 60.0 | 32.0 | 0.0 |
+| EXAONE LoRA 300개, 열 번호 형식(`colid`), vLLM | 30 | **43.3** | **46.7** | 56.0 | 20.0 | 12.0 | 0.0 |
 | EXAONE LoRA 전체 3,587개, vLLM | 30 | **66.7** | **66.7** | 68.0 | 20.0 | 4.0 | 0.0 |
 | EXAONE LoRA 전체, vLLM TP=2 | 30 | **66.7** | **66.7** | 68.0 | 20.0 | 4.0 | 0.0 |
 | EXAONE LoRA 전체, SGLang(우회) | 30 | **66.7** | **66.7** | 68.0 | 20.0 | 4.0 | 0.0 |
@@ -800,6 +805,7 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 | EXAONE-4.0-1.2B LoRA 300개, 1번째 학습 | 360 | 168 | 1 | 191 | **53.1 (47.9–58.1)** | 189 | 181 / 10 | 52.2 | **29.3** |
 | 같은 설정, 2번째 학습 | 372 | 137 | 0 | 235 | **63.2 (58.2–67.9)** | 231 | 221 / 14 | 53.2 | **24.6** |
 | 같은 설정, 3번째 학습 | 376 | 130 | 1 | 245 | **65.2 (60.2–69.8)** | 241 | 227 / 18 | 53.1 | **23.5** |
+| **같은 300개, 표 입력에 열 번호(`colid`)** | 347 | 335 | 1 | 11 | **3.2 (1.8–5.6)** | 10 | 9 / 2 | 51.1 | **49.9** |
 | EXAONE-4.0-1.2B LoRA 전체 3,587개, 1번째 학습 | 455 | 449 | 0 | 6 | **1.3 (0.6–2.9)** | 6 | 4 / 2 | 84.3 | **83.8** |
 | 같은 설정, 2번째 학습 | 458 | 451 | 1 | 6 | **1.3 (0.6–2.8)** | 6 | 5 / 1 | 87.1 | **86.4** |
 
@@ -836,6 +842,10 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 | EXAONE LoRA 300개 (3번째 학습) | 검증기 v1 | 85.4 | 60.6 (56.7–64.5) | 33.6 | 362 / 235 |
 | EXAONE LoRA 300개 (3번째 학습) | 검증기 v2(개체 일치 검사) | 78.1 | 63.4 (59.2–67.3) | 28.6 | 346 / 200 |
 | EXAONE LoRA 300개 (3번째 학습) | 검증기 v1에서 근거 복구를 끄고 보류 | 30.6 | 63.1 (56.4–69.3) | 11.3 | 135 / 79 |
+| EXAONE LoRA 300개, 열 번호 형식(`colid`) | 모델 출력 그대로 | 99.1 | 50.2 (46.5–53.9) | 49.4 | 348 / 345 |
+| EXAONE LoRA 300개, 열 번호 형식(`colid`) | 검증기 v1 | 95.9 | 52.4 (48.6–56.1) | 45.6 | 351 / 319 |
+| EXAONE LoRA 300개, 열 번호 형식(`colid`) | 검증기 v2(개체 일치 검사) | 85.8 | 56.5 (52.5–60.4) | 37.3 | 339 / 261 |
+| EXAONE LoRA 300개, 열 번호 형식(`colid`) | 검증기 v1에서 근거 복구를 끄고 보류 | 91.8 | 53.3 (49.4–57.1) | 42.9 | 342 / 300 |
 | EXAONE LoRA 전체 (1번째 학습) | 모델 출력 그대로 | 95.3 | 77.3 (74.0–80.3) | 21.6 | 515 / 151 |
 | EXAONE LoRA 전체 (1번째 학습) | 검증기 v1 | 93.4 | 85.2 (82.2–87.7) | 13.9 | 556 / 97 |
 | EXAONE LoRA 전체 (1번째 학습) | 검증기 v2(개체 일치 검사) | 88.7 | 86.5 (83.5–88.9) | 12.0 | 536 / 84 |
@@ -925,7 +935,7 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 
 E2E는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 통과다. 데모의 EXAONE 답 가운데에는 틀린 답도 있다. 본문에 답이 있는 질문에 표의 셀을 답한 것(수작업 평가의 본문 범주 0/5와 같은 현상)이 검증을 통과해 나온다. 데모는 이것을 숨기지 않는다.
 
-### 19.7 표 입력에 열 번호를 넣는 형식 — 구현 후 미실행
+### 19.7 표 입력에 열 번호를 넣는 형식 — 300개 학습에서 근거 오류 65% → 3% (답 정확도는 그대로)
 
 §19.1에서 근거 오류는 거의 전부 "행은 맞고 열이 틀림"이었다. 모델이 받는 표는 `r0: 2011 | MBC | 놀러와` 형태다. 행에는 번호가 붙어 있지만 열 번호는 구분자를 세어야 알 수 있다. 그래서 셀마다 열 번호를 붙이는 형식을 옵션으로 추가했다(`src/tabletrace/model/serialize.py`).
 
@@ -938,7 +948,27 @@ E2E는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /nu
 
 **실행한 것: 토큰 비용.** EXAONE-4.0-1.2B 토크나이저로 세면 `colid`는 입력이 <!-- num:experiments/serialize/table_format_cost.json:colid_extra_tokens_rate:pct -->26.0<!-- /num -->% 길다(문항당 중앙값 <!-- num:experiments/serialize/table_format_cost.json:cases.plain_672.whole_input_tokens_median:int -->438<!-- /num --> → <!-- num:experiments/serialize/table_format_cost.json:cases.colid_672.whole_input_tokens_median:int -->552<!-- /num --> 토큰). 입력 예산을 그대로 672로 두면 test에서 정답 행이 잘리는 문항이 <!-- num:experiments/serialize/table_format_cost.json:cases.plain_672.test_gold_row_cut:int -->24<!-- /num -->개에서 <!-- num:experiments/serialize/table_format_cost.json:cases.colid_672.test_gold_row_cut:int -->63<!-- /num -->개로 늘어 불공정한 비교가 된다. 예산을 800으로 올리면 <!-- num:experiments/serialize/table_format_cost.json:cases.colid_800.test_gold_row_cut:int -->27<!-- /num -->개, 학습 예제는 <!-- num:experiments/serialize/table_format_cost.json:cases.colid_800.train_examples_kept:int -->3,588<!-- /num -->개로 `plain`의 <!-- num:experiments/serialize/table_format_cost.json:cases.plain_672.train_examples_kept:int -->3,587<!-- /num -->개와 거의 같다(`scripts/table_format_cost.py`). 그래서 노트북은 `colid`일 때 `--max-len 896`, 평가 `--max-in 800`을 쓴다.
 
-**실행하지 않은 것: 정확도.** 열 번호를 붙이면 근거 오류가 줄어드는지는 재지 않았다. GPU 학습이 필요하다. 노트북에서 `LIMIT = 300`, `TABLE_FORMAT = "colid"`로 0·1·2·5번 절만 돌리면 된다(무료 T4에서 20~30분). 비교 대상은 저장소에 있는 `plain` 300개 결과 세 번(인용 셀에 답이 없는 비율 53~65%)이다. 줄어들면 "데이터를 12배 늘리지 않고 입력 형식만으로 근거 오류를 줄였다"는 결과가 되고, 그대로면 "열 번호를 보여 줘도 300개로는 못 배운다"는 결과가 된다. 어느 쪽이든 적는다.
+**실행한 것: 정확도 (소유자가 2026-11-10 Kaggle T4에서 1회 실행).** 기존 300개 실험과 같은 예제 <!-- num:experiments/exaone_lora_colid/train_info.json:n_examples:int -->300<!-- /num -->개, 같은 <!-- num:experiments/exaone_lora_colid/train_info.json:steps:int -->18<!-- /num --> step으로 `colid` 형식만 바꿔 학습하고(LoRA <!-- num:experiments/exaone_lora_colid/train_info.json:wall_s:int -->183<!-- /num -->초) vLLM으로 띄워 같은 test 699문항을 같은 검증기로 평가했다(`experiments/eval/exaone_colid_vllm_ko_test`, 출처는 `experiments/eval/PROVENANCE_exaone.md`의 6차 세션). 비교 대상은 `plain` 300개의 세 번 학습이다.
+
+| 지표 (한국어 test) | `plain` 300개 (3번째 학습) | `colid` 300개 |
+|---|---:|---:|
+| 답이 맞은 조회 답 가운데 인용 셀에 답이 없는 비율 | <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict.rate:pct -->65.2<!-- /num -->% (<!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict.lo:pct -->60.2<!-- /num -->~<!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict.hi:pct -->69.8<!-- /num -->) | **<!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.strict.rate:pct -->3.2<!-- /num -->%** (<!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.strict.lo:pct -->1.8<!-- /num -->~<!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.strict.hi:pct -->5.6<!-- /num -->) |
+| 조회 인용에서 열이 맞은 비율 / 행이 맞은 비율 | <!-- num:experiments/eval/exaone_vllm_ko_test/analysis.json:lookup_citation.col_correct:pct -->33.6<!-- /num -->% / <!-- num:experiments/eval/exaone_vllm_ko_test/analysis.json:lookup_citation.row_correct:pct -->85.1<!-- /num -->% | <!-- num:experiments/eval/exaone_colid_vllm_ko_test/analysis.json:lookup_citation.col_correct:pct -->80.0<!-- /num -->% / <!-- num:experiments/eval/exaone_colid_vllm_ko_test/analysis.json:lookup_citation.row_correct:pct -->81.3<!-- /num -->% |
+| 검증기가 근거를 고쳐 준 답 (건) | <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.repaired_answers:int -->383<!-- /num --> | <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.repaired_answers:int -->28<!-- /num --> |
+| verified EM | <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verified_em:pct -->53.1<!-- /num -->% | <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.verified_em:pct -->51.1<!-- /num -->% |
+| 근거 복구 없이 채점한 verified EM | <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verified_em_no_repair:pct -->23.5<!-- /num -->% | **<!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.verified_em_no_repair:pct -->49.9<!-- /num -->%** |
+| 모델이 쓴 답 텍스트의 정확도 (답 있는 문항) | <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.raw_answer_em_answerable:pct -->58.1<!-- /num -->% | <!-- num:experiments/eval/exaone_colid_vllm_ko_test/metrics.json:metrics.raw_answer_em_answerable:pct -->53.6<!-- /num -->% |
+| 검증기를 통과해 나간 오답 (전체 대비) | <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verifier.wrong_answer_rate.rate:pct -->33.6<!-- /num -->% (<!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verifier.answered_wrong:int -->235<!-- /num -->건) | <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.verifier.wrong_answer_rate.rate:pct -->45.6<!-- /num -->% (<!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.verifier.answered_wrong:int -->319<!-- /num -->건) |
+| 답한 비율 | <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verifier.coverage:pct -->85.4<!-- /num -->% | <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.verifier.coverage:pct -->95.9<!-- /num -->% |
+
+읽는 법:
+
+1. **근거 오류는 입력 형식으로 거의 없어졌다.** 답이 맞은 조회 답 가운데 인용 셀에 답이 없는 비율이 `plain` 세 번의 학습 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test_run1.strict.rate:pct -->53.1<!-- /num -->%, <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test_run2.strict.rate:pct -->63.2<!-- /num -->%, <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict.rate:pct -->65.2<!-- /num -->%에서 <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.strict.rate:pct -->3.2<!-- /num -->%가 됐다. 95% 구간이 겹치지 않고, 차이는 학습 간 변동보다 훨씬 크다. 전체 데이터로 12배 학습해 얻은 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.strict.rate:pct -->1.3<!-- /num -->%에 가깝다. §19.1에서 본 "열 번호를 세지 못한다"는 문제는 데이터를 12배로 늘려도 풀리고, 열 번호를 입력에 보여 주면 300개로도 풀린다. 300개로 배우지 못한 것은 구분자를 세어 열 번호를 알아내는 일이었다.
+2. **답 정확도는 오르지 않았다.** verified EM은 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verified_em:pct -->53.1<!-- /num -->% 대 <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.verified_em:pct -->51.1<!-- /num -->%이고 같은 문항끼리 짝지으면 차이가 없다(`colid`만 맞힌 문항 <!-- num:experiments/eval/paired_tests.json:exaone_colid_vs_plain300_ko_test.candidate_better:int -->67<!-- /num -->개, `plain`만 맞힌 문항 <!-- num:experiments/eval/paired_tests.json:exaone_colid_vs_plain300_ko_test.reference_better:int -->81<!-- /num -->개, 정확 검정 p=<!-- num:experiments/eval/paired_tests.json:exaone_colid_vs_plain300_ko_test.p_display -->0.285<!-- /num -->). 어느 행을 볼지 고르는 능력은 그대로다. 300개에는 계산·보류 예제가 없어 그 문항들은 두 형식 모두 조회로 답한다. 모델이 쓴 답 텍스트의 정확도는 <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.raw_answer_em_answerable:pct -->58.1<!-- /num -->%에서 <!-- num:experiments/eval/exaone_colid_vllm_ko_test/metrics.json:metrics.raw_answer_em_answerable:pct -->53.6<!-- /num -->%로 조금 낮다. 한 번의 학습이라 형식 때문인지 학습마다의 변동인지는 가릴 수 없다.
+3. **근거가 맞아야 정답으로 치면 두 배가 된다.** 복구 없이 채점한 verified EM이 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verified_em_no_repair:pct -->23.5<!-- /num -->%에서 <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.verified_em_no_repair:pct -->49.9<!-- /num -->%로 올랐다. `plain` 모델의 점수는 검증기의 근거 복구(<!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.repaired_answers:int -->383<!-- /num -->건)에 기대고 있었고 `colid` 모델은 거의 기대지 않는다(<!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.repaired_answers:int -->28<!-- /num -->건).
+4. **검증기를 통과하는 오답은 늘었다.** <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verifier.answered_wrong:int -->235<!-- /num -->건에서 <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.verifier.answered_wrong:int -->319<!-- /num -->건이다. `plain` 모델은 답과 인용 셀이 자주 어긋나서, 답이 표의 다른 셀과도 맞지 않으면 검증기가 보류했다(답 있는 문항의 `verification_failed` 보류 <!-- num:experiments/eval/exaone_vllm_ko_test/analysis.json:abstain_reason_answerable.verification_failed:int -->72<!-- /num -->건). `colid` 모델은 틀린 행을 골라도 그 행의 셀을 일관되게 인용하고 그 값을 답으로 쓰므로 검증기가 잡을 어긋남이 없다(같은 보류 <!-- num:experiments/eval/exaone_colid_vllm_ko_test/analysis.json:abstain_reason_answerable.verification_failed:int -->14<!-- /num -->건). 검증기는 답과 근거의 불일치를 잡는 장치이고, 일관되게 틀린 답은 잡지 못한다(§19.2의 4번)는 것이 이 실험에서 수치로 드러났다.
+
+한계: `colid`는 한 번만 학습했다. 입력 예산이 다르다(`plain` 672, `colid` 800 토큰. 잘린 정답 행은 <!-- num:experiments/serialize/table_format_cost.json:cases.plain_672.test_gold_row_cut:int -->24<!-- /num -->개 대 <!-- num:experiments/serialize/table_format_cost.json:cases.colid_800.test_gold_row_cut:int -->27<!-- /num -->개로 맞췄다). 전체 데이터에서 `colid`가 더 나은지는 재지 않았다. `plain`도 전체 데이터에서는 근거 오류가 1%대라 얻을 것이 적을 수 있고, 입력이 <!-- num:experiments/serialize/table_format_cost.json:colid_extra_tokens_rate:pct -->26.0<!-- /num -->% 길어지는 비용은 남는다.
 
 ### 19.8 검증기의 근거 복구 끄기 옵션 — 명세와 테스트 준비, 구현은 소유자 몫
 

@@ -1,0 +1,77 @@
+{
+ "run": "experiments/eval/exaone_colid_vllm_ko_custom_ec",
+ "n": 30,
+ "n_answerable": 25,
+ "pred_status_answerable": {
+  "answered": 22,
+  "abstained": 3
+ },
+ "abstain_reason_answerable": {
+  "verification_failed": 3
+ },
+ "raw_correct_but_blocked": 1,
+ "evidence_repaired": 0,
+ "lookup_citation": {
+  "n": 13,
+  "row_correct": 1.0,
+  "col_correct": 1.0,
+  "both_correct": 1.0
+ },
+ "abstain_breakdown": {
+  "n_gold_abstain": 5,
+  "explicit_abstain_outputs": 0,
+  "explicit_abstain_on_answerable": 0,
+  "planner_chose_abstain_recall": 0.0,
+  "final_abstain_recall": 0.2,
+  "abstained_via_invalid_program_recall": 0.0,
+  "abstained_via_verifier_recall": 0.2
+ },
+ "selective": {
+  "n": 30,
+  "answered": 26,
+  "answered_correct": 13,
+  "answered_wrong": 13,
+  "precision": 0.5,
+  "wrong_answer_rate": 0.4333
+ },
+ "text_answers": {
+  "n_gold_text": 6,
+  "chose_text_op_rate": 0.0,
+  "verified_correct_rate": 0.0,
+  "verified_correct": 0
+ },
+ "degenerate_calc_outputs": 0,
+ "degenerate_calc_rate": 0.0,
+ "op_confusion_top": [
+  [
+   "lookup->lookup",
+   13
+  ],
+  [
+   "text->lookup",
+   6
+  ],
+  [
+   "abstain->lookup",
+   5
+  ],
+  [
+   "diff->lookup",
+   3
+  ],
+  [
+   "avg->lookup",
+   2
+  ],
+  [
+   "sum->lookup",
+   1
+  ]
+ ],
+ "by_source_verified": {
+  "custom": {
+   "n": 30,
+   "verified_em": 0.467
+  }
+ }
+}

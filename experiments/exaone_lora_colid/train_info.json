@@ -1,0 +1,123 @@
+{
+ "n_examples": 300,
+ "steps": 18,
+ "dtype": "torch.float16",
+ "wall_s": 182.9,
+ "gpu": "Tesla T4",
+ "args": {
+  "model": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+  "train": [
+   "data/ko/train.jsonl",
+   "data/ko/synthetic_train.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "out": "experiments/exaone_lora_colid",
+  "dtype": "auto",
+  "trust_remote_code": false,
+  "epochs": 1.0,
+  "bs": 2,
+  "grad_accum": 8,
+  "lr": 0.0002,
+  "max_len": 896,
+  "lora_r": 16,
+  "grad_ckpt": true,
+  "merge": true,
+  "limit": 300,
+  "tokenizer": null,
+  "table_format": "colid"
+ },
+ "loss_log": [
+  {
+   "step": 1,
+   "of": 18,
+   "loss": 1.5505
+  },
+  {
+   "step": 2,
+   "of": 18,
+   "loss": 1.7602
+  },
+  {
+   "step": 3,
+   "of": 18,
+   "loss": 2.238
+  },
+  {
+   "step": 4,
+   "of": 18,
+   "loss": 0.9032
+  },
+  {
+   "step": 5,
+   "of": 18,
+   "loss": 1.8036
+  },
+  {
+   "step": 6,
+   "of": 18,
+   "loss": 2.4165
+  },
+  {
+   "step": 7,
+   "of": 18,
+   "loss": 2.2122
+  },
+  {
+   "step": 8,
+   "of": 18,
+   "loss": 0.9333
+  },
+  {
+   "step": 9,
+   "of": 18,
+   "loss": 0.4197
+  },
+  {
+   "step": 10,
+   "of": 18,
+   "loss": 0.2222
+  },
+  {
+   "step": 11,
+   "of": 18,
+   "loss": 0.0434
+  },
+  {
+   "step": 12,
+   "of": 18,
+   "loss": 0.6282
+  },
+  {
+   "step": 13,
+   "of": 18,
+   "loss": 0.0537
+  },
+  {
+   "step": 14,
+   "of": 18,
+   "loss": 0.1654
+  },
+  {
+   "step": 15,
+   "of": 18,
+   "loss": 0.0736
+  },
+  {
+   "step": 16,
+   "of": 18,
+   "loss": 0.1318
+  },
+  {
+   "step": 17,
+   "of": 18,
+   "loss": 0.0384
+  },
+  {
+   "step": 18,
+   "of": 18,
+   "loss": 0.5493
+  }
+ ]
+}

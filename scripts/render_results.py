@@ -141,6 +141,7 @@ def engine_table() -> str:
             ("EXAONE-4.0-1.2B + LoRA 300개, vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_vllm_ko_test"),
             ("같은 모델, vLLM 텐서 병렬 TP=2 (Kaggle T4 2장, 동시 16요청)", "exaone_vllm_tp2_ko_test"),
             ("같은 모델, SGLang 0.5.9 + T4 우회 모듈 (Kaggle T4 1장, 동시 8요청)", "exaone_sglang_ko_test"),
+            ("EXAONE-4.0-1.2B + LoRA 300개, **표 입력에 열 번호(`colid`)**, vLLM fp16 (Kaggle T4 1장, 동시 16요청, 입력 예산 800)", "exaone_colid_vllm_ko_test"),
             ("EXAONE-4.0-1.2B + LoRA **전체 3,587개**(3,654개 중 행 예산 안), vLLM fp16 (Kaggle T4 1장, 동시 16요청)", "exaone_full_vllm_ko_test"),
             ("같은 전체 데이터 모델, vLLM TP=2 (T4 2장)", "exaone_full_vllm_tp2_ko_test"),
             ("같은 전체 데이터 모델, SGLang + T4 우회 모듈", "exaone_full_sglang_ko_test")]
@@ -165,7 +166,7 @@ def engine_table() -> str:
                 f"| {pct(m['abstain_recall'])} → {v2('abstain_recall')} | {pct(m['false_abstain_rate'])} → {v2('false_abstain_rate')} | {pct(m['parse_fail_rate'])} | {m['mean_ms_per_example']:.0f} |\n")
     ev = got[2][1]["meta"]
     out += f"\nEXAONE 행의 조건: ko test {ev['n']}문항 전체를 vLLM 1장·동시 16요청으로 {ev['wall_s']}초(끝에서 끝까지 {ev['n'] / ev['wall_s']:.1f}문항/s), ms/예제는 동시 요청 중의 요청당 지연. v1 = 개체 일치 검사 없음, v2 = 같은 출력을 개체 일치 검사로 재검증(본 실행과 같은 토크나이저·행 예산). 300개 모델은 세 번째 세션, 전체 데이터 모델은 네 번째 세션의 학습이다(출처는 `experiments/eval/PROVENANCE_exaone.md`).\n"
-    bench = [(label, load(EXP / "bench" / f"engine_{tag}_c{c}.json")) for label, tag in (("vLLM, GPU 1장", "vllm"), ("vLLM TP=2, GPU 2장", "vllm_tp2"), ("SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장", "sglang"),
+    bench = [(label, load(EXP / "bench" / f"engine_{tag}_c{c}.json")) for label, tag in (("vLLM, GPU 1장", "vllm"), ("vLLM TP=2, GPU 2장", "vllm_tp2"), ("SGLang + T4 우회 모듈(fused 커널 없음), GPU 1장", "sglang"), ("열 번호 형식 300개 모델, vLLM, GPU 1장", "colid_vllm"),
                                                                                       ("전체 데이터 모델, vLLM, GPU 1장", "full_vllm"), ("전체 데이터 모델, vLLM TP=2", "full_vllm_tp2"), ("전체 데이터 모델, SGLang + 우회 모듈", "full_sglang"),
                                                                                       ("**Colab L4**: vLLM 기본 커널", "full_l4_vllm"), ("**Colab L4**: SGLang 기본 커널", "full_l4_sglang"),
                                                                                       ("**Colab A100**: vLLM 기본 커널", "full_a100_vllm"), ("**Colab A100**: SGLang 기본 커널", "full_a100_sglang")) for c in (1, 8, 32)]
@@ -181,6 +182,7 @@ def engine_custom_table() -> str:
     """The hand-made 30 Korean questions under the EXAONE planners (owner's GPU runs), next to the CPU rows."""
     rows = [("휴리스틱 기준선", "heuristic_ko_custom"), ("[2차] GRPO RL v3 = mT5-small", "rl_v3_ko_custom"),
             ("EXAONE LoRA 300개, vLLM", "exaone_vllm_ko_custom"), ("EXAONE LoRA 300개, SGLang(우회)", "exaone_sglang_ko_custom"),
+            ("EXAONE LoRA 300개, 열 번호 형식(`colid`), vLLM", "exaone_colid_vllm_ko_custom"),
             ("EXAONE LoRA 전체 3,587개, vLLM", "exaone_full_vllm_ko_custom"), ("EXAONE LoRA 전체, vLLM TP=2", "exaone_full_vllm_tp2_ko_custom"),
             ("EXAONE LoRA 전체, SGLang(우회)", "exaone_full_sglang_ko_custom"),
             ("EXAONE LoRA 전체(Colab L4 학습), vLLM", "exaone_full_l4_vllm_ko_custom"), ("같은 모델, SGLang (L4)", "exaone_full_l4_sglang_ko_custom"),
@@ -210,6 +212,7 @@ def ci(w: dict | None) -> str:
 EVIDENCE_ROWS = [("SFT stage2 = mT5-small 300M", "sft_ko2_ko_test"), ("화학 SFT (1차 최종 mT5)", "sft_chem_ko_test"), ("GRPO RL v1 (보상 허점)", "rl_ko_v1_ko_test"),
                  ("[2차] GRPO RL v3 (mT5 최종)", "rl_v3_ko_test"),
                  ("EXAONE-4.0-1.2B LoRA 300개, 1번째 학습", "exaone_vllm_ko_test_run1"), ("같은 설정, 2번째 학습", "exaone_vllm_ko_test_run2"), ("같은 설정, 3번째 학습", "exaone_vllm_ko_test"),
+                 ("**같은 300개, 표 입력에 열 번호(`colid`)**", "exaone_colid_vllm_ko_test"),
                  ("EXAONE-4.0-1.2B LoRA 전체 3,587개, 1번째 학습", "exaone_full_vllm_ko_test"), ("같은 설정, 2번째 학습", "exaone_full_vllm_ko_test_run2")]
 
 
@@ -235,6 +238,7 @@ def evidence_table() -> str:
 
 
 OPERATING_ROWS = [("휴리스틱 기준선", "heuristic_ko_test"), ("[2차] GRPO RL v3 (mT5 최종)", "rl_v3_ko_test"), ("EXAONE LoRA 300개 (3번째 학습)", "exaone_vllm_ko_test"),
+                  ("EXAONE LoRA 300개, 열 번호 형식(`colid`)", "exaone_colid_vllm_ko_test"),
                   ("EXAONE LoRA 전체 (1번째 학습)", "exaone_full_vllm_ko_test"), ("EXAONE LoRA 전체 (2번째 학습)", "exaone_full_vllm_ko_test_run2")]
 
 

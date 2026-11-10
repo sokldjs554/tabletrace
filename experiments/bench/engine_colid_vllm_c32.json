@@ -1,0 +1,12 @@
+{
+ "url": "http://127.0.0.1:8001",
+ "model": "planner",
+ "table_format": "colid",
+ "n": 64,
+ "concurrency": 32,
+ "wall_s": 2.74,
+ "throughput_req_per_s": 23.335,
+ "p50_ms": 1130.9,
+ "p95_ms": 1530.8,
+ "parse_ok_rate": 1.0
+}

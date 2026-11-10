@@ -53,6 +53,11 @@ PAIRS = [
     ("exaone_sglang_vs_vllm_ko_test_ec", "exaone_vllm_ko_test_ec", "exaone_sglang_ko_test_ec"),
     ("exaone_sglang_vs_rl_v3_ko_test_ec", "rl_v3_ko_test_ec", "exaone_sglang_ko_test_ec"),
     # full-data LoRA (3,587 examples, 224 steps) from the fourth Kaggle session
+    # same 300 examples and steps, table input with a column id on every cell (model/serialize.py `colid`) against `plain`
+    ("exaone_colid_vs_plain300_ko_test", "exaone_vllm_ko_test", "exaone_colid_vllm_ko_test"),
+    ("exaone_colid_vs_plain300_ko_test_ec", "exaone_vllm_ko_test_ec", "exaone_colid_vllm_ko_test_ec"),
+    ("exaone_colid_vs_plain300_run1_ko_test", "exaone_vllm_ko_test_run1", "exaone_colid_vllm_ko_test"),
+    ("exaone_colid_vs_plain300_run2_ko_test", "exaone_vllm_ko_test_run2", "exaone_colid_vllm_ko_test"),
     ("exaone_full_vs_300_ko_test", "exaone_vllm_ko_test", "exaone_full_vllm_ko_test"),
     ("exaone_full_vs_300_ko_test_ec", "exaone_vllm_ko_test_ec", "exaone_full_vllm_ko_test_ec"),
     ("exaone_full_vs_rl_v3_ko_test_ec", "rl_v3_ko_test_ec", "exaone_full_vllm_ko_test_ec"),
