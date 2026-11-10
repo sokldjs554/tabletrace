@@ -12,8 +12,8 @@ the planner itself cited, before the verifier touched the output:
   strict rate =  no_answer_in_cell                         / correct lookup answers
 
 Both come with Wilson 95% intervals. The file also records what the verifier then did with the strict errors
-(repaired the evidence, or withheld the answer) and three operating points per run: the planner's raw output,
-the verifier, and the verifier with the subject check.
+(repaired the evidence, or withheld the answer) and operating points per run: the planner's raw output,
+the verifier, the verifier with the subject check, and the verifier with evidence repair switched off.
 
   python scripts/evidence_error.py            # writes experiments/eval/evidence_error.json
 """
@@ -113,6 +113,20 @@ def one_run(run: Path) -> dict | None:
     # Operating points over ALL questions of the run (answerable and unanswerable).
     out["raw"] = operating_point(rows, lambda r: r["pred_op"] not in (None, "abstain"), lambda r: r["raw_correct"])
     out["verifier"] = operating_point(rows, lambda r: r["pred_status"] == "answered", lambda r: r["verified_correct"])
+    # Counterfactual: the same verifier without evidence repair. In verify/verifier.py the branch that repairs
+    # would otherwise return abstain("verification_failed"), so a repaired answer becomes an abstention.
+    def kept(r: dict) -> bool:
+        return r["pred_status"] == "answered" and not r["evidence_repaired"]
+
+    def right_without_repair(r: dict) -> bool:
+        if r["pred_status"] == "answered" and r["evidence_repaired"]:
+            return r["gold_status"] == "abstained"
+        return bool(r["verified_correct"])
+
+    out["verifier_no_repair"] = operating_point(rows, kept, lambda r: r["verified_correct"])
+    out["verified_em"] = round(sum(1 for r in rows if r["verified_correct"]) / len(rows), 4)
+    out["verified_em_no_repair"] = round(sum(1 for r in rows if right_without_repair(r)) / len(rows), 4)
+    out["repaired_answers"] = sum(1 for r in rows if r["pred_status"] == "answered" and r["evidence_repaired"])
     # What the verifier changed relative to the planner's own answer text.
     gained = [r for r in rows if r["pred_status"] == "answered" and r["verified_correct"] and not r["raw_correct"]]
     lost = [r for r in rows if r["raw_correct"] and not (r["pred_status"] == "answered" and r["verified_correct"])]

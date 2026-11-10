@@ -1,6 +1,6 @@
 # 자소서·포트폴리오 작성용 전달 문서 (TableTrace)
 
-이 문서는 자기소개서와 포트폴리오를 쓰는 사람(또는 AI 도구)에게 넘기는 사실 정리다. **여기 없는 숫자는 쓰지 말고, 여기 있는 숫자도 괄호의 출처 파일로 다시 확인한 뒤 쓴다.** 저장소에서 `python scripts/check_numbers.py --strict`와 `python scripts/render_results.py --check`를 돌리면 README·보고서의 모든 숫자가 산출물과 일치하는지 검사된다(2026-11-10 기준 922개 일치).
+이 문서는 자기소개서와 포트폴리오를 쓰는 사람(또는 AI 도구)에게 넘기는 사실 정리다. **여기 없는 숫자는 쓰지 말고, 여기 있는 숫자도 괄호의 출처 파일로 다시 확인한 뒤 쓴다.** 저장소에서 `python scripts/check_numbers.py --strict`와 `python scripts/render_results.py --check`를 돌리면 README·보고서의 모든 숫자가 산출물과 일치하는지 검사된다(2026-11-10 기준 947개 일치).
 
 ## 0. 반드시 지킬 규칙
 
@@ -52,6 +52,7 @@
 | RL v3가 배운 것 | 본문 근거 없음 50문항에서 모델이 직접 보류 0% → 90% (p=0.020) | `experiments/eval/rl_v3_text2_test/analysis.json`, `experiments/eval/paired_tests.json` |
 | RL v1의 보상 허점 발견 | 답 없는 문항에서 "최종 상태가 보류"면 만점을 줘서, 검증기가 거부한 쓰레기 출력도 만점을 받았다. 같은 셀을 두 번 쓰는 퇴화 계산 출력: SFT 101건 → RL v1 160건 → 보상만 고친 v2 146건 → 데이터까지 고친 최종(RL v3) 0건. 보상 수정만으로는 줄지 않았다 | `experiments/eval/{sft_ko2,rl_ko_v1,rl_ko,rl_v3}_ko_test/analysis.json` |
 | **답은 맞는데 근거 셀이 틀린 비율** (조회 문항, 95% 구간) | mT5 최종 52.6% (45.9~59.3), EXAONE 300개 세 번 학습 53.1 / 63.2 / 65.2%, EXAONE 전체 1.3% (0.6~2.9), 두 번째 학습 1.3% (0.6~2.8). 틀린 것은 거의 전부 "행은 맞고 열이 틀림" | `experiments/eval/evidence_error.json` (`scripts/evidence_error.py`) |
+| **근거 복구에 기댄 점수** (근거 복구를 끄고 보류로 채점한 verified EM) | mT5 최종 32.8% → 20.2%, EXAONE 300개 53.1% → 23.5%, EXAONE 전체 84.3% → 83.8%. 약한 모델의 점수는 검증기의 근거 복구가 지탱하고, 전체 데이터 모델은 복구가 거의 필요 없다. 복구는 오답도 함께 내보낸다(mT5 오답 유출 42.2% → 복구 없이 16.7%) | `experiments/eval/evidence_error.json` |
 | **검증기 앞뒤의 오답 유출** (EXAONE 전체, 699문항) | 모델 출력 그대로 21.6% → 검증기 v1 13.9% → v2 12.0%. 답하는 비율 95.3% → 93.4% → 88.7%. 두 번째 학습: 16.0% → 11.2% → 9.4% | 같은 파일 |
 | **표 겹침의 효과** (mT5 최종 모델, 1,497문항씩) | 학습 때 본 표의 새 질문 38.9% 대 처음 보는 표 41.3%, 차이 -2.3%p (95% 구간 -6.0 ~ +1.4). **겹침이 점수를 올린다는 증거는 얻지 못했다.** 학습 없는 기준선의 차이는 +1.2%p. EXAONE에서는 재지 않음 | `experiments/eval/leak_effect.json` (`scripts/leak_effect.py`) |
 | int8 동적 양자화 범위별 측정 | lm_head만 int8: 정확도 손실 검출 안 됨(32.2%, p=0.636), 처리량 약 1.5배(같은 측정 안 bs=8: 2.12 → 3.21 예제/s) / 모든 층 int8: 21.2%로 하락 | `experiments/eval/final_int8_*_ko_test/metrics.json`, `experiments/bench/inference_r2*.json` |
@@ -64,7 +65,7 @@
 | vLLM 텐서 병렬 TP=2 (T4 2장) | 41.0 요청/s, p50 678 ms; 점수는 1장과 같음 | `experiments/bench/engine_vllm_tp2_c32.json`, `experiments/eval/exaone_vllm_tp2_ko_test/metrics.json` |
 | SGLang (T4, 우회 모듈) | vLLM과 같은 답(699문항 중 1개 차이), 속도는 8.3 요청/s | `experiments/eval/exaone_sglang_ko_test/metrics.json`, `experiments/bench/engine_sglang_c32.json` |
 | mT5 2-스테이지 파이프라인 병렬 (T4 2장, NCCL) | 출력 일치, 처리량 이득 없음(설계상 겹치지 않음), 장치당 메모리 분할 | `experiments/bench/pp_*_gpu.json` |
-| 테스트·검증 | pytest 115개 통과, E2E 실시간 16/16·정적 13/13, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
+| 테스트·검증 | pytest 116개 통과, E2E 실시간 16/16·정적 13/13, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
 
 ## 4. 포트폴리오에 쓸 만한 과정 (전부 기록이 있음)
 
@@ -73,7 +74,7 @@
 3. **검증기 v2(개체 일치 검사)**: 표에 없는 대상에도 셀을 인용해 답하는 문제를 검증기 단계에서 잡았고, 정답을 오탐 보류하는 비용(4.3%)을 함께 측정했다. 잘하는 모델(EXAONE 전체)에서는 순효과가 음수에 가깝다는 것도 적었다.
 4. **int8 "lm_head는 fp32"라는 문서의 오류를 스스로 발견**하고 양자화 범위별로 다시 측정해, 속도 이득은 lm_head에서 나오고 정확도 붕괴는 전체 양자화에서만 난다는 것을 보였다. (§8, §18.2)
 5. **SGLang을 미지원 GPU(T4)에서 돌림**: sgl_kernel에 sm75 커널이 없어 두 번 실패 → 소스를 읽고 `MultiPlatformOp`를 PyTorch 구현으로 돌리는 우회 모듈 작성 → 세 번째는 transformers 5.x가 저장한 config.json의 RoPE 키를 4.57이 못 읽어 엉뚱한 답 → 설정 복원 → 네 번째 성공, vLLM과 답 일치. (`experiments/serving/sglang_t4_failure.md`, 이슈 37~39)
-6. **숫자 정합성 도구**: 문서의 모든 숫자를 산출물 JSON에 묶는 표식과 검사 스크립트(`scripts/check_numbers.py`, `scripts/render_results.py`)로 922개 숫자를 자동 검증한다.
+6. **숫자 정합성 도구**: 문서의 모든 숫자를 산출물 JSON에 묶는 표식과 검사 스크립트(`scripts/check_numbers.py`, `scripts/render_results.py`)로 947개 숫자를 자동 검증한다.
 7. **학습 실행 간 변동을 측정**: 같은 설정의 LoRA를 300개 3회, 전체 2회 돌려 300개는 1점 안, 전체는 약 3점(p=0.013) 움직임을 기록하고 점수를 범위로 적었다.
 8. **자기 주장을 측정으로 다시 확인하고 줄임** (2026-11-10): "공개 분할이 표 1,755개를 공유한다"는 문장이 실은 페이지 수였음을 찾아 고쳤다(같은 표는 1,578개). "표 겹침이 점수를 부풀린다"는 가정은 직접 재 보니 mT5에서 검출되지 않았고, 그 결과를 그대로 적었다. (`docs/REPORT.md` §19.3, 이슈 42)
 9. **가까운 논문 12편을 원문으로 읽고 주장 범위를 정함**: 답과 근거의 불일치, 셀 인용 강화학습, 근거 셀 보상은 이미 연구가 있다는 것을 확인하고 "새롭다"는 표현을 빼고 "한국어 표에서의 측정"으로 좁혔다. KorWikiTQ 원논문이 분할 방식을 밝히지 않는다는 것도 원문에서 확인했다. (§8, `docs/research/papers.md`)

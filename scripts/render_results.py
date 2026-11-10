@@ -218,18 +218,19 @@ def evidence_table() -> str:
     d = load(EXP / "eval" / "evidence_error.json")
     if not d:
         return "_evidence_error.json 없음_\n"
-    out = ("| 모델 | 답 텍스트가 맞은 조회 답 | 인용 셀 = 정답 셀 | 같은 값의 다른 셀 | 인용 셀에 답이 없음 | **인용 셀에 답이 없는 비율 % (95% 구간)** | 그중 행은 맞고 열이 틀림 | 검증기: 근거를 고쳐 답함 / 보류 |\n"
-           "|---|---:|---:|---:|---:|---:|---:|---:|\n")
+    out = ("| 모델 | 답 텍스트가 맞은 조회 답 | 인용 셀 = 정답 셀 | 같은 값의 다른 셀 | 인용 셀에 답이 없음 | **인용 셀에 답이 없는 비율 % (95% 구간)** | 그중 행은 맞고 열이 틀림 | 검증기: 근거를 고쳐 답함 / 보류 | verified EM % | 근거 복구 없이 채점한 verified EM % |\n"
+           "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|\n")
     for name, key in EVIDENCE_ROWS:
         o = d.get(key)
         if not o:
             continue
         v = o["verifier_on_strict"]
         out += (f"| {name} | {o['correct_lookup_answers']} | {o['cited_gold']} | {o['same_value_elsewhere']} | {o['no_answer_in_cell']} | **{ci(o['strict'])}** "
-                f"| {o['strict_where'].get('same_row', 0)} | {v['repaired_and_answered']} / {v['withheld']} |\n")
+                f"| {o['strict_where'].get('same_row', 0)} | {v['repaired_and_answered']} / {v['withheld']} | {pct(o['verified_em'])} | **{pct(o['verified_em_no_repair'])}** |\n")
     n = d["rl_v3_ko_test"]["lookup_questions"]
     out += (f"\n대상은 한국어 test의 조회 문항 {n}개(KorWikiTQ 원본) 가운데 모델이 쓴 답 텍스트가 정답과 같은 것이다. 인용 셀은 검증기가 손대기 전 모델 출력의 `cells:` 값이다. "
-            "정답 셀은 답 텍스트에서 역으로 찾은 것이므로, 답과 같은 값을 가진 다른 셀을 인용한 경우는 오류로 세지 않았다. 구간은 Wilson 95%다. `scripts/evidence_error.py`가 저장된 예측에서 다시 계산한다.\n")
+            "정답 셀은 답 텍스트에서 역으로 찾은 것이므로, 답과 같은 값을 가진 다른 셀을 인용한 경우는 오류로 세지 않았다. 구간은 Wilson 95%다. "
+            "마지막 두 열은 test 699문항 전체의 verified EM(검증기 v1)과, 인용 셀에 답이 없을 때 근거를 고치지 않고 보류로 채점한 값이다. `scripts/evidence_error.py`가 저장된 예측에서 다시 계산한다.\n")
     return out
 
 
@@ -247,14 +248,16 @@ def operating_table() -> str:
         o = d.get(key)
         if not o:
             continue
-        for label, pt in (("모델 출력 그대로", "raw"), ("검증기 v1", "verifier"), ("검증기 v2(개체 일치 검사)", "verifier_subject_check")):
+        for label, pt in (("모델 출력 그대로", "raw"), ("검증기 v1", "verifier"), ("검증기 v2(개체 일치 검사)", "verifier_subject_check"),
+                          ("검증기 v1에서 근거 복구를 끄고 보류", "verifier_no_repair")):
             q = o.get(pt)
             if not q:
                 continue
             out += (f"| {name} | {label} | {pct(q['coverage'])} | {ci(q['accuracy_when_answered'])} | {pct(q['wrong_answer_rate']['rate'])} | {q['answered_correct']} / {q['answered_wrong']} |\n")
     n = d["rl_v3_ko_test"]["raw"]["n"]
     out += (f"\n한국어 test {n}문항 전체(답이 없는 문항 포함) 기준이다. \"모델 출력 그대로\"는 모델이 쓴 답 텍스트를 채점한 것이고, 답이 없는 문항에 답을 쓰면 오답이다. "
-            "검증기 행은 도구가 인용 셀로 다시 계산한 답을 채점하므로 계산 문항에서는 정답 수가 늘 수 있다. 답한 비율이 줄어든 만큼이 보류다.\n")
+            "검증기 행은 도구가 인용 셀로 다시 계산한 답을 채점하므로 계산 문항에서는 정답 수가 늘 수 있다. 답한 비율이 줄어든 만큼이 보류다. "
+            "마지막 조건은 인용 셀에 답이 없을 때 근거를 고치지 않고 보류했다면 어떻게 됐을지를 저장된 출력에서 계산한 값이다(검증기 코드에서 복구 분기 다음은 보류다).\n")
     return out
 
 

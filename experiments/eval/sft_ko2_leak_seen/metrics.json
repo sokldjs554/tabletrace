@@ -1,0 +1,68 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "model",
+  "data": [
+   "data/ko/leak_probe_seen.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl",
+   "data/ko/leak_probe_documents.jsonl"
+  ],
+  "n": 1497,
+  "wall_s": 742.1,
+  "hardware": "x86_64",
+  "label": null,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-10T09:40:36",
+  "quantize": false,
+  "quantize_scope": null
+ },
+ "metrics": {
+  "n": 1497,
+  "n_answerable": 1497,
+  "n_gold_abstain": 0,
+  "n_calc": 0,
+  "n_lookup": 1497,
+  "verified_em": 0.3427,
+  "answer_em_answerable": 0.3427,
+  "raw_answer_em_answerable": 0.3627,
+  "evidence_cells_exact": 0.342,
+  "evidence_cells_exact_raw": 0.2565,
+  "evidence_repaired_rate": 0.501,
+  "evidence_cells_overlap": 0.342,
+  "op_acc": 0.8717,
+  "lookup_em": 0.3427,
+  "calc_em": null,
+  "calc_result_correct": null,
+  "unit_error_rate": null,
+  "abstain_recall": null,
+  "false_abstain_rate": 0.2465,
+  "abstain_precision": 0.0,
+  "parse_fail_rate": 0.0007,
+  "verifier_corrections": 0.2578,
+  "truncated_gold_rate": 0.0468,
+  "verified_em_untruncated": 0.3595,
+  "mean_ms_per_example": 481.8,
+  "by_source": {
+   "korwikitq": {
+    "n": 1497,
+    "verified_em": 0.3427
+   }
+  },
+  "by_category": {
+   "other_cell": {
+    "n": 1486,
+    "verified_em": 0.3405
+   },
+   "same_cell_as_set_aside": {
+    "n": 11,
+    "verified_em": 0.6364
+   }
+  },
+  "gold_subject_fail_rate": 0.0494,
+  "entity_check": false
+ }
+}

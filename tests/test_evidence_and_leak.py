@@ -84,3 +84,17 @@ def test_official_overlap_profile_is_consistent():
     assert p["shared_tables_by_url_and_content"] <= p["dev"]["unique_tables_by_url_and_content"]
     assert p["dev_on_train_table"]["examples"] <= p["dev_on_train_url"]["examples"] <= p["dev"]["examples"]
     assert p["dev_same_table_same_answer_in_train"]["examples"] <= p["dev_on_train_table"]["examples"]
+
+
+def test_no_repair_counterfactual_on_stored_runs():
+    """Stored runs: the recomputed verified EM equals the recorded one, and switching repair off only removes answers."""
+    eval_dir = ROOT / "experiments" / "eval"
+    plain = evidence_error.one_run(eval_dir / "heuristic_ko_test")       # the heuristic never needs a repair
+    assert plain["repaired_answers"] == 0 and plain["verified_em_no_repair"] == plain["verified_em"]
+    weak = evidence_error.one_run(eval_dir / "rl_v3_ko_test")
+    recorded = json.loads((eval_dir / "rl_v3_ko_test" / "metrics.json").read_text(encoding="utf-8"))["metrics"]["verified_em"]
+    assert weak["verified_em"] == recorded
+    assert weak["repaired_answers"] > 0 and weak["verified_em_no_repair"] < weak["verified_em"]
+    with_repair, without = weak["verifier"], weak["verifier_no_repair"]
+    assert without["answered"] == with_repair["answered"] - weak["repaired_answers"]
+    assert without["answered_wrong"] <= with_repair["answered_wrong"] and without["answered_correct"] <= with_repair["answered_correct"]

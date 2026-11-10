@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->115<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패(모델 가중치가 없으면 모델 테스트는 skip) |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->116<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패(모델 가중치가 없으면 모델 테스트는 skip) |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 | `training/rl_grpo.py`, §7, §18, 이슈 23–24 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->115<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->116<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->16<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->16<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->13<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->13<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -791,19 +791,19 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 모델은 `op: lookup ; cells: r3c1 ; answer: …` 형태로 답과 근거 셀을 함께 낸다. 답 텍스트가 정답과 같은 조회 답만 골라, 모델이 인용한 셀(검증기가 손대기 전)에 실제로 그 답이 들어 있는지 셌다.
 
 <!-- results:evidence:start -->
-| 모델 | 답 텍스트가 맞은 조회 답 | 인용 셀 = 정답 셀 | 같은 값의 다른 셀 | 인용 셀에 답이 없음 | **인용 셀에 답이 없는 비율 % (95% 구간)** | 그중 행은 맞고 열이 틀림 | 검증기: 근거를 고쳐 답함 / 보류 |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| SFT stage2 = mT5-small 300M | 177 | 83 | 0 | 94 | **53.1 (45.8–60.3)** | 84 | 89 / 5 |
-| 화학 SFT (1차 최종 mT5) | 217 | 61 | 0 | 156 | **71.9 (65.6–77.5)** | 148 | 139 / 17 |
-| GRPO RL v1 (보상 허점) | 169 | 78 | 0 | 91 | **53.8 (46.3–61.2)** | 82 | 85 / 6 |
-| [2차] GRPO RL v3 (mT5 최종) | 209 | 99 | 0 | 110 | **52.6 (45.9–59.3)** | 107 | 105 / 5 |
-| EXAONE-4.0-1.2B LoRA 300개, 1번째 학습 | 360 | 168 | 1 | 191 | **53.1 (47.9–58.1)** | 189 | 181 / 10 |
-| 같은 설정, 2번째 학습 | 372 | 137 | 0 | 235 | **63.2 (58.2–67.9)** | 231 | 221 / 14 |
-| 같은 설정, 3번째 학습 | 376 | 130 | 1 | 245 | **65.2 (60.2–69.8)** | 241 | 227 / 18 |
-| EXAONE-4.0-1.2B LoRA 전체 3,587개, 1번째 학습 | 455 | 449 | 0 | 6 | **1.3 (0.6–2.9)** | 6 | 4 / 2 |
-| 같은 설정, 2번째 학습 | 458 | 451 | 1 | 6 | **1.3 (0.6–2.8)** | 6 | 5 / 1 |
+| 모델 | 답 텍스트가 맞은 조회 답 | 인용 셀 = 정답 셀 | 같은 값의 다른 셀 | 인용 셀에 답이 없음 | **인용 셀에 답이 없는 비율 % (95% 구간)** | 그중 행은 맞고 열이 틀림 | 검증기: 근거를 고쳐 답함 / 보류 | verified EM % | 근거 복구 없이 채점한 verified EM % |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| SFT stage2 = mT5-small 300M | 177 | 83 | 0 | 94 | **53.1 (45.8–60.3)** | 84 | 89 / 5 | 27.5 | **18.9** |
+| 화학 SFT (1차 최종 mT5) | 217 | 61 | 0 | 156 | **71.9 (65.6–77.5)** | 148 | 139 / 17 | 29.8 | **13.3** |
+| GRPO RL v1 (보상 허점) | 169 | 78 | 0 | 91 | **53.8 (46.3–61.2)** | 82 | 85 / 6 | 26.8 | **18.3** |
+| [2차] GRPO RL v3 (mT5 최종) | 209 | 99 | 0 | 110 | **52.6 (45.9–59.3)** | 107 | 105 / 5 | 32.8 | **20.2** |
+| EXAONE-4.0-1.2B LoRA 300개, 1번째 학습 | 360 | 168 | 1 | 191 | **53.1 (47.9–58.1)** | 189 | 181 / 10 | 52.2 | **29.3** |
+| 같은 설정, 2번째 학습 | 372 | 137 | 0 | 235 | **63.2 (58.2–67.9)** | 231 | 221 / 14 | 53.2 | **24.6** |
+| 같은 설정, 3번째 학습 | 376 | 130 | 1 | 245 | **65.2 (60.2–69.8)** | 241 | 227 / 18 | 53.1 | **23.5** |
+| EXAONE-4.0-1.2B LoRA 전체 3,587개, 1번째 학습 | 455 | 449 | 0 | 6 | **1.3 (0.6–2.9)** | 6 | 4 / 2 | 84.3 | **83.8** |
+| 같은 설정, 2번째 학습 | 458 | 451 | 1 | 6 | **1.3 (0.6–2.8)** | 6 | 5 / 1 | 87.1 | **86.4** |
 
-대상은 한국어 test의 조회 문항 539개(KorWikiTQ 원본) 가운데 모델이 쓴 답 텍스트가 정답과 같은 것이다. 인용 셀은 검증기가 손대기 전 모델 출력의 `cells:` 값이다. 정답 셀은 답 텍스트에서 역으로 찾은 것이므로, 답과 같은 값을 가진 다른 셀을 인용한 경우는 오류로 세지 않았다. 구간은 Wilson 95%다. `scripts/evidence_error.py`가 저장된 예측에서 다시 계산한다.
+대상은 한국어 test의 조회 문항 539개(KorWikiTQ 원본) 가운데 모델이 쓴 답 텍스트가 정답과 같은 것이다. 인용 셀은 검증기가 손대기 전 모델 출력의 `cells:` 값이다. 정답 셀은 답 텍스트에서 역으로 찾은 것이므로, 답과 같은 값을 가진 다른 셀을 인용한 경우는 오류로 세지 않았다. 구간은 Wilson 95%다. 마지막 두 열은 test 699문항 전체의 verified EM(검증기 v1)과, 인용 셀에 답이 없을 때 근거를 고치지 않고 보류로 채점한 값이다. `scripts/evidence_error.py`가 저장된 예측에서 다시 계산한다.
 
 <!-- results:evidence:end -->
 
@@ -813,7 +813,7 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 2. **전체 데이터로 학습하면 이 오류가 거의 사라진다.** 같은 EXAONE을 3,587개로 튜닝하면 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.correct_lookup_answers:int -->455<!-- /num -->개 중 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.no_answer_in_cell:int -->6<!-- /num -->개(<!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.strict.rate:pct -->1.3<!-- /num -->%, 구간 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.strict.lo:pct -->0.6<!-- /num -->~<!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.strict.hi:pct -->2.9<!-- /num -->%), 두 번째 학습에서도 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test_run2.correct_lookup_answers:int -->458<!-- /num -->개 중 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test_run2.no_answer_in_cell:int -->6<!-- /num -->개(<!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test_run2.strict.rate:pct -->1.3<!-- /num -->%)다. 300개 모델의 구간과 전혀 겹치지 않는다.
 3. **틀리는 방식은 거의 하나다.** 행은 맞고 열이 틀린다. RL v3의 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.no_answer_in_cell:int -->110<!-- /num -->건 중 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.strict_where.same_row:int -->107<!-- /num -->건, EXAONE 300개 모델(3번째)의 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.no_answer_in_cell:int -->245<!-- /num -->건 중 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict_where.same_row:int -->241<!-- /num -->건이 그렇다. 모델은 어느 행인지 찾고 답 글자도 맞게 쓰지만, 그 답이 몇 번째 열에 있는지를 틀린다.
 4. **"같은 값의 다른 셀"은 원인이 아니다.** 정답 셀은 답 텍스트에서 역으로 찾은 것이라, 같은 값이 여러 셀에 있으면 다른 셀을 인용해도 틀렸다고 셀 위험이 있다. 그런 경우는 따로 셌고 모든 모델에서 0~1건이다.
-5. **검증기는 이 경우 답을 버리지 않고 근거를 고친다.** 답 텍스트와 같은 셀이 표에 하나뿐이면 그 셀로 근거를 바꾸고, 그 사실을 실패한 검사(`evidence_repaired`)로 남긴다. 표의 마지막 열이 그 처리 결과다. 그래서 약한 모델의 verified EM은 "모델이 근거를 맞혔다"는 뜻이 아니다. 모델 자신의 인용 정확도는 결과 표의 "근거 셀 일치 %(모델 인용)" 열과 이 표가 보여 준다.
+5. **검증기는 이 경우 답을 버리지 않고 근거를 고친다. 약한 모델의 점수는 이 복구에 기대고 있다.** 답 텍스트와 같은 셀이 표에 하나뿐이면 그 셀로 근거를 바꾸고, 그 사실을 실패한 검사(`evidence_repaired`)로 남긴다. 복구를 끄고 보류로 채점하면 verified EM은 mT5 최종 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.verified_em_no_repair:pct -->20.2<!-- /num -->%, EXAONE 300개(3번째 학습) <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verified_em:pct -->53.1<!-- /num -->% → <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.verified_em_no_repair:pct -->23.5<!-- /num -->%로 내려간다. 전체 데이터 EXAONE은 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verified_em:pct -->84.3<!-- /num -->% → <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verified_em_no_repair:pct -->83.8<!-- /num -->%로 거의 그대로다(표의 마지막 두 열). 약한 모델의 verified EM은 "모델이 근거를 맞혔다"는 뜻이 아니다.
 
 한계: 조회 문항(KorWikiTQ 원본 539개)만 대상이다. 계산 문항은 합성 템플릿이라 넣지 않았다. 300개 모델은 학습마다 10%p 넘게 움직였다. 전체 데이터 모델은 두 번, mT5 모델들은 한 번씩만 학습했다.
 
@@ -827,20 +827,25 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 | 휴리스틱 기준선 | 모델 출력 그대로 | 54.4 | 37.1 (32.4–42.1) | 34.2 | 141 / 239 |
 | 휴리스틱 기준선 | 검증기 v1 | 53.9 | 54.6 (49.6–59.6) | 24.5 | 206 / 171 |
 | 휴리스틱 기준선 | 검증기 v2(개체 일치 검사) | 50.6 | 57.3 (52.1–62.4) | 21.6 | 203 / 151 |
+| 휴리스틱 기준선 | 검증기 v1에서 근거 복구를 끄고 보류 | 53.9 | 54.6 (49.6–59.6) | 24.5 | 206 / 171 |
 | [2차] GRPO RL v3 (mT5 최종) | 모델 출력 그대로 | 81.3 | 36.8 (32.9–40.8) | 51.4 | 209 / 359 |
 | [2차] GRPO RL v3 (mT5 최종) | 검증기 v1 | 71.7 | 41.1 (36.9–45.5) | 42.2 | 206 / 295 |
 | [2차] GRPO RL v3 (mT5 최종) | 검증기 v2(개체 일치 검사) | 67.2 | 41.9 (37.5–46.4) | 39.1 | 197 / 273 |
+| [2차] GRPO RL v3 (mT5 최종) | 검증기 v1에서 근거 복구를 끄고 보류 | 31.2 | 46.3 (39.8–53.0) | 16.7 | 101 / 117 |
 | EXAONE LoRA 300개 (3번째 학습) | 모델 출력 그대로 | 99.9 | 54.0 (50.3–57.7) | 45.9 | 377 / 321 |
 | EXAONE LoRA 300개 (3번째 학습) | 검증기 v1 | 85.4 | 60.6 (56.7–64.5) | 33.6 | 362 / 235 |
 | EXAONE LoRA 300개 (3번째 학습) | 검증기 v2(개체 일치 검사) | 78.1 | 63.4 (59.2–67.3) | 28.6 | 346 / 200 |
+| EXAONE LoRA 300개 (3번째 학습) | 검증기 v1에서 근거 복구를 끄고 보류 | 30.6 | 63.1 (56.4–69.3) | 11.3 | 135 / 79 |
 | EXAONE LoRA 전체 (1번째 학습) | 모델 출력 그대로 | 95.3 | 77.3 (74.0–80.3) | 21.6 | 515 / 151 |
 | EXAONE LoRA 전체 (1번째 학습) | 검증기 v1 | 93.4 | 85.2 (82.2–87.7) | 13.9 | 556 / 97 |
 | EXAONE LoRA 전체 (1번째 학습) | 검증기 v2(개체 일치 검사) | 88.7 | 86.5 (83.5–88.9) | 12.0 | 536 / 84 |
+| EXAONE LoRA 전체 (1번째 학습) | 검증기 v1에서 근거 복구를 끄고 보류 | 92.0 | 85.9 (82.9–88.3) | 13.0 | 552 / 91 |
 | EXAONE LoRA 전체 (2번째 학습) | 모델 출력 그대로 | 92.4 | 82.7 (79.5–85.4) | 16.0 | 534 / 112 |
 | EXAONE LoRA 전체 (2번째 학습) | 검증기 v1 | 91.3 | 87.8 (85.0–90.1) | 11.2 | 560 / 78 |
 | EXAONE LoRA 전체 (2번째 학습) | 검증기 v2(개체 일치 검사) | 87.0 | 89.1 (86.4–91.4) | 9.4 | 542 / 66 |
+| EXAONE LoRA 전체 (2번째 학습) | 검증기 v1에서 근거 복구를 끄고 보류 | 90.1 | 88.1 (85.3–90.4) | 10.7 | 555 / 75 |
 
-한국어 test 699문항 전체(답이 없는 문항 포함) 기준이다. "모델 출력 그대로"는 모델이 쓴 답 텍스트를 채점한 것이고, 답이 없는 문항에 답을 쓰면 오답이다. 검증기 행은 도구가 인용 셀로 다시 계산한 답을 채점하므로 계산 문항에서는 정답 수가 늘 수 있다. 답한 비율이 줄어든 만큼이 보류다.
+한국어 test 699문항 전체(답이 없는 문항 포함) 기준이다. "모델 출력 그대로"는 모델이 쓴 답 텍스트를 채점한 것이고, 답이 없는 문항에 답을 쓰면 오답이다. 검증기 행은 도구가 인용 셀로 다시 계산한 답을 채점하므로 계산 문항에서는 정답 수가 늘 수 있다. 답한 비율이 줄어든 만큼이 보류다. 마지막 조건은 인용 셀에 답이 없을 때 근거를 고치지 않고 보류했다면 어떻게 됐을지를 저장된 출력에서 계산한 값이다(검증기 코드에서 복구 분기 다음은 보류다).
 
 <!-- results:operating:end -->
 
@@ -851,7 +856,9 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 3. **검증기 v2는 더 조심스러운 운영점이다.** v1보다 오답을 더 막지만 정답도 더 보류한다(1번째 학습에서 정답 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier.answered_correct:int -->556<!-- /num -->개 → <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier_subject_check.answered_correct:int -->536<!-- /num -->개, 오답 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier.answered_wrong:int -->97<!-- /num -->개 → <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier_subject_check.answered_wrong:int -->84<!-- /num -->개). 어느 쪽이 나은지는 오답 한 건과 보류 한 건의 비용 비율에 달려 있다. 이 프로젝트는 그 비용을 정하지 않았으므로 두 점을 모두 보고한다.
 4. **검증기를 거쳐도 오답은 남는다.** 가장 좋은 조건(2번째 학습, v2)에서도 전체의 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test_run2.verifier_subject_check.wrong_answer_rate.rate:pct -->9.4<!-- /num -->%가 오답으로 나간다. 검증기는 "답이 인용 셀과 일치하는가"를 볼 뿐이다. 모델이 엉뚱한 행의 셀을 인용하고 그 셀의 값을 그대로 답으로 쓰면 통과한다.
 
-이것은 임계값을 움직여 그린 곡선이 아니다. 이 시스템에는 조절할 신뢰 점수가 없고 조건이 세 개뿐이다.
+5. **근거 복구는 정답과 오답을 함께 내보낸다.** 복구는 "답 텍스트가 표의 한 셀과 같다"는 것만 확인한다. 모델이 다른 셀의 값을 답으로 쓴 경우도 통과한다. mT5 최종 모델에서 복구된 답은 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.repaired_answers:int -->283<!-- /num -->건이고, 복구를 끄면 오답 유출이 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.verifier.wrong_answer_rate.rate:pct -->42.2<!-- /num -->% → <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.verifier_no_repair.wrong_answer_rate.rate:pct -->16.7<!-- /num -->%로 줄지만 답하는 비율도 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.verifier.coverage:pct -->71.7<!-- /num -->% → <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.verifier_no_repair.coverage:pct -->31.2<!-- /num -->%로 준다. 전체 데이터 EXAONE에서는 복구된 답이 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.repaired_answers:int -->10<!-- /num -->건뿐이라 차이가 거의 없다(오답 유출 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier.wrong_answer_rate.rate:pct -->13.9<!-- /num -->% → <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.verifier_no_repair.wrong_answer_rate.rate:pct -->13.0<!-- /num -->%). 인용이 정확한 모델에는 복구가 필요 없고, 인용이 부정확한 모델에서는 복구가 점수와 오답을 함께 올린다. 서비스 기본값은 복구를 켠 상태다.
+
+이것은 임계값을 움직여 그린 곡선이 아니다. 이 시스템에는 조절할 신뢰 점수가 없고 조건이 네 개뿐이다.
 
 ### 19.3 표가 겹치는 분할은 점수를 얼마나 올리는가
 
@@ -864,6 +871,8 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 |---|---|---:|---:|---:|
 | 휴리스틱 기준선 (학습 없음, 대조군) | verified EM | 27.9 (25.7–30.2) | 26.7 (24.5–29.0) | +1.2 (-2.1 ~ +4.5) |
 | 휴리스틱 기준선 (학습 없음, 대조군) | 모델이 인용한 셀 = 정답 셀 | 27.9 (25.7–30.2) | 26.7 (24.5–28.9) | +1.3 (-2.0 ~ +4.6) |
+| SFT stage2 = mT5-small | verified EM | 34.3 (31.9–36.7) | 36.2 (33.8–38.7) | -1.9 (-5.5 ~ +1.8) |
+| SFT stage2 = mT5-small | 모델이 인용한 셀 = 정답 셀 | 25.7 (23.5–27.9) | 25.0 (22.9–27.2) | +0.7 (-2.5 ~ +4.0) |
 | [2차] GRPO RL v3 (mT5 최종) | verified EM | 38.9 (36.5–41.4) | 41.3 (38.8–43.8) | -2.3 (-6.0 ~ +1.4) |
 | [2차] GRPO RL v3 (mT5 최종) | 모델이 인용한 셀 = 정답 셀 | 22.8 (20.7–25.0) | 24.0 (21.9–26.2) | -1.2 (-4.2 ~ +1.9) |
 
@@ -873,7 +882,7 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 
 읽는 법:
 
-1. **mT5에서는 학습 때 본 표라고 점수가 오르지 않았다.** mT5 최종 모델(RL v3)의 verified EM은 본 표의 새 질문에서 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.seen.rate:pct -->38.9<!-- /num -->%, 처음 보는 표에서 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.unseen.rate:pct -->41.3<!-- /num -->%다. 차이는 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff:pct -->-2.3<!-- /num -->%p이고 95% 구간은 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff_lo:pct -->-6.0<!-- /num --> ~ <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff_hi:pct -->1.4<!-- /num -->%p다. 이 구간은 0을 포함한다. 구간의 위쪽 끝이 표를 본 이득의 상한에 해당한다.
+1. **mT5에서는 학습 때 본 표라고 점수가 오르지 않았다.** mT5 최종 모델(RL v3)의 verified EM은 본 표의 새 질문에서 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.seen.rate:pct -->38.9<!-- /num -->%, 처음 보는 표에서 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.unseen.rate:pct -->41.3<!-- /num -->%다. 차이는 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff:pct -->-2.3<!-- /num -->%p이고 95% 구간은 <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff_lo:pct -->-6.0<!-- /num --> ~ <!-- num:experiments/eval/leak_effect.json:planners.rl_v3.verified_em.diff_hi:pct -->1.4<!-- /num -->%p다. 이 구간은 0을 포함한다. 구간의 위쪽 끝이 표를 본 이득의 상한에 해당한다. RL 이전 단계인 SFT stage2 모델도 같다. 본 표의 새 질문에서 <!-- num:experiments/eval/leak_effect.json:planners.sft_ko2.verified_em.seen.rate:pct -->34.3<!-- /num -->%, 처음 보는 표에서 <!-- num:experiments/eval/leak_effect.json:planners.sft_ko2.verified_em.unseen.rate:pct -->36.2<!-- /num -->%이고, 차이는 <!-- num:experiments/eval/leak_effect.json:planners.sft_ko2.verified_em.diff:pct -->-1.9<!-- /num -->%p(95% 구간 <!-- num:experiments/eval/leak_effect.json:planners.sft_ko2.verified_em.diff_lo:pct -->-5.5<!-- /num --> ~ <!-- num:experiments/eval/leak_effect.json:planners.sft_ko2.verified_em.diff_hi:pct -->1.8<!-- /num -->%p)다. 이 구간도 0을 포함한다. 두 모델은 같은 학습 표를 쓴 같은 계열이라 독립된 반복은 아니다.
 2. **두 세트의 난이도는 비슷하다.** 학습이 없는 기준선의 verified EM은 본 표의 새 질문에서 <!-- num:experiments/eval/leak_effect.json:planners.heuristic.verified_em.seen.rate:pct -->27.9<!-- /num -->%, 처음 보는 표에서 <!-- num:experiments/eval/leak_effect.json:planners.heuristic.verified_em.unseen.rate:pct -->26.7<!-- /num -->%다. 차이는 <!-- num:experiments/eval/leak_effect.json:planners.heuristic.verified_em.diff:pct -->1.2<!-- /num -->%p이고 95% 구간은 <!-- num:experiments/eval/leak_effect.json:planners.heuristic.verified_em.diff_lo:pct -->-2.1<!-- /num --> ~ <!-- num:experiments/eval/leak_effect.json:planners.heuristic.verified_em.diff_hi:pct -->4.5<!-- /num -->%p다.
 3. **말할 수 있는 것과 없는 것.** 공개 파일에서 표가 겹친다는 것은 사실이다. 그러나 "겹침 때문에 공개 dev 점수가 부풀려진다"는 것은 이 프로젝트에서 보이지 못했다. 표 단위 재분할은 평가 표가 학습에 없다는 것을 보장하는 설계 선택이다. 그 선택이 점수를 바꿨다는 증거는 없다.
 4. **이 측정이 덮지 못하는 조건.** 여기서 잰 모델은 표당 최대 3문항, 표 900개로 학습한 3억 파라미터 모델이다. 공개 train은 표당 평균 <!-- num:data/ko/official_split_profile.json:train.examples_per_table -->4.35<!-- /num -->문항에 표가 <!-- num:data/ko/official_split_profile.json:train.unique_tables_by_url_and_content:int -->13,379<!-- /num -->개다. 더 큰 모델을 더 오래 학습하면 표를 외울 수 있다. 전체 데이터 EXAONE에서는 GPU가 필요해 재지 않았다. 질문 세트(`data/ko/leak_probe_*.jsonl`)가 저장소에 있어 같은 평가 명령으로 잴 수 있다.
@@ -902,5 +911,5 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 - **반복 수.** mT5 단계별 모델은 시드 1개다. EXAONE은 300개 설정 3회, 전체 데이터 설정 2회다. 구간은 문항 표본의 불확실성만 담고 학습 시드의 변동은 담지 않는다. 전체 데이터 두 번의 학습 사이 verified EM 차이는 약 3%p였다(§18.3).
 - **한 데이터셋.** 근거 오류와 겹침 효과는 KorWikiTQ에서만 쟀다. 16행·7열·900자 이하 표만 남긴 필터를 거친 부분집합이다.
 - **정답 셀의 출처.** KorWikiTQ는 정답 셀을 주지 않는다. 답 텍스트와 같은 셀을 찾아 정답 셀로 삼았고, 여러 개면 질문과 겹치는 행을 골랐으며 답이 어느 셀인지 정할 수 없는 421건은 뺐다.
-- **검증기의 근거 복구.** 약한 모델의 verified EM은 복구된 근거에 기대고 있다. 복구를 끄고 보류하게 한 조건의 점수는 따로 재지 않았다.
+- **검증기의 근거 복구.** 약한 모델의 verified EM은 복구된 근거에 기대고 있다(§19.1의 5번, §19.2의 5번). 복구를 끈 조건은 검증기를 다시 돌린 값이 아니다. 검증기 코드에서 복구 분기 다음이 보류라는 점에 근거해 저장된 출력에서 계산했다.
 - **겹침 효과는 mT5로만 쟀다.** 가장 좋은 모델(EXAONE 전체 데이터)의 겹침 효과는 GPU가 필요해 재지 않았다. 질문 세트는 저장소에 있다(`data/ko/leak_probe_*.jsonl`).

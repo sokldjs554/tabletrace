@@ -148,6 +148,80 @@
     "verified_em": -0.0354,
     "raw_answer_em": -0.0287
    }
+  },
+  "sft_ko2": {
+   "seen": {
+    "questions": 1497,
+    "tables": 882
+   },
+   "unseen": {
+    "questions": 1497,
+    "tables": 879
+   },
+   "verified_em": {
+    "seen": {
+     "k": 513,
+     "n": 1497,
+     "rate": 0.3427,
+     "lo": 0.3191,
+     "hi": 0.3671
+    },
+    "unseen": {
+     "k": 542,
+     "n": 1497,
+     "rate": 0.3621,
+     "lo": 0.3381,
+     "hi": 0.3867
+    },
+    "diff": -0.0194,
+    "diff_lo": -0.0555,
+    "diff_hi": 0.0177,
+    "diff_excludes_zero": false
+   },
+   "raw_answer_em": {
+    "seen": {
+     "k": 543,
+     "n": 1497,
+     "rate": 0.3627,
+     "lo": 0.3388,
+     "hi": 0.3874
+    },
+    "unseen": {
+     "k": 566,
+     "n": 1497,
+     "rate": 0.3781,
+     "lo": 0.3539,
+     "hi": 0.4029
+    },
+    "diff": -0.0154,
+    "diff_lo": -0.0511,
+    "diff_hi": 0.0215,
+    "diff_excludes_zero": false
+   },
+   "cited_cell_exact": {
+    "seen": {
+     "k": 384,
+     "n": 1497,
+     "rate": 0.2565,
+     "lo": 0.235,
+     "hi": 0.2792
+    },
+    "unseen": {
+     "k": 374,
+     "n": 1497,
+     "rate": 0.2498,
+     "lo": 0.2286,
+     "hi": 0.2724
+    },
+    "diff": 0.0067,
+    "diff_lo": -0.0255,
+    "diff_hi": 0.0402,
+    "diff_excludes_zero": false
+   },
+   "minus_heuristic": {
+    "verified_em": -0.0314,
+    "raw_answer_em": -0.0274
+   }
   }
  }
 }
