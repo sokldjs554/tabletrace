@@ -5,8 +5,9 @@ Output: data/ko/documents.jsonl            every kept table as a Document (title
         data/ko/{train,dev,test}.jsonl     QA records with gold cell(s); splits share NO table
         data/ko/build_report.json          counts and exclusion reasons
 
-Why our own split: the official train/dev share 1,755 table URLs (docs/research/datasets.md),
-so a model could memorise table content. We re-split by table identity (URL + content hash).
+Why our own split: the official train/dev files contain 1,578 identical tables (1,755 shared page URLs;
+scripts/data/profile_korwikitq.py), so 43% of the official dev questions ask about a table that is also in
+train. We re-split by table identity (URL + content hash).
 """
 from __future__ import annotations
 
@@ -69,16 +70,11 @@ def make_units(header: list[str]) -> dict[int, str]:
     return {i: u for i, h in enumerate(header) if (u := header_unit(h))}
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--seed", type=int, default=13)
-    ap.add_argument("--train-tables", type=int, default=900)
-    ap.add_argument("--dev-tables", type=int, default=60)
-    ap.add_argument("--test-tables", type=int, default=180)
-    ap.add_argument("--max-q-per-table", type=int, default=3)
-    a = ap.parse_args()
-    rnd = random.Random(a.seed)
+def load_and_filter() -> tuple[dict[str, list[dict]], Counter, int]:
+    """Read both official files and keep the questions this project can use, grouped by table identity.
 
+    Returns (questions by table key, exclusion counts, number of input examples). Shared with
+    scripts/data/build_leak_probe.py so both apply exactly the same filters."""
     examples = []
     for split in ("train", "dev"):
         d = json.load(open(RAW / f"KorWikiTQ_ko_{split}.json", encoding="utf-8"))["data"]
@@ -86,8 +82,6 @@ def main() -> None:
             ex["_orig_split"] = split
             examples.append(ex)
     excluded: Counter = Counter()
-    report: dict = {"input_examples": len(examples)}
-
     by_table: dict[str, list[dict]] = defaultdict(list)
     for ex in examples:
         tbl = ex["TBL"]
@@ -113,6 +107,52 @@ def main() -> None:
             continue
         ex["_gold"] = g
         by_table[table_key(ex)].append(ex)
+    return by_table, excluded, len(examples)
+
+
+def table_id(key: str) -> str:
+    return "ko_" + hashlib.sha1(key.encode()).hexdigest()[:10]
+
+
+def document_for(key: str, ex0: dict, note: str) -> dict:
+    tbl = ex0["TBL"]
+    header, rows = tbl[0], tbl[1:]
+    title, desc = split_title(ex0["T"])
+    tid = table_id(key)
+    doc_id = "doc_" + tid
+    passages = [{"id": f"{doc_id}_p0", "doc_id": doc_id, "order": 0, "text": desc}] if desc else []
+    return {
+        "id": doc_id, "corpus": "ko_tables", "lang": "ko", "title": title, "passages": passages,
+        "tables": [{"id": tid, "doc_id": doc_id, "title": title, "caption": None, "header": header,
+                    "rows": rows, "units": make_units(header), "lang": "ko", "source_url": ex0["U"]}],
+        "source": {"name": "KorWikiTQ (LG AI Research)",
+                   "url": "https://github.com/LG-NLP/KorWikiTableQuestions",
+                   "license": "CC BY-SA 4.0", "note": note},
+    }
+
+
+def qa_record(ex: dict, key: str) -> dict:
+    tid = table_id(key)
+    r, c = ex["_gold"]
+    return {
+        "qid": ex["QAS"]["qid"], "question": ex["QAS"]["question"], "answer": ex["QAS"]["answer"],
+        "doc_id": "doc_" + tid, "table_id": tid, "op": "lookup", "gold_cells": [[r, c]],
+        "source": "korwikitq", "orig_split": ex["_orig_split"], "needs_text": False,
+    }
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seed", type=int, default=13)
+    ap.add_argument("--train-tables", type=int, default=900)
+    ap.add_argument("--dev-tables", type=int, default=60)
+    ap.add_argument("--test-tables", type=int, default=180)
+    ap.add_argument("--max-q-per-table", type=int, default=3)
+    a = ap.parse_args()
+    rnd = random.Random(a.seed)
+
+    by_table, excluded, n_input = load_and_filter()
+    report: dict = {"input_examples": n_input}
     report["excluded"] = dict(excluded)
     report["tables_after_filter"] = len(by_table)
 
@@ -134,29 +174,10 @@ def main() -> None:
     docs, qa = [], defaultdict(list)
     for k in keys[:need]:
         exs = by_table[k]
-        ex0 = exs[0]
-        tbl = ex0["TBL"]
-        header, rows = tbl[0], tbl[1:]
-        title, desc = split_title(ex0["T"])
-        tid = "ko_" + hashlib.sha1(k.encode()).hexdigest()[:10]
-        doc_id = "doc_" + tid
-        passages = [{"id": f"{doc_id}_p0", "doc_id": doc_id, "order": 0, "text": desc}] if desc else []
-        docs.append({
-            "id": doc_id, "corpus": "ko_tables", "lang": "ko", "title": title, "passages": passages,
-            "tables": [{"id": tid, "doc_id": doc_id, "title": title, "caption": None, "header": header,
-                        "rows": rows, "units": make_units(header), "lang": "ko", "source_url": ex0["U"]}],
-            "source": {"name": "KorWikiTQ (LG AI Research)",
-                       "url": "https://github.com/LG-NLP/KorWikiTableQuestions",
-                       "license": "CC BY-SA 4.0", "note": f"official split: {ex0['_orig_split']}; split here: {assignment[k]}"},
-        })
+        docs.append(document_for(k, exs[0], f"official split: {exs[0]['_orig_split']}; split here: {assignment[k]}"))
         rnd.shuffle(exs)
         for ex in exs[: a.max_q_per_table]:
-            r, c = ex["_gold"]
-            qa[assignment[k]].append({
-                "qid": ex["QAS"]["qid"], "question": ex["QAS"]["question"], "answer": ex["QAS"]["answer"],
-                "doc_id": doc_id, "table_id": tid, "op": "lookup", "gold_cells": [[r, c]],
-                "source": "korwikitq", "orig_split": ex["_orig_split"], "needs_text": False,
-            })
+            qa[assignment[k]].append(qa_record(ex, k))
     OUT.mkdir(parents=True, exist_ok=True)
     with open(OUT / "documents.jsonl", "w", encoding="utf-8") as f:
         for d in docs:

@@ -1,6 +1,6 @@
 # 자소서·포트폴리오 작성용 전달 문서 (TableTrace)
 
-이 문서는 자기소개서와 포트폴리오를 쓰는 사람(또는 AI 도구)에게 넘기는 사실 정리다. **여기 없는 숫자는 쓰지 말고, 여기 있는 숫자도 괄호의 출처 파일로 다시 확인한 뒤 쓴다.** 저장소에서 `python scripts/check_numbers.py --strict`와 `python scripts/render_results.py --check`를 돌리면 README·보고서의 모든 숫자가 산출물과 일치하는지 검사된다(2026-11-08 기준 815개 일치).
+이 문서는 자기소개서와 포트폴리오를 쓰는 사람(또는 AI 도구)에게 넘기는 사실 정리다. **여기 없는 숫자는 쓰지 말고, 여기 있는 숫자도 괄호의 출처 파일로 다시 확인한 뒤 쓴다.** 저장소에서 `python scripts/check_numbers.py --strict`와 `python scripts/render_results.py --check`를 돌리면 README·보고서의 모든 숫자가 산출물과 일치하는지 검사된다(2026-11-10 기준 922개 일치).
 
 ## 0. 반드시 지킬 규칙
 
@@ -12,7 +12,7 @@
 2. **수치는 출처 파일에서만.** 모든 수치는 `experiments/` 아래 JSON에서 나오고, README와 `docs/REPORT.md`에 `<!-- num:파일:키 -->` 표식으로 묶여 있다.
 3. **"주장하면 안 되는 것"(§5)을 쓰지 않는다.** 특히 "mT5로 기준선을 넘었다", "강화학습으로 점수를 올렸다", "SGLang과 vLLM 속도를 비교했다"는 틀린 말이다.
 4. 실패와 수정 과정(§4)은 숨기지 말고 쓴다. 이 프로젝트의 가장 강한 재료다.
-5. 공고 원문은 이 프로젝트에서 읽지 못했고(네트워크 차단) 지원자가 준 역량 목록 15개를 기준으로 했다(`docs/research/job-posting.md`). 원문과 다르면 원문이 우선이다.
+5. **공고 원문 기준으로 쓴다.** 원문은 2026-11-10에 읽었고 문구는 `docs/research/job-posting.md`에 있다. 수행 업무는 다섯 묶음(초거대 언어모델 / 심층문서이해 / 강화학습 / 테이블이해(Table MRC) / LLM 서비스·Agent)이고 채용은 "Tech Cell별"로 진행된다고 적혀 있다. **이 프로젝트는 테이블이해 묶음에 맞춘 프로젝트로 소개하고, 강화학습을 두 번째로 둔다.** 나머지 묶음의 항목은 같은 과제 위에서 실행해 본 보조 근거다. 프로젝트는 원문을 읽기 전에 지원자가 준 역량 목록 15개로 만들어졌으므로 "공고의 모든 항목을 했다"고 쓰면 안 된다. 원문에만 있는 gRPC, 챗봇, 메모리 결합, Personal Agent, 구조 전용 PLM 구현은 하지 않았다.
 
 ## 1. 링크와 위치
 
@@ -22,13 +22,23 @@
 | 공개 데모 (GitHub Pages, 저장된 실행 결과 모드) | <https://sokldjs554.github.io/tabletrace/> — 소유자가 2026-11-08 브라우저에서 열리는 것을 확인 |
 | 최종 보고서 | `docs/REPORT.md` (공고 대조표 §3, 확인 가능한 사실 §17, 2차 시도 §18) |
 | README | `README.md` (결과 표 §9·§10, 수행/미수행 표 §14) |
-| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (39건) |
+| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (44건) |
 | GPU 실험 출처 | `experiments/eval/PROVENANCE_exaone.md`, `experiments/serving/sglang_t4_failure.md` |
 | 로컬 실행 | `docker compose up --build` → <http://localhost:8000> |
 
 ## 2. 프로젝트 한 문단 (사실만)
 
-TableTrace는 한국어 위키 표(KorWikiTQ)와 영어 화학 교과서 표(OpenStax)에서 질문에 답할 때, 모델이 답을 바로 말하는 대신 **프로그램(`op: lookup|sum|avg|diff|text|abstain ; cells: r{i}c{j} ; answer: …`)을 제안**하고, 도구가 그 셀을 읽고 계산을 실행하고, 검증기가 답과 근거 셀이 맞는지 확인해 틀리면 **보류**하는 파이프라인이다. 검색(BM25, Kiwi 형태소) → 모델 제안 → 도구 실행 → 검증 → 보류 정책 → 트레이스 기록까지를 FastAPI 서비스와 LangGraph 그래프로 묶었고, 비동기 작업 러너, Docker, GitHub Actions CI, GitHub Pages 데모가 있다. 모델은 두 갈래다. (가) mT5-small(300M)을 CPU에서 SFT 2단계와 GRPO 방식 RL로 튜닝했고 기준선을 넘지 못했다. (나) 같은 데이터로 EXAONE-4.0-1.2B를 LoRA 튜닝해 GPU(Kaggle T4)에서 vLLM·SGLang·텐서 병렬로 서빙한 모델은 기준선을 크게 넘었다.
+**한 줄 소개.** TableTrace는 LG AI연구원 공고의 **테이블이해(Table MRC)** 업무에 맞춘 프로젝트다. 한국어 표 질의응답에서 모델이 답과 근거 셀을 함께 내고, 고정 규칙 검증기가 그 셀로 답을 다시 확인해 맞지 않으면 보류한다. 데이터는 LG AI연구원이 공개한 KorWikiTQ다.
+
+**먼저 말할 것은 측정 결과다.** 스택(FastAPI, LangGraph, vLLM)은 다른 지원자의 프로젝트에도 흔하므로 앞에 두지 않는다.
+
+1. 답 텍스트가 맞은 조회 답 가운데 모델이 인용한 셀에 그 답이 없는 비율: mT5-small 52.6%(110/209), EXAONE-4.0-1.2B LoRA 300개 65.2%(245/376), 같은 모델 전체 데이터 1.3%(6/455). 답 정확도와 근거 정확도는 따로 움직이고, 데이터를 늘리면 근거 오류가 사라진다.
+2. 검증기는 오답 유출을 21.6%에서 12.0%로 줄이고, 대가로 답하는 비율이 95.3%에서 88.7%로 준다(전체 데이터 EXAONE).
+3. KorWikiTQ 공개 dev 질문의 42.9%가 train에도 있는 표를 묻는다. 표 단위로 다시 나눴다. 다만 mT5-small에서는 학습 때 본 표라고 점수가 오르지 않았다(차이 -2.3%p, 95% 구간 -6.0 ~ +1.4). 겹침은 데이터의 사실이고, 점수를 부풀린다는 주장은 하지 않는다.
+4. 강화학습은 점수를 올리지 못했고, 보류가 있는 시스템에서만 생기는 보상 허점을 찾아 고쳤다.
+5. 정답률은 기준선 36.2%, mT5-small 32.8%(미달), EXAONE 전체 데이터 LoRA 84.3%와 87.1%(두 번 학습).
+
+**구조.** 모델은 답을 바로 말하지 않고 프로그램(`op: lookup|sum|avg|diff|text|abstain ; cells: r{i}c{j} ; answer: …`)을 제안한다. 도구가 그 셀을 읽고 계산을 실행하고, 검증기가 답과 근거 셀이 맞는지 확인해 틀리면 보류한다. 검색(BM25, Kiwi 형태소) → 모델 제안 → 도구 실행 → 검증 → 보류 정책 → 트레이스 기록을 FastAPI 서비스와 LangGraph 그래프로 묶었고, 비동기 작업 러너, Docker, GitHub Actions CI, GitHub Pages 데모가 있다. 모델은 두 갈래다. (가) mT5-small(300M)을 CPU에서 SFT 2단계와 GRPO 방식 RL로 튜닝했고 기준선을 넘지 못했다. (나) 같은 데이터로 EXAONE-4.0-1.2B를 LoRA 튜닝해 GPU(Kaggle T4)에서 vLLM·SGLang·텐서 병렬로 서빙한 모델은 기준선을 크게 넘었다. 영어 화학 교과서 표(OpenStax)도 같은 구조로 다뤘지만 보조 실험이다.
 
 ## 3. 확인 가능한 수치 (출처와 함께)
 
@@ -36,11 +46,14 @@ TableTrace는 한국어 위키 표(KorWikiTQ)와 영어 화학 교과서 표(Ope
 
 | 사실 | 수치 | 출처 |
 |---|---|---|
-| 공개 분할의 표 누수를 측정하고 재분할 | 공유 표 1,755개 → 0 | `data/ko/official_split_profile.json` |
+| 공개 분할의 표 겹침을 측정하고 재분할 | 공개 train/dev 파일에 셀까지 같은 표 1,578개(같은 위키 페이지 기준 1,755개). 공개 dev 질문의 42.9%(5,046/11,771)가 train에도 있는 표를 묻는다 → 재분할 뒤 공유 표 0 | `data/ko/official_split_profile.json`, `data/ko/build_report.json` |
 | 휴리스틱 기준선 verified EM | 36.2% | `experiments/eval/heuristic_ko_test/metrics.json` |
 | mT5-small 미튜닝 → 1차 최종 → 2차 최종(RL v3) | 7.1% → 29.8% → 32.8% (기준선 미달) | `experiments/eval/{base,sft_chem,rl_v3}_ko_test/metrics.json` |
 | RL v3가 배운 것 | 본문 근거 없음 50문항에서 모델이 직접 보류 0% → 90% (p=0.020) | `experiments/eval/rl_v3_text2_test/analysis.json`, `experiments/eval/paired_tests.json` |
-| RL v1의 보상 편법 발견 | 같은 셀을 두 번 쓰는 퇴화 계산 160건 → v3 0건 | `experiments/eval/rl_ko_v1_ko_test/analysis.json`, `rl_v3_ko_test/analysis.json` |
+| RL v1의 보상 허점 발견 | 답 없는 문항에서 "최종 상태가 보류"면 만점을 줘서, 검증기가 거부한 쓰레기 출력도 만점을 받았다. 같은 셀을 두 번 쓰는 퇴화 계산 출력: SFT 101건 → RL v1 160건 → 보상만 고친 v2 146건 → 데이터까지 고친 최종(RL v3) 0건. 보상 수정만으로는 줄지 않았다 | `experiments/eval/{sft_ko2,rl_ko_v1,rl_ko,rl_v3}_ko_test/analysis.json` |
+| **답은 맞는데 근거 셀이 틀린 비율** (조회 문항, 95% 구간) | mT5 최종 52.6% (45.9~59.3), EXAONE 300개 세 번 학습 53.1 / 63.2 / 65.2%, EXAONE 전체 1.3% (0.6~2.9), 두 번째 학습 1.3% (0.6~2.8). 틀린 것은 거의 전부 "행은 맞고 열이 틀림" | `experiments/eval/evidence_error.json` (`scripts/evidence_error.py`) |
+| **검증기 앞뒤의 오답 유출** (EXAONE 전체, 699문항) | 모델 출력 그대로 21.6% → 검증기 v1 13.9% → v2 12.0%. 답하는 비율 95.3% → 93.4% → 88.7%. 두 번째 학습: 16.0% → 11.2% → 9.4% | 같은 파일 |
+| **표 겹침의 효과** (mT5 최종 모델, 1,497문항씩) | 학습 때 본 표의 새 질문 38.9% 대 처음 보는 표 41.3%, 차이 -2.3%p (95% 구간 -6.0 ~ +1.4). **겹침이 점수를 올린다는 증거는 얻지 못했다.** 학습 없는 기준선의 차이는 +1.2%p. EXAONE에서는 재지 않음 | `experiments/eval/leak_effect.json` (`scripts/leak_effect.py`) |
 | int8 동적 양자화 범위별 측정 | lm_head만 int8: 정확도 손실 검출 안 됨(32.2%, p=0.636), 처리량 약 1.5배(같은 측정 안 bs=8: 2.12 → 3.21 예제/s) / 모든 층 int8: 21.2%로 하락 | `experiments/eval/final_int8_*_ko_test/metrics.json`, `experiments/bench/inference_r2*.json` |
 | 검색 | 표 검색 hit@1 80.0%, hit@5 95.7% (1,140표) | `experiments/eval/retrieval/metrics.json` |
 | EXAONE-4.0-1.2B LoRA, 300개 예제·18 step (T4) | verified EM 53.1% (세 번 학습 52.2 / 53.2 / 53.1) | `experiments/eval/exaone_vllm_ko_test*/metrics.json` |
@@ -51,17 +64,20 @@ TableTrace는 한국어 위키 표(KorWikiTQ)와 영어 화학 교과서 표(Ope
 | vLLM 텐서 병렬 TP=2 (T4 2장) | 41.0 요청/s, p50 678 ms; 점수는 1장과 같음 | `experiments/bench/engine_vllm_tp2_c32.json`, `experiments/eval/exaone_vllm_tp2_ko_test/metrics.json` |
 | SGLang (T4, 우회 모듈) | vLLM과 같은 답(699문항 중 1개 차이), 속도는 8.3 요청/s | `experiments/eval/exaone_sglang_ko_test/metrics.json`, `experiments/bench/engine_sglang_c32.json` |
 | mT5 2-스테이지 파이프라인 병렬 (T4 2장, NCCL) | 출력 일치, 처리량 이득 없음(설계상 겹치지 않음), 장치당 메모리 분할 | `experiments/bench/pp_*_gpu.json` |
-| 테스트·검증 | pytest 102개 통과, E2E 실시간 16/16·정적 13/13, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
+| 테스트·검증 | pytest 115개 통과, E2E 실시간 16/16·정적 13/13, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
 
 ## 4. 포트폴리오에 쓸 만한 과정 (전부 기록이 있음)
 
-1. **보상 편법을 찾아 고친 RL**: v1 보상이 "같은 셀 두 번 쓰는 계산"에 점수를 줘서 퇴화 출력 160건이 나왔다. 보상을 고친 v2는 개선이 없었고, 2차 v3(프롬프트 5,130개, 검증기 v2 보상)가 "모델이 스스로 보류"를 배웠지만 전체 점수는 그대로였다. 세 결과를 다 적었다. (`docs/REPORT.md` §7, §18)
+1. **보상 허점을 찾아 고친 RL**: v1 보상은 답 없는 문항에서 최종 상태가 보류이기만 하면 만점을 줬다. 그래서 검증기가 거부하는 쓰레기 출력(같은 셀을 두 번 쓰는 계산)이 의도한 보류와 같은 점수를 받았고 그런 출력이 101건에서 160건으로 늘었다. 보상을 고친 v2는 개선이 없었고(146건), 2차 v3(프롬프트 5,130개, 검증기 v2 보상)가 "모델이 스스로 보류"를 배웠지만 전체 점수는 그대로였다. 세 결과를 다 적었다. (`docs/REPORT.md` §7, §18)
 2. **학습 데이터의 지름길 발견**: 본문 예제가 전부 빈 표와 함께 있어 모델이 "표가 비면 text"를 배운 것을 찾아 재학습했고, 반대편 지름길(표 질문을 text로 보냄)까지 겪고 고쳤다. (§18.1)
 3. **검증기 v2(개체 일치 검사)**: 표에 없는 대상에도 셀을 인용해 답하는 문제를 검증기 단계에서 잡았고, 정답을 오탐 보류하는 비용(4.3%)을 함께 측정했다. 잘하는 모델(EXAONE 전체)에서는 순효과가 음수에 가깝다는 것도 적었다.
 4. **int8 "lm_head는 fp32"라는 문서의 오류를 스스로 발견**하고 양자화 범위별로 다시 측정해, 속도 이득은 lm_head에서 나오고 정확도 붕괴는 전체 양자화에서만 난다는 것을 보였다. (§8, §18.2)
 5. **SGLang을 미지원 GPU(T4)에서 돌림**: sgl_kernel에 sm75 커널이 없어 두 번 실패 → 소스를 읽고 `MultiPlatformOp`를 PyTorch 구현으로 돌리는 우회 모듈 작성 → 세 번째는 transformers 5.x가 저장한 config.json의 RoPE 키를 4.57이 못 읽어 엉뚱한 답 → 설정 복원 → 네 번째 성공, vLLM과 답 일치. (`experiments/serving/sglang_t4_failure.md`, 이슈 37~39)
-6. **숫자 정합성 도구**: 문서의 모든 숫자를 산출물 JSON에 묶는 표식과 검사 스크립트(`scripts/check_numbers.py`, `scripts/render_results.py`)로 815개 숫자를 자동 검증한다.
+6. **숫자 정합성 도구**: 문서의 모든 숫자를 산출물 JSON에 묶는 표식과 검사 스크립트(`scripts/check_numbers.py`, `scripts/render_results.py`)로 922개 숫자를 자동 검증한다.
 7. **학습 실행 간 변동을 측정**: 같은 설정의 LoRA를 300개 3회, 전체 2회 돌려 300개는 1점 안, 전체는 약 3점(p=0.013) 움직임을 기록하고 점수를 범위로 적었다.
+8. **자기 주장을 측정으로 다시 확인하고 줄임** (2026-11-10): "공개 분할이 표 1,755개를 공유한다"는 문장이 실은 페이지 수였음을 찾아 고쳤다(같은 표는 1,578개). "표 겹침이 점수를 부풀린다"는 가정은 직접 재 보니 mT5에서 검출되지 않았고, 그 결과를 그대로 적었다. (`docs/REPORT.md` §19.3, 이슈 42)
+9. **가까운 논문 12편을 원문으로 읽고 주장 범위를 정함**: 답과 근거의 불일치, 셀 인용 강화학습, 근거 셀 보상은 이미 연구가 있다는 것을 확인하고 "새롭다"는 표현을 빼고 "한국어 표에서의 측정"으로 좁혔다. KorWikiTQ 원논문이 분할 방식을 밝히지 않는다는 것도 원문에서 확인했다. (§8, `docs/research/papers.md`)
+10. **답은 맞는데 근거가 틀린 비율을 따로 잼**: verified EM만 보면 가려지는 것을 드러냈다. 약한 모델은 맞힌 답의 절반 이상에서 답이 없는 셀을 인용했고, 검증기의 근거 복구가 점수를 지탱하고 있었다. 전체 데이터 학습 뒤에는 1.3%가 됐다. (§19.1)
 
 ## 5. 주장하면 안 되는 것
 
@@ -71,8 +87,43 @@ TableTrace는 한국어 위키 표(KorWikiTQ)와 영어 화학 교과서 표(Ope
 - "SGLang과 vLLM의 성능을 비교했다" (T4의 SGLang은 우회 모듈 탓에 느림. Ampere 이상에서의 비교는 비용 때문에 하지 않음).
 - "멀티 GPU로 속도를 올렸다" (파이프라인 병렬은 이득 없음. TP=2만 처리량 약 1.6배).
 - "화학 논문 데이터" (교과서 표다), "DDP를 했다" (안 했다), "혼자 코드를 짰다" (AI 도구가 작성).
-- 공고 원문을 읽고 맞췄다는 식의 표현 (원문은 읽지 못함).
+- "처음", "최초", "새로운 방법" (가까운 논문 12편을 원문으로 읽었다. 답과 근거의 불일치는 TrustTable(ACL 2026)과 ViTaB-A가, 작은 모델의 셀 인용 강화학습은 RSAT가, 근거 셀 보상과 그 위험은 Reasoning-Table이 이미 다룬다. §8 참고).
+- "표 1,755개가 겹친다" (1,755는 페이지 수다. 셀까지 같은 표는 1,578개다).
+- "검증기가 틀린 근거를 걸러 낸다" (답 텍스트가 표의 한 셀과 같으면 검증기는 근거를 그 셀로 고쳐서 답한다. 걸러 내는 것은 답과 셀이 안 맞는 경우다).
+- "공고의 모든 항목을 구현했다" (원문에만 있는 gRPC, 챗봇, 메모리 결합, Personal Agent, 구조 전용 PLM 구현은 하지 않았다. 프로젝트는 원문을 읽기 전에 만들어졌고 원문 대조는 2026-11-10에 했다).
 
-## 6. 공고 역량 15개 항목과 대응 (상태는 전부 완료, 근거는 `docs/REPORT.md` §3)
+## 6. 공고 항목과 대응 (근거는 `docs/REPORT.md` §3, 원문 항목별 표는 `docs/research/job-posting.md`)
+
+원문의 다섯 묶음 가운데 **테이블이해(Table MRC)** 가 이 프로젝트의 중심이고 **강화학습**이 두 번째다. 아래 15개는 프로젝트를 만들 때 기준으로 삼은 목록이며 원문에 모두 들어 있다. 상태는 전부 완료다. 원문에만 있는 다섯 항목(gRPC, 챗봇, 메모리 결합, Personal Agent, 구조 전용 PLM 구현)은 미구현이다.
 
 한국어 LM 튜닝 / 한국어 벤치마크 구축 / 표 이해·Table MRC / 추론 엔진 최적화 / 영어 화학 데이터·튜닝 / 강화학습 / LLM Agent·도구 연결 / FastAPI 서빙 / 비동기·워크플로우 / 프롬프트·컨텍스트·검색 / Linux·Python·HF·PyTorch / 멀티 GPU Model Parallelism / vLLM 또는 SGLang / Docker / LangChain 또는 LangGraph. 각 항목의 "적용 방식·증거·평가 결과" 열을 그대로 가져다 쓰면 된다. 강화학습 항목은 "완료(부분 개선)"이고 그 뜻은 §4의 1번이다.
+
+## 7. ko-search-clinic과 역할 나누기
+
+지원자의 다른 공개 저장소 <https://github.com/sokldjs554/ko-search-clinic>도 한국어를 다루고 Kiwi 형태소 분석과 BM25를 쓴다. 두 저장소를 같은 이야기로 쓰면 "한국어 검색 프로젝트 두 개"로 읽힌다. 다음과 같이 나눠 쓴다.
+
+| | ko-search-clinic | TableTrace |
+|---|---|---|
+| 질문 | 한국어 검색이 왜 실패하고, 어떤 수정안이 실제로 검색을 고치는가 | 표를 읽는 모델이 낸 답의 근거 셀이 맞는가, 틀리면 어떻게 막는가 |
+| 모델 학습 | 없음 (규칙, 임베딩, GPT·Claude 후보를 회귀 게이트로 검증) | 있음 (mT5 SFT·강화학습, EXAONE LoRA) |
+| 평가 대상 | 검색 순위(nDCG, Recall), 인용 원문 일치 | 답과 근거 셀, 보류, 검증된 정답률 |
+| 공고에서 맞는 묶음 | LLM 서비스·Agent (검색 결합, 서비스 품질 개선) | 테이블이해(Table MRC), 강화학습 |
+| 검색(BM25·Kiwi)의 지위 | 연구 대상 | 표를 찾아 오는 앞 단계. 연구 대상이 아님 |
+
+두 저장소의 공통점은 "모델 출력을 그대로 믿지 않고 규칙으로 검증한다"는 태도다. 이것은 한 문장으로 묶어 써도 된다. TableTrace 쪽에서 검색이나 FastAPI를 길게 쓰면 ko-search-clinic과 겹치므로, 근거 셀 측정·검증기·학습 실험을 중심으로 쓴다.
+
+## 8. 선행 연구 대비 주장 범위
+
+가까운 논문 12편을 2026-11-10에 PDF 전문으로 읽었다(`docs/research/papers.md`, 인용문은 `docs/research/fulltext/`). 면접에서 "이런 연구가 이미 있지 않나"라는 질문이 나오면 아래대로 답하면 된다.
+
+| 논문 | 이미 한 것 | TableTrace가 다른 점 |
+|---|---|---|
+| TrustTable (ACL 2026) | "답은 맞고 추론이 틀린" 경우를 이름 붙이고, LLM이 쓴 Pandas·Z3 코드로 검사 | 검사에 LLM이 없다(고정 규칙). 셀 좌표와 정답 셀로 잰다. 실패하면 보류한다. 한국어, 1.2B 모델 |
+| ViTaB-A (arXiv 2602.15769) | QA 정확도와 셀 인용 정확도의 차이를 보고(따로 잰 두 과제) | 한 출력 안에서 "답이 맞은 것 중 인용이 틀린 비율"을 재고 학습 전후를 비교 |
+| RSAT (arXiv 2605.00199) | 1~8B 모델을 SFT 뒤 강화학습으로 셀 좌표를 인용하게 학습. 인용 품질은 NLI 점수 | 정답 셀과 직접 대조. 추론 때 검증기와 보류가 있다 |
+| Reasoning-Table (arXiv 2506.01710) | 근거 셀 보상, "답이 틀려도 셀 표시로 점수를 얻는" 위험을 지적 | 보류가 있는 시스템의 다른 허점을 실제로 겪고 건수로 추적 |
+| Table-R1 세 편, TableGPT-R1 | 표 추론 강화학습(7~8B 중심). 한 편은 SFT가 RL과 같거나 낫다고 보고 | "RL이 SFT를 못 넘었다"는 새 결과가 아니라 같은 방향의 사례 |
+| KorWikiTQ 원논문 (LG AI Research, LREC 2022) | 데이터와 KO-TaBERT, EM·F1 | 같은 데이터에 근거 셀·보류 평가를 더하고, 공개 파일의 표 겹침을 세어 다시 나눔 |
+
+쓸 수 있는 문장: "한국어 표 질의응답에서, 답과 근거 셀을 함께 내는 작은 모델의 근거 오류를 정답 셀 기준으로 재고, 고정 규칙 검증기와 보류로 오답 유출을 줄이는 폭을 수치로 보였다." 12편에 한국어 표의 근거 셀 평가는 없었다. 그렇다고 "처음"이라고 쓰지는 않는다. 12편만 봤기 때문이다.
+

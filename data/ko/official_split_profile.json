@@ -3,6 +3,8 @@
   "examples": 58221,
   "unique_tables_by_url": 12030,
   "unique_table_ids_by_qid_prefix": 13551,
+  "unique_tables_by_url_and_content": 13379,
+  "examples_per_table": 4.35,
   "answer_is_cell_pct": 99.6,
   "table_rows_median": 14,
   "table_rows_max": 21
@@ -11,10 +13,33 @@
   "examples": 11771,
   "unique_tables_by_url": 2949,
   "unique_table_ids_by_qid_prefix": 3033,
+  "unique_tables_by_url_and_content": 3018,
+  "examples_per_table": 3.9,
   "answer_is_cell_pct": 99.5,
   "table_rows_median": 13,
   "table_rows_max": 21
  },
  "shared_tables_by_url": 1755,
- "shared_tables_by_qid_prefix": 1554
+ "shared_tables_by_qid_prefix": 1554,
+ "shared_tables_by_url_and_content": 1578,
+ "dev_on_train_url": {
+  "examples": 6129,
+  "of": 11771,
+  "rate": 0.5207
+ },
+ "dev_on_train_table": {
+  "examples": 5046,
+  "of": 11771,
+  "rate": 0.4287
+ },
+ "dev_same_table_same_answer_in_train": {
+  "examples": 51,
+  "of": 11771,
+  "rate": 0.0043
+ },
+ "dev_same_table_same_question_in_train": {
+  "examples": 0,
+  "of": 11771,
+  "rate": 0.0
+ }
 }

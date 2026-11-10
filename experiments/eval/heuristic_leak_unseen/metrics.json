@@ -1,0 +1,68 @@
+{
+ "meta": {
+  "planner": "heuristic",
+  "model": "heuristic",
+  "data": [
+   "data/ko/leak_probe_unseen.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl",
+   "data/ko/leak_probe_documents.jsonl"
+  ],
+  "n": 1497,
+  "wall_s": 5.7,
+  "hardware": "x86_64",
+  "label": null,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-10T09:05:34",
+  "quantize": false,
+  "quantize_scope": null
+ },
+ "metrics": {
+  "n": 1497,
+  "n_answerable": 1497,
+  "n_gold_abstain": 0,
+  "n_calc": 0,
+  "n_lookup": 1497,
+  "verified_em": 0.2672,
+  "answer_em_answerable": 0.2672,
+  "raw_answer_em_answerable": 0.2672,
+  "evidence_cells_exact": 0.2665,
+  "evidence_cells_exact_raw": 0.2665,
+  "evidence_repaired_rate": 0.0,
+  "evidence_cells_overlap": 0.2705,
+  "op_acc": 0.5084,
+  "lookup_em": 0.2672,
+  "calc_em": null,
+  "calc_result_correct": null,
+  "unit_error_rate": null,
+  "abstain_recall": null,
+  "false_abstain_rate": 0.4923,
+  "abstain_precision": 0.0,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.0073,
+  "truncated_gold_rate": 0.0414,
+  "verified_em_untruncated": 0.2787,
+  "mean_ms_per_example": 3.0,
+  "by_source": {
+   "korwikitq": {
+    "n": 1497,
+    "verified_em": 0.2672
+   }
+  },
+  "by_category": {
+   "other_cell": {
+    "n": 1484,
+    "verified_em": 0.2689
+   },
+   "same_cell_as_set_aside": {
+    "n": 13,
+    "verified_em": 0.0769
+   }
+  },
+  "gold_subject_fail_rate": 0.0648,
+  "entity_check": false
+ }
+}

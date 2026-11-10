@@ -200,6 +200,88 @@ def engine_custom_table() -> str:
     return out
 
 
+def ci(w: dict | None) -> str:
+    """'52.6 (45.9–59.3)' from a Wilson record written by scripts/evidence_error.py."""
+    if not w or w.get("rate") is None:
+        return "–"
+    return f"{pct(w['rate'])} ({pct(w['lo'])}–{pct(w['hi'])})"
+
+
+EVIDENCE_ROWS = [("SFT stage2 = mT5-small 300M", "sft_ko2_ko_test"), ("화학 SFT (1차 최종 mT5)", "sft_chem_ko_test"), ("GRPO RL v1 (보상 허점)", "rl_ko_v1_ko_test"),
+                 ("[2차] GRPO RL v3 (mT5 최종)", "rl_v3_ko_test"),
+                 ("EXAONE-4.0-1.2B LoRA 300개, 1번째 학습", "exaone_vllm_ko_test_run1"), ("같은 설정, 2번째 학습", "exaone_vllm_ko_test_run2"), ("같은 설정, 3번째 학습", "exaone_vllm_ko_test"),
+                 ("EXAONE-4.0-1.2B LoRA 전체 3,587개, 1번째 학습", "exaone_full_vllm_ko_test"), ("같은 설정, 2번째 학습", "exaone_full_vllm_ko_test_run2")]
+
+
+def evidence_table() -> str:
+    """Right answer text, wrong cited cell: scripts/evidence_error.py over the stored ko test predictions."""
+    d = load(EXP / "eval" / "evidence_error.json")
+    if not d:
+        return "_evidence_error.json 없음_\n"
+    out = ("| 모델 | 답 텍스트가 맞은 조회 답 | 인용 셀 = 정답 셀 | 같은 값의 다른 셀 | 인용 셀에 답이 없음 | **인용 셀에 답이 없는 비율 % (95% 구간)** | 그중 행은 맞고 열이 틀림 | 검증기: 근거를 고쳐 답함 / 보류 |\n"
+           "|---|---:|---:|---:|---:|---:|---:|---:|\n")
+    for name, key in EVIDENCE_ROWS:
+        o = d.get(key)
+        if not o:
+            continue
+        v = o["verifier_on_strict"]
+        out += (f"| {name} | {o['correct_lookup_answers']} | {o['cited_gold']} | {o['same_value_elsewhere']} | {o['no_answer_in_cell']} | **{ci(o['strict'])}** "
+                f"| {o['strict_where'].get('same_row', 0)} | {v['repaired_and_answered']} / {v['withheld']} |\n")
+    n = d["rl_v3_ko_test"]["lookup_questions"]
+    out += (f"\n대상은 한국어 test의 조회 문항 {n}개(KorWikiTQ 원본) 가운데 모델이 쓴 답 텍스트가 정답과 같은 것이다. 인용 셀은 검증기가 손대기 전 모델 출력의 `cells:` 값이다. "
+            "정답 셀은 답 텍스트에서 역으로 찾은 것이므로, 답과 같은 값을 가진 다른 셀을 인용한 경우는 오류로 세지 않았다. 구간은 Wilson 95%다. `scripts/evidence_error.py`가 저장된 예측에서 다시 계산한다.\n")
+    return out
+
+
+OPERATING_ROWS = [("휴리스틱 기준선", "heuristic_ko_test"), ("[2차] GRPO RL v3 (mT5 최종)", "rl_v3_ko_test"), ("EXAONE LoRA 300개 (3번째 학습)", "exaone_vllm_ko_test"),
+                  ("EXAONE LoRA 전체 (1번째 학습)", "exaone_full_vllm_ko_test"), ("EXAONE LoRA 전체 (2번째 학습)", "exaone_full_vllm_ko_test_run2")]
+
+
+def operating_table() -> str:
+    """Coverage against wrong answers at three points: planner output as is, verifier, verifier with the subject check."""
+    d = load(EXP / "eval" / "evidence_error.json")
+    if not d:
+        return "_evidence_error.json 없음_\n"
+    out = ("| 모델 | 조건 | 답한 비율 % | 답한 것 중 정답 % (95% 구간) | 오답이 그대로 나간 비율 % (전체 대비) | 정답 수 / 오답 수 |\n|---|---|---:|---:|---:|---:|\n")
+    for name, key in OPERATING_ROWS:
+        o = d.get(key)
+        if not o:
+            continue
+        for label, pt in (("모델 출력 그대로", "raw"), ("검증기 v1", "verifier"), ("검증기 v2(개체 일치 검사)", "verifier_subject_check")):
+            q = o.get(pt)
+            if not q:
+                continue
+            out += (f"| {name} | {label} | {pct(q['coverage'])} | {ci(q['accuracy_when_answered'])} | {pct(q['wrong_answer_rate']['rate'])} | {q['answered_correct']} / {q['answered_wrong']} |\n")
+    n = d["rl_v3_ko_test"]["raw"]["n"]
+    out += (f"\n한국어 test {n}문항 전체(답이 없는 문항 포함) 기준이다. \"모델 출력 그대로\"는 모델이 쓴 답 텍스트를 채점한 것이고, 답이 없는 문항에 답을 쓰면 오답이다. "
+            "검증기 행은 도구가 인용 셀로 다시 계산한 답을 채점하므로 계산 문항에서는 정답 수가 늘 수 있다. 답한 비율이 줄어든 만큼이 보류다.\n")
+    return out
+
+
+LEAK_ROWS = [("휴리스틱 기준선 (학습 없음, 대조군)", "heuristic"), ("SFT stage2 = mT5-small", "sft_ko2"), ("[2차] GRPO RL v3 (mT5 최종)", "rl_v3"),
+             ("EXAONE LoRA 전체", "exaone_full_vllm")]
+
+
+def leak_table() -> str:
+    """Seen-table against unseen-table questions: scripts/leak_effect.py over the two probe sets."""
+    d = load(EXP / "eval" / "leak_effect.json")
+    rep = load(ROOT / "data" / "ko" / "leak_probe_report.json")
+    if not d or not rep:
+        return "_leak_effect.json 없음_\n"
+    out = ("| 모델 | 지표 | 학습 때 본 표의 새 질문 % (95% 구간) | 본 적 없는 표의 질문 % (95% 구간) | 차이 %p (95% 구간, 표 단위 부트스트랩) |\n|---|---|---:|---:|---:|\n")
+    for name, key in LEAK_ROWS:
+        r = d["planners"].get(key)
+        if not r:
+            continue
+        for label, m in (("verified EM", "verified_em"), ("모델이 인용한 셀 = 정답 셀", "cited_cell_exact")):
+            x = r[m]
+            out += (f"| {name} | {label} | {ci(x['seen'])} | {ci(x['unseen'])} | {100 * x['diff']:+.1f} ({100 * x['diff_lo']:+.1f} ~ {100 * x['diff_hi']:+.1f}) |\n")
+    out += (f"\n두 세트는 각각 {rep['seen']['questions']:,}문항이다. 본 표 세트는 train 표 {rep['seen']['tables']}개에서 학습에 쓰지 않은 질문이고, "
+            f"안 본 표 세트는 dev·test 표와 미사용 표 {rep['unseen']['tables']}개에서 같은 규칙으로 고른 질문이다. 두 세트가 공유하는 표는 {rep['shared_tables_between_sets']}개, 학습 질문과 겹치는 질문은 {rep['shared_qids_with_training']}개다. "
+            "표는 한 번의 무작위 섞기로 배정했으므로 두 세트의 차이는 \"학습 때 그 표를 봤는가\"뿐이다(`scripts/data/build_leak_probe.py`, `scripts/leak_effect.py`).\n")
+    return out
+
+
 def blocks() -> dict[str, str]:
     v1 = "검증기 v1: 개체 일치 검사 없음 (1차 평가와 같은 조건)"
     v2 = "검증기 v2: 개체 일치 검사 있음 (같은 모델 출력을 다시 검증)"
@@ -222,6 +304,9 @@ def blocks() -> dict[str, str]:
         "pp_gpu": pp_table("_gpu", "Kaggle Tesla T4 ×2(nccl), 소유자 실행 2026-11-07, 원본 google/mt5-small"),
         "engine": engine_table(),
         "engine_custom": engine_custom_table(),
+        "evidence": evidence_table(),
+        "operating": operating_table(),
+        "leak": leak_table(),
     }
 
 

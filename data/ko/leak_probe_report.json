@@ -1,0 +1,27 @@
+{
+ "seed": 13,
+ "seen": {
+  "questions": 1497,
+  "tables": 882,
+  "same_cell_as_set_aside": 11,
+  "other_cell": 1486,
+  "by_table_split": {
+   "train": 1497
+  }
+ },
+ "unseen": {
+  "questions": 1497,
+  "tables": 879,
+  "same_cell_as_set_aside": 13,
+  "other_cell": 1484,
+  "by_table_split": {
+   "dev": 111,
+   "test": 304,
+   "unused": 1082
+  }
+ },
+ "unseen_from_dev_test_tables": 415,
+ "unused_tables_drawn": 647,
+ "shared_tables_between_sets": 0,
+ "shared_qids_with_training": 0
+}
