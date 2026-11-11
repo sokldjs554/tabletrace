@@ -26,9 +26,9 @@
 
 **4b (추가 과제)**: 4단계에서 쓴 검증기에 "근거 복구 끄기" 옵션을 더한다. 명세는 `docs/rewrite/05_verifier_repair_option.md`, 테스트는 `tests/test_verifier_repair_option.py`(옵션이 생기기 전에는 건너뜀). 5단계보다 먼저 해도 된다.
 
-**T (학습 과제)**: 학습 코드의 핵심 세 조각을 새 파일로 직접 쓴다. 강화학습 보상(`training/evidence_reward.py`), GRPO 이점·손실(`training/grpo.py`), 라벨 가리기·학습률 일정·학습 루프(`training/lm_loop.py`). 합쳐서 150줄 안팎이고 참고할 기존 파일이 없다. 명세는 `docs/rewrite/06_training_code.md`, 테스트는 `tests/test_owner_training_code.py`(35개, 파일이 생기기 전에는 건너뜀). 이 함수들을 불러 쓰는 스크립트(`scripts/train/exaone_grpo.py`, `scripts/train/exaone_lora_sft.py --loop owner`)는 이미 연결되어 있다. 5~9단계와 순서가 무관하다.
+**T (학습 과제, 완료: 2026-11-12, PR #6)**: 학습 코드의 핵심 세 조각을 새 파일로 직접 쓴다. 강화학습 보상(`training/evidence_reward.py`), GRPO 이점·손실(`training/grpo.py`), 라벨 가리기·학습률 일정·학습 루프(`training/lm_loop.py`). 합쳐서 150줄 안팎이고 참고할 기존 파일이 없다. 명세는 `docs/rewrite/06_training_code.md`, 테스트는 `tests/test_owner_training_code.py`(35개, 파일이 생기기 전에는 건너뜀). 이 함수들을 불러 쓰는 스크립트(`scripts/train/exaone_grpo.py`, `scripts/train/exaone_lora_sft.py --loop owner`)는 이미 연결되어 있다. 5~9단계와 순서가 무관하다.
 
-1~4단계(약 640줄)가 끝나면 "검증 파이프라인의 핵심을 직접 구현했다"가 사실이 된다. T가 끝나면 "강화학습 보상과 손실, 학습 루프를 직접 썼다"가 사실이 된다. 9단계까지 가면 서비스 계층도 포함된다. 그 밖의 학습·벤치 스크립트(`training/sft.py`, `training/rl_grpo.py`, `bench/`, `scripts/`)와 문서는 이 계획에 없고 AI 작성으로 남는다.
+1~4단계(약 640줄)가 끝나면 "검증 파이프라인의 핵심을 직접 구현했다"가 사실이 된다. T는 2026-11-12에 끝났으므로 "강화학습 보상과 손실, 학습 루프를 직접 썼다"는 사실이다(그 세 파일에 한해서. 이를 불러 쓰는 스크립트는 AI 작성). 9단계까지 가면 서비스 계층도 포함된다. 그 밖의 학습·벤치 스크립트(`training/sft.py`, `training/rl_grpo.py`, `bench/`, `scripts/`)와 문서는 이 계획에 없고 AI 작성으로 남는다.
 
 ## 환경 준비 (맥북, 처음 한 번)
 

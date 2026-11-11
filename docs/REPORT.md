@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->204<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->38<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip은 소유자가 직접 쓸 학습 코드의 테스트(§20.7)이고 파일이 생기면 실행된다. 모델 가중치가 없으면 모델 테스트도 skip |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->241<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 | `training/rl_grpo.py`, §7, §18, 이슈 23–24 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->204<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->241<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -1146,9 +1146,9 @@ mT5는 CPU 시간 때문에 시드 13으로 뽑은 1,000문항이다. 같은 문
 
 ### 20.7 학습 코드를 직접 쓰는 과제
 
-**무엇이 비어 있었나.** 학습 스크립트는 모두 AI 도구가 썼다. 소유자가 직접 쓴 것은 검증 쪽 다섯 모듈이다.
+**무엇이 비어 있었나.** 학습 스크립트는 모두 AI 도구가 썼다. 그때까지 소유자가 직접 쓴 것은 검증 쪽 다섯 모듈이었다.
 
-**한 것(준비).** 학습의 핵심 세 조각을 소유자가 새 파일로 쓰도록 명세와 테스트를 만들었다(`docs/rewrite/06_training_code.md`, `tests/test_owner_training_code.py` 35개). 구현은 저장소에 넣지 않았다.
+**한 것.** AI 도구는 학습의 핵심 세 조각을 소유자가 새 파일로 쓰도록 명세와 테스트를 만들었다(`docs/rewrite/06_training_code.md`, `tests/test_owner_training_code.py` 35개). 구현은 넣지 않았다. **소유자가 2026-11-12에 세 파일을 직접 써서 병합했다**(PR #6, 133줄, `docs/rewrite/LOG.md`).
 
 | 파일(소유자가 씀) | 내용 | 쓰이는 곳 |
 |---|---|---|
@@ -1156,9 +1156,11 @@ mT5는 CPU 시간 때문에 시드 13으로 뽑은 1,000문항이다. 같은 문
 | `training/grpo.py` | 그룹 이점, 생성 토큰의 로그 확률, 정책 경사 손실, KL 항 | 같은 스크립트 |
 | `training/lm_loop.py` | 라벨 가리기, 학습률 일정, 기울기 누적·자르기가 있는 학습 루프 | `scripts/train/exaone_lora_sft.py --loop owner` |
 
-- 테스트의 기대값은 정의에서 손으로 계산했다. 테스트가 실제 검증기 동작과 맞는지는 임시 구현으로 확인했고(35개 통과) 그 구현은 지웠다.
+- 테스트의 기대값은 정의에서 손으로 계산했다. 테스트가 실제 검증기 동작과 맞는지는 임시 구현으로 확인했고(35개 통과) 그 구현은 저장소에 넣지 않았다.
 - 이 함수들을 불러 쓰는 쪽은 연결해 두었다. `exaone_grpo.py`는 모델 불러오기, 샘플 생성, 기록, 저장만 한다. 세 파일이 없으면 안내와 함께 멈춘다. 두 스크립트의 CPU 시험(`tests/test_exaone_grpo_smoke.py`, `tests/test_lora_sft_smoke.py`)은 파일이 생기면 자동으로 돈다.
-- 끝나면 "강화학습 보상과 손실, 학습 루프를 직접 썼다"가 사실이 된다. 지금은 사실이 아니다.
+- 소유자의 구현은 전용 테스트 35개를 통과했다. 리뷰에서 임시 구현과 견주었을 때 보상 함수는 저장된 모델 출력 66,450회 호출에서 차이가 없었고, 깨뜨린 입력 6,000개에서 예외가 없었다. GRPO 함수와 학습 루프도 무작위 입력에서 같았다.
+- 첫 CI는 실패했다. 소유자의 코드가 아니라 AI 도구가 쓴 테스트가 토치 없는 환경을 건너뛰지 않아서였고, 테스트를 고쳤다(`docs/dev/issues-log.md` 53).
+- "강화학습 보상과 손실, 학습 루프를 직접 썼다"는 2026-11-12부터 사실이다. 범위는 이 세 파일이다. 이 코드로 EXAONE을 학습한 결과는 아직 없다(§20.8).
 
 ### 20.8 GPU 보강 실험 — 준비만 했고 돌리지 않았다
 

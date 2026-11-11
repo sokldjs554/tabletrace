@@ -222,7 +222,7 @@ def supplement_sections() -> list[dict]:
     out.append({"title": "준비만 한 것 — GPU에서 돌려야 하는 실험", "status": "prep",
                 "description": "notebooks/gpu_experiments_2.ipynb: 튜닝하지 않은 EXAONE 7.8B·32B 참고선, 모델이 도구를 스스로 고르는 방식(Tool Calling), 학습 데이터 확대(약 1만, 3.4만 문항), "
                                "멀티 GPU 학습(DDP) 속도, EXAONE 강화학습(GRPO), 4비트 서빙, 열 번호 형식의 전체 데이터·시드 추가, 화학, 큰 표. "
-                               "스크립트는 작은 무작위 모델과 모의 서버로 CPU에서 시험했다. 강화학습의 보상과 손실은 저장소 소유자가 직접 쓰도록 명세와 테스트만 두었다(docs/rewrite/06_training_code.md)."})
+                               "스크립트는 작은 무작위 모델과 모의 서버로 CPU에서 시험했다. 강화학습의 보상과 손실, 학습 루프는 저장소 소유자가 직접 썼다(docs/rewrite/LOG.md, PR #6). 이 코드로 학습한 결과는 아직 없다."})
     return out
 
 

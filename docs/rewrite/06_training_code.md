@@ -1,6 +1,6 @@
 # 학습 과제(T) 명세 — 학습 코드 직접 쓰기 (`training/evidence_reward.py`, `training/grpo.py`, `training/lm_loop.py`)
 
-> **상태: 시작 전.** 세 파일 모두 아직 없다. 테스트 `tests/test_owner_training_code.py`는 파일이 생기기 전에는 건너뛴다(skipped).
+> **상태: 완료 (2026-11-12).** 소유자가 세 파일을 직접 써서 PR #6으로 병합했다(`3df067a` → `3d6b38d`). 전용 테스트 35개가 통과한다. 리뷰 기록은 `docs/rewrite/LOG.md`에 있다. 아래는 과제를 낼 때의 명세 그대로다.
 
 1~4단계는 검증 파이프라인이었다. 이 과제는 **학습 코드**다. `README.md`의 5~9단계와 순서가 무관하므로 먼저 해도 된다. 지금 저장소의 학습 스크립트(`training/sft.py`, `training/rl_grpo.py`, `scripts/train/exaone_lora_sft.py`)는 AI 코딩 도구가 썼다. 그래서 "학습 코드를 직접 짰다"고 말할 수 없다. 이 과제에서 학습의 핵심 세 조각을 새 파일로 직접 쓴다. 이번에는 참고할 기존 파일이 없다. 명세와 테스트만 보고 쓴다.
 
@@ -102,4 +102,4 @@ pytest -q && ruff check src tests scripts
 
 ## 이 코드로 하는 실험 (소유자가 Kaggle에서 실행)
 
-`notebooks/gpu_experiments.ipynb` 6번 절. EXAONE 4.0 1.2B를 300문항으로 튜닝한 모델(정답 중 근거 셀 오류가 절반을 넘는 모델)에서 시작해, 이 보상으로 GRPO를 돌린다. 볼 것은 verified EM이 아니라 **근거 복구를 끈 정답률과 근거 셀 오류율**이 움직이는가다. 결과가 좋든 나쁘든 그대로 적는다.
+`notebooks/gpu_experiments_2.ipynb` D절. EXAONE 4.0 1.2B를 300문항으로 튜닝한 모델(정답 중 근거 셀 오류가 절반을 넘는 모델)에서 시작해, 이 보상으로 GRPO를 돌린다. 볼 것은 verified EM이 아니라 **근거 복구를 끈 정답률과 근거 셀 오류율**이 움직이는가다. 결과가 좋든 나쁘든 그대로 적는다.

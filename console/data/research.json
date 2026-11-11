@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-11 11:09 UTC",
- "commit": "408c51a",
+ "generated_at": "2026-11-11 18:01 UTC",
+ "commit": "3d6b38d",
  "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. CPU 실험(mT5-small 학습·평가·양자화)은 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없는 개발 환경에서 실행했다. [GPU] 표시가 있는 실험(EXAONE LoRA, vLLM·SGLang 서빙, 멀티 GPU)은 저장소 소유자가 Kaggle·Colab의 Tesla T4에서 실행해 결과 파일을 받은 것이다. 해석과 한계는 저장소의 README와 docs/REPORT.md에 있다.",
  "sections": [
   {
@@ -769,7 +769,7 @@
   {
    "title": "준비만 한 것 — GPU에서 돌려야 하는 실험",
    "status": "prep",
-   "description": "notebooks/gpu_experiments_2.ipynb: 튜닝하지 않은 EXAONE 7.8B·32B 참고선, 모델이 도구를 스스로 고르는 방식(Tool Calling), 학습 데이터 확대(약 1만, 3.4만 문항), 멀티 GPU 학습(DDP) 속도, EXAONE 강화학습(GRPO), 4비트 서빙, 열 번호 형식의 전체 데이터·시드 추가, 화학, 큰 표. 스크립트는 작은 무작위 모델과 모의 서버로 CPU에서 시험했다. 강화학습의 보상과 손실은 저장소 소유자가 직접 쓰도록 명세와 테스트만 두었다(docs/rewrite/06_training_code.md)."
+   "description": "notebooks/gpu_experiments_2.ipynb: 튜닝하지 않은 EXAONE 7.8B·32B 참고선, 모델이 도구를 스스로 고르는 방식(Tool Calling), 학습 데이터 확대(약 1만, 3.4만 문항), 멀티 GPU 학습(DDP) 속도, EXAONE 강화학습(GRPO), 4비트 서빙, 열 번호 형식의 전체 데이터·시드 추가, 화학, 큰 표. 스크립트는 작은 무작위 모델과 모의 서버로 CPU에서 시험했다. 강화학습의 보상과 손실, 학습 루프는 저장소 소유자가 직접 썼다(docs/rewrite/LOG.md, PR #6). 이 코드로 학습한 결과는 아직 없다."
   },
   {
    "title": "한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160)",
