@@ -1,0 +1,66 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "model",
+  "data": [
+   "data/ko/unseen_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/unseen_dev_documents.jsonl.gz"
+  ],
+  "n": 1000,
+  "wall_s": 690.4,
+  "hardware": "x86_64",
+  "label": null,
+  "table_format": "plain",
+  "row_select": "first",
+  "evidence_repair": true,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-11T06:44:43",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": false,
+  "few_shot": null,
+  "sample": {
+   "n": 1000,
+   "seed": 13
+  }
+ },
+ "metrics": {
+  "n": 1000,
+  "n_answerable": 1000,
+  "n_gold_abstain": 0,
+  "n_calc": 0,
+  "n_lookup": 1000,
+  "verified_em": 0.298,
+  "answer_em_answerable": 0.298,
+  "raw_answer_em_answerable": 0.305,
+  "evidence_cells_exact": 0.297,
+  "evidence_cells_exact_raw": 0.198,
+  "evidence_repaired_rate": 0.287,
+  "evidence_cells_overlap": 0.297,
+  "op_acc": 0.673,
+  "lookup_em": 0.298,
+  "calc_em": null,
+  "calc_result_correct": null,
+  "unit_error_rate": null,
+  "abstain_recall": null,
+  "false_abstain_rate": 0.432,
+  "abstain_precision": 0.0,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.126,
+  "truncated_gold_rate": 0.264,
+  "verified_em_untruncated": 0.4049,
+  "mean_ms_per_example": 683.1,
+  "by_source": {
+   "korwikitq": {
+    "n": 1000,
+    "verified_em": 0.298
+   }
+  },
+  "gold_subject_fail_rate": 0.059,
+  "entity_check": false
+ }
+}

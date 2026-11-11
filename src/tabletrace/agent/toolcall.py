@@ -52,7 +52,7 @@ TOOLS = [
         {"text": {"type": "string"}, "exact": {"type": "boolean"}}, ["text"]),
     _fn("row_read", "Read every cell of one data row.", {"row": {"type": "integer", "minimum": 0}}, ["row"]),
     _fn("column_read", "Read the cells of one column.", {"col": {"type": "integer", "minimum": 0}}, ["col"]),
-    _fn("calculate", "Compute over cells. diff = first - second, ratio = first / second, pct_change = (second - first) / first.",
+    _fn("calculate", "Compute over cells. diff = first - second, ratio = first / second, pct_change = (first - second) / second * 100.",
         {"op": {"type": "string", "enum": ["diff", "sum", "avg", "ratio", "pct_change"]}, "cells": {"type": "array", "items": {"type": "string"}}}, ["op", "cells"]),
     _fn("submit", "Give the final answer with its evidence cells.",
         {"op": {"type": "string", "enum": OPS}, "cells": {"type": "array", "items": {"type": "string"}}, "answer": {"type": "string"}}, ["op", "cells", "answer"]),

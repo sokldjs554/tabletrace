@@ -1,0 +1,248 @@
+{
+ "note": "arXiv papers under CC BY 4.0 (licence read from each abstract page on 2026-11-11). `index` is the position of the tabular among the page's table figures.",
+ "papers": [
+  {
+   "arxiv_id": "2609.05086",
+   "title": "Measurements of Diffusion Coefficients of CO$_{2}$ in 1-Butanol with a New Laminar Jet Apparatus and PFG-NMR, Pointing to Interfacial Mass Transfer Effects",
+   "authors": [
+    "Großmann, Oliver",
+    "Mross, Sarah",
+    "Wagner, Jens",
+    "Munnemann, Kerstin",
+    "Jirasek, Fabian",
+    "Hasse, Hans"
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 1,
+     "unit_row": true
+    },
+    {
+     "index": 2,
+     "unit_row": true
+    },
+    {
+     "index": 3,
+     "first_header": "Method"
+    },
+    {
+     "index": 0,
+     "unit_row": true,
+     "first_header": "Component"
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.02762",
+   "title": "Relating solute interactions to interfacial properties",
+   "authors": [
+    "Mandalaparthy, Varun",
+    "Curlee, Benjamin M.",
+    "Noid, William G."
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 0
+    },
+    {
+     "index": 1
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.05671",
+   "title": "Differentiable Solvation Shell Model for Rational Electrolyte Design",
+   "authors": [
+    "Zhao, Hancheng",
+    "Lin, Hongyi",
+    "Kelly, Celia",
+    "Viswanathan, Venkatasubramanian"
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 2
+    },
+    {
+     "index": 3
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.06162",
+   "title": "Performance of a minimally empirical local-hybrid density functional for molecular chemistry",
+   "authors": [
+    "Johnson, Erin R.",
+    "Bryenton, Kyle R."
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 2
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.07106",
+   "title": "Coupled structural and electronic evolution under pressure in CuIr2Se4, CuRh2S4, and CuRh2Se4",
+   "authors": [
+    "Emi, M.",
+    "Shiomi, M.",
+    "Kojima, K.",
+    "Sugimoto, K.",
+    "Karasawa, T.",
+    "Suzuki, H.",
+    "Takahashi, M.",
+    "Oka, K.",
+    "Kadobayashi, H.",
+    "Kawaguchi-Imada, S.",
+    "Hirao, N.",
+    "Ohashi, T.",
+    "Ito, D.",
+    "Kubo, T.",
+    "Matsushita, M.",
+    "Nohara, M.",
+    "Matsubayashi, K.",
+    "Katayama, N."
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 0
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.09293",
+   "title": "Quantum-accurate atomistic modeling of enzyme catalysis using a machine learned potential",
+   "authors": [
+    "Gao, Meng",
+    "Zadeh, Armin Shayesteh",
+    "Seal, Aniruddha",
+    "Dasetty, Siva",
+    "Achar, Siddarth K.",
+    "Dzamba, Misko",
+    "Miller, Benjamin K.",
+    "Jacobson, Leif D.",
+    "Zitnick, C. Lawrence",
+    "Wood, Brandon M.",
+    "Ulissi, Zachary W.",
+    "Levine, Daniel S.",
+    "Ferguson, Andrew L."
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 5
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.13018",
+   "title": "First application of the transcorrelated method to noncovalent interactions: The A24 dataset",
+   "authors": [
+    "Hauskrecht, Johannes",
+    "Lambie, Stephanie",
+    "Christlmaier, Evelin Martine Corvid",
+    "Schraivogel, Thomas",
+    "Kats, Daniel",
+    "Alavi, Ali"
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 0,
+     "units": false
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.16558",
+   "title": "Tailored coupled cluster method with sample-based quantum diagonalization: Application to titanium-based metallocene catalytic reactions for 1-hexene production",
+   "authors": [
+    "Lin, Tzu-Wei",
+    "Hirai, Hirotoshi",
+    "Huang, Kuan-Chieh",
+    "Hong, Zih-Chao",
+    "Zhuang, Hui-Zhong",
+    "Li, Tsung-Hui"
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 0
+    },
+    {
+     "index": 2
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.18654",
+   "title": "Variational computation of anharmonic ground and excited vibrational eigenstates using bound Quartic Force Fields: Application with MCTDH and ElVibRot",
+   "authors": [
+    "Al-Jaaidi, Ali",
+    "Lauvergnat, David",
+    "Peláez, Daniel"
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 1
+    },
+    {
+     "index": 3
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.19045",
+   "title": "Quantum-Classical Fragmentation with the Effective Fragment Molecular Orbital Method",
+   "authors": [
+    "Zahariev, Federico",
+    "Glezakou, Vassiliki-Alexandra",
+    "Gordon, Mark S."
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 0
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.16851",
+   "title": "Understanding the spin coherence of molecular photoexcited triplet states from first principles",
+   "authors": [
+    "Păunică, Ecaterina",
+    "Bayliss, Sam L."
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 0
+    }
+   ]
+  },
+  {
+   "arxiv_id": "2609.20891",
+   "title": "RECOB: Reliable Benchmarking of Experimental Optimization in Chemistry and Materials Science",
+   "authors": [
+    "Xie, Zikai",
+    "Wan, Jiaming",
+    "Chen, Linjiang"
+   ],
+   "license": "CC BY 4.0",
+   "tables": [
+    {
+     "index": 3
+    },
+    {
+     "index": 2
+    }
+   ]
+  }
+ ]
+}

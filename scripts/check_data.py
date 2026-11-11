@@ -115,9 +115,17 @@ def main() -> int:
     bad = [r["qid"] for r in custom if r["doc_id"] not in split["test"]]
     if bad:
         errors.append(f"chem/custom: records outside the test split: {bad}")
+    # chemistry-paper tables: answers come from the cells / the calculator, every document names its paper and licence
+    paper_docs = {d["id"]: d for d in load(ROOT / "data/chem_papers/documents.jsonl")}
+    paper_q = load(ROOT / "data/chem_papers/custom_eval.jsonl")
+    check_records(paper_q, paper_docs, "chem_papers/custom", verify_gold=True)
+    for d in paper_docs.values():
+        if d["source"].get("license") != "CC BY 4.0" or "arxiv.org/abs/" not in d["source"].get("url", ""):
+            errors.append(f"chem_papers:{d['id']} has no licence or source link")
     summary = {"ko": {s: len(v) for s, v in ko.items()}, "ko_custom": len(load(ROOT / "data/ko/custom_eval.jsonl")),
                "ko_pool": {"tables": len(pool_docs), "questions": len(pool)}, "ko_dialogs": len(dialogs), "ko_unseen_dev": {"tables": len(unseen_docs), "questions": len(unseen)},
-               "chem_split": {k: len(v) for k, v in split.items()}, "chem_custom": len(custom), "errors": len(errors)}
+               "chem_split": {k: len(v) for k, v in split.items()}, "chem_custom": len(custom),
+               "chem_papers": {"papers": len(paper_docs), "tables": sum(len(d["tables"]) for d in paper_docs.values()), "questions": len(paper_q)}, "errors": len(errors)}
     print(json.dumps(summary, ensure_ascii=False))
     for e in errors[:50]:
         print("ERROR", e)
