@@ -518,7 +518,7 @@ dev(475문항, 학습과 겹치지 않음)에서 verified EM이 step 0 <!-- num:
 | EXAONE LoRA 전체 (2번째 학습) | 검증기 v2(개체 일치 검사) | 87.0 | 89.1 (86.4–91.4) | 9.4 | 542 / 66 |
 | EXAONE LoRA 전체 (2번째 학습) | 검증기 v1에서 근거 복구를 끄고 보류 | 90.1 | 88.1 (85.3–90.4) | 10.7 | 555 / 75 |
 
-한국어 test 699문항 전체(답이 없는 문항 포함) 기준이다. "모델 출력 그대로"는 모델이 쓴 답 텍스트를 채점한 것이고, 답이 없는 문항에 답을 쓰면 오답이다. 검증기 행은 도구가 인용 셀로 다시 계산한 답을 채점하므로 계산 문항에서는 정답 수가 늘 수 있다. 답한 비율이 줄어든 만큼이 보류다. 마지막 조건은 인용 셀에 답이 없을 때 근거를 고치지 않고 보류했다면 어떻게 됐을지를 저장된 출력에서 계산한 값이다(검증기 코드에서 복구 분기 다음은 보류다).
+한국어 test 699문항 전체(답이 없는 문항 포함) 기준이다. "모델 출력 그대로"는 모델이 쓴 답 텍스트를 채점한 것이고, 답이 없는 문항에 답을 쓰면 오답이다. 검증기 행은 도구가 인용 셀로 다시 계산한 답을 채점하므로 계산 문항에서는 정답 수가 늘 수 있다. 답한 비율이 줄어든 만큼이 보류다. 마지막 조건은 인용 셀에 답이 없을 때 근거를 고치지 않고 보류한 경우다. 검증기에 `repair=False`를 주고 다시 검증한 결과와 문항 단위로 같다(`experiments/eval/no_repair_check.json`).
 
 <!-- results:operating:end -->
 
@@ -751,7 +751,7 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 **구조적 한계**
 
 - **모델 크기·환경**: 개발 환경에는 GPU가 없어 mT5-small(300M)은 CPU(4 vCPU)에서 학습했습니다. GPU 실험은 EXAONE-4.0-1.2B 하나를 무료 T4에서 돌린 것이 전부입니다(§10.3). 수십억 파라미터 이상의 모델과는 비교하지 못했습니다.
-- **검증기가 못 잡는 것**: 검증기는 답이 인용 셀(또는 복구로 찾은 셀)의 값과 같은지를 봅니다. 모델이 엉뚱한 행의 셀 값을 답으로 쓰면 통과합니다. 근거 복구는 답 텍스트가 표의 한 셀과 같기만 하면 근거를 그 셀로 고쳐 답하므로 오답도 함께 내보냅니다(§9.6). 복구를 끄는 옵션은 명세와 테스트만 있고 아직 구현 전입니다(`docs/rewrite/05_verifier_repair_option.md`).
+- **검증기가 못 잡는 것**: 검증기는 답이 인용 셀(또는 복구로 찾은 셀)의 값과 같은지를 봅니다. 모델이 엉뚱한 행의 셀 값을 답으로 쓰면 통과합니다. 근거 복구는 답 텍스트가 표의 한 셀과 같기만 하면 근거를 그 셀로 고쳐 답하므로 오답도 함께 내보냅니다(§9.6). 복구는 끌 수 있습니다. 검증기의 `repair=False`(소유자 구현, PR #5)이고 서비스에서는 `TABLETRACE_EVIDENCE_REPAIR=0`입니다. 끄면 인용 셀에 답이 없는 조회를 보류합니다. 그래도 일관되게 틀린 답(틀린 행의 셀을 인용하고 그 값을 답으로 씀)은 잡지 못합니다.
 - **입력 예산 512 토큰**: test의 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.truncated_gold_rate:pct -->8.9<!-- /num -->%는 정답 행이 잘려 원리적으로 맞힐 수 없습니다. 긴 표·다중 표 질문은 다루지 않습니다.
 - **연산 범위**: 두 셀 간 차·합·평균·비율·증감률과 셀/문장 조회만 지원합니다. argmax, 조건 집계, 단위 환산(원↔억원, kPa↔atm)은 도구에 없습니다.
 - **합성 데이터**: 계산·보류 학습 예제는 템플릿이라 표현이 단조롭고, 기준선에 유리한 편향이 있습니다. 화학은 논문이 아니라 교과서 표입니다. 수작업 평가는 62문항뿐입니다.
@@ -769,7 +769,7 @@ python3.11+ -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"            # 휴리스틱 플래너 + API + 콘솔 (torch 없음)
 pip install -e ".[model]"          # + PyTorch/Transformers (모델 플래너)
 python scripts/check_data.py       # 데이터 무결성
-pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->127<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
+pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->139<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
 tabletrace serve                   # http://127.0.0.1:8000  (모델이 models/mt5-small-tabletrace 에 있으면 자동 사용)
 ```
 
@@ -781,7 +781,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 
 ## 13. 테스트·CI·배포
 
-- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 모델 로딩. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->127<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->8<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). 모델 가중치가 없으면 모델 테스트는 skip됩니다.
+- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 모델 로딩. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->139<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->0<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). 모델 가중치가 없으면 모델 테스트는 skip됩니다.
 - **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·대표 질문·결과·근거 강조·보류·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 정적 모드에서는 EXAONE 저장 결과에 모델 이름이 붙는지, 근거를 고친 답에서 모델이 인용한 셀과 근거 셀이 따로 표시되는지도 봅니다. 두 모드 모두 푸터가 본문과 겹치지 않는지 검사합니다. 최종 실행: 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->18<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
 - **Docker**: 이미지(786 MB)를 이 세션에서 빌드하고 컨테이너 smoke(health·release·corpora·ask·콘솔)를 통과했습니다(`experiments/docker/smoke.json`). Docker Hub·ECR이 429를 돌려 MCR 베이스 이미지로 빌드했습니다.
 - **CI**: `.github/workflows/ci.yml`(ruff, pytest, 데이터 무결성, **README·REPORT 표·수치 대조**, Docker 빌드·smoke)가 GitHub Actions에서 실행되어 **전부 통과**했습니다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/41213002277): `test` 작업과 `docker` 작업 모두 success, 커밋 `0f38f8d`). 그 뒤 커밋의 실행 결과는 저장소 Actions 탭에서 확인하세요.
@@ -813,6 +813,6 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | 근거 셀 오류·검증기 운영점·표 겹침 효과 측정 | 완료(CPU, 저장된 예측 재분석 + mT5 재평가) | §9.6, docs/REPORT.md §19. EXAONE의 표 겹침 효과는 GPU가 필요해 재지 않음(질문 세트는 `data/ko/leak_probe_*.jsonl`) |
 | 가까운 논문 12편 원문 확인 | 완료 | docs/research/papers.md, docs/research/fulltext/ |
 | 표 입력에 열 번호를 넣는 형식(`--table-format colid`) | 완료(300개 설정, 1회 실행) | 같은 300개 학습에서 근거 오류가 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict.rate:pct -->65.2<!-- /num -->% → <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.strict.rate:pct -->3.2<!-- /num -->%로 줄었습니다. 답 정확도는 그대로이고 검증기를 통과하는 오답은 늘었습니다. 전체 데이터에서는 재지 않았습니다. 토큰 비용(입력 <!-- num:experiments/serialize/table_format_cost.json:colid_extra_tokens_rate:pct -->26.0<!-- /num -->% 증가, 같은 조건이 되는 입력 예산 800). (docs/REPORT.md §19.7) |
-| 검증기의 근거 복구 끄기 옵션 | 명세·테스트 준비 | 검증기는 소유자가 직접 쓴 모듈이라 구현은 소유자 몫입니다(docs/rewrite/05_verifier_repair_option.md). "복구 없이" 수치는 계산값이고 옵션이 들어가면 측정값으로 바꿉니다 |
+| 검증기의 근거 복구 끄기 옵션 | 완료(소유자 구현, PR #5) | `resolve(..., repair=False)`, 서비스는 `TABLETRACE_EVIDENCE_REPAIR=0`. 저장된 모델 출력 <!-- num:experiments/eval/no_repair_check.json:questions_checked:int -->6,990<!-- /num -->문항을 다시 검증해 "복구 없이" 수치와 모두 일치함을 확인했습니다(docs/REPORT.md §19.8) |
 | 공개 데모에 EXAONE 저장 출력, 인용 셀·근거 셀 구분 표시 | 완료 | §2, docs/REPORT.md §19.6 |
 | 공고 원문 대조 | 완료(2026-11-10) | docs/research/job-posting.md. 프로젝트는 원문을 읽기 전에 소유자가 준 15개 목록으로 만들어짐 |

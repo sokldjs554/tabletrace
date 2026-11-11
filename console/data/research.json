@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-10 14:02 UTC",
- "commit": "44aea04",
+ "generated_at": "2026-11-11 04:53 UTC",
+ "commit": "5fb91c3",
  "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. CPU 실험(mT5-small 학습·평가·양자화)은 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없는 개발 환경에서 실행했다. [GPU] 표시가 있는 실험(EXAONE LoRA, vLLM·SGLang 서빙, 멀티 GPU)은 저장소 소유자가 Kaggle·Colab의 Tesla T4에서 실행해 결과 파일을 받은 것이다. 해석과 한계는 저장소의 README와 docs/REPORT.md에 있다.",
  "sections": [
   {

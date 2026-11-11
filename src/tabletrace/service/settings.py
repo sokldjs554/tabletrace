@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     engine_model: str = "planner"             # the --served-model-name of that server
     engine_api_key: str = "EMPTY"
     entity_check: bool = True                 # verifier: the question's subject must occur in the cited rows (TABLETRACE_ENTITY_CHECK=0 turns it off)
+    evidence_repair: bool = True              # verifier: re-point a lookup to the cell that holds the answer (TABLETRACE_EVIDENCE_REPAIR=0 withholds instead)
     threads: int = 0
     max_concurrent_jobs: int = 2
     job_timeout_s: float = 60.0
