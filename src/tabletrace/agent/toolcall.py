@@ -36,9 +36,11 @@ OPS = ["lookup", "text", "diff", "sum", "avg", "ratio", "pct_change"]
 REASONS = ["not_in_document", "ambiguous_question", "unit_mismatch"]
 SYSTEM = (
     "You answer a question about a table that you can only read through tools. Cell ids look like r3c2: data row 3 "
-    "(from 0), column 2 (from 0). Find the cell or cells that hold the answer, then call `submit` with the operation, "
-    "the cell ids and the answer text. Use `calculate` for arithmetic instead of computing yourself. If the table does "
-    "not contain the answer, call `abstain`. Always finish with `submit` or `abstain`."
+    "(from 0), column 2 (from 0). Find the cell or cells that hold the answer, then call `submit`.\n"
+    "- The answer is the text of one cell: submit op \"lookup\" with that one cell and its text.\n"
+    "- The answer needs arithmetic over cells: call `calculate` first, then submit the same op and cells with the result.\n"
+    "- The table does not contain what is asked: call `abstain`.\n"
+    "Always finish with `submit` or `abstain`. Do not answer in plain text."
 )
 
 
@@ -54,7 +56,7 @@ TOOLS = [
     _fn("column_read", "Read the cells of one column.", {"col": {"type": "integer", "minimum": 0}}, ["col"]),
     _fn("calculate", "Compute over cells. diff = first - second, ratio = first / second, pct_change = (first - second) / second * 100.",
         {"op": {"type": "string", "enum": ["diff", "sum", "avg", "ratio", "pct_change"]}, "cells": {"type": "array", "items": {"type": "string"}}}, ["op", "cells"]),
-    _fn("submit", "Give the final answer with its evidence cells.",
+    _fn("submit", "Give the final answer with its evidence cells. op is \"lookup\" for the text of one cell; diff, sum, avg, ratio or pct_change only for a result of `calculate`.",
         {"op": {"type": "string", "enum": OPS}, "cells": {"type": "array", "items": {"type": "string"}}, "answer": {"type": "string"}}, ["op", "cells", "answer"]),
     _fn("abstain", "Decline: the table does not answer the question.", {"reason": {"type": "string", "enum": REASONS}}, []),
 ]

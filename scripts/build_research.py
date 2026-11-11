@@ -93,8 +93,9 @@ def supplement_sections() -> list[dict]:
     its artifact is missing, so the page never shows a run that did not happen."""
     out = []
     enc_dir = EXP / "encoder"
-    variants = [("plain", "구조 임베딩 없음 (같은 토큰, 대조군)"), ("structure", "행·열 임베딩"), ("structure_pt", "행·열 임베딩 + 표 사전학습(바뀐 셀 찾기)"),
-                ("structure_pool", "행·열 임베딩, 학습 질문을 풀에서 8,000개 더 (1 epoch)")]
+    variants = [("structure", "mT5-small의 인코더 + 행·열 임베딩"), ("ko_plain", "KoELECTRA-small, 구조 임베딩 없음 (같은 토큰, 대조군)"),
+                ("ko_structure", "KoELECTRA-small + 행·열 임베딩"), ("ko_structure_pt", "KoELECTRA-small + 행·열 임베딩 + 표 사전학습(바뀐 셀 찾기)"),
+                ("ko_structure_pool", "KoELECTRA-small + 행·열 임베딩, 학습 질문을 풀에서 8,000개 더 (1 epoch)")]
     rows = []
     for key, label in variants:
         m = load(enc_dir / key / "metrics.json")
@@ -111,8 +112,8 @@ def supplement_sections() -> list[dict]:
                 cited.append(f"{label} {pct(sum(r['cells_exact_raw'] for r in lookups) / len(lookups))}")
         notes = [f"같은 539문항에서 생성 모델이 인용한 셀이 정답 셀인 비율(검증기가 손대기 전): {', '.join(cited)}.",
                  "인코더는 조회(셀 하나 고르기)만 한다. 계산, 보류, 본문 답은 하지 못한다.",
-                 "바탕 모델은 mT5-small의 인코더다. 한국어 전용 PLM의 가중치는 이 환경에서 받지 못했다."]
-        pre = load(enc_dir / "pretrain" / "metrics.json")
+                 "바탕 모델은 둘이다. 생성 플래너와 같은 mT5-small의 인코더, 그리고 한국어 PLM인 KoELECTRA-small. 각 설정은 한 번씩 돌렸다."]
+        pre = load(enc_dir / "ko_pretrain" / "metrics.json")
         if pre:
             notes.append(f"표 사전학습: 표 {pre['tables']:,}개에서 셀의 15%를 다른 셀로 바꾸고 바뀐 셀을 찾게 했다({pre['steps']} step). "
                          f"따로 떼어 둔 표 {pre['probe_tables']}개에서 바뀐 셀 찾기 F1 {pre['probe_before']['f1']:.2f} → {pre['probe_after']['f1']:.2f}.")
@@ -123,7 +124,9 @@ def supplement_sections() -> list[dict]:
                     "artifact": "experiments/encoder/*/metrics.json (scripts/train/table_encoder.py)"})
     ag = load(enc_dir / "agreement.json")
     if ag:
-        name = next((k for k in ("structure_pool", "structure_pt", "structure") if k in ag["encoders"]), None)
+        summ = load(enc_dir / "summary.json") or {"variants": {}}
+        ranked = sorted((k for k in ag["encoders"] if k in summ["variants"]), key=lambda k: -summ["variants"][k]["test"]["cell"]["rate"])
+        name = ranked[0] if ranked else next(iter(ag["encoders"]), None)
         if name:
             rows = []
             for label, run in [("mT5-small 최종", "rl_v3_ko_test"), ("EXAONE LoRA 300개", "exaone_vllm_ko_test"), ("EXAONE LoRA 300개, 열 번호 형식", "exaone_colid_vllm_ko_test"),

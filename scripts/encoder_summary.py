@@ -21,8 +21,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from evidence_error import wilson  # noqa: E402
 
 ENC = ROOT / "experiments" / "encoder"
-VARIANTS = ["plain", "structure", "structure_pt", "structure_pool"]
-PAIRS = [("structure_vs_plain", "plain", "structure"), ("pretraining_vs_none", "structure", "structure_pt"), ("pool_vs_main", "structure", "structure_pool")]
+# `structure` uses the encoder half of mT5-small (the model the generative planner is built on); the ko_* runs use KoELECTRA-small
+VARIANTS = ["structure", "ko_plain", "ko_structure", "ko_structure_pt", "ko_structure_pool"]
+PAIRS = [("structure_vs_plain", "ko_plain", "ko_structure"), ("pretraining_vs_none", "ko_structure", "ko_structure_pt"),
+         ("pool_vs_main", "ko_structure", "ko_structure_pool"), ("koelectra_vs_mt5", "structure", "ko_structure")]
 GENERATIVE = [("heuristic", "heuristic_ko_test"), ("mt5_final", "rl_v3_ko_test"), ("exaone_300", "exaone_vllm_ko_test"), ("exaone_300_colid", "exaone_colid_vllm_ko_test"),
               ("exaone_full", "exaone_full_vllm_ko_test"), ("exaone_full_run2", "exaone_full_vllm_ko_test_run2")]
 
@@ -63,10 +65,10 @@ def main() -> None:
             out["generative"][key] = {"run": run, "n": n, "cited_gold_cell": wilson(sum(r["cells_exact_raw"] for r in rows), n),
                                       "verified_on_gold_cell": wilson(sum(r["cells_exact"] and r["pred_status"] == "answered" for r in rows), n),
                                       "verified_em": wilson(sum(r["verified_correct"] for r in rows), n)}
-    f = ENC / "pretrain" / "metrics.json"
+    f = ENC / "ko_pretrain" / "metrics.json"
     if f.exists():
         m = json.loads(f.read_text(encoding="utf-8"))
-        out["pretraining"] = {k: m[k] for k in ("objective", "tables", "probe_tables", "steps", "batch", "rate", "minutes", "probe_before", "probe_after")}
+        out["pretraining"] = {k: m[k] for k in ("objective", "backbone", "tables", "probe_tables", "steps", "batch", "rate", "minutes", "probe_before", "probe_after")}
     (ENC / "summary.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     for name, v in out["variants"].items():
         t = v["test"]
