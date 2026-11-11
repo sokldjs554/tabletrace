@@ -88,6 +88,124 @@ def measurement_sections() -> list[dict]:
     return out
 
 
+def supplement_sections() -> list[dict]:
+    """What was added after comparing the project with the job posting (docs/REPORT.md §20). Every section is skipped when
+    its artifact is missing, so the page never shows a run that did not happen."""
+    out = []
+    enc_dir = EXP / "encoder"
+    variants = [("plain", "구조 임베딩 없음 (같은 토큰, 대조군)"), ("structure", "행·열 임베딩"), ("structure_pt", "행·열 임베딩 + 표 사전학습(바뀐 셀 찾기)"),
+                ("structure_pool", "행·열 임베딩, 학습 질문을 풀에서 8,000개 더 (1 epoch)")]
+    rows = []
+    for key, label in variants:
+        m = load(enc_dir / key / "metrics.json")
+        if m:
+            t = m["test"]
+            rows.append([label, f"{m['train_questions']:,}", m["steps"], ci(t["cell"]), pct(t["row"]["rate"]), pct(t["col"]["rate"]), f"{m['minutes']:.0f}분"])
+    if rows:
+        cited = []
+        for label, run in (("mT5-small 최종", "rl_v3_ko_test"), ("EXAONE-4.0-1.2B LoRA 300개", "exaone_vllm_ko_test"), ("같은 300개에 열 번호 형식", "exaone_colid_vllm_ko_test"),
+                           ("전체 데이터", "exaone_full_vllm_ko_test")):
+            f = EXP / "eval" / run / "predictions.jsonl"
+            if f.exists():
+                lookups = [r for r in map(json.loads, open(f, encoding="utf-8")) if r["source"] == "korwikitq"]
+                cited.append(f"{label} {pct(sum(r['cells_exact_raw'] for r in lookups) / len(lookups))}")
+        notes = [f"같은 539문항에서 생성 모델이 인용한 셀이 정답 셀인 비율(검증기가 손대기 전): {', '.join(cited)}.",
+                 "인코더는 조회(셀 하나 고르기)만 한다. 계산, 보류, 본문 답은 하지 못한다.",
+                 "바탕 모델은 mT5-small의 인코더다. 한국어 전용 PLM의 가중치는 이 환경에서 받지 못했다."]
+        pre = load(enc_dir / "pretrain" / "metrics.json")
+        if pre:
+            notes.append(f"표 사전학습: 표 {pre['tables']:,}개에서 셀의 15%를 다른 셀로 바꾸고 바뀐 셀을 찾게 했다({pre['steps']} step). "
+                         f"따로 떼어 둔 표 {pre['probe_tables']}개에서 바뀐 셀 찾기 F1 {pre['probe_before']['f1']:.2f} → {pre['probe_after']['f1']:.2f}.")
+        out.append({"title": "구조 이해 표 인코더 — 사전학습 모델에 행·열 임베딩과 셀 선택 헤드 (CPU 학습)", "status": "done",
+                    "description": "표를 글로 풀어 생성 모델에 넣는 대신, 토큰마다 행 번호와 열 번호 임베딩을 더하고 셀마다 점수를 매겨 답이 든 셀을 고른다. "
+                                   "행·열 임베딩은 0에서 시작하므로 학습 전에는 원래 사전학습 모델과 같다. 시험은 한국어 test의 조회 539문항(표 단위 분할)이다.",
+                    "columns": ["설정", "학습 질문", "step", "셀 정확도 (95% 구간)", "행 정확도", "열 정확도", "학습 시간"], "rows": rows, "notes": notes,
+                    "artifact": "experiments/encoder/*/metrics.json (scripts/train/table_encoder.py)"})
+    ag = load(enc_dir / "agreement.json")
+    if ag:
+        name = next((k for k in ("structure_pool", "structure_pt", "structure") if k in ag["encoders"]), None)
+        if name:
+            rows = []
+            for label, run in [("mT5-small 최종", "rl_v3_ko_test"), ("EXAONE LoRA 300개", "exaone_vllm_ko_test"), ("EXAONE LoRA 300개, 열 번호 형식", "exaone_colid_vllm_ko_test"),
+                               ("EXAONE LoRA 전체 데이터", "exaone_full_vllm_ko_test"), ("EXAONE LoRA 전체 데이터, 2번째 학습", "exaone_full_vllm_ko_test_run2")]:
+                r = ag["encoders"][name]["runs"].get(run)
+                if r:
+                    for cond, key in (("검증기만", "verifier"), ("+ 인코더가 같은 행을 고를 때만", "verifier_and_same_row"), ("+ 인코더가 같은 셀을 고를 때만", "verifier_and_same_cell")):
+                        q = r[key]
+                        rows.append([label, cond, pct(q["coverage"]["rate"]), pct(q["risk"]["rate"]), f"{q['right_sent']['k']} / {q['wrong_sent']['k']}"])
+            out.append({"title": "검증기를 통과한 오답 줄이기 — 표 인코더를 두 번째 의견으로 (저장된 예측 재분석)", "status": "done",
+                        "description": "검증기는 답과 근거 셀이 서로 맞는지만 본다. 엉뚱한 행의 셀을 일관되게 고른 답은 통과한다. 표 인코더는 생성 모델의 출력을 보지 않고 질문과 표만으로 셀을 고른다. "
+                                       "인코더가 다른 곳을 가리키면 답을 보류하는 규칙을, 저장된 예측(조회 539문항)에 적용했다. 응답률은 내보낸 답 ÷ 문항, 위험은 틀린 답 ÷ 내보낸 답이다.",
+                        "columns": ["생성 모델", "조건", "응답률", "위험", "정답 수 / 오답 수"], "rows": rows,
+                        "notes": ["오답은 크게 줄지만 정답도 함께 잃는다. 어느 지점을 쓸지는 서비스가 정한다(TABLETRACE_SECOND_OPINION, 모드 row 또는 cell).",
+                                  "모델을 새로 돌린 것이 아니라 저장된 출력에 규칙을 적용한 계산이다."],
+                        "artifact": "experiments/encoder/agreement.json (scripts/encoder_agreement.py)"})
+    lt = load(EXP / "eval" / "large_tables.json")
+    if lt:
+        rows = []
+        for label, key in [("휴리스틱, 표 전체", "heuristic_whole_table"), ("휴리스틱, 512토큰, 앞에서 자름", "heuristic_first512"), ("휴리스틱, 512토큰, 행 선별", "heuristic_overlap512"),
+                           ("mT5-small 최종, 512토큰, 앞에서 자름", "mt5_first512"), ("mT5-small 최종, 512토큰, 행 선별", "mt5_overlap512"),
+                           ("EXAONE 전체 데이터, 672토큰, 앞에서 자름", "exaone_first672"), ("EXAONE 전체 데이터, 672토큰, 행 선별", "exaone_overlap672"),
+                           ("EXAONE 전체 데이터, 1,500토큰, 앞에서 자름", "exaone_first1500")]:
+            r = (lt["runs"].get(key) or {}).get("all")
+            if r:
+                rows.append([label, f"{r['n']:,}", pct(r["gold_row_shown"]["rate"]), ci(r["verified_em"]), pct(r["withheld"]["rate"]), pct(r["wrong_answer_sent"]["rate"])])
+        st = lt["set"]
+        out.append({"title": "큰 표 — 공개 dev 분할에서 학습에 없던 표", "status": "done",
+                    "description": f"공개 dev {st['official_dev_questions']:,}문항에서 학습에 쓰인 표를 빼고 남은 {st['questions']:,}문항(표 {st['tables']}개). 그중 {st['by_size']['large']:,}문항이 16행·7열·900자를 넘는 표다. "
+                                   "표가 입력에 다 들어가지 않을 때 앞에서부터 자르는 방식과, 질문의 낱말이 든 행을 골라 원래 행 번호 그대로 보여 주는 방식을 비교했다.",
+                    "columns": ["실행", "문항", "정답 행이 입력에 있음", "verified EM (95% 구간)", "보류", "오답 내보냄"], "rows": rows,
+                    "notes": ["mT5는 시드로 뽑은 1,000문항이다. 작은 표로만 학습한 3억 파라미터 모델이라 절대 수준은 낮다.",
+                              "학습에 없던 표만 골랐고 근거 셀까지 채점하므로, 논문에 실린 EM 수치와 나란히 놓을 수 없다."],
+                    "artifact": "experiments/eval/large_tables.json (scripts/large_tables.py), data/ko/unseen_dev.jsonl"})
+    dh, dn = load(EXP / "eval" / "dialog" / "heuristic.json"), load(EXP / "eval" / "dialog" / "neural.json")
+    if dh:
+        rows = [[label, pct(d["first_turn_correct"]["rate"]), pct(d["no_memory"]["all"]["rate"]), ci(d["memory"]["all"]), pct(d["memory_when_first_turn_correct"]["rate"]), pct(d["oracle_memory"]["all"]["rate"])]
+                for label, d in (("휴리스틱", dh), ("mT5-small 최종", dn)) if d]
+        out.append({"title": "여러 턴 대화 — 기억이 후속 질문을 채우는가", "status": "done",
+                    "description": f"시험 표의 원래 질문 뒤에 \"그럼 ○○은?\" 형태의 후속 질문을 틀로 붙인 2턴 대화 {dh['dialogs']}개. 둘째 턴만 채점했다. "
+                                   "기억은 이전 턴의 표와 근거 셀이고, 후속 질문은 규칙으로 완성한다. 답은 같은 검증 파이프라인이 낸다.",
+                    "columns": ["플래너", "첫 턴 정답", "기억 없이", "기억 사용 (95% 구간)", "첫 턴이 정답일 때", "상한 (정답 근거를 기억에 넣음)"], "rows": rows,
+                    "notes": ["후속 질문은 틀 두 가지(행 바꾸기, 열 바꾸기)로 만든 것이다. 사람이 나눈 대화가 아니다.",
+                              "언어모델이 대화를 관리하지 않는다. 무엇을 채웠는지는 응답과 실행 추적에 남는다."],
+                    "artifact": "experiments/eval/dialog/*.json (scripts/eval_dialog.py)"})
+    rows = []
+    for label, d in [("휴리스틱", "heuristic_chem_papers"), ("mT5-small 화학 튜닝", "sft_chem2_chem_papers"), ("mT5-small 최종", "rl_v3_chem_papers"), ("EXAONE LoRA (한국어+화학)", "exaone_kochem_vllm_chem_papers")]:
+        m = load(EXP / "eval" / d / "metrics.json")
+        if m:
+            c = m["metrics"]["by_category"]
+            rows.append([label, pct(m["metrics"]["verified_em"]), pct(c["cell"]["verified_em"]), pct(c["calc"]["verified_em"]), pct(c["abstain"]["verified_em"])])
+    if rows:
+        out.append({"title": "영어 화학 — 논문 표 (arXiv, CC BY 4.0, 12편·표 20개·62문항)", "status": "done",
+                    "description": "교과서 표가 아닌 실제 논문의 표다. 단위가 따로 행으로 있고, 기호가 수식이고, 셀에 불확도가 섞여 있다. 어떤 학습에도 쓰지 않았다. "
+                                   "질문은 AI 도구가 표를 읽고 썼고, 답은 표와 계산기에서 채워 기계로 대조한다.",
+                    "columns": ["플래너", "verified EM", "조회 (33)", "계산 (19)", "보류 (10)"], "rows": rows,
+                    "notes": ["62문항이라 구간이 넓다. 논문별 출처와 라이선스는 data/chem_papers/SOURCES.md에 있다."],
+                    "artifact": "experiments/eval/*_chem_papers/metrics.json, data/chem_papers/"})
+    rc = load(EXP / "eval" / "risk_coverage.json")
+    if rc:
+        rows = []
+        for label, run in [("mT5-small 최종", "rl_v3_conf_ko_test")] + [(k, k) for k in rc["runs"] if k != "rl_v3_conf_ko_test"]:
+            r = rc["runs"].get(run)
+            if not r:
+                continue
+            sig = r["best_signal_for_verifier"]
+            for cond, key in (("모델만", f"model/{sig}"), ("검증기 통과분", f"verifier/{sig}")):
+                c = r["curves"][key]
+                at = c["risk_at_coverage_pct"]
+                rows.append([label, cond, pct(c["no_threshold"]["coverage"]), pct(c["no_threshold"]["risk"])] + [pct(at[k]) if at.get(k) is not None else "–" for k in ("10", "30", "50", "70")] + [c["auroc_right_vs_wrong"]])
+        out.append({"title": "확신도 문턱 — 위험·응답률 곡선 (한국어 test 699문항)", "status": "done",
+                    "description": "모델이 생성한 토큰의 로그 확률을 확신도로 써서, 확신도가 문턱 이상일 때만 답하게 했을 때의 위험(틀린 답 ÷ 내보낸 답)이다. 답 없는 질문에 답하면 틀린 것으로 센다.",
+                    "columns": ["모델", "조건", "문턱 없음: 응답률", "문턱 없음: 위험", "응답률 10%에서 위험", "30%", "50%", "70%", "AUROC"], "rows": rows,
+                    "notes": ["작은 모델에서는 확신도가 약한 신호다. 가장 확신하는 답만 내보내도 위험이 크게 줄지 않는다.", "EXAONE은 GPU 평가에서 로그 확률을 저장해야 그릴 수 있다."],
+                    "artifact": "experiments/eval/risk_coverage.json (scripts/risk_coverage.py)"})
+    out.append({"title": "준비만 한 것 — GPU에서 돌려야 하는 실험", "status": "prep",
+                "description": "notebooks/gpu_experiments_2.ipynb: 튜닝하지 않은 EXAONE 7.8B·32B 참고선, 모델이 도구를 스스로 고르는 방식(Tool Calling), 학습 데이터 확대(약 1만, 3.4만 문항), "
+                               "멀티 GPU 학습(DDP) 속도, EXAONE 강화학습(GRPO), 4비트 서빙, 열 번호 형식의 전체 데이터·시드 추가, 화학, 큰 표. "
+                               "스크립트는 작은 무작위 모델과 모의 서버로 CPU에서 시험했다. 강화학습의 보상과 손실은 저장소 소유자가 직접 쓰도록 명세와 테스트만 두었다(docs/rewrite/06_training_code.md)."})
+    return out
+
+
 def gpu_sections() -> list[dict]:
     """GPU runs by the repository owner on Kaggle / Colab T4 (files taken from the uploaded result archives)."""
     out = []
@@ -127,7 +245,7 @@ def main() -> None:
     except Exception:
         commit = "unknown"
     env = load(ROOT / "docs" / "research" / "environment.json") or {}
-    sections = measurement_sections()
+    sections = measurement_sections() + supplement_sections()
     cols = ["플래너 / 모델", "n", "verified EM", "lookup EM", "calc EM", "근거 셀 일치(최종)", "근거 셀 일치(모델 인용)", "보류 재현율", "오보류율", "파싱 실패", "ms/예제"]
     models = [("휴리스틱(어휘 겹침) 기준선", "heuristic", False), ("mT5-small 기본(변환만)", "base", False), ("SFT stage1(표)", "sft_ko", False),
               ("SFT stage2(+본문, 1차)", "sft_ko2", False), ("GRPO RL v2(1차)", "rl_ko", False), ("화학 SFT(1차 최종)", "sft_chem", False),
