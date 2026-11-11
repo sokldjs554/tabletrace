@@ -1079,7 +1079,7 @@ mT5는 CPU 시간 때문에 시드 13으로 뽑은 1,000문항이다. 같은 문
 - **도구 호출 경로는 실제 모델로 끝까지 돈다.** 30문항 가운데 <!-- num:experiments/eval/tool_calling_cpu.json:runs.tools.tool_calling.episodes_that_read_the_table:int -->28<!-- /num -->문항에서 모델이 도구로 표를 읽었고(셀 찾기 34회, 행 읽기 20회, 계산 1회), 인자 오류는 <!-- num:experiments/eval/tool_calling_cpu.json:runs.tools.tool_calling.tool_errors:int -->1<!-- /num -->건이었다. 모델 호출은 문항당 평균 <!-- num:experiments/eval/tool_calling_cpu.json:runs.tools.tool_calling.model_calls_mean -->2.5<!-- /num -->번이다.
 - **맞힌 것은 답 없는 질문의 보류 5개뿐이다.** 튜닝하지 않은 1.2B 모델은 셀을 한 번 찾아본 뒤 대부분 보류를 골랐다(보류로 끝남 25문항, 제출 4문항, 횟수 한도 1문항). 제출한 4문항은 모두 틀렸고 그중 3개는 검증기가 막았다.
 - 한 줄 답 방식과 차이가 없다(한쪽만 맞힌 문항 <!-- num:experiments/eval/tool_calling_cpu.json:paired_tools_vs_fewshot.tools_only:int -->2<!-- /num --> 대 <!-- num:experiments/eval/tool_calling_cpu.json:paired_tools_vs_fewshot.fewshot_only:int -->3<!-- /num -->). 다른 점은 틀리는 방식이다. 한 줄 답은 오답을 <!-- num:experiments/eval/tool_calling_cpu.json:runs.fewshot.wrong_answer_sent.rate:pct -->23.3<!-- /num -->% 내보냈고 도구 호출은 <!-- num:experiments/eval/tool_calling_cpu.json:runs.tools.wrong_answer_sent.rate:pct -->3.3<!-- /num -->%였다. 도구 호출 쪽이 덜 틀린 것이 아니라 거의 답하지 않은 것이다.
-- 이 모델이 도구를 못 쓰는 것인지 도구 설계가 나쁜 것인지는 이 측정으로 가를 수 없다. 30문항, 한 모델, 한 번이다. 같은 방식을 튜닝한 모델과 32B 모델로 돌리는 것이 노트북 A2절이다.
+- 이 모델이 도구를 못 쓰는 것인지 도구 설계가 나쁜 것인지는 이 측정으로 가를 수 없다. 30문항, 한 모델, 한 번이다. 같은 방식을 GPU에서 시험 세트 전체와 32B 모델로 돌리는 것이 노트북 A2절이다. 도구 호출 형식으로 튜닝한 모델은 아직 없다.
 - 8문항에서 모델이 마지막 `<tool_call>` 블록을 닫지 않고 턴을 끝냈다. 처음 해석기는 이것을 도구 호출로 읽지 못했다(결과는 같다: 답이 나가지 않음). 해석기를 고치고 테스트를 추가했다.
 - 도구 설명은 개발용 문항 5개로 한 번 다듬었다(조회 답은 `lookup`으로 제출하라는 문장). 이 30문항으로는 고치지 않았다.
 
