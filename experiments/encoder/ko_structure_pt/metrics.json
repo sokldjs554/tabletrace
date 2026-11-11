@@ -1,0 +1,93 @@
+{
+ "name": "ko_structure_pt",
+ "backbone": "models/koelectra-small-v3-discriminator",
+ "structure_embeddings": true,
+ "init": "experiments/encoder/ko_pretrain",
+ "train_set": "main",
+ "pool_n": null,
+ "train_questions": 2694,
+ "train_questions_gold_row_did_not_fit": 0,
+ "epochs": 4,
+ "steps": 676,
+ "batch": 16,
+ "lr": 0.0001,
+ "head_lr": 0.001,
+ "max_len": 512,
+ "seed": 13,
+ "minutes": 21.0,
+ "trainable_parameters": 9589250,
+ "row_embedding_norm": 0.8593788743019104,
+ "col_embedding_norm": 1.0075263977050781,
+ "dev_by_epoch": [
+  {
+   "epoch": 1,
+   "dev_cell": 0.5333,
+   "minutes": 5.2
+  },
+  {
+   "epoch": 2,
+   "dev_cell": 0.6167,
+   "minutes": 10.3
+  },
+  {
+   "epoch": 3,
+   "dev_cell": 0.6333,
+   "minutes": 15.5
+  },
+  {
+   "epoch": 4,
+   "dev_cell": 0.6222,
+   "minutes": 20.8
+  }
+ ],
+ "dev": {
+  "n": 180,
+  "cell": {
+   "k": 112,
+   "n": 180,
+   "rate": 0.6222,
+   "lo": 0.5495,
+   "hi": 0.6898
+  },
+  "row": {
+   "k": 162,
+   "n": 180,
+   "rate": 0.9,
+   "lo": 0.8475,
+   "hi": 0.9358
+  },
+  "col": {
+   "k": 122,
+   "n": 180,
+   "rate": 0.6778,
+   "lo": 0.6064,
+   "hi": 0.7417
+  },
+  "gold_row_dropped": 0
+ },
+ "test": {
+  "n": 539,
+  "cell": {
+   "k": 314,
+   "n": 539,
+   "rate": 0.5826,
+   "lo": 0.5405,
+   "hi": 0.6235
+  },
+  "row": {
+   "k": 462,
+   "n": 539,
+   "rate": 0.8571,
+   "lo": 0.8251,
+   "hi": 0.8842
+  },
+  "col": {
+   "k": 360,
+   "n": 539,
+   "rate": 0.6679,
+   "lo": 0.6271,
+   "hi": 0.7064
+  },
+  "gold_row_dropped": 0
+ }
+}

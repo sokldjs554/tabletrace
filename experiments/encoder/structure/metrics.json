@@ -1,0 +1,93 @@
+{
+ "name": "structure",
+ "backbone": "models/mt5-small-base",
+ "structure_embeddings": true,
+ "init": null,
+ "train_set": "main",
+ "pool_n": null,
+ "train_questions": 2694,
+ "train_questions_gold_row_did_not_fit": 0,
+ "epochs": 4,
+ "steps": 676,
+ "batch": 16,
+ "lr": 0.0003,
+ "head_lr": 0.001,
+ "max_len": 512,
+ "seed": 13,
+ "minutes": 88.4,
+ "trainable_parameters": 18934466,
+ "row_embedding_norm": 1.713204264640808,
+ "col_embedding_norm": 1.4442845582962036,
+ "dev_by_epoch": [
+  {
+   "epoch": 1,
+   "dev_cell": 0.1556,
+   "minutes": 35.1
+  },
+  {
+   "epoch": 2,
+   "dev_cell": 0.5389,
+   "minutes": 67.5
+  },
+  {
+   "epoch": 3,
+   "dev_cell": 0.5444,
+   "minutes": 77.4
+  },
+  {
+   "epoch": 4,
+   "dev_cell": 0.5944,
+   "minutes": 87.8
+  }
+ ],
+ "dev": {
+  "n": 180,
+  "cell": {
+   "k": 107,
+   "n": 180,
+   "rate": 0.5944,
+   "lo": 0.5215,
+   "hi": 0.6635
+  },
+  "row": {
+   "k": 163,
+   "n": 180,
+   "rate": 0.9056,
+   "lo": 0.854,
+   "hi": 0.9402
+  },
+  "col": {
+   "k": 118,
+   "n": 180,
+   "rate": 0.6556,
+   "lo": 0.5835,
+   "hi": 0.7211
+  },
+  "gold_row_dropped": 0
+ },
+ "test": {
+  "n": 539,
+  "cell": {
+   "k": 315,
+   "n": 539,
+   "rate": 0.5844,
+   "lo": 0.5424,
+   "hi": 0.6253
+  },
+  "row": {
+   "k": 468,
+   "n": 539,
+   "rate": 0.8683,
+   "lo": 0.8371,
+   "hi": 0.8942
+  },
+  "col": {
+   "k": 351,
+   "n": 539,
+   "rate": 0.6512,
+   "lo": 0.61,
+   "hi": 0.6902
+  },
+  "gold_row_dropped": 0
+ }
+}

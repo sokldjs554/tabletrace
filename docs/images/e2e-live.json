@@ -4,7 +4,7 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (6085635)"
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (408c51a)"
   },
   {
    "name": "desktop: document + examples rendered",
@@ -14,7 +14,7 @@
   {
    "name": "desktop: first example produced a result",
    "ok": true,
-   "detail": "완료 · 13 ms · 작업 bfd1d8bc8036"
+   "detail": "완료 · 12 ms · 작업 1ff65858d980"
   },
   {
    "name": "desktop: evidence highlighted in table",
@@ -39,7 +39,7 @@
   {
    "name": "desktop: typed question executed",
    "ok": true,
-   "detail": "완료 · 13 ms · 작업 605c3a87095d"
+   "detail": "완료 · 7 ms · 작업 02fc099a39da"
   },
   {
    "name": "desktop: conversation keeps three turns",
@@ -69,7 +69,7 @@
   {
    "name": "mobile: mode badge",
    "ok": true,
-   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (6085635)"
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (408c51a)"
   },
   {
    "name": "mobile: document + examples rendered",
@@ -79,7 +79,7 @@
   {
    "name": "mobile: first example produced a result",
    "ok": true,
-   "detail": "완료 · 8 ms · 작업 df21843bd28e"
+   "detail": "완료 · 8 ms · 작업 38c1b5e98e1a"
   },
   {
    "name": "mobile: evidence highlighted in table",

@@ -101,7 +101,7 @@ def supplement_sections() -> list[dict]:
         m = load(enc_dir / key / "metrics.json")
         if m:
             t = m["test"]
-            rows.append([label, f"{m['train_questions']:,}", m["steps"], ci(t["cell"]), pct(t["row"]["rate"]), pct(t["col"]["rate"]), f"{m['minutes']:.0f}분"])
+            rows.append([label, f"{m['train_questions']:,}", m["steps"], ci(t["cell"]), pct(t["row"]["rate"]), pct(t["col"]["rate"])])
     if rows:
         cited = []
         for label, run in (("mT5-small 최종", "rl_v3_ko_test"), ("EXAONE-4.0-1.2B LoRA 300개", "exaone_vllm_ko_test"), ("같은 300개에 열 번호 형식", "exaone_colid_vllm_ko_test"),
@@ -120,7 +120,7 @@ def supplement_sections() -> list[dict]:
         out.append({"title": "구조 이해 표 인코더 — 사전학습 모델에 행·열 임베딩과 셀 선택 헤드 (CPU 학습)", "status": "done",
                     "description": "표를 글로 풀어 생성 모델에 넣는 대신, 토큰마다 행 번호와 열 번호 임베딩을 더하고 셀마다 점수를 매겨 답이 든 셀을 고른다. "
                                    "행·열 임베딩은 0에서 시작하므로 학습 전에는 원래 사전학습 모델과 같다. 시험은 한국어 test의 조회 539문항(표 단위 분할)이다.",
-                    "columns": ["설정", "학습 질문", "step", "셀 정확도 (95% 구간)", "행 정확도", "열 정확도", "학습 시간"], "rows": rows, "notes": notes,
+                    "columns": ["설정", "학습 질문", "step", "셀 정확도 (95% 구간)", "행 정확도", "열 정확도"], "rows": rows, "notes": notes,
                     "artifact": "experiments/encoder/*/metrics.json (scripts/train/table_encoder.py)"})
     ag = load(enc_dir / "agreement.json")
     if ag:

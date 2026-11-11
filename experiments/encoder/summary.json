@@ -1,0 +1,645 @@
+{
+ "variants": {
+  "structure": {
+   "structure_embeddings": true,
+   "init": null,
+   "train_set": "main",
+   "pool_n": null,
+   "train_questions": 2694,
+   "epochs": 4,
+   "steps": 676,
+   "minutes": 88.4,
+   "trainable_parameters": 18934466,
+   "row_embedding_norm": 1.713204264640808,
+   "col_embedding_norm": 1.4442845582962036,
+   "backbone": "models/mt5-small-base",
+   "dev_by_epoch": [
+    {
+     "epoch": 1,
+     "dev_cell": 0.1556,
+     "minutes": 35.1
+    },
+    {
+     "epoch": 2,
+     "dev_cell": 0.5389,
+     "minutes": 67.5
+    },
+    {
+     "epoch": 3,
+     "dev_cell": 0.5444,
+     "minutes": 77.4
+    },
+    {
+     "epoch": 4,
+     "dev_cell": 0.5944,
+     "minutes": 87.8
+    }
+   ],
+   "dev": {
+    "n": 180,
+    "cell": {
+     "k": 107,
+     "n": 180,
+     "rate": 0.5944,
+     "lo": 0.5215,
+     "hi": 0.6635
+    },
+    "row": {
+     "k": 163,
+     "n": 180,
+     "rate": 0.9056,
+     "lo": 0.854,
+     "hi": 0.9402
+    },
+    "col": {
+     "k": 118,
+     "n": 180,
+     "rate": 0.6556,
+     "lo": 0.5835,
+     "hi": 0.7211
+    },
+    "gold_row_dropped": 0
+   },
+   "test": {
+    "n": 539,
+    "cell": {
+     "k": 315,
+     "n": 539,
+     "rate": 0.5844,
+     "lo": 0.5424,
+     "hi": 0.6253
+    },
+    "row": {
+     "k": 468,
+     "n": 539,
+     "rate": 0.8683,
+     "lo": 0.8371,
+     "hi": 0.8942
+    },
+    "col": {
+     "k": 351,
+     "n": 539,
+     "rate": 0.6512,
+     "lo": 0.61,
+     "hi": 0.6902
+    },
+    "gold_row_dropped": 0
+   }
+  },
+  "ko_plain": {
+   "structure_embeddings": false,
+   "init": null,
+   "train_set": "main",
+   "pool_n": null,
+   "train_questions": 2694,
+   "epochs": 4,
+   "steps": 676,
+   "minutes": 22.3,
+   "trainable_parameters": 9576706,
+   "row_embedding_norm": null,
+   "col_embedding_norm": null,
+   "backbone": "models/koelectra-small-v3-discriminator",
+   "dev_by_epoch": [
+    {
+     "epoch": 1,
+     "dev_cell": 0.4833,
+     "minutes": 5.5
+    },
+    {
+     "epoch": 2,
+     "dev_cell": 0.5556,
+     "minutes": 11.0
+    },
+    {
+     "epoch": 3,
+     "dev_cell": 0.5889,
+     "minutes": 16.5
+    },
+    {
+     "epoch": 4,
+     "dev_cell": 0.5889,
+     "minutes": 22.0
+    }
+   ],
+   "dev": {
+    "n": 180,
+    "cell": {
+     "k": 106,
+     "n": 180,
+     "rate": 0.5889,
+     "lo": 0.5159,
+     "hi": 0.6582
+    },
+    "row": {
+     "k": 159,
+     "n": 180,
+     "rate": 0.8833,
+     "lo": 0.8282,
+     "hi": 0.9224
+    },
+    "col": {
+     "k": 116,
+     "n": 180,
+     "rate": 0.6444,
+     "lo": 0.5722,
+     "hi": 0.7107
+    },
+    "gold_row_dropped": 0
+   },
+   "test": {
+    "n": 539,
+    "cell": {
+     "k": 304,
+     "n": 539,
+     "rate": 0.564,
+     "lo": 0.5218,
+     "hi": 0.6053
+    },
+    "row": {
+     "k": 452,
+     "n": 539,
+     "rate": 0.8386,
+     "lo": 0.8052,
+     "hi": 0.8672
+    },
+    "col": {
+     "k": 347,
+     "n": 539,
+     "rate": 0.6438,
+     "lo": 0.6025,
+     "hi": 0.6831
+    },
+    "gold_row_dropped": 0
+   }
+  },
+  "ko_structure": {
+   "structure_embeddings": true,
+   "init": null,
+   "train_set": "main",
+   "pool_n": null,
+   "train_questions": 2694,
+   "epochs": 4,
+   "steps": 676,
+   "minutes": 57.7,
+   "trainable_parameters": 9589250,
+   "row_embedding_norm": 0.6795433163642883,
+   "col_embedding_norm": 0.6968610882759094,
+   "backbone": "models/koelectra-small-v3-discriminator",
+   "dev_by_epoch": [
+    {
+     "epoch": 1,
+     "dev_cell": 0.4833,
+     "minutes": 41.1
+    },
+    {
+     "epoch": 2,
+     "dev_cell": 0.5278,
+     "minutes": 46.6
+    },
+    {
+     "epoch": 3,
+     "dev_cell": 0.5889,
+     "minutes": 52.1
+    },
+    {
+     "epoch": 4,
+     "dev_cell": 0.5944,
+     "minutes": 57.5
+    }
+   ],
+   "dev": {
+    "n": 180,
+    "cell": {
+     "k": 107,
+     "n": 180,
+     "rate": 0.5944,
+     "lo": 0.5215,
+     "hi": 0.6635
+    },
+    "row": {
+     "k": 161,
+     "n": 180,
+     "rate": 0.8944,
+     "lo": 0.841,
+     "hi": 0.9314
+    },
+    "col": {
+     "k": 117,
+     "n": 180,
+     "rate": 0.65,
+     "lo": 0.5778,
+     "hi": 0.7159
+    },
+    "gold_row_dropped": 0
+   },
+   "test": {
+    "n": 539,
+    "cell": {
+     "k": 300,
+     "n": 539,
+     "rate": 0.5566,
+     "lo": 0.5144,
+     "hi": 0.598
+    },
+    "row": {
+     "k": 449,
+     "n": 539,
+     "rate": 0.833,
+     "lo": 0.7992,
+     "hi": 0.8621
+    },
+    "col": {
+     "k": 349,
+     "n": 539,
+     "rate": 0.6475,
+     "lo": 0.6062,
+     "hi": 0.6867
+    },
+    "gold_row_dropped": 0
+   }
+  },
+  "ko_structure_pt": {
+   "structure_embeddings": true,
+   "init": "experiments/encoder/ko_pretrain",
+   "train_set": "main",
+   "pool_n": null,
+   "train_questions": 2694,
+   "epochs": 4,
+   "steps": 676,
+   "minutes": 21.0,
+   "trainable_parameters": 9589250,
+   "row_embedding_norm": 0.8593788743019104,
+   "col_embedding_norm": 1.0075263977050781,
+   "backbone": "models/koelectra-small-v3-discriminator",
+   "dev_by_epoch": [
+    {
+     "epoch": 1,
+     "dev_cell": 0.5333,
+     "minutes": 5.2
+    },
+    {
+     "epoch": 2,
+     "dev_cell": 0.6167,
+     "minutes": 10.3
+    },
+    {
+     "epoch": 3,
+     "dev_cell": 0.6333,
+     "minutes": 15.5
+    },
+    {
+     "epoch": 4,
+     "dev_cell": 0.6222,
+     "minutes": 20.8
+    }
+   ],
+   "dev": {
+    "n": 180,
+    "cell": {
+     "k": 112,
+     "n": 180,
+     "rate": 0.6222,
+     "lo": 0.5495,
+     "hi": 0.6898
+    },
+    "row": {
+     "k": 162,
+     "n": 180,
+     "rate": 0.9,
+     "lo": 0.8475,
+     "hi": 0.9358
+    },
+    "col": {
+     "k": 122,
+     "n": 180,
+     "rate": 0.6778,
+     "lo": 0.6064,
+     "hi": 0.7417
+    },
+    "gold_row_dropped": 0
+   },
+   "test": {
+    "n": 539,
+    "cell": {
+     "k": 314,
+     "n": 539,
+     "rate": 0.5826,
+     "lo": 0.5405,
+     "hi": 0.6235
+    },
+    "row": {
+     "k": 462,
+     "n": 539,
+     "rate": 0.8571,
+     "lo": 0.8251,
+     "hi": 0.8842
+    },
+    "col": {
+     "k": 360,
+     "n": 539,
+     "rate": 0.6679,
+     "lo": 0.6271,
+     "hi": 0.7064
+    },
+    "gold_row_dropped": 0
+   }
+  },
+  "ko_structure_pool": {
+   "structure_embeddings": true,
+   "init": null,
+   "train_set": "pool",
+   "pool_n": 8000,
+   "train_questions": 10694,
+   "epochs": 1,
+   "steps": 669,
+   "minutes": 21.9,
+   "trainable_parameters": 9589250,
+   "row_embedding_norm": 0.6421416997909546,
+   "col_embedding_norm": 0.7891899943351746,
+   "backbone": "models/koelectra-small-v3-discriminator",
+   "dev_by_epoch": [
+    {
+     "epoch": 1,
+     "dev_cell": 0.6167,
+     "minutes": 21.7
+    }
+   ],
+   "dev": {
+    "n": 180,
+    "cell": {
+     "k": 111,
+     "n": 180,
+     "rate": 0.6167,
+     "lo": 0.5439,
+     "hi": 0.6846
+    },
+    "row": {
+     "k": 168,
+     "n": 180,
+     "rate": 0.9333,
+     "lo": 0.8871,
+     "hi": 0.9615
+    },
+    "col": {
+     "k": 120,
+     "n": 180,
+     "rate": 0.6667,
+     "lo": 0.595,
+     "hi": 0.7314
+    },
+    "gold_row_dropped": 0
+   },
+   "test": {
+    "n": 539,
+    "cell": {
+     "k": 322,
+     "n": 539,
+     "rate": 0.5974,
+     "lo": 0.5555,
+     "hi": 0.638
+    },
+    "row": {
+     "k": 467,
+     "n": 539,
+     "rate": 0.8664,
+     "lo": 0.8351,
+     "hi": 0.8926
+    },
+    "col": {
+     "k": 359,
+     "n": 539,
+     "rate": 0.666,
+     "lo": 0.6252,
+     "hi": 0.7046
+    },
+    "gold_row_dropped": 0
+   }
+  }
+ },
+ "paired": {
+  "structure_vs_plain": {
+   "reference": "ko_plain",
+   "candidate": "ko_structure",
+   "n": 539,
+   "candidate_only": 33,
+   "reference_only": 37,
+   "both": 267,
+   "p_two_sided": 0.7202027723528613,
+   "p_display": "0.720",
+   "difference": -0.0074
+  },
+  "pretraining_vs_none": {
+   "reference": "ko_structure",
+   "candidate": "ko_structure_pt",
+   "n": 539,
+   "candidate_only": 56,
+   "reference_only": 42,
+   "both": 258,
+   "p_two_sided": 0.18884671980890244,
+   "p_display": "0.189",
+   "difference": 0.026
+  },
+  "pool_vs_main": {
+   "reference": "ko_structure",
+   "candidate": "ko_structure_pool",
+   "n": 539,
+   "candidate_only": 47,
+   "reference_only": 25,
+   "both": 275,
+   "p_two_sided": 0.012774595538064903,
+   "p_display": "0.013",
+   "difference": 0.0408
+  },
+  "koelectra_vs_mt5": {
+   "reference": "structure",
+   "candidate": "ko_structure",
+   "n": 539,
+   "candidate_only": 56,
+   "reference_only": 71,
+   "both": 244,
+   "p_two_sided": 0.2139651540354207,
+   "p_display": "0.214",
+   "difference": -0.0278
+  }
+ },
+ "generative": {
+  "heuristic": {
+   "run": "heuristic_ko_test",
+   "n": 539,
+   "cited_gold_cell": {
+    "k": 141,
+    "n": 539,
+    "rate": 0.2616,
+    "lo": 0.2263,
+    "hi": 0.3003
+   },
+   "verified_on_gold_cell": {
+    "k": 141,
+    "n": 539,
+    "rate": 0.2616,
+    "lo": 0.2263,
+    "hi": 0.3003
+   },
+   "verified_em": {
+    "k": 141,
+    "n": 539,
+    "rate": 0.2616,
+    "lo": 0.2263,
+    "hi": 0.3003
+   }
+  },
+  "mt5_final": {
+   "run": "rl_v3_ko_test",
+   "n": 539,
+   "cited_gold_cell": {
+    "k": 123,
+    "n": 539,
+    "rate": 0.2282,
+    "lo": 0.1948,
+    "hi": 0.2655
+   },
+   "verified_on_gold_cell": {
+    "k": 206,
+    "n": 539,
+    "rate": 0.3822,
+    "lo": 0.3421,
+    "hi": 0.4239
+   },
+   "verified_em": {
+    "k": 206,
+    "n": 539,
+    "rate": 0.3822,
+    "lo": 0.3421,
+    "hi": 0.4239
+   }
+  },
+  "exaone_300": {
+   "run": "exaone_vllm_ko_test",
+   "n": 539,
+   "cited_gold_cell": {
+    "k": 150,
+    "n": 539,
+    "rate": 0.2783,
+    "lo": 0.2421,
+    "hi": 0.3176
+   },
+   "verified_on_gold_cell": {
+    "k": 361,
+    "n": 539,
+    "rate": 0.6698,
+    "lo": 0.629,
+    "hi": 0.7081
+   },
+   "verified_em": {
+    "k": 362,
+    "n": 539,
+    "rate": 0.6716,
+    "lo": 0.6309,
+    "hi": 0.7099
+   }
+  },
+  "exaone_300_colid": {
+   "run": "exaone_colid_vllm_ko_test",
+   "n": 539,
+   "cited_gold_cell": {
+    "k": 354,
+    "n": 539,
+    "rate": 0.6568,
+    "lo": 0.6157,
+    "hi": 0.6956
+   },
+   "verified_on_gold_cell": {
+    "k": 349,
+    "n": 539,
+    "rate": 0.6475,
+    "lo": 0.6062,
+    "hi": 0.6867
+   },
+   "verified_em": {
+    "k": 350,
+    "n": 539,
+    "rate": 0.6494,
+    "lo": 0.6081,
+    "hi": 0.6884
+   }
+  },
+  "exaone_full": {
+   "run": "exaone_full_vllm_ko_test",
+   "n": 539,
+   "cited_gold_cell": {
+    "k": 458,
+    "n": 539,
+    "rate": 0.8497,
+    "lo": 0.8171,
+    "hi": 0.8774
+   },
+   "verified_on_gold_cell": {
+    "k": 458,
+    "n": 539,
+    "rate": 0.8497,
+    "lo": 0.8171,
+    "hi": 0.8774
+   },
+   "verified_em": {
+    "k": 458,
+    "n": 539,
+    "rate": 0.8497,
+    "lo": 0.8171,
+    "hi": 0.8774
+   }
+  },
+  "exaone_full_run2": {
+   "run": "exaone_full_vllm_ko_test_run2",
+   "n": 539,
+   "cited_gold_cell": {
+    "k": 464,
+    "n": 539,
+    "rate": 0.8609,
+    "lo": 0.8291,
+    "hi": 0.8875
+   },
+   "verified_on_gold_cell": {
+    "k": 462,
+    "n": 539,
+    "rate": 0.8571,
+    "lo": 0.8251,
+    "hi": 0.8842
+   },
+   "verified_em": {
+    "k": 463,
+    "n": 539,
+    "rate": 0.859,
+    "lo": 0.8271,
+    "hi": 0.8858
+   }
+  }
+ },
+ "pretraining": {
+  "objective": "corrupt-cell detection",
+  "backbone": "models/koelectra-small-v3-discriminator",
+  "tables": 6811,
+  "probe_tables": 200,
+  "steps": 800,
+  "batch": 16,
+  "rate": 0.15,
+  "minutes": 45.2,
+  "probe_before": {
+   "step": 0,
+   "precision": 0.1395,
+   "recall": 0.8891,
+   "f1": 0.2412,
+   "cells": 10298,
+   "corrupted": 1461
+  },
+  "probe_after": {
+   "step": 800,
+   "loss": 0.2238,
+   "minutes": 45.1,
+   "precision": 0.7913,
+   "recall": 0.9316,
+   "f1": 0.8557,
+   "cells": 10298,
+   "corrupted": 1461
+  }
+ }
+}
