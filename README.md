@@ -86,6 +86,10 @@ TableTrace는 이 문제를 **"모델은 제안하고, 도구가 실행·검증�
 
 ![근거를 고친 답 — 모델이 인용한 셀(점선)과 근거 셀](docs/images/static-desktop-08-repaired.png)
 
+대화 모드(실시간 백엔드에서만)입니다. 첫 질문 뒤에 "그럼 서부간선도로는?", "차로수는?"이라고만 물어도 이전 턴의 표와 근거 셀로 질문을 완성하고, 무엇을 채웠는지 결과 카드와 대화 기록에 적습니다.
+
+![대화 모드 — 이전 턴을 기억해 후속 질문을 완성](docs/images/live-desktop-09-chat.png)
+
 화면 구조와 상태 설계는 [docs/design/screens.md](docs/design/screens.md), 참고한 제품 UI 조사는 [docs/design/ui-research.md](docs/design/ui-research.md)에 있습니다. 데모 바탕은 다른 제품 화면(OCR Form Tools, MLflow, promptfoo, doccano, Marker)을 직접 열어 확인한 뒤 **단색 중립 바탕 + 실제 문서 콘텐츠**로 만들었고, 그라데이션·블러·질감 같은 장식 배경은 쓰지 않습니다(`tests/test_console_style.py`가 CSS에서 이를 검사합니다). 스크린샷은 `scripts/console_screenshots.py`(Playwright)가 데스크톱 1440×900·모바일 390×844에서 자동으로 찍고 동작을 검사합니다(`docs/images/e2e-*.json`).
 
 ## 4. 핵심 기능
@@ -819,7 +823,9 @@ pytest -q                          # <!-- num:experiments/tests/summary.json:pas
 tabletrace serve                   # http://127.0.0.1:8000  (모델이 models/mt5-small-tabletrace 에 있으면 자동 사용)
 ```
 
-서비스 설정(환경 변수 `TABLETRACE_*`): `PLANNER=auto|neural|heuristic`, `ENTITY_CHECK=0`(검증기 v2의 개체 일치 검사 끄기, 기본 켜짐), `QUANTIZE=1`과 `QUANTIZE_SCOPE=lm_head`(출력 층만 int8, §10.1).
+서비스 설정(환경 변수 `TABLETRACE_*`): `PLANNER=auto|neural|heuristic`, `ENTITY_CHECK=0`(검증기 v2의 개체 일치 검사 끄기, 기본 켜짐), `QUANTIZE=1`과 `QUANTIZE_SCOPE=lm_head`(출력 층만 int8, §10.1), `EVIDENCE_REPAIR=0`(근거 복구 대신 보류), `ROW_SELECT=overlap`(큰 표에서 질문과 겹치는 행을 골라 보여 줌), `GRPC_PORT=50051`(gRPC API), `MEMORY_PATH=파일`(사용자 기억 SQLite 위치), `ENGINE_URL`과 `ENGINE_MODEL`(vLLM·SGLang 등 OpenAI 호환 서버를 플래너로), `ENGINE_TOOLS=1`(그 모델이 도구를 스스로 고르는 방식), `SECOND_OPINION=학습한 표 인코더 폴더`와 `SECOND_OPINION_MODE=row|cell`(인코더가 다른 곳을 가리키면 보류).
+
+GPU가 없는 곳에서 엔진 플래너를 써 보려면 `python scripts/serving/hf_cpu_server.py --model <Hugging Face 모델 폴더>`가 같은 API를 CPU에서 엽니다(느립니다. 작은 측정용).
 
 Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker compose up --build` (모델; `models/` 마운트). 환경 변수는 `.env.example`.
 

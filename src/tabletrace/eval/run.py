@@ -55,6 +55,7 @@ def main() -> None:
     ap.add_argument("--no-repair", action="store_true",
                     help="verifier withholds a lookup whose cited cell does not hold the answer instead of repairing the evidence "
                          "(needs resolve(..., repair=False), docs/rewrite/05_verifier_repair_option.md)")
+    ap.add_argument("--engine-timeout", type=float, default=120.0, help="seconds to wait for one engine request (raise it for a CPU server)")
     ap.add_argument("--tool-calling", action="store_true",
                     help="engine planner only: the model reads the table through tools and picks them itself (agent/toolcall.py). "
                          "The whole table is available, so there is no row budget")
@@ -135,7 +136,7 @@ def main() -> None:
 
         from tabletrace.agent.toolcall import ToolCallingPlanner
 
-        planner = ToolCallingPlanner(a.engine_url, a.engine_model, timeout_s=120.0)
+        planner = ToolCallingPlanner(a.engine_url, a.engine_model, timeout_s=a.engine_timeout)
         planner_id = planner.model_id
         planner.health()
         examples = [replace(e, table=e.table_full or e.table, context=e.context_full or e.context, truncated_gold=False) for e in examples]
@@ -160,7 +161,7 @@ def main() -> None:
                     pool = sorted(by_kind.get(kind, []), key=lambda d: (len(d.input_text), d.qid))
                     if i < len(pool):
                         shots.append((pool[i].input_text, pool[i].target_text))
-        planner = EnginePlanner(a.engine_url, a.engine_model, timeout_s=120.0, shots=shots)
+        planner = EnginePlanner(a.engine_url, a.engine_model, timeout_s=a.engine_timeout, shots=shots)
         planner_id = planner.model_id + (f" +{len(shots)} shots" if shots else "")
         planner.health()
         with cf.ThreadPoolExecutor(a.concurrency) as pool:
