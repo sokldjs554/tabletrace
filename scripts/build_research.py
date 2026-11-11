@@ -172,6 +172,23 @@ def supplement_sections() -> list[dict]:
                     "notes": ["후속 질문은 틀 두 가지(행 바꾸기, 열 바꾸기)로 만든 것이다. 사람이 나눈 대화가 아니다.",
                               "언어모델이 대화를 관리하지 않는다. 무엇을 채웠는지는 응답과 실행 추적에 남는다."],
                     "artifact": "experiments/eval/dialog/*.json (scripts/eval_dialog.py)"})
+    tc = load(EXP / "eval" / "tool_calling_cpu.json")
+    if tc and tc["runs"].get("tools"):
+        rows = []
+        for label, r in [("EXAONE-4.0-1.2B 미튜닝, 도구 호출", tc["runs"]["tools"]), ("EXAONE-4.0-1.2B 미튜닝, 예시 3개 + 한 줄 답", tc["runs"].get("fewshot")),
+                         ("(참고) 어휘 겹침 휴리스틱", tc["reference"].get("heuristic")), ("(참고) mT5-small 최종", tc["reference"].get("mt5_final")),
+                         ("(참고) EXAONE-4.0-1.2B 전체 데이터 LoRA", tc["reference"].get("exaone_tuned_full"))]:
+            if r:
+                rows.append([label, f"{pct(r['verified_em']['rate'])} ({r['verified_em']['k']}/{r['verified_em']['n']})", pct(r["withheld"]["rate"]), pct(r["wrong_answer_sent"]["rate"])])
+        t = tc["runs"]["tools"]["tool_calling"]
+        out.append({"title": "모델이 도구를 고르는 방식 (Tool Calling) — 실제 모델 30문항, CPU", "status": "done",
+                    "description": "모델은 표 본문을 받지 않고 제목·열 이름·행 수만 받는다. 셀 찾기, 행 읽기, 열 읽기, 계산 도구를 스스로 골라 호출하고 제출 또는 보류로 끝낸다. 제출은 같은 검증기를 거친다. "
+                                   "GPU가 없어 같은 API를 CPU에서 여는 서버로 튜닝하지 않은 EXAONE-4.0-1.2B를 돌렸다. 한국어 수작업 30문항.",
+                    "columns": ["실행", "verified EM", "보류", "오답 내보냄"], "rows": rows,
+                    "notes": [f"경로는 실제 모델로 끝까지 돌았다. 30문항 중 {t['episodes_that_read_the_table']}문항에서 모델이 도구로 표를 읽었고 인자 오류는 {t['tool_errors']}건이다.",
+                              "튜닝하지 않은 1.2B 모델은 셀을 한 번 찾아본 뒤 대부분 보류를 골랐다. 맞힌 것은 답 없는 질문의 보류뿐이다.",
+                              "30문항, 한 모델, 한 번이다. 튜닝한 모델과 큰 모델로는 GPU에서 재야 한다."],
+                    "artifact": "experiments/eval/tool_calling_cpu.json (scripts/tool_calling_summary.py, scripts/serving/hf_cpu_server.py)"})
     rows = []
     for label, d in [("휴리스틱", "heuristic_chem_papers"), ("mT5-small 화학 튜닝", "sft_chem2_chem_papers"), ("mT5-small 최종", "rl_v3_chem_papers"), ("EXAONE LoRA (한국어+화학)", "exaone_kochem_vllm_chem_papers")]:
         m = load(EXP / "eval" / d / "metrics.json")
