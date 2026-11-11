@@ -37,6 +37,8 @@ GPU가 없으므로 **모든 모델 학습·추론은 CPU에서 수행**했다. 
 - `learn.microsoft.com`, `labelstud.io`, `langfuse.com`, `docs.ragas.io` 등 제품 문서 사이트
 - `download.pytorch.org` (CPU 전용 휠 → PyPI 일반 휠로 대체), `storage.googleapis.com/bert_models` (403)
 
+**이후 바뀐 것.** 위 목록은 2026-10-29 기준이다. 소유자가 허용 목록을 고쳐 2026-11-10부터 `arxiv.org`, `aclanthology.org`, `huggingface.co`(작은 파일), `www.lgresearch.ai`가 열렸다. 2026-11-11에는 이 저장소용 환경(`tabletrace-research`)을 따로 승인받아 Hugging Face의 큰 파일 서버(`us.aws.cdn.hf.co`, `cas-bridge.xethub.hf.co`, `cas-server.xethub.hf.co`, `cdn-lfs.hf.co`)와 `koreascience.kr`을 더했다. 그 뒤 KoELECTRA-small 가중치를 받았다. `koreascience.kr`은 프록시가 허용해도 사이트가 연결을 끊어 열리지 않았다(이슈 52). EXAONE 가중치는 받을 수 있게 됐지만 이 컨테이너에는 GPU가 없어 돌리지 않았다.
+
 ## API 키
 
 - 환경변수 `OpenAI_API_KEY`가 존재하지만 `api.openai.com`이 차단되어 사용 불가.
