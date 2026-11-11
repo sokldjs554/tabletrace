@@ -98,7 +98,12 @@ class AgentRuntime:
             return {"program": None, "raw_output": None, "attempts": s.get("attempts", 0) + 1, "trace": trace}
         mode = s.get("planner_mode", "auto")
         use_neural = self.neural is not None and mode in ("auto", "neural")
-        if use_neural:
+        if use_neural and hasattr(self.neural, "plan_traced"):
+            # tool-calling planner: the model chose its own tool calls; they become trace steps before the proposal
+            prog, raw, rows, _ms, steps, tool_info = self.neural.plan_traced(s["question"], table, s.get("context"))
+            trace.extend(steps)
+            info = {"mode": "neural", "model": self.neural.model_id, "rows_shown": rows, "tool_calling": tool_info}
+        elif use_neural:
             prog, raw, rows, _ms = self.neural.plan(s["question"], table, s.get("context"))
             info = {"mode": "neural", "model": self.neural.model_id, "rows_shown": rows}
         else:

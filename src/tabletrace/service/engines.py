@@ -74,8 +74,9 @@ class EnginePlanner:
     def plan(self, question: str, table: Table, context: str | None = None) -> tuple[Program | None, str, int, float]:
         return self.plan_scored(question, table, context, logprobs=False)[:4]
 
-    def plan_scored(self, question: str, table: Table, context: str | None = None, logprobs: bool = True) -> tuple[Program | None, str, int, float, dict | None]:
-        text = build_input(question, table, context)
+    def plan_scored(self, question: str, table: Table, context: str | None = None, logprobs: bool = True,
+                    rows: list[int] | None = None) -> tuple[Program | None, str, int, float, dict | None]:
+        text = build_input(question, table, context, rows=rows)
         t0 = time.perf_counter()
         raw, conf = self.complete_scored(text, logprobs=logprobs)
         ms = (time.perf_counter() - t0) * 1000

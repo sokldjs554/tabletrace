@@ -33,7 +33,7 @@ from tabletrace.agent.graph import AgentRuntime
 from tabletrace.chat.agent import ChatAgent
 from tabletrace.chat.memory import UserMemory
 from tabletrace.corpus.store import CorpusStore
-from tabletrace.model.serialize import get_table_format
+from tabletrace.model.serialize import get_row_select, get_table_format
 from tabletrace.retrieval.index import CorpusIndex
 from tabletrace.schema import CellRef, Corpus
 from tabletrace.service.jobs import JobRunner
@@ -92,7 +92,12 @@ def build_runtime(settings: Settings):
     if settings.engine_url and settings.planner in ("auto", "neural"):
         from tabletrace.service.engines import EnginePlanner
 
-        neural = EnginePlanner(settings.engine_url, settings.engine_model, api_key=settings.engine_api_key, timeout_s=settings.job_timeout_s)
+        if settings.engine_tools:
+            from tabletrace.agent.toolcall import ToolCallingPlanner
+
+            neural = ToolCallingPlanner(settings.engine_url, settings.engine_model, api_key=settings.engine_api_key, timeout_s=settings.job_timeout_s)
+        else:
+            neural = EnginePlanner(settings.engine_url, settings.engine_model, api_key=settings.engine_api_key, timeout_s=settings.job_timeout_s)
         neural.health()                      # fail at start-up, not on the first question, if the engine is not reachable
     elif settings.planner in ("auto", "neural") and model_dir.exists():
         from tabletrace.model.planner import NeuralPlanner
@@ -135,7 +140,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         rt: AgentRuntime = state["runtime"]
         return {"version": __version__, "commit": git_commit(), "release": settings.release,
                 "planner": "neural" if rt.neural else "heuristic", "model_id": rt.neural.model_id if rt.neural else None,
-                "quantized": bool(rt.neural and rt.neural.quantized), "table_format": get_table_format(), "entity_check": rt.entity_check, "evidence_repair": rt.evidence_repair, "grpc_port": state.get("grpc_port"), "max_concurrent_jobs": settings.max_concurrent_jobs,
+                "quantized": bool(rt.neural and rt.neural.quantized), "table_format": get_table_format(), "row_select": get_row_select(), "entity_check": rt.entity_check, "evidence_repair": rt.evidence_repair, "grpc_port": state.get("grpc_port"), "max_concurrent_jobs": settings.max_concurrent_jobs,
                 "job_timeout_s": settings.job_timeout_s}
 
     @app.get("/v1/corpora")

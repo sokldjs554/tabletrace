@@ -7,7 +7,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from tabletrace.agent.program import serialize
-from tabletrace.model.serialize import build_input, choose_context_and_rows
+from tabletrace.model.serialize import (
+    build_input,
+    choose_context_and_rows,
+    choose_rows,
+    get_row_select,
+    masked,
+)
 from tabletrace.schema import CellRef, Document, Program, Table
 
 CONTEXT_CHARS = 300
@@ -28,6 +34,7 @@ class Example:
     rows_kept: int
     table_full: Table | None = None      # untruncated table (gold resolution, metrics)
     context_full: str | None = None      # untruncated passage text
+    shown_rows: list[int] | None = None  # row selection `overlap`: indices of the rows in the input (table is then full size, hidden rows blank)
 
 
 def load_docs(*corpus_files: Path) -> dict[str, Document]:
@@ -76,8 +83,27 @@ def build_examples(records: list[dict], docs: dict[str, Document], tokenizer, ma
         doc = docs[rec["doc_id"]]
         table = doc.table(rec["table_id"])
         ctx_full = context_for(doc, rec, limit=None)
-        ctx, n = choose_context_and_rows(tokenizer, rec["question"], table, ctx_full, max_in)
         gold = gold_program(rec, table.id)
+        if get_row_select() == "overlap":
+            ctx, kept = choose_rows(tokenizer, rec["question"], table, ctx_full, max_in)
+            if kept == list(range(len(kept))):
+                kept_rows, n = None, len(kept)                 # a prefix (or the whole table): same example as with `first`
+            else:
+                kept_rows, n = kept, len(kept)
+        else:
+            ctx, n = choose_context_and_rows(tokenizer, rec["question"], table, ctx_full, max_in)
+            kept_rows = None
+        if kept_rows is not None:
+            truncated = any(c.row not in kept_rows for c in gold.cells)
+            if truncated and drop_truncated_gold:
+                continue
+            out.append(Example(
+                qid=rec["qid"], question=rec["question"], table=masked(table, kept_rows), context=ctx, gold=gold,
+                gold_answer=rec.get("answer"), source=rec.get("source", "?"),
+                input_text=build_input(rec["question"], table, ctx, rows=kept_rows), target_text=serialize(gold),
+                truncated_gold=truncated, rows_kept=n, table_full=table, context_full=ctx_full, shown_rows=kept_rows,
+            ))
+            continue
         truncated = any(c.row >= n for c in gold.cells)
         if truncated and drop_truncated_gold:
             continue

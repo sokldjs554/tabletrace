@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 from tabletrace.agent.program import ProgramParseError, parse
-from tabletrace.model.serialize import build_input, choose_context_and_rows
+from tabletrace.model.serialize import build_input, choose_rows
 from tabletrace.schema import Program, Table
 
 
@@ -34,9 +34,12 @@ class NeuralPlanner:
             tag = ":int8" if quantize is True or quantize == "all" else f":int8-{quantize}"
         self.model_id = Path(model_dir).name + tag
 
-    def inputs_for(self, question: str, table: Table, context: str | None) -> tuple[str, int]:
-        context, n = choose_context_and_rows(self.tok, question, table, context, self.max_in)
-        return build_input(question, table, context, max_rows=n), n
+    def inputs_for(self, question: str, table: Table, context: str | None, rows: list[int] | None = None) -> tuple[str, int]:
+        """-> (model input, number of rows shown). `rows` fixes the rows (an evaluation example that already chose them);
+        otherwise they are chosen here with the process-wide row selection (model/serialize.py)."""
+        if rows is None:
+            context, rows = choose_rows(self.tok, question, table, context, self.max_in)
+        return build_input(question, table, context, rows=rows), len(rows)
 
     def generate(self, texts: list[str], **gen_kwargs) -> list[str]:
         import torch
@@ -72,11 +75,11 @@ class NeuralPlanner:
         results = []
         for i in range(0, len(items), batch_size):
             chunk = items[i:i + batch_size]
-            pairs = [self.inputs_for(q, t, c) for q, t, c in chunk]
+            pairs = [self.inputs_for(*item) for item in chunk]
             t0 = time.perf_counter()
             raws, confs = self.generate_scored([txt for txt, _ in pairs])
             ms = (time.perf_counter() - t0) * 1000 / len(chunk)
-            for (_q, t, _c), raw, (_txt, n), conf in zip(chunk, raws, pairs, confs, strict=True):
+            for (_q, t, *_rest), raw, (_txt, n), conf in zip(chunk, raws, pairs, confs, strict=True):
                 try:
                     prog = parse(raw, t.id)
                 except ProgramParseError:
@@ -90,14 +93,14 @@ class NeuralPlanner:
         for i in range(0, len(items), batch_size):
             chunk = items[i:i + batch_size]
             texts, rows = [], []
-            for q, t, c in chunk:
-                txt, n = self.inputs_for(q, t, c)
+            for item in chunk:                       # (question, table, context) or (question, table, context, rows)
+                txt, n = self.inputs_for(*item)
                 texts.append(txt)
                 rows.append(n)
             t0 = time.perf_counter()
             raws = self.generate(texts)
             ms = (time.perf_counter() - t0) * 1000 / len(chunk)
-            for (_q, t, _c), raw, n in zip(chunk, raws, rows, strict=True):
+            for (_q, t, *_rest), raw, n in zip(chunk, raws, rows, strict=True):
                 try:
                     prog = parse(raw, t.id)
                 except ProgramParseError:

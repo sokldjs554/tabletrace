@@ -1,0 +1,25 @@
+{
+ "official_dev_questions": 11771,
+ "excluded_table_in_official_train": 4848,
+ "excluded_table_in_this_projects_training": 3136,
+ "excluded_empty_header": 614,
+ "excluded_answer_not_unique_cell": 63,
+ "excluded_ragged_rows": 30,
+ "questions": 3080,
+ "tables": 665,
+ "by_size": {
+  "large": 2988,
+  "small": 92
+ },
+ "page_seen": 449,
+ "also_in_main_split": {
+  "test": 55,
+  "dev": 32
+ },
+ "over_limit": {
+  "rows_over_16": 2387,
+  "cols_over_7": 852
+ },
+ "max_rows": 20,
+ "max_cols": 10
+}

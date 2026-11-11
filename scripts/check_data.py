@@ -85,6 +85,13 @@ def main() -> int:
     main_qids = {r["qid"] for recs in ko.values() for r in recs}
     if any(r["qid"] in main_qids for r in pool):
         errors.append("ko/pool repeats a question of the main split")
+    # official-dev questions on unseen tables (any size): gold cells hold the answers, no table is a training table
+    unseen_docs = {d["id"]: d for d in load(ROOT / "data/ko/unseen_dev_documents.jsonl.gz")}
+    unseen = load(ROOT / "data/ko/unseen_dev.jsonl")
+    check_records(unseen, unseen_docs, "ko/unseen_dev", verify_gold=True)
+    trained = tabs["train"] | {t["id"] for d in pool_docs.values() for t in d["tables"]}
+    if any(r["table_id"] in trained for r in unseen):
+        errors.append("ko/unseen_dev contains a table used for training")
     # two-turn dialogs: built on test tables only, and the follow-up's gold cell holds its answer
     dialogs = load(ROOT / "data/ko/dialog_eval.jsonl")
     for d in dialogs:
@@ -109,7 +116,7 @@ def main() -> int:
     if bad:
         errors.append(f"chem/custom: records outside the test split: {bad}")
     summary = {"ko": {s: len(v) for s, v in ko.items()}, "ko_custom": len(load(ROOT / "data/ko/custom_eval.jsonl")),
-               "ko_pool": {"tables": len(pool_docs), "questions": len(pool)}, "ko_dialogs": len(dialogs),
+               "ko_pool": {"tables": len(pool_docs), "questions": len(pool)}, "ko_dialogs": len(dialogs), "ko_unseen_dev": {"tables": len(unseen_docs), "questions": len(unseen)},
                "chem_split": {k: len(v) for k, v in split.items()}, "chem_custom": len(custom), "errors": len(errors)}
     print(json.dumps(summary, ensure_ascii=False))
     for e in errors[:50]:

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     quantize_scope: str = ""                  # "" = all Linear when `quantize` is true; or lm_head | no_lm_head | ffn | attn (model/quant.py)
     engine_url: str = ""                      # OpenAI-compatible server (vLLM / SGLang); when set it replaces the in-process model
     engine_model: str = "planner"             # the --served-model-name of that server
+    engine_tools: bool = False                # the engine model picks tools step by step (agent/toolcall.py) instead of writing one program
     engine_api_key: str = "EMPTY"
     entity_check: bool = True                 # verifier: the question's subject must occur in the cited rows (TABLETRACE_ENTITY_CHECK=0 turns it off)
     evidence_repair: bool = True              # verifier: re-point a lookup to the cell that holds the answer (TABLETRACE_EVIDENCE_REPAIR=0 withholds instead)

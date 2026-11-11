@@ -28,6 +28,15 @@ class FindArgs(BaseModel):
     exact: bool = True
 
 
+class RowArgs(BaseModel):
+    row: int = Field(ge=0)
+
+
+class ColumnArgs(BaseModel):
+    col: int = Field(ge=0)
+    limit: int = Field(default=40, ge=1, le=200)
+
+
 class CalcArgs(BaseModel):
     op: str
     cells: list[str] = Field(min_length=1, max_length=12)
@@ -43,6 +52,8 @@ class ToolRegistry:
         self.register("cell_lookup", LookupArgs, self._lookup)
         self.register("cell_find", FindArgs, self._find)
         self.register("calculate", CalcArgs, self._calc)
+        self.register("row_read", RowArgs, self._row)
+        self.register("column_read", ColumnArgs, self._column)
 
     def register(self, name: str, args_model: type[BaseModel], fn: Callable[..., Any]) -> None:
         self._tools[name] = (args_model, fn)
@@ -84,6 +95,21 @@ class ToolRegistry:
     @staticmethod
     def _find(table: Table, a: FindArgs) -> list[CellRef]:
         return find_cells(table, a.text, exact=a.exact)
+
+    @staticmethod
+    def _row(table: Table, a: RowArgs) -> dict:
+        """All cells of one row with their ids (for a model that inspects a table step by step)."""
+        if a.row >= table.n_rows:
+            raise IndexError(f"row {a.row} outside a table of {table.n_rows} rows")
+        return {"row": a.row, "cells": {f"r{a.row}c{j}": table.cell(a.row, j) for j in range(table.n_cols)}}
+
+    @staticmethod
+    def _column(table: Table, a: ColumnArgs) -> dict:
+        if a.col >= table.n_cols:
+            raise IndexError(f"column {a.col} outside a table of {table.n_cols} columns")
+        shown = min(table.n_rows, a.limit)
+        return {"col": a.col, "header": table.header[a.col], "cells": {f"r{i}c{a.col}": table.cell(i, a.col) for i in range(shown)},
+                "rows_not_shown": table.n_rows - shown}
 
     @staticmethod
     def _calc(table: Table, a: CalcArgs):
