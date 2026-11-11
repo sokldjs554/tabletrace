@@ -22,3 +22,4 @@ class Settings(BaseSettings):
     max_question_chars: int = 300
     console_dir: str = "console"
     release: str = "dev"
+    grpc_port: int = 0                        # > 0: also serve the gRPC API (service/grpc_server.py) on this port, sharing the runtime

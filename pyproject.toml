@@ -34,11 +34,15 @@ model = [
   "peft>=0.12",
 ]
 serve = ["vllm>=0.6"]          # GPU only; see docs/experiments/serving.md
+grpc = ["grpcio>=1.85", "protobuf>=7.35"]     # gRPC API; the stubs under service/pb/ were generated with grpcio-tools 1.85
 dev = [
   "pytest>=8.2",
   "pytest-asyncio>=0.23",
   "ruff>=0.5",
   "playwright>=1.45",
+  "grpcio>=1.85",
+  "grpcio-tools>=1.85",
+  "protobuf>=7.35",
 ]
 
 [project.scripts]
@@ -54,6 +58,8 @@ tabletrace = ["py.typed"]
 line-length = 110
 target-version = "py311"
 src = ["src", "tests", "scripts"]
+
+extend-exclude = ["src/tabletrace/service/pb/*_pb2.py", "src/tabletrace/service/pb/*_pb2_grpc.py"]   # generated
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "ASYNC"]

@@ -5,12 +5,13 @@ services:
       args:
         WITH_MODEL: "${WITH_MODEL:-0}"
     image: tabletrace:local
-    ports: ["8000:8000"]
+    ports: ["8000:8000", "50051:50051"]      # REST + console, gRPC
     environment:
       TABLETRACE_PLANNER: ${TABLETRACE_PLANNER:-auto}
       TABLETRACE_MODEL_DIR: ${TABLETRACE_MODEL_DIR:-models/mt5-small-tabletrace}
       TABLETRACE_MAX_CONCURRENT_JOBS: ${TABLETRACE_MAX_CONCURRENT_JOBS:-2}
       TABLETRACE_JOB_TIMEOUT_S: ${TABLETRACE_JOB_TIMEOUT_S:-60}
+      TABLETRACE_GRPC_PORT: ${TABLETRACE_GRPC_PORT:-50051}
     volumes:
       - ./models:/app/models:ro          # fine-tuned weights (not in git); planner falls back to heuristic if absent
     healthcheck:

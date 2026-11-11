@@ -101,7 +101,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         state["store"], state["runtime"] = store, runtime
         state["runner"] = JobRunner(lambda req: runtime.run(**req), settings.max_concurrent_jobs, settings.job_timeout_s, settings.queue_limit)
         state["started"] = time.time()
+        grpc_server = None
+        if settings.grpc_port:
+            from tabletrace.service.grpc_server import start_grpc_server
+
+            grpc_server, state["grpc_port"] = start_grpc_server(runtime, store, settings, settings.grpc_port, commit=git_commit())
         yield
+        if grpc_server is not None:
+            grpc_server.stop(grace=2).wait()
 
     app = FastAPI(title="TableTrace API", version=__version__, lifespan=lifespan)
 
@@ -114,7 +121,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         rt: AgentRuntime = state["runtime"]
         return {"version": __version__, "commit": git_commit(), "release": settings.release,
                 "planner": "neural" if rt.neural else "heuristic", "model_id": rt.neural.model_id if rt.neural else None,
-                "quantized": bool(rt.neural and rt.neural.quantized), "table_format": get_table_format(), "entity_check": rt.entity_check, "evidence_repair": rt.evidence_repair, "max_concurrent_jobs": settings.max_concurrent_jobs,
+                "quantized": bool(rt.neural and rt.neural.quantized), "table_format": get_table_format(), "entity_check": rt.entity_check, "evidence_repair": rt.evidence_repair, "grpc_port": state.get("grpc_port"), "max_concurrent_jobs": settings.max_concurrent_jobs,
                 "job_timeout_s": settings.job_timeout_s}
 
     @app.get("/v1/corpora")

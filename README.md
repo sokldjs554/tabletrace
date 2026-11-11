@@ -140,7 +140,7 @@ flowchart LR
 - **신뢰 경계**: 문서 텍스트·셀·질문은 데이터입니다. 모델 출력은 정규식 문법으로만 해석되고(`agent/program.py`), 셀 좌표는 범위 검사, 도구 인자는 pydantic 검증, 계산기는 숫자·사칙연산·괄호만 받는 AST 평가기입니다. 임의 코드 실행 경로가 없습니다(`tests/test_api.py::test_document_text_is_data_not_commands`).
 - **비동기 처리**: CPU 바운드 추론은 스레드 풀에서 실행하고 이벤트 루프는 상태 조회·정적 파일을 계속 처리합니다. 상태: `queued → running → done | failed | timeout`, 큐 초과 시 429.
 - **LangGraph를 쓴 이유**: 분기(검증 실패 → 보완 제안)가 있는 짧은 워크플로를 명시적 그래프로 두면 노드 경계가 곧 콘솔의 실행 추적 단계가 되고, 플래너(모델/휴리스틱/외부 엔진)를 바꿔 끼워도 그래프가 같습니다. `GET /v1/graph`가 Mermaid를 반환합니다.
-- **gRPC**: 쓰지 않았습니다. 클라이언트가 브라우저 하나뿐이고 스트리밍·다중 언어 클라이언트 요구가 없어 REST+JSON이 검증·디버깅에 유리했습니다.
+- **gRPC**: REST와 같은 런타임을 쓰는 gRPC API가 있습니다(`proto/tabletrace/service/pb/tabletrace.proto`, `service/grpc_server.py`). `Ask`(답 하나), `Calculate`, `Release`는 REST를 그대로 옮긴 것이고, **`AskStream`은 그래프의 각 단계(검색, 제안, 도구 호출, 검증)가 끝날 때마다 서버가 밀어 주는 스트리밍 호출**입니다. REST는 작업 상태를 주기적으로 물어야 하지만 gRPC에서는 단계가 도착하는 대로 보입니다. 동시 실행 수와 대기열 한도는 REST와 같은 설정을 쓰고, 넘치면 `RESOURCE_EXHAUSTED`로 거절합니다. `TABLETRACE_GRPC_PORT=50051`(Docker 기본값)로 켜고, `tabletrace grpc-ask "질문" --corpus ko_tables`로 써 볼 수 있습니다. 인증과 TLS는 없습니다.
 
 ## 8. 데이터 분할과 평가 방법
 
@@ -807,7 +807,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | GitHub Actions CI | 완료 | 커밋 `0f38f8d`에서 test·docker 작업 모두 success |
 | GitHub Pages 공개 배포 | 완료 | build·deploy 작업 success. 소유자가 2026-11-08 브라우저에서 페이지가 열리는 것을 확인(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 접속하지 못함) |
 | 저장된 결과 데모 호스팅(대체 경로) | 완료(비공개 링크) | 단일 파일 `scripts/build_artifact_page.py` → claude.ai Artifact. 소유자가 공유해야 공개됨, 실시간 모드는 호스팅하지 않음 |
-| gRPC | 미구현(불필요 판단) | §7 |
+| gRPC | 완료 | 단항 호출 3개와 단계별 스트리밍 1개, REST와 같은 런타임·한도(§7). 테스트 11개(`tests/test_grpc.py`). 인증·TLS 없음 |
 | 챗봇(여러 턴 대화), 메모리 결합, Personal Agent | 미구현 | 공고 원문에는 있으나 이 프로젝트의 범위 밖. 질문 한 건에 답하는 에이전트 서비스만 있음 |
 | 데이터 구조 이해용 PLM 구현 | 미구현(직렬화·튜닝으로 대체) | 표를 좌표 붙은 텍스트로 바꿔 일반 언어모델을 튜닝. 행·열 임베딩을 갖는 구조 전용 PLM은 만들지 않음 |
 | 근거 셀 오류·검증기 운영점·표 겹침 효과 측정 | 완료(CPU, 저장된 예측 재분석 + mT5 재평가) | §9.6, docs/REPORT.md §19. EXAONE의 표 겹침 효과는 GPU가 필요해 재지 않음(질문 세트는 `data/ko/leak_probe_*.jsonl`) |

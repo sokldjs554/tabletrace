@@ -95,7 +95,7 @@ class AgentRuntime:
         table = s.get("table")
         if table is None:
             trace.append(TraceStep(step="propose", status="skipped", output={"reason": "no table"}))
-            return {"program": None, "raw_output": None, "attempts": s.get("attempts", 0) + 1}
+            return {"program": None, "raw_output": None, "attempts": s.get("attempts", 0) + 1, "trace": trace}
         mode = s.get("planner_mode", "auto")
         use_neural = self.neural is not None and mode in ("auto", "neural")
         if use_neural:
@@ -107,7 +107,7 @@ class AgentRuntime:
         trace.append(TraceStep(step="propose", tool=info["mode"], input={"question": s["question"], "table_id": table.id, **info},
                                output={"raw": raw, "parsed": prog.model_dump() if prog else None},
                                ms=(time.perf_counter() - t0) * 1000, status="ok" if prog else "error"))
-        return {"program": prog, "raw_output": raw, "attempts": s.get("attempts", 0) + 1, "planner_info": info}
+        return {"program": prog, "raw_output": raw, "attempts": s.get("attempts", 0) + 1, "planner_info": info, "trace": trace}
 
     def verify(self, s: AgentState) -> AgentState:
         t0 = time.perf_counter()
@@ -149,7 +149,7 @@ class AgentRuntime:
         prog = heuristic_plan(s["question"], table, table.lang)
         s["trace"].append(TraceStep(step="propose", tool="heuristic", input={"question": s["question"], "table_id": table.id, "fallback": True},
                                     output={"raw": serialize(prog), "parsed": prog.model_dump()}, ms=(time.perf_counter() - t0) * 1000))
-        return {"program": prog, "raw_output": serialize(prog), "attempts": s["attempts"] + 1,
+        return {"program": prog, "raw_output": serialize(prog), "attempts": s["attempts"] + 1, "trace": s["trace"],
                 "planner_info": {**s.get("planner_info", {}), "mode": "neural", "fallback": "heuristic"}}
 
     def _build(self):
@@ -174,6 +174,23 @@ class AgentRuntime:
                              "planner_mode": planner_mode, "trace": [], "t_start": time.perf_counter()}
         out = self.graph.invoke(state)
         return out["result"]
+
+    def stream(self, question: str, corpus: Corpus, doc_id: str | None = None, table_id: str | None = None,
+               planner_mode: str = "auto"):
+        """Like `run`, but yields ("step", node, TraceStep) as each graph node finishes and ("result", None, AnswerResult)
+        last. Trace steps are reported once, in order (a node may add several: verify adds its tool calls)."""
+        state: AgentState = {"question": question, "corpus": corpus, "doc_id": doc_id, "table_id": table_id,
+                             "planner_mode": planner_mode, "trace": [], "t_start": time.perf_counter()}
+        seen = 0
+        for update in self.graph.stream(state, stream_mode="updates"):
+            for node, delta in update.items():
+                trace = (delta or {}).get("trace")
+                if trace is not None:
+                    for step in trace[seen:]:
+                        yield "step", node, step
+                    seen = len(trace)
+                if delta and delta.get("result") is not None:
+                    yield "result", None, delta["result"]
 
     def mermaid(self) -> str:
         return self.graph.get_graph().draw_mermaid()

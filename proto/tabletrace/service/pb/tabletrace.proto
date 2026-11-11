@@ -1,0 +1,95 @@
+// TableTrace gRPC API. Mirrors the REST API's /v1/ask and adds a server-streaming call that reports each step of
+// the agent graph (retrieve -> propose -> tool -> verify -> finalize) as it happens.
+//
+//   python scripts/gen_proto.py        # regenerates src/tabletrace/service/pb/tabletrace_pb2*.py
+syntax = "proto3";
+
+package tabletrace.v1;
+
+service TableTrace {
+  // Version, commit and how the server is configured (planner, verifier switches).
+  rpc Release(ReleaseRequest) returns (ReleaseReply);
+  // One question in, the verified answer or the abstention out.
+  rpc Ask(AskRequest) returns (AskReply);
+  // The same question, streamed: one event per graph step, then the final reply.
+  rpc AskStream(AskRequest) returns (stream AskEvent);
+  // The bounded calculator over table cells (no model involved).
+  rpc Calculate(CalculateRequest) returns (CalculateReply);
+}
+
+message ReleaseRequest {}
+
+message ReleaseReply {
+  string version = 1;
+  string commit = 2;
+  string planner = 3;          // "neural" or "heuristic"
+  string model_id = 4;
+  bool entity_check = 5;
+  bool evidence_repair = 6;
+  string table_format = 7;
+}
+
+message AskRequest {
+  string question = 1;         // 2..300 characters
+  string corpus = 2;           // "ko_tables" or "chem_docs"
+  string doc_id = 3;           // optional
+  string table_id = 4;         // optional
+  string planner = 5;          // "auto" (default), "neural" or "heuristic"
+}
+
+message CellRef {
+  string table_id = 1;
+  int32 row = 2;
+  int32 col = 3;
+}
+
+message Check {
+  string name = 1;
+  bool passed = 2;
+  string detail = 3;
+}
+
+message AskReply {
+  string status = 1;                    // "answered" or "abstained"
+  string answer = 2;                    // empty when abstained
+  string reason = 3;                    // abstention reason, empty when answered
+  repeated CellRef evidence_cells = 4;  // final evidence, after verification
+  repeated CellRef cited_cells = 5;     // cells the planner itself cited
+  repeated Check checks = 6;
+  string planner_mode = 7;
+  string model_id = 8;
+  string raw_output = 9;                // the planner's program, as written
+  double elapsed_ms = 10;
+  string table_id = 11;
+  string result_json = 12;              // the full result (calculation, spans, trace) as the REST API returns it
+}
+
+message Step {
+  string node = 1;        // graph node: retrieve, propose, verify, propose_fallback, finalize
+  string step = 2;        // trace step inside the node: retrieve, propose, tool, verify
+  string tool = 3;
+  string status = 4;
+  double ms = 5;
+  string detail_json = 6; // the step's input and output
+}
+
+message AskEvent {
+  oneof event {
+    Step step = 1;
+    AskReply result = 2;
+  }
+}
+
+message CalculateRequest {
+  string table_id = 1;
+  string op = 2;                 // diff, ratio, sum, avg, count, pct_change
+  repeated string cells = 3;     // "r0c4", ...
+}
+
+message CalculateReply {
+  string op = 1;
+  string expression = 2;
+  double result = 3;
+  string formatted = 4;
+  string unit = 5;
+}
