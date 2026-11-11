@@ -8,8 +8,8 @@
   "corpus": [
    "data/ko/unseen_dev_documents.jsonl.gz"
   ],
-  "n": 3080,
-  "wall_s": 8.5,
+  "n": 3072,
+  "wall_s": 8.7,
   "hardware": "x86_64",
   "label": null,
   "table_format": "plain",
@@ -18,46 +18,47 @@
   "entity_check": false,
   "column_check": false,
   "replay_from": null,
-  "finished": "2026-11-11T06:31:53",
+  "finished": "2026-11-11T07:03:35",
   "quantize": false,
   "quantize_scope": null,
   "confidence": false,
   "few_shot": null,
-  "sample": null
+  "sample": null,
+  "tool_calling": false
  },
  "metrics": {
-  "n": 3080,
-  "n_answerable": 3080,
+  "n": 3072,
+  "n_answerable": 3072,
   "n_gold_abstain": 0,
   "n_calc": 0,
-  "n_lookup": 3080,
-  "verified_em": 0.2714,
-  "answer_em_answerable": 0.2714,
-  "raw_answer_em_answerable": 0.2711,
+  "n_lookup": 3072,
+  "verified_em": 0.2715,
+  "answer_em_answerable": 0.2715,
+  "raw_answer_em_answerable": 0.2712,
   "evidence_cells_exact": 0.2708,
   "evidence_cells_exact_raw": 0.2708,
   "evidence_repaired_rate": 0.0,
-  "evidence_cells_overlap": 0.2756,
-  "op_acc": 0.5003,
-  "lookup_em": 0.2714,
+  "evidence_cells_overlap": 0.2757,
+  "op_acc": 0.5007,
+  "lookup_em": 0.2715,
   "calc_em": null,
   "calc_result_correct": null,
   "unit_error_rate": null,
   "abstain_recall": null,
-  "false_abstain_rate": 0.4997,
+  "false_abstain_rate": 0.4993,
   "abstain_precision": 0.0,
   "parse_fail_rate": 0.0,
   "verifier_corrections": 0.0114,
   "truncated_gold_rate": 0.0,
-  "verified_em_untruncated": 0.2714,
-  "mean_ms_per_example": 2.2,
+  "verified_em_untruncated": 0.2715,
+  "mean_ms_per_example": 2.3,
   "by_source": {
    "korwikitq": {
-    "n": 3080,
-    "verified_em": 0.2714
+    "n": 3072,
+    "verified_em": 0.2715
    }
   },
-  "gold_subject_fail_rate": 0.0649,
+  "gold_subject_fail_rate": 0.0651,
   "entity_check": false
  }
 }

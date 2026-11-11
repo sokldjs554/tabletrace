@@ -60,7 +60,7 @@ def main() -> None:
     trained_pages |= {e["U"] for e in examples if e["_orig_split"] == "train"}
 
     counts: Counter = Counter()
-    docs, rows, seen_docs = [], [], set()
+    docs, rows, seen_docs, seen_qids = [], [], set(), set()
     for ex in examples:
         if ex["_orig_split"] != "dev":
             continue
@@ -88,6 +88,10 @@ def main() -> None:
         if tid in trained_tables:
             counts["excluded_table_in_this_projects_training"] += 1
             continue
+        if ex["QAS"]["qid"] in seen_qids:                       # the official file repeats a few records verbatim
+            counts["excluded_repeated_record"] += 1
+            continue
+        seen_qids.add(ex["QAS"]["qid"])
         ex["_gold"] = g
         large = len(body) > MAX_ROWS or len(header) > MAX_COLS or sum(len(c) for r in tbl for c in r) > MAX_CHARS
         rec = {**qa_record(ex, key), "size": "large" if large else "small", "page_seen": ex["U"] in trained_pages,

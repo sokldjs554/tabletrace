@@ -8,14 +8,15 @@
  },
  "pool_tables_dropped_same_page_as_dev_or_test": 43,
  "pool_tables": 6111,
+ "repeated_records_dropped": 12,
  "pool_questions": {
-  "unused_table": 28422,
+  "unused_table": 28410,
   "train_table_extra": 1497
  },
- "pool_questions_total": 29919,
+ "pool_questions_total": 29907,
  "official_split_of_pool_questions": {
-  "dev": 5170,
-  "train": 24749
+  "dev": 5167,
+  "train": 24740
  },
  "pool_questions_on_dev_or_test_tables": 0
 }

@@ -86,8 +86,8 @@ def curve(rows: list[dict], system: str, signal: str) -> dict:
         auroc = round((rank_sum - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg)), 4)
     return {"system": system, "signal": signal, "no_threshold": {**full, "coverage": round(full["coverage"], 4), "risk": round(full["risk"], 4),
                                                                 "risk_ci": wilson(wrong, max(1, len(items)))},
-            "aurc": round(aurc, 4), "auroc_right_vs_wrong": auroc, "risk_at_coverage": {str(c): risk_at(c) for c in COVERAGES},
-            "max_coverage_with_risk_under": {"0.05": coverage_under(0.05), "0.10": coverage_under(0.10)}}
+            "aurc": round(aurc, 4), "auroc_right_vs_wrong": auroc, "risk_at_coverage_pct": {str(round(c * 100)): risk_at(c) for c in COVERAGES},          # keys are percentages: "10" .. "90"
+            "max_coverage_with_risk_under_pct": {"5": coverage_under(0.05), "10": coverage_under(0.10), "30": coverage_under(0.30)}}
 
 
 def one_run(name: str, same_outputs_as: str | None) -> dict:

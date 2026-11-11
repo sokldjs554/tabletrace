@@ -65,6 +65,14 @@ def main() -> None:
             if ex["QAS"]["qid"] not in main_train_qids:
                 rows.append({**qa_record(ex, k), "pool": "train_table_extra"})
                 extra += 1
+    unique, seen = [], set()
+    for r in rows:                                               # the official files repeat a few records verbatim
+        if r["qid"] not in seen:
+            seen.add(r["qid"])
+            unique.append(r)
+    report["repeated_records_dropped"] = len(rows) - len(unique)
+    extra -= sum(r["pool"] == "train_table_extra" for r in rows) - sum(r["pool"] == "train_table_extra" for r in unique)
+    rows = unique
     report["pool_questions"] = dict(Counter(r["pool"] for r in rows))
     report["pool_questions_total"] = len(rows)
     report["official_split_of_pool_questions"] = dict(Counter(r["orig_split"] for r in rows))

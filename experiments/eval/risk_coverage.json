@@ -29,25 +29,31 @@
      },
      "aurc": 0.5197,
      "auroc_right_vs_wrong": 0.6778,
-     "risk_at_coverage": {
-      "0.1": 0.4,
-      "0.2": 0.45,
-      "0.3": 0.4905,
-      "0.4": 0.5143,
-      "0.5": 0.5429,
-      "0.6": 0.5656,
-      "0.7": 0.591,
-      "0.8": 0.6261,
-      "0.9": null
+     "risk_at_coverage_pct": {
+      "10": 0.4,
+      "20": 0.45,
+      "30": 0.4905,
+      "40": 0.5143,
+      "50": 0.5429,
+      "60": 0.5656,
+      "70": 0.591,
+      "80": 0.6261,
+      "90": null
      },
-     "max_coverage_with_risk_under": {
-      "0.05": {
+     "max_coverage_with_risk_under_pct": {
+      "5": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
        "threshold": null
       },
-      "0.10": {
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
@@ -73,25 +79,31 @@
      },
      "aurc": 0.6101,
      "auroc_right_vs_wrong": 0.5592,
-     "risk_at_coverage": {
-      "0.1": 0.5714,
-      "0.2": 0.5643,
-      "0.3": 0.5857,
-      "0.4": 0.6179,
-      "0.5": 0.6143,
-      "0.6": 0.6014,
-      "0.7": 0.6033,
-      "0.8": 0.6261,
-      "0.9": null
+     "risk_at_coverage_pct": {
+      "10": 0.5714,
+      "20": 0.5643,
+      "30": 0.5857,
+      "40": 0.6179,
+      "50": 0.6143,
+      "60": 0.6014,
+      "70": 0.6033,
+      "80": 0.6261,
+      "90": null
      },
-     "max_coverage_with_risk_under": {
-      "0.05": {
+     "max_coverage_with_risk_under_pct": {
+      "5": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
        "threshold": null
       },
-      "0.10": {
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
@@ -117,25 +129,31 @@
      },
      "aurc": 0.5188,
      "auroc_right_vs_wrong": 0.6756,
-     "risk_at_coverage": {
-      "0.1": 0.4143,
-      "0.2": 0.4643,
-      "0.3": 0.4857,
-      "0.4": 0.5036,
-      "0.5": 0.5343,
-      "0.6": 0.5656,
-      "0.7": 0.5992,
-      "0.8": 0.6261,
-      "0.9": null
+     "risk_at_coverage_pct": {
+      "10": 0.4143,
+      "20": 0.4643,
+      "30": 0.4857,
+      "40": 0.5036,
+      "50": 0.5343,
+      "60": 0.5656,
+      "70": 0.5992,
+      "80": 0.6261,
+      "90": null
      },
-     "max_coverage_with_risk_under": {
-      "0.05": {
+     "max_coverage_with_risk_under_pct": {
+      "5": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
        "threshold": null
       },
-      "0.10": {
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
@@ -161,25 +179,31 @@
      },
      "aurc": 0.4919,
      "auroc_right_vs_wrong": 0.6477,
-     "risk_at_coverage": {
-      "0.1": 0.4,
-      "0.2": 0.4429,
-      "0.3": 0.4714,
-      "0.4": 0.5071,
-      "0.5": 0.52,
-      "0.6": 0.5513,
-      "0.7": 0.5808,
-      "0.8": null,
-      "0.9": null
+     "risk_at_coverage_pct": {
+      "10": 0.4,
+      "20": 0.4429,
+      "30": 0.4714,
+      "40": 0.5071,
+      "50": 0.52,
+      "60": 0.5513,
+      "70": 0.5808,
+      "80": null,
+      "90": null
      },
-     "max_coverage_with_risk_under": {
-      "0.05": {
+     "max_coverage_with_risk_under_pct": {
+      "5": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
        "threshold": null
       },
-      "0.10": {
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
@@ -205,25 +229,31 @@
      },
      "aurc": 0.5578,
      "auroc_right_vs_wrong": 0.5675,
-     "risk_at_coverage": {
-      "0.1": 0.4714,
-      "0.2": 0.5143,
-      "0.3": 0.5429,
-      "0.4": 0.5607,
-      "0.5": 0.5514,
-      "0.6": 0.5632,
-      "0.7": 0.5808,
-      "0.8": null,
-      "0.9": null
+     "risk_at_coverage_pct": {
+      "10": 0.4714,
+      "20": 0.5143,
+      "30": 0.5429,
+      "40": 0.5607,
+      "50": 0.5514,
+      "60": 0.5632,
+      "70": 0.5808,
+      "80": null,
+      "90": null
      },
-     "max_coverage_with_risk_under": {
-      "0.05": {
+     "max_coverage_with_risk_under_pct": {
+      "5": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
        "threshold": null
       },
-      "0.10": {
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
@@ -249,25 +279,31 @@
      },
      "aurc": 0.4864,
      "auroc_right_vs_wrong": 0.6448,
-     "risk_at_coverage": {
-      "0.1": 0.4143,
-      "0.2": 0.4429,
-      "0.3": 0.4762,
-      "0.4": 0.4893,
-      "0.5": 0.5286,
-      "0.6": 0.5561,
-      "0.7": 0.5828,
-      "0.8": null,
-      "0.9": null
+     "risk_at_coverage_pct": {
+      "10": 0.4143,
+      "20": 0.4429,
+      "30": 0.4762,
+      "40": 0.4893,
+      "50": 0.5286,
+      "60": 0.5561,
+      "70": 0.5828,
+      "80": null,
+      "90": null
      },
-     "max_coverage_with_risk_under": {
-      "0.05": {
+     "max_coverage_with_risk_under_pct": {
+      "5": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,
        "threshold": null
       },
-      "0.10": {
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
        "coverage": 0.0,
        "risk": null,
        "answers": 0,

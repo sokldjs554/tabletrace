@@ -72,6 +72,12 @@ PAIRS = [
     ("exaone_full_run2_vs_run1_ko_test_ec", "exaone_full_vllm_ko_test_ec", "exaone_full_vllm_ko_test_ec_run2"),
     ("exaone_full_run2_sglang_vs_vllm_ko_test", "exaone_full_vllm_ko_test_run2", "exaone_full_sglang_ko_test_run2"),
     ("exaone_full_run2_vs_run1_ko_custom", "exaone_full_vllm_ko_custom", "exaone_full_vllm_ko_custom_run2"),
+    # large tables (official dev, unseen tables): first rows vs. question-aware row selection, same questions
+    ("row_select_overlap_vs_first_rl_v3_unseen_dev", "rl_v3_unseen_dev_first", "rl_v3_unseen_dev_overlap"),
+    ("row_select_overlap_vs_first_heuristic_unseen_dev", "heuristic_unseen_dev_first512", "heuristic_unseen_dev_overlap512"),
+    ("heuristic_512_overlap_vs_whole_table_unseen_dev", "heuristic_unseen_dev", "heuristic_unseen_dev_overlap512"),
+    # chemistry-paper tables
+    ("rl_v3_vs_heuristic_chem_papers", "heuristic_chem_papers", "rl_v3_chem_papers"),
 ]
 
 

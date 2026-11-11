@@ -457,5 +457,41 @@
   "reference_better": 2,
   "p_two_sided": 1.0,
   "p_display": "1.000"
+ },
+ "row_select_overlap_vs_first_rl_v3_unseen_dev": {
+  "reference": "rl_v3_unseen_dev_first",
+  "candidate": "rl_v3_unseen_dev_overlap",
+  "n": 1000,
+  "candidate_better": 99,
+  "reference_better": 11,
+  "p_two_sided": 7.369793042206746e-19,
+  "p_display": "<0.001"
+ },
+ "row_select_overlap_vs_first_heuristic_unseen_dev": {
+  "reference": "heuristic_unseen_dev_first512",
+  "candidate": "heuristic_unseen_dev_overlap512",
+  "n": 3072,
+  "candidate_better": 222,
+  "reference_better": 11,
+  "p_two_sided": 3.3004122454921293e-52,
+  "p_display": "<0.001"
+ },
+ "heuristic_512_overlap_vs_whole_table_unseen_dev": {
+  "reference": "heuristic_unseen_dev",
+  "candidate": "heuristic_unseen_dev_overlap512",
+  "n": 3072,
+  "candidate_better": 23,
+  "reference_better": 5,
+  "p_two_sided": 0.0009122341871261597,
+  "p_display": "<0.001"
+ },
+ "rl_v3_vs_heuristic_chem_papers": {
+  "reference": "heuristic_chem_papers",
+  "candidate": "rl_v3_chem_papers",
+  "n": 62,
+  "candidate_better": 5,
+  "reference_better": 18,
+  "p_two_sided": 0.010622024536132812,
+  "p_display": "0.011"
  }
 }
