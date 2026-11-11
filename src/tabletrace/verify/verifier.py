@@ -102,7 +102,7 @@ def header_column(question, table, cited):
     return columns[0] if len(columns) == 1 else None
 
 
-def resolve(question, table, program, retrieval_ok=True, context=None, passage_id="context", entity_check=True, column_check=False):
+def resolve(question, table, program, retrieval_ok=True, context=None, passage_id="context", entity_check=True, column_check=False, repair=True):
     checks = []
     trace = []
 
@@ -178,6 +178,8 @@ def resolve(question, table, program, retrieval_ok=True, context=None, passage_i
                     contained = False
             check("answer_matches_cell", same, f"제안 답: {program.answer!r}, 셀 {ref.cid}: {value!r}")
             if not same and not contained and proposed:
+                if not repair:
+                    return abstain("verification_failed")
                 found = REGISTRY.call("cell_find", table, {"text": program.answer, "exact": True}, trace)
                 if len(found) == 1 and len(proposed) >= 2:
                     replacement = found[0]
