@@ -23,7 +23,10 @@ def mock_engine():
         user = body["messages"][-1]["content"]
         # a deterministic "model": answer the ammonia question, abstain otherwise
         content = "op: lookup ; cells: r4c2 ; answer: 11,300" if "ammonia" in user else "op: abstain ; cells: - ; answer: - ; reason: not_in_document"
-        return {"id": "x", "object": "chat.completion", "model": body["model"], "choices": [{"index": 0, "message": {"role": "assistant", "content": content}, "finish_reason": "stop"}]}
+        choice = {"index": 0, "message": {"role": "assistant", "content": content}, "finish_reason": "stop"}
+        if body.get("logprobs"):                                  # what vLLM / SGLang add when asked
+            choice["logprobs"] = {"content": [{"token": "op", "logprob": -0.1}, {"token": ":", "logprob": -0.4}, {"token": " lookup", "logprob": -1.0}]}
+        return {"id": "x", "object": "chat.completion", "model": body["model"], "choices": [choice]}
 
     config = uvicorn.Config(app, host="127.0.0.1", port=8765, log_level="error")
     server = uvicorn.Server(config)
@@ -48,6 +51,24 @@ def test_engine_planner_roundtrip(mock_engine, chem_table):
     assert body["messages"][0]["content"] == SYSTEM_PROMPT and body["temperature"] == 0.0 and "question:" in body["messages"][1]["content"]
     prog, _raw, _, _ = p.plan("What is the density of argon?", chem_table)
     assert prog is not None and prog.op == "abstain"
+
+
+def test_engine_planner_returns_a_confidence_when_the_server_sends_logprobs(mock_engine, chem_table):
+    p = EnginePlanner("http://127.0.0.1:8765", "planner")
+    prog, _raw, _rows, _ms, conf = p.plan_scored("What is the critical pressure of ammonia?", chem_table)
+    assert mock_engine["body"]["logprobs"] is True and prog is not None
+    assert conf == {"tokens": 3, "sum_logprob": -1.5, "mean_logprob": -0.5, "min_logprob": -1.0}
+    *_, none = p.plan_scored("What is the critical pressure of ammonia?", chem_table, logprobs=False)
+    assert none is None and "logprobs" not in mock_engine["body"]            # plan() keeps sending the request it always sent
+
+
+def test_engine_planner_shows_demonstrations_as_earlier_turns(mock_engine, chem_table):
+    p = EnginePlanner("http://127.0.0.1:8765", "planner", shots=[("question: q1", "op: lookup ; cells: r0c1 ; answer: 1"), ("question: q2", "op: abstain ; cells: - ; answer: -")])
+    p.plan("What is the critical pressure of ammonia?", chem_table)
+    roles = [m["role"] for m in mock_engine["body"]["messages"]]
+    assert roles == ["system", "user", "assistant", "user", "assistant", "user"]
+    assert mock_engine["body"]["messages"][2]["content"] == "op: lookup ; cells: r0c1 ; answer: 1"
+    assert "ammonia" in mock_engine["body"]["messages"][-1]["content"]
 
 
 def test_service_uses_the_engine_when_engine_url_is_set(mock_engine):

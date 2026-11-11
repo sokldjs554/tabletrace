@@ -46,6 +46,13 @@ def main() -> None:
     ap.add_argument("--no-repair", action="store_true",
                     help="verifier withholds a lookup whose cited cell does not hold the answer instead of repairing the evidence "
                          "(needs resolve(..., repair=False), docs/rewrite/05_verifier_repair_option.md)")
+    ap.add_argument("--few-shot", nargs="*", default=[],
+                    help="engine planner only: training files to draw demonstrations from (one lookup, one calculation, one abstention, "
+                         "repeated --shots-per-kind times). For models that were not tuned on the program grammar")
+    ap.add_argument("--shots-per-kind", type=int, default=1)
+    ap.add_argument("--confidence", action="store_true",
+                    help="also store the log-probability summary of each generated program (neural: from the model; engine: needs a "
+                         "server that returns logprobs). scripts/risk_coverage.py reads it")
     ap.add_argument("--replay-from", default=None, help="eval dir whose predictions.jsonl raw outputs are re-verified (no model run)")
     ap.add_argument("--table-format", choices=TABLE_FORMATS, default=None,
                     help="how tables are written into the model input (model/serialize.py); must be the format the planner was trained on. "
@@ -73,6 +80,7 @@ def main() -> None:
     lang = next(iter(docs.values())).lang
     t0 = time.time()
     planner_id = "heuristic"
+    confidences: dict[str, dict | None] = {}
     if a.replay_from:
         # Re-verify the stored raw planner outputs of an earlier run with the current verifier; no model is loaded.
         with open(Path(a.replay_from) / "predictions.jsonl", encoding="utf-8") as fh:
@@ -85,24 +93,46 @@ def main() -> None:
             except ProgramParseError:
                 prog = None
             plans.append((prog, o["raw_output"], e.rows_kept, o["ms"]))
+            if "confidence" in o:
+                confidences[e.qid] = o["confidence"]
         planner_id = f"replay of {a.replay_from}"
     elif a.planner == "engine":
         import concurrent.futures as cf
 
         from tabletrace.service.engines import EnginePlanner
 
-        planner = EnginePlanner(a.engine_url, a.engine_model, timeout_s=120.0)
-        planner_id = planner.model_id
+        shots = []
+        if a.few_shot:
+            demo = build_examples(read_records([Path(p) for p in a.few_shot]), docs, tok, a.max_in, drop_truncated_gold=True)
+            by_kind: dict[str, list] = {}
+            for d in demo:
+                kind = d.gold.op if d.gold.op in ("lookup", "abstain") else "calc"
+                by_kind.setdefault(kind, []).append(d)
+            for i in range(a.shots_per_kind):                       # the i-th shortest example of each kind: small, and the same every run
+                for kind in ("lookup", "calc", "abstain"):
+                    pool = sorted(by_kind.get(kind, []), key=lambda d: (len(d.input_text), d.qid))
+                    if i < len(pool):
+                        shots.append((pool[i].input_text, pool[i].target_text))
+        planner = EnginePlanner(a.engine_url, a.engine_model, timeout_s=120.0, shots=shots)
+        planner_id = planner.model_id + (f" +{len(shots)} shots" if shots else "")
         planner.health()
         with cf.ThreadPoolExecutor(a.concurrency) as pool:
-            plans = list(pool.map(lambda e: planner.plan(e.question, e.table, e.context), examples))
+            scored = list(pool.map(lambda e: planner.plan_scored(e.question, e.table, e.context, logprobs=a.confidence), examples))
+        plans = [s[:4] for s in scored]
+        if a.confidence:
+            confidences = {e.qid: s[4] for e, s in zip(examples, scored, strict=True)}
     elif a.planner == "neural":
         from tabletrace.model.planner import NeuralPlanner
 
         planner = NeuralPlanner(a.model, max_in=a.max_in, threads=a.threads or None,
                                quantize=(a.quantize_scope if a.quantize else False))
         planner_id = planner.model_id
-        plans = planner.plan_batch([(e.question, e.table, e.context) for e in examples], batch_size=a.bs)
+        if a.confidence:
+            scored = planner.plan_batch_scored([(e.question, e.table, e.context) for e in examples], batch_size=a.bs)
+            plans = [s[:4] for s in scored]
+            confidences = {e.qid: s[4] for e, s in zip(examples, scored, strict=True)}
+        else:
+            plans = planner.plan_batch([(e.question, e.table, e.context) for e in examples], batch_size=a.bs)
     else:
         plans = []
         for e in examples:
@@ -144,13 +174,16 @@ def main() -> None:
             "truncated_gold": e.truncated_gold, "ms": ms, "gold_subject_fail": gold_subject_fail,
             "checks": [c.model_dump() for c in res.verdict.checks],
         })
+        if e.qid in confidences:
+            rows[-1]["confidence"] = confidences[e.qid]
     metrics = summarize(rows)
     answerable_rows = [r for r in rows if r["gold_status"] == "answered"]
     metrics["gold_subject_fail_rate"] = round(sum(r["gold_subject_fail"] for r in answerable_rows) / len(answerable_rows), 4) if answerable_rows else None
     metrics["entity_check"] = not a.no_entity_check
     meta = {"planner": a.planner, "model": planner_id, "data": a.data, "corpus": a.corpus, "n": len(rows),
             "wall_s": round(time.time() - t0, 1), "hardware": platform.processor() or platform.machine(),
-            "label": a.label, "table_format": get_table_format(), "evidence_repair": not a.no_repair, "entity_check": not a.no_entity_check, "column_check": a.column_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None}
+            "label": a.label, "table_format": get_table_format(), "evidence_repair": not a.no_repair, "entity_check": not a.no_entity_check, "column_check": a.column_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None,
+            "confidence": bool(confidences), "few_shot": a.few_shot or None}
     (out / "metrics.json").write_text(json.dumps({"meta": meta, "metrics": metrics}, ensure_ascii=False, indent=1))
     with open(out / "predictions.jsonl", "w", encoding="utf-8") as f:
         for r in rows:

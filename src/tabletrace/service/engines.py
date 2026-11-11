@@ -27,8 +27,21 @@ SYSTEM_PROMPT = (
 )
 
 
+def confidence_from(token_logprobs: list[float]) -> dict | None:
+    """Summaries of one generated sequence. `mean_logprob` does not depend on length; `min_logprob` is the least certain token."""
+    if not token_logprobs:
+        return None
+    total = float(sum(token_logprobs))
+    return {"tokens": len(token_logprobs), "sum_logprob": round(total, 5), "mean_logprob": round(total / len(token_logprobs), 5),
+            "min_logprob": round(float(min(token_logprobs)), 5)}
+
+
 class EnginePlanner:
-    def __init__(self, base_url: str, model: str, api_key: str = "EMPTY", timeout_s: float = 30.0, max_tokens: int = 64) -> None:
+    def __init__(self, base_url: str, model: str, api_key: str = "EMPTY", timeout_s: float = 30.0, max_tokens: int = 64,
+                 shots: list[tuple[str, str]] | None = None) -> None:
+        """`shots`: (input, program) pairs shown as earlier turns of the chat. A model that was not tuned on the program
+        grammar (a larger EXAONE used as a reference) needs them; the tuned planner is always called without."""
+        self.shots = shots or []
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.model_id = f"engine:{model}"
@@ -42,19 +55,32 @@ class EnginePlanner:
         return r.json()
 
     def complete(self, prompt: str) -> str:
-        body = {"model": self.model, "messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
+        return self.complete_scored(prompt, logprobs=False)[0]
+
+    def complete_scored(self, prompt: str, logprobs: bool = True) -> tuple[str, dict | None]:
+        """-> (text, confidence). The confidence is built from the log-probabilities of the generated tokens, which
+        OpenAI-compatible servers (vLLM, SGLang) return with `logprobs: true`; None when the server sends none."""
+        demos = [m for x, y in self.shots for m in ({"role": "user", "content": x}, {"role": "assistant", "content": y})]
+        body = {"model": self.model, "messages": [{"role": "system", "content": SYSTEM_PROMPT}, *demos, {"role": "user", "content": prompt}],
                 "max_tokens": self.max_tokens, "temperature": 0.0}
+        if logprobs:
+            body["logprobs"] = True
         r = self.client.post("/v1/chat/completions", json=body)
         r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
+        choice = r.json()["choices"][0]
+        content = (choice.get("logprobs") or {}).get("content") or []
+        return choice["message"]["content"], confidence_from([t["logprob"] for t in content if t.get("logprob") is not None])
 
     def plan(self, question: str, table: Table, context: str | None = None) -> tuple[Program | None, str, int, float]:
+        return self.plan_scored(question, table, context, logprobs=False)[:4]
+
+    def plan_scored(self, question: str, table: Table, context: str | None = None, logprobs: bool = True) -> tuple[Program | None, str, int, float, dict | None]:
         text = build_input(question, table, context)
         t0 = time.perf_counter()
-        raw = self.complete(text)
+        raw, conf = self.complete_scored(text, logprobs=logprobs)
         ms = (time.perf_counter() - t0) * 1000
         try:
             prog = parse(raw, table.id)
         except ProgramParseError:
             prog = None
-        return prog, raw, table.n_rows, ms
+        return prog, raw, table.n_rows, ms, conf
