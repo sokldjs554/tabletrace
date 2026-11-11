@@ -107,6 +107,11 @@ def test_plain_text_answers_and_text_tool_calls(engine, planner, medal_table):
     prog, _raw, _rows, _ms, steps, info = planner.plan_traced("text_blocks", medal_table)       # a server that does not parse tool calls
     assert prog.cells[0].cid == "r2c5" and [s.tool for s in steps] == ["row_read"] and info["finished_by"] == "submit"
     assert tool_calls_of({"content": "<tool_call>{not json}</tool_call>"}) == [("text_0", "", None)]
+    # EXAONE-4.0-1.2B ended some turns right after the JSON, without the closing tag
+    unclosed = '<tool_call>{"name": "abstain", "arguments": {"reason": "not_in_document"}}'
+    assert tool_calls_of({"content": unclosed}) == [("text_0", "abstain", {"reason": "not_in_document"})]
+    two = '<tool_call>{"name": "row_read", "arguments": {"row": 1}}</tool_call>\n<tool_call>{"name": "row_read", "arguments": {"row": 2}}'
+    assert [c[2] for c in tool_calls_of({"content": two})] == [{"row": 1}, {"row": 2}]
 
 
 def test_a_wrong_submission_is_still_stopped_by_the_verifier(engine, planner, medal_table):

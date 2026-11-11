@@ -61,7 +61,7 @@ TOOLS = [
     _fn("abstain", "Decline: the table does not answer the question.", {"reason": {"type": "string", "enum": REASONS}}, []),
 ]
 READ_TOOLS = {"cell_find", "row_read", "column_read", "calculate"}
-_BLOCK = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.S)
+_BLOCK = re.compile(r"<tool_call>\s*(\{.*?\})\s*(?:</tool_call>|\Z)", re.S)      # a model may end its turn without closing the last block
 
 
 def tool_calls_of(message: dict) -> list[tuple[str, str, dict | None]]:

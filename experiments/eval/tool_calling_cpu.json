@@ -1,0 +1,277 @@
+{
+ "runs": {
+  "tools": {
+   "dir": "exaone_base_tools_cpu_ko_custom",
+   "model": "engine:planner+tools",
+   "hardware": "cpu-4vcpu-fp32",
+   "wall_s": 1558.3,
+   "seconds_per_question": 51.9,
+   "n": 30,
+   "verified_em": {
+    "k": 5,
+    "n": 30,
+    "rate": 0.1667,
+    "lo": 0.0734,
+    "hi": 0.3356
+   },
+   "withheld": {
+    "k": 29,
+    "n": 30,
+    "rate": 0.9667,
+    "lo": 0.8333,
+    "hi": 0.9941
+   },
+   "wrong_answer_sent": {
+    "k": 1,
+    "n": 30,
+    "rate": 0.0333,
+    "lo": 0.0059,
+    "hi": 0.1667
+   },
+   "by_category": {
+    "abstain": {
+     "k": 5,
+     "n": 5
+    },
+    "calc": {
+     "k": 0,
+     "n": 6
+    },
+    "cell": {
+     "k": 0,
+     "n": 9
+    },
+    "text_table": {
+     "k": 0,
+     "n": 5
+    },
+    "unit_period": {
+     "k": 0,
+     "n": 5
+    }
+   },
+   "tool_calling": {
+    "model_calls_mean": 2.5,
+    "tool_calls_mean": 2.53,
+    "tool_errors": 1,
+    "finished_by": {
+     "no_tool_call": 8,
+     "abstain": 17,
+     "max_steps": 1,
+     "submit": 4
+    },
+    "tools_used": {
+     "cell_find": 34,
+     "row_read": 20,
+     "calculate": 1
+    },
+    "episodes_that_read_the_table": 28
+   }
+  },
+  "fewshot": {
+   "dir": "exaone_base_fewshot_cpu_ko_custom",
+   "model": "engine:planner +3 shots",
+   "hardware": "cpu-4vcpu-fp32",
+   "wall_s": 643.6,
+   "seconds_per_question": 21.5,
+   "n": 30,
+   "verified_em": {
+    "k": 6,
+    "n": 30,
+    "rate": 0.2,
+    "lo": 0.0951,
+    "hi": 0.3731
+   },
+   "withheld": {
+    "k": 20,
+    "n": 30,
+    "rate": 0.6667,
+    "lo": 0.4878,
+    "hi": 0.8077
+   },
+   "wrong_answer_sent": {
+    "k": 7,
+    "n": 30,
+    "rate": 0.2333,
+    "lo": 0.1179,
+    "hi": 0.4093
+   },
+   "by_category": {
+    "abstain": {
+     "k": 3,
+     "n": 5
+    },
+    "calc": {
+     "k": 0,
+     "n": 6
+    },
+    "cell": {
+     "k": 1,
+     "n": 9
+    },
+    "text_table": {
+     "k": 1,
+     "n": 5
+    },
+    "unit_period": {
+     "k": 1,
+     "n": 5
+    }
+   },
+   "few_shot": [
+    "data/ko/train.jsonl",
+    "data/ko/synthetic_train.jsonl"
+   ]
+  }
+ },
+ "reference": {
+  "heuristic": {
+   "dir": "heuristic_ko_custom",
+   "n": 30,
+   "verified_em": {
+    "k": 15,
+    "n": 30,
+    "rate": 0.5,
+    "lo": 0.3315,
+    "hi": 0.6685
+   },
+   "withheld": {
+    "k": 15,
+    "n": 30,
+    "rate": 0.5,
+    "lo": 0.3315,
+    "hi": 0.6685
+   },
+   "wrong_answer_sent": {
+    "k": 5,
+    "n": 30,
+    "rate": 0.1667,
+    "lo": 0.0734,
+    "hi": 0.3356
+   },
+   "by_category": {
+    "abstain": {
+     "k": 5,
+     "n": 5
+    },
+    "calc": {
+     "k": 5,
+     "n": 6
+    },
+    "cell": {
+     "k": 4,
+     "n": 9
+    },
+    "text_table": {
+     "k": 0,
+     "n": 5
+    },
+    "unit_period": {
+     "k": 1,
+     "n": 5
+    }
+   }
+  },
+  "mt5_final": {
+   "dir": "rl_v3_ko_custom",
+   "n": 30,
+   "verified_em": {
+    "k": 4,
+    "n": 30,
+    "rate": 0.1333,
+    "lo": 0.0531,
+    "hi": 0.2968
+   },
+   "withheld": {
+    "k": 11,
+    "n": 30,
+    "rate": 0.3667,
+    "lo": 0.2187,
+    "hi": 0.5449
+   },
+   "wrong_answer_sent": {
+    "k": 18,
+    "n": 30,
+    "rate": 0.6,
+    "lo": 0.4232,
+    "hi": 0.7541
+   },
+   "by_category": {
+    "abstain": {
+     "k": 3,
+     "n": 5
+    },
+    "calc": {
+     "k": 0,
+     "n": 6
+    },
+    "cell": {
+     "k": 1,
+     "n": 9
+    },
+    "text_table": {
+     "k": 0,
+     "n": 5
+    },
+    "unit_period": {
+     "k": 0,
+     "n": 5
+    }
+   }
+  },
+  "exaone_tuned_full": {
+   "dir": "exaone_full_vllm_ko_custom",
+   "n": 30,
+   "verified_em": {
+    "k": 20,
+    "n": 30,
+    "rate": 0.6667,
+    "lo": 0.4878,
+    "hi": 0.8077
+   },
+   "withheld": {
+    "k": 2,
+    "n": 30,
+    "rate": 0.0667,
+    "lo": 0.0185,
+    "hi": 0.2132
+   },
+   "wrong_answer_sent": {
+    "k": 9,
+    "n": 30,
+    "rate": 0.3,
+    "lo": 0.1666,
+    "hi": 0.4788
+   },
+   "by_category": {
+    "abstain": {
+     "k": 1,
+     "n": 5
+    },
+    "calc": {
+     "k": 6,
+     "n": 6
+    },
+    "cell": {
+     "k": 9,
+     "n": 9
+    },
+    "text_table": {
+     "k": 0,
+     "n": 5
+    },
+    "unit_period": {
+     "k": 4,
+     "n": 5
+    }
+   }
+  }
+ },
+ "paired_tools_vs_fewshot": {
+  "n": 30,
+  "tools_only": 2,
+  "fewshot_only": 3,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ }
+}
