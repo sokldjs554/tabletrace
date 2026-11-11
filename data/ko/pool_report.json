@@ -1,0 +1,21 @@
+{
+ "tables_after_filter": 7294,
+ "tables_used_by_main_split": 1140,
+ "tables_unused": 6154,
+ "main_split_pages_shared": {
+  "test_tables_on_a_page_with_a_train_table": 5,
+  "test_tables": 180
+ },
+ "pool_tables_dropped_same_page_as_dev_or_test": 43,
+ "pool_tables": 6111,
+ "pool_questions": {
+  "unused_table": 28422,
+  "train_table_extra": 1497
+ },
+ "pool_questions_total": 29919,
+ "official_split_of_pool_questions": {
+  "dev": 5170,
+  "train": 24749
+ },
+ "pool_questions_on_dev_or_test_tables": 0
+}

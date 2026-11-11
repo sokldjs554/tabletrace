@@ -30,6 +30,8 @@ from pydantic import BaseModel, Field
 
 from tabletrace import __version__
 from tabletrace.agent.graph import AgentRuntime
+from tabletrace.chat.agent import ChatAgent
+from tabletrace.chat.memory import UserMemory
 from tabletrace.corpus.store import CorpusStore
 from tabletrace.model.serialize import get_table_format
 from tabletrace.retrieval.index import CorpusIndex
@@ -54,6 +56,16 @@ def git_commit() -> str:
 class AskRequest(BaseModel):
     question: str = Field(min_length=2, max_length=300)
     corpus: Corpus
+    doc_id: str | None = Field(default=None, max_length=64)
+    table_id: str | None = Field(default=None, max_length=64)
+    planner: Literal["auto", "neural", "heuristic"] = "auto"
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=300)
+    session_id: str | None = Field(default=None, max_length=32, pattern=r"^[A-Za-z0-9]+$")
+    user_id: str | None = Field(default=None, max_length=64, pattern=r"^[A-Za-z0-9_.-]+$")
+    corpus: Corpus | None = None
     doc_id: str | None = Field(default=None, max_length=64)
     table_id: str | None = Field(default=None, max_length=64)
     planner: Literal["auto", "neural", "heuristic"] = "auto"
@@ -100,6 +112,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         store, runtime = build_runtime(settings)
         state["store"], state["runtime"] = store, runtime
         state["runner"] = JobRunner(lambda req: runtime.run(**req), settings.max_concurrent_jobs, settings.job_timeout_s, settings.queue_limit)
+        state["chat"] = ChatAgent(runtime, store, UserMemory(settings.memory_path))
+        state["chat_runner"] = JobRunner(lambda req: state["chat"].handle(**req), settings.max_concurrent_jobs, settings.job_timeout_s, settings.queue_limit)
         state["started"] = time.time()
         grpc_server = None
         if settings.grpc_port:
@@ -188,6 +202,48 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await runner.wait(job, max_wait_s=settings.job_timeout_s + 1)
             return JSONResponse(job.view(), status_code=200 if job.status == "done" else 202)
         return job.view()
+
+    @app.post("/v1/chat")
+    async def chat(req: ChatRequest):
+        """One turn of a conversation. Memory decides which table and which full question to ask; the answer still
+        comes from the verified pipeline. Returns the reply text, what memory contributed, and the pipeline result."""
+        store: CorpusStore = state["store"]
+        if req.doc_id and req.doc_id not in store.docs:
+            raise HTTPException(404, "document not found")
+        if req.table_id and req.table_id not in store.tables:
+            raise HTTPException(404, "table not found")
+        if req.planner == "neural" and state["runtime"].neural is None:
+            raise HTTPException(409, "neural planner is not loaded on this server")
+        runner: JobRunner = state["chat_runner"]
+        try:
+            job = runner.submit(req.model_dump())
+        except OverflowError as e:
+            raise HTTPException(429, str(e)) from None
+        await runner.wait(job, max_wait_s=settings.job_timeout_s + 1)
+        if job.status != "done":
+            raise HTTPException(504 if job.status in ("timeout", "running", "queued") else 500, job.error or job.status)
+        return job.result
+
+    @app.get("/v1/chat/{session_id}")
+    def chat_session(session_id: str):
+        session = state["chat"].sessions.get(session_id)
+        if session is None:
+            raise HTTPException(404, "session not found (sessions are dropped after two idle hours)")
+        return session.view()
+
+    @app.get("/v1/users/{user_id}/memory")
+    def user_memory(user_id: str):
+        try:
+            return state["chat"].users.view(user_id)
+        except ValueError as e:
+            raise HTTPException(422, str(e)) from None
+
+    @app.delete("/v1/users/{user_id}/memory")
+    def forget_user(user_id: str):
+        try:
+            return {"removed": state["chat"].users.forget(user_id)}
+        except ValueError as e:
+            raise HTTPException(422, str(e)) from None
 
     @app.get("/v1/jobs/{job_id}")
     def job(job_id: str):

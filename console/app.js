@@ -21,7 +21,8 @@
   };
   const CATS = { cell: "셀 근거", calc: "계산", text_table: "본문+표", unit_period: "단위·기간 주의", abstain: "답 없음 → 보류" };
 
-  const state = { mode: null, corpus: "ko_tables", docs: [], doc: null, tableId: null, examples: [], recorded: null, release: null, busy: false, timer: null, lastEvidence: null };
+  const state = { mode: null, corpus: "ko_tables", docs: [], doc: null, tableId: null, examples: [], recorded: null, release: null, busy: false, timer: null, lastEvidence: null,
+    chat: { session: null, turns: [] } };
 
   // Recorded mode: runs are stored per planner ({planners: {exaone: {...runs}, neural: {...runs}, heuristic: {...runs}}}).
   // "auto" shows, for each question, the result of the strongest planner that has one.
@@ -48,12 +49,13 @@
     } finally { clearTimeout(t); }
   }
 
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage can be blocked (private window, sandboxed frame) */ } },
+  };
+
   // ---------- boot ----------
   async function init() {
-    const store = {
-      get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-      set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage can be blocked (private window, sandboxed frame) */ } },
-    };
     if (store.get("tt.intro") === "closed") $("#intro").hidden = true;
     $("#introclose").addEventListener("click", () => { $("#intro").hidden = true; store.set("tt.intro", "closed"); });
     try {
@@ -118,6 +120,11 @@
     $("#askform").addEventListener("submit", (e) => { e.preventDefault(); ask($("#question").value.trim()); });
     $("#question").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#askform").requestSubmit(); } });
     $("#planner").addEventListener("change", () => { if (state.mode === "recorded") { renderExamples(); if (state.lastRecordedId) showRecorded(state.lastRecordedId); } });
+    $("#chatnew").addEventListener("click", resetChat);
+    $("#chatmode").addEventListener("change", resetChat);
+    $("#chatuser").value = store.get("tt.user") || "";
+    $("#chatuser").addEventListener("change", () => store.set("tt.user", $("#chatuser").value.trim()));
+    if (state.mode !== "live") { $("#chatmode").disabled = true; $("#chatuser").disabled = true; $("#chatnew").disabled = true; $("#chatbox summary .muted").textContent = "백엔드가 연결된 실시간 모드에서만 쓸 수 있습니다"; }
     window.addEventListener("hashchange", route);
     $$(".navlink[data-view]").forEach((a) => a.addEventListener("click", () => setTimeout(route, 0)));
   }
@@ -178,6 +185,7 @@
     } catch (e) { showError("문서를 불러오지 못했습니다: " + e.message); return; }
     if (!doc) return;
     state.doc = doc; state.tableId = doc.tables.length ? doc.tables[0].id : null;
+    resetChat();                                   // another document starts another conversation
     $$("li[data-id]", $("#doclist")).forEach((li) => li.setAttribute("aria-selected", li.dataset.id === id));
     renderDoc(doc);
     renderExamples();
@@ -240,6 +248,27 @@
   }
 
   // ---------- asking ----------
+  // ---------- conversation (live mode): /v1/chat keeps the session; the page only shows the transcript ----------
+  function resetChat() { state.chat = { session: null, turns: [] }; renderTranscript(); }
+  function renderTranscript() {
+    $("#transcript").innerHTML = state.chat.turns.map((t) => `<li><span class="who">질문</span> <span class="said">${esc(t.message)}</span><br><span class="who">답</span> ${esc(t.text)}${t.notes && t.notes.length ? `<br><span class="who">기억</span> <span class="muted">${esc(t.notes.join(" "))}</span>` : ""}</li>`).join("");
+    const box = $("#transcript"); box.scrollTop = box.scrollHeight;
+  }
+  async function chatTurn(question, tableId) {
+    const user = $("#chatuser").value.trim();
+    const body = { message: question, corpus: state.corpus, planner: $("#planner").value, session_id: state.chat.session || undefined, user_id: user || undefined };
+    if (!state.chat.session || tableId) { body.doc_id = state.doc.id; body.table_id = tableId || state.tableId || undefined; }   // later turns rely on the session's table
+    const r = await fetchJSON("v1/chat", { method: "POST", body: JSON.stringify(body) }, 90000);
+    state.chat.session = r.session_id;
+    state.chat.turns.push({ message: question, text: r.text, notes: r.memory.notes });
+    renderTranscript();
+    return r;
+  }
+  function renderChatOnly(r) {
+    const box = $("#result"); box.hidden = false; clearEvidence();
+    box.innerHTML = `<div class="card"><div class="card-head"><span>기억 <span class="badge badge-mode">${esc(r.intent)}</span></span><span class="badge badge-rec">대화 ${r.turn + 1}번째 턴</span></div><div class="card-body"><div class="answer hold">${esc(r.text)}</div></div></div>`;
+  }
+
   function clearResult() { state.lastRecordedId = null; $("#result").hidden = true; $("#result").innerHTML = ""; $("#resultempty").hidden = false; $("#status").hidden = true; $("#errorbar").hidden = true; clearEvidence(); }
   function showError(msg, retry) {
     const bar = $("#errorbar"); bar.hidden = false;
@@ -258,6 +287,14 @@
     state.timer = setInterval(() => setStatus(`실행 중 · ${fmtMs(performance.now() - t0)} · 검색 → 제안 → 도구 → 검증`, true), 250);
     setStatus("작업을 제출했습니다…", true);
     try {
+      if ($("#chatmode").checked) {
+        const r = await chatTurn(question, tableId);
+        clearInterval(state.timer);
+        setStatus(`완료 · 대화 ${r.turn + 1}번째 턴 · ${fmtMs(performance.now() - t0)}`, false);
+        if (r.result) renderResult(r.result, { kind: "live", chat: r }); else renderChatOnly(r);
+        $("#question").value = "";
+        return;
+      }
       let job = await fetchJSON("v1/ask?wait=1", { method: "POST", body: JSON.stringify(body) }, 90000);
       while (job.status === "queued" || job.status === "running") {
         await new Promise((r) => setTimeout(r, 400));
@@ -311,6 +348,7 @@
     box.innerHTML = `
       <div class="card"><div class="card-head"><span>답변 ${modeBadge} ${plannerBadge}</span>${head}</div><div class="card-body">${bodyHtml}
         <p class="muted" style="margin:8px 0 0;font-size:12px">질문: ${esc(res.question)} · 표 ${esc(res.table_id || "-")} · ${fmtMs(res.elapsed_ms || 0)}</p>
+        ${meta.chat && (meta.chat.memory.notes.length || meta.chat.question !== meta.chat.message) ? `<p class="memline"><b>기억에서 채운 것</b> ${esc(meta.chat.memory.notes.join(" "))}<br>파이프라인에 보낸 질문: ${esc(meta.chat.question)}</p>` : ""}
         ${meta.source ? `<p class="muted provenance">모델 출력은 ${esc(meta.source.generated)}에 ${esc(meta.source.where)}에서 받아 저장한 것입니다. 검증·근거·실행 추적은 그 출력을 같은 파이프라인에 다시 넣은 결과입니다.</p>` : ""}</div></div>
       <div class="card"><div class="card-head"><span>근거</span><span>${res.evidence_cells.length}개 셀 · ${res.evidence_spans.length}개 문장</span></div><div class="card-body">${evidence}</div></div>
       ${calc ? `<div class="card"><div class="card-head"><span>계산</span><span>제한 계산기(사칙연산, 단위 검사)</span></div><div class="card-body calc">${calc}</div></div>` : ""}

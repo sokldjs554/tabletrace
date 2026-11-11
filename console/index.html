@@ -100,6 +100,16 @@
           <button type="submit" class="btn btn-primary" id="askbtn" disabled>실행</button>
         </div>
       </form>
+      <details class="chatbox" id="chatbox">
+        <summary>대화 모드 <span class="muted">이전 질문을 기억해 "그럼 ○○는?" 같은 후속 질문을 이어 갑니다</span></summary>
+        <div class="chatrow">
+          <label class="chatcheck"><input type="checkbox" id="chatmode"> 대화 이어가기</label>
+          <input type="text" id="chatuser" class="input" placeholder="사용자 ID (선택: 표 기억·선호 저장)" maxlength="64" autocomplete="off" aria-label="사용자 ID">
+          <button type="button" class="btn btn-quiet" id="chatnew">새 대화</button>
+        </div>
+        <p class="muted chathelp">예: "그럼 독전은?", "매출액은?", "그 영화의 개봉일은 언제입니까?", "이 표를 '박스오피스'로 기억해줘"(사용자 ID 필요). 답은 항상 검증 파이프라인이 내고, 기억은 어느 표의 어떤 질문인지만 채웁니다.</p>
+        <ol class="transcript" id="transcript" aria-live="polite"></ol>
+      </details>
       <div class="status" id="status" role="status" aria-live="polite" hidden></div>
       <div class="errorbar" id="errorbar" role="alert" hidden></div>
       <div class="result" id="result" hidden></div>

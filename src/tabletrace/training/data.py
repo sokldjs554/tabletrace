@@ -1,6 +1,7 @@
 """Turn QA records + corpus documents into (input_text, target_text) pairs for SFT / RL / eval."""
 from __future__ import annotations
 
+import gzip
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,11 +33,16 @@ class Example:
 def load_docs(*corpus_files: Path) -> dict[str, Document]:
     out = {}
     for corpus_file in corpus_files:
-        with open(corpus_file, encoding="utf-8") as f:
+        with _open_text(corpus_file) as f:
             for line in f:
                 d = Document.model_validate(json.loads(line))
                 out[d.id] = d
     return out
+
+
+def _open_text(path: Path):
+    """Plain or gzip-compressed JSON lines (the training pool is stored as .jsonl.gz)."""
+    return gzip.open(path, "rt", encoding="utf-8") if str(path).endswith(".gz") else open(path, encoding="utf-8")
 
 
 def gold_program(rec: dict, table_id: str) -> Program:
@@ -88,6 +94,6 @@ def build_examples(records: list[dict], docs: dict[str, Document], tokenizer, ma
 def read_records(paths: list[Path]) -> list[dict]:
     recs = []
     for p in paths:
-        with open(p, encoding="utf-8") as f:
+        with _open_text(p) as f:
             recs += [json.loads(line) for line in f if line.strip()]
     return recs

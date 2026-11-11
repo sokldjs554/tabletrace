@@ -100,6 +100,18 @@ table.tt td .evn { position: absolute; top: -8px; right: -6px; background: var(-
 .cellinfo { margin: -6px 0 12px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
 
 .askform { display: flex; flex-direction: column; gap: 8px; }
+.chatbox { margin: 8px 0 0; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; background: #fbfcfd; font-size: 13px; }
+.chatbox summary { cursor: pointer; font-weight: 600; }
+.chatbox summary .muted { font-weight: 400; font-size: 12px; margin-left: 6px; }
+.chatrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0 4px; }
+.chatrow .input { flex: 1; min-width: 150px; }
+.chatcheck { display: inline-flex; gap: 5px; align-items: center; white-space: nowrap; }
+.chathelp { margin: 4px 0; font-size: 12px; }
+.transcript { list-style: none; margin: 6px 0 2px; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; }
+.transcript li { border-left: 3px solid var(--line-strong); padding: 2px 8px; }
+.transcript .who { color: var(--muted); font-size: 11px; }
+.transcript .said { font-weight: 600; }
+.memline { margin: 6px 0 0; font-size: 12px; color: var(--rec); background: var(--rec-soft); border-radius: 6px; padding: 5px 8px; }
 .askrow { display: flex; gap: 8px; align-items: center; }
 .plannerlabel { flex: 1; display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .btn { font: inherit; border-radius: 6px; padding: 7px 14px; border: 1px solid var(--line-strong); background: #fff; cursor: pointer; color: var(--ink); }

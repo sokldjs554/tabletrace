@@ -1,0 +1,95 @@
+{
+ "planner": "heuristic",
+ "model": null,
+ "dialogs": 681,
+ "first_turn_correct": {
+  "k": 241,
+  "n": 681,
+  "rate": 0.3539,
+  "lo": 0.3189,
+  "hi": 0.3905
+ },
+ "resolver_kind_matches_template": {
+  "k": 681,
+  "n": 681,
+  "rate": 1.0,
+  "lo": 0.9944,
+  "hi": 1.0
+ },
+ "no_memory": {
+  "all": {
+   "k": 7,
+   "n": 681,
+   "rate": 0.0103,
+   "lo": 0.005,
+   "hi": 0.0211
+  },
+  "row_switch": {
+   "k": 4,
+   "n": 327,
+   "rate": 0.0122,
+   "lo": 0.0048,
+   "hi": 0.031
+  },
+  "column_switch": {
+   "k": 3,
+   "n": 354,
+   "rate": 0.0085,
+   "lo": 0.0029,
+   "hi": 0.0246
+  }
+ },
+ "memory": {
+  "all": {
+   "k": 242,
+   "n": 681,
+   "rate": 0.3554,
+   "lo": 0.3203,
+   "hi": 0.392
+  },
+  "row_switch": {
+   "k": 93,
+   "n": 327,
+   "rate": 0.2844,
+   "lo": 0.2382,
+   "hi": 0.3356
+  },
+  "column_switch": {
+   "k": 149,
+   "n": 354,
+   "rate": 0.4209,
+   "lo": 0.3706,
+   "hi": 0.4729
+  }
+ },
+ "oracle_memory": {
+  "all": {
+   "k": 374,
+   "n": 681,
+   "rate": 0.5492,
+   "lo": 0.5116,
+   "hi": 0.5862
+  },
+  "row_switch": {
+   "k": 100,
+   "n": 327,
+   "rate": 0.3058,
+   "lo": 0.2584,
+   "hi": 0.3578
+  },
+  "column_switch": {
+   "k": 274,
+   "n": 354,
+   "rate": 0.774,
+   "lo": 0.7276,
+   "hi": 0.8145
+  }
+ },
+ "memory_when_first_turn_correct": {
+  "k": 195,
+  "n": 241,
+  "rate": 0.8091,
+  "lo": 0.7548,
+  "hi": 0.8537
+ }
+}

@@ -22,4 +22,5 @@ class Settings(BaseSettings):
     max_question_chars: int = 300
     console_dir: str = "console"
     release: str = "dev"
+    memory_path: str = ""                     # SQLite file for per-user long-term memory (chat/memory.py); empty = kept in process memory only
     grpc_port: int = 0                        # > 0: also serve the gRPC API (service/grpc_server.py) on this port, sharing the runtime

@@ -1,0 +1,95 @@
+{
+ "planner": "neural",
+ "model": "experiments/rl_v3/model",
+ "dialogs": 681,
+ "first_turn_correct": {
+  "k": 344,
+  "n": 681,
+  "rate": 0.5051,
+  "lo": 0.4677,
+  "hi": 0.5426
+ },
+ "resolver_kind_matches_template": {
+  "k": 681,
+  "n": 681,
+  "rate": 1.0,
+  "lo": 0.9944,
+  "hi": 1.0
+ },
+ "no_memory": {
+  "all": {
+   "k": 118,
+   "n": 681,
+   "rate": 0.1733,
+   "lo": 0.1467,
+   "hi": 0.2035
+  },
+  "row_switch": {
+   "k": 117,
+   "n": 327,
+   "rate": 0.3578,
+   "lo": 0.3078,
+   "hi": 0.4111
+  },
+  "column_switch": {
+   "k": 1,
+   "n": 354,
+   "rate": 0.0028,
+   "lo": 0.0005,
+   "hi": 0.0158
+  }
+ },
+ "memory": {
+  "all": {
+   "k": 156,
+   "n": 681,
+   "rate": 0.2291,
+   "lo": 0.1991,
+   "hi": 0.2621
+  },
+  "row_switch": {
+   "k": 124,
+   "n": 327,
+   "rate": 0.3792,
+   "lo": 0.3283,
+   "hi": 0.4329
+  },
+  "column_switch": {
+   "k": 32,
+   "n": 354,
+   "rate": 0.0904,
+   "lo": 0.0648,
+   "hi": 0.1248
+  }
+ },
+ "oracle_memory": {
+  "all": {
+   "k": 184,
+   "n": 681,
+   "rate": 0.2702,
+   "lo": 0.2382,
+   "hi": 0.3048
+  },
+  "row_switch": {
+   "k": 126,
+   "n": 327,
+   "rate": 0.3853,
+   "lo": 0.3342,
+   "hi": 0.4391
+  },
+  "column_switch": {
+   "k": 58,
+   "n": 354,
+   "rate": 0.1638,
+   "lo": 0.1289,
+   "hi": 0.206
+  }
+ },
+ "memory_when_first_turn_correct": {
+  "k": 107,
+  "n": 344,
+  "rate": 0.311,
+  "lo": 0.2644,
+  "hi": 0.3618
+ }
+}

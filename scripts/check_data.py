@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+import gzip
 import json
 import sys
 from pathlib import Path
@@ -19,7 +20,8 @@ errors: list[str] = []
 
 
 def load(p: Path) -> list[dict]:
-    with open(p, encoding="utf-8") as f:
+    opener = gzip.open if p.suffix == ".gz" else open
+    with opener(p, "rt", encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
 
 
@@ -71,6 +73,25 @@ def main() -> int:
         for b in tabs:
             if a < b and tabs[a] & tabs[b]:
                 errors.append(f"ko split leak {a}&{b}: {len(tabs[a] & tabs[b])} shared tables")
+    # the extra training pool: gold cells hold the answers, and nothing in it touches a dev or test table
+    pool_docs = {d["id"]: d for d in load(ROOT / "data/ko/pool_documents.jsonl.gz")}
+    pool = load(ROOT / "data/ko/pool_train.jsonl.gz")
+    check_records(pool, {**ko_docs, **pool_docs}, "ko/pool", verify_gold=True)
+    held = tabs["dev"] | tabs["test"]
+    if any(r["table_id"] in held for r in pool) or any(t["id"] in held for d in pool_docs.values() for t in d["tables"]):
+        errors.append("ko/pool contains a dev or test table")
+    if set(pool_docs) & set(ko_docs):
+        errors.append("ko/pool documents repeat documents of the main split")
+    main_qids = {r["qid"] for recs in ko.values() for r in recs}
+    if any(r["qid"] in main_qids for r in pool):
+        errors.append("ko/pool repeats a question of the main split")
+    # two-turn dialogs: built on test tables only, and the follow-up's gold cell holds its answer
+    dialogs = load(ROOT / "data/ko/dialog_eval.jsonl")
+    for d in dialogs:
+        tbl = next(t for t in ko_docs[d["doc_id"]]["tables"] if t["id"] == d["table_id"])
+        (rr, cc), = d["gold_cells"]
+        if d["table_id"] not in tabs["test"] or Table.model_validate(tbl).cell(rr, cc) != d["answer"]:
+            errors.append(f"ko/dialog:{d['id']} is not a test table or its gold cell does not hold the answer")
     split = json.load(open(ROOT / "data/chem/split.json"))
     for a in split:
         for b in split:
@@ -88,6 +109,7 @@ def main() -> int:
     if bad:
         errors.append(f"chem/custom: records outside the test split: {bad}")
     summary = {"ko": {s: len(v) for s, v in ko.items()}, "ko_custom": len(load(ROOT / "data/ko/custom_eval.jsonl")),
+               "ko_pool": {"tables": len(pool_docs), "questions": len(pool)}, "ko_dialogs": len(dialogs),
                "chem_split": {k: len(v) for k, v in split.items()}, "chem_custom": len(custom), "errors": len(errors)}
     print(json.dumps(summary, ensure_ascii=False))
     for e in errors[:50]:

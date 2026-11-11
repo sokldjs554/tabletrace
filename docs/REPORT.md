@@ -980,3 +980,41 @@ E2E는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->18<!-- /nu
 - **재검증.** 저장된 모델 출력을 `repair=False`로 다시 검증했다(`scripts/no_repair_check.py`). 평가 <!-- num:experiments/eval/no_repair_check.json:runs_checked:int -->10<!-- /num -->개, <!-- num:experiments/eval/no_repair_check.json:questions_checked:int -->6,990<!-- /num -->문항에서 §19.1 표의 "근거 복구 없이 채점한 verified EM"과 다른 문항은 <!-- num:experiments/eval/no_repair_check.json:questions_that_differ:int -->0<!-- /num -->개다. mT5 최종 <!-- num:experiments/eval/no_repair_check.json:runs.rl_v3_ko_test.verified_em_with_repair:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/no_repair_check.json:runs.rl_v3_ko_test.verified_em_replayed:pct -->20.2<!-- /num -->%, EXAONE 300개 <!-- num:experiments/eval/no_repair_check.json:runs.exaone_vllm_ko_test.verified_em_with_repair:pct -->53.1<!-- /num -->% → <!-- num:experiments/eval/no_repair_check.json:runs.exaone_vllm_ko_test.verified_em_replayed:pct -->23.5<!-- /num -->%, 열 번호 형식 <!-- num:experiments/eval/no_repair_check.json:runs.exaone_colid_vllm_ko_test.verified_em_with_repair:pct -->51.1<!-- /num -->% → <!-- num:experiments/eval/no_repair_check.json:runs.exaone_colid_vllm_ko_test.verified_em_replayed:pct -->49.9<!-- /num -->%, EXAONE 전체 데이터 <!-- num:experiments/eval/no_repair_check.json:runs.exaone_full_vllm_ko_test.verified_em_with_repair:pct -->84.3<!-- /num -->% → <!-- num:experiments/eval/no_repair_check.json:runs.exaone_full_vllm_ko_test.verified_em_replayed:pct -->83.8<!-- /num -->%.
 - 서비스에 연결했다. 환경 변수 `TABLETRACE_EVIDENCE_REPAIR=0`이면 검증기가 복구하지 않고, `/v1/release`가 그 설정을 보고한다(`tests/test_service_evidence_repair.py`). 모델 제안이 보류되면 그래프는 다른 검증 실패와 같이 휴리스틱 보완 제안을 한 번 시도한다. 기본값은 복구를 켠 상태다.
 
+## 20. 공고 대조 뒤 보강한 것 (2026-11-11)
+
+공고 원문과 대조했을 때 비어 있던 항목을 하나씩 채운 기록이다. 절마다 "한 것", "측정", "하지 않은 것"을 나눠 적는다. 소유자가 GPU에서 돌려야 하는 것은 준비까지만 했고 그렇게 적었다.
+
+### 20.1 gRPC
+
+REST와 같은 런타임을 쓰는 gRPC 서버를 넣었다(`proto/tabletrace/service/pb/tabletrace.proto`, `service/grpc_server.py`). 단항 호출 `Release`, `Ask`, `Calculate`와 서버 스트리밍 `AskStream`이 있다. `AskStream`은 LangGraph의 `stream(stream_mode="updates")`를 그대로 흘려보내서, 검색·제안·도구 호출·검증 단계가 끝날 때마다 한 메시지씩 간다. 동시 실행과 대기열 한도는 REST와 같은 설정을 쓰고 넘치면 `RESOURCE_EXHAUSTED`다. 테스트 11개(`tests/test_grpc.py`)가 실제 서버를 띄워 네 호출, 잘못된 입력의 상태 코드, 한도 초과, REST와 답이 같은지를 본다. 하지 않은 것: 인증, TLS, 양방향 스트리밍, 부하 측정.
+
+### 20.2 대화, 기억, Personal Agent
+
+**한 것.** `chat/` 패키지(`memory.py`, `resolve.py`, `agent.py`)와 `POST /v1/chat`, `GET /v1/chat/{session_id}`, `GET`·`DELETE /v1/users/{user_id}/memory`, 콘솔의 대화 모드.
+
+- 세션 기억: 턴마다 표, 완성된 질문, 답, 근거 셀을 남긴다. 프로세스 메모리, 세션 500개 한도, 2시간 유휴 뒤 삭제.
+- 사용자 기억: SQLite. 이름 붙인 표(pin), 선호 두 가지(답 형식, 기본 코퍼스), 최근 질문 기록. "내 기억 지워줘"로 전부 지운다. 사용자 ID는 글자 규칙만 검사하고 인증은 없다.
+- 후속 질문 완성: 규칙 세 가지. 이전 답의 근거 셀에서 행 이름과 열 이름을 얻고, 새 메시지가 다른 행 이름이면 이전 질문에서 행 이름을 바꾸고(row switch), 다른 열 이름이면 열 이름을 바꾸거나 "행의 열은 무엇입니까?"로 다시 쓰고(column switch), "그 영화" 같은 지시어는 이전 행 이름으로 바꾼다(reference). 표에 없는 말로는 바꾸지 않는다.
+- 답은 기존 `AgentRuntime.run`이 낸다. 기억이 한 일은 실행 추적 맨 앞의 `memory` 단계와 응답의 `memory.notes`에 적힌다.
+
+**측정.** `scripts/data/build_dialog_eval.py`가 시험 분할 질문 539개에서 2턴 대화 <!-- num:experiments/eval/dialog/heuristic.json:dialogs:int -->681<!-- /num -->개를 만든다. 첫 턴은 원래 질문이고, 둘째 턴은 틀이다("그럼 {다른 행 이름}은?", "그럼 {다른 열 이름}은?"). 첫 질문에 행 이름이 드러나지 않는 184문항은 뺐다. `scripts/eval_dialog.py`가 세 조건으로 둘째 턴을 채점한다.
+
+| 플래너 | 첫 턴 정답 | 기억 없이 | 기억 사용 | 첫 턴이 정답일 때 | 상한(정답 근거를 기억에 넣음) |
+|---|---:|---:|---:|---:|---:|
+| 휴리스틱 | <!-- num:experiments/eval/dialog/heuristic.json:first_turn_correct.rate:pct -->35.4<!-- /num -->% | <!-- num:experiments/eval/dialog/heuristic.json:no_memory.all.rate:pct -->1.0<!-- /num -->% | <!-- num:experiments/eval/dialog/heuristic.json:memory.all.rate:pct -->35.5<!-- /num -->% | <!-- num:experiments/eval/dialog/heuristic.json:memory_when_first_turn_correct.rate:pct -->80.9<!-- /num -->% | <!-- num:experiments/eval/dialog/heuristic.json:oracle_memory.all.rate:pct -->54.9<!-- /num -->% |
+| mT5-small 최종 | <!-- num:experiments/eval/dialog/neural.json:first_turn_correct.rate:pct -->50.5<!-- /num -->% | <!-- num:experiments/eval/dialog/neural.json:no_memory.all.rate:pct -->17.3<!-- /num -->% | <!-- num:experiments/eval/dialog/neural.json:memory.all.rate:pct -->22.9<!-- /num -->% | <!-- num:experiments/eval/dialog/neural.json:memory_when_first_turn_correct.rate:pct -->31.1<!-- /num -->% | <!-- num:experiments/eval/dialog/neural.json:oracle_memory.all.rate:pct -->27.0<!-- /num -->% |
+
+| 플래너 | 행 바꾸기: 기억 없이 → 기억 → 상한 | 열 바꾸기: 기억 없이 → 기억 → 상한 |
+|---|---|---|
+| 휴리스틱 | <!-- num:experiments/eval/dialog/heuristic.json:no_memory.row_switch.rate:pct -->1.2<!-- /num -->% → <!-- num:experiments/eval/dialog/heuristic.json:memory.row_switch.rate:pct -->28.4<!-- /num -->% → <!-- num:experiments/eval/dialog/heuristic.json:oracle_memory.row_switch.rate:pct -->30.6<!-- /num -->% | <!-- num:experiments/eval/dialog/heuristic.json:no_memory.column_switch.rate:pct -->0.9<!-- /num -->% → <!-- num:experiments/eval/dialog/heuristic.json:memory.column_switch.rate:pct -->42.1<!-- /num -->% → <!-- num:experiments/eval/dialog/heuristic.json:oracle_memory.column_switch.rate:pct -->77.4<!-- /num -->% |
+| mT5-small 최종 | <!-- num:experiments/eval/dialog/neural.json:no_memory.row_switch.rate:pct -->35.8<!-- /num -->% → <!-- num:experiments/eval/dialog/neural.json:memory.row_switch.rate:pct -->37.9<!-- /num -->% → <!-- num:experiments/eval/dialog/neural.json:oracle_memory.row_switch.rate:pct -->38.5<!-- /num -->% | <!-- num:experiments/eval/dialog/neural.json:no_memory.column_switch.rate:pct -->0.3<!-- /num -->% → <!-- num:experiments/eval/dialog/neural.json:memory.column_switch.rate:pct -->9.0<!-- /num -->% → <!-- num:experiments/eval/dialog/neural.json:oracle_memory.column_switch.rate:pct -->16.4<!-- /num -->% |
+
+읽는 법.
+
+- 규칙이 고른 완성 종류는 틀과 <!-- num:experiments/eval/dialog/heuristic.json:resolver_kind_matches_template.k:int -->681<!-- /num -->/<!-- num:experiments/eval/dialog/heuristic.json:resolver_kind_matches_template.n:int -->681<!-- /num --> 일치했다. 틀이 규칙에 맞춰 만든 것이므로 당연한 값이고, 규칙의 일반성을 보여 주지 않는다.
+- 기억의 이득은 플래너에 달려 있다. 휴리스틱은 열 바꾸기에서 크게 오른다. 규칙이 쓴 문장이 행 이름과 열 이름을 그대로 담고 있어 어휘 겹침으로 풀리기 때문이다. mT5는 같은 문장에서 상한이 <!-- num:experiments/eval/dialog/neural.json:oracle_memory.column_switch.rate:pct -->16.4<!-- /num -->%다. 학습 데이터에 그런 문장이 없다.
+- mT5는 행 바꾸기에서 **기억 없이도** <!-- num:experiments/eval/dialog/neural.json:no_memory.row_switch.rate:pct -->35.8<!-- /num -->%를 맞혔다. "그럼 하리는?"처럼 무엇을 묻는지 없는 메시지인데도 그 행의 한 셀을 골라 맞힌 것이다. 이 데이터의 표에서는 답이 될 만한 열이 정해져 있는 경우가 많다는 뜻이고, 한 턴 평가 점수에도 같은 요인이 들어 있다.
+- 기억을 써도 첫 턴이 틀리면 둘째 턴도 틀린다. 기억에는 검증을 통과한 답의 근거만 들어가므로, 틀린 근거가 다음 턴으로 넘어간다.
+
+**하지 않은 것.** 사람이 나눈 대화로 평가하지 않았다. 주제 전환, 여러 표를 오가는 질문, 긴 대화 요약, 벡터 검색형 장기 기억, 언어모델이 대화를 관리하는 방식은 없다. EXAONE으로 재지 않았다. 세션 기억은 서버를 다시 띄우면 사라진다.
+

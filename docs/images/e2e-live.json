@@ -4,7 +4,7 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (44aea04)"
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (6085635)"
   },
   {
    "name": "desktop: document + examples rendered",
@@ -14,7 +14,7 @@
   {
    "name": "desktop: first example produced a result",
    "ok": true,
-   "detail": "완료 · 12 ms · 작업 01bbc1570afe"
+   "detail": "완료 · 13 ms · 작업 bfd1d8bc8036"
   },
   {
    "name": "desktop: evidence highlighted in table",
@@ -39,7 +39,22 @@
   {
    "name": "desktop: typed question executed",
    "ok": true,
-   "detail": "완료 · 9 ms · 작업 0043f12eede2"
+   "detail": "완료 · 13 ms · 작업 605c3a87095d"
+  },
+  {
+   "name": "desktop: conversation keeps three turns",
+   "ok": true,
+   "detail": "질문 국도 1호 자동차 전용도로 구간 중 호남로의 총연장은 몇 km입니까?답 22.8 / 질문 그럼 서부간선도로는?답 10.8기억 이전 턴의 표를 이어서 사용했습니다. 이전 질문에서 \"호남로\"를 \" / 질문 차로수는?답 4기억 이전 턴의 표를 이어서 사용했습니다. 이전 답의 행 \"서부간선도로\"에서 열을 \"차로"
+  },
+  {
+   "name": "desktop: follow-up answered from memory (row switch, then column switch)",
+   "ok": true,
+   "detail": "질문 국도 1호 자동차 전용도로 구간 중 호남로의 총연장은 몇 km입니까?답 22.8 /  서부간선도로는?답 10.8기억 이전 턴의 표를 이어서 사용했습니다. 이전 질문에서 \"호남로\"를 \"서부간선도로\"로 바꿨습니다. / 질문 차로수는?답 4기억 이전 턴의 표를 이어서 사용했습니다. 이전 답의 행 \"서부간선도로\"에서 열을 \"차로수\"로 바꿨습니다."
+  },
+  {
+   "name": "desktop: result card says what memory filled in",
+   "ok": true,
+   "detail": "기억에서 채운 것 이전 턴의 표를 이어서 사용했습니다. 이전 답의 행 \"서부간선도로\"에서 열을 \"차로수\"로 바꿨습니다.파이프라인에 보낸 질문: 서부간선도로의 차로수는 무엇입니까?"
   },
   {
    "name": "desktop: chemistry example produced a result",
@@ -54,7 +69,7 @@
   {
    "name": "mobile: mode badge",
    "ok": true,
-   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (44aea04)"
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (6085635)"
   },
   {
    "name": "mobile: document + examples rendered",
@@ -64,7 +79,7 @@
   {
    "name": "mobile: first example produced a result",
    "ok": true,
-   "detail": "완료 · 7 ms · 작업 ce43bff82eb4"
+   "detail": "완료 · 8 ms · 작업 df21843bd28e"
   },
   {
    "name": "mobile: evidence highlighted in table",

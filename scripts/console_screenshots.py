@@ -175,6 +175,25 @@ def main() -> None:
                         page.wait_for_function("() => document.querySelector('#status') && /완료|보류|오류/.test(document.querySelector('#status').textContent)", timeout=120000)
                         check("desktop: typed question executed", True, page.text_content("#status") or "")
                         page.screenshot(path=str(out / f"{tag}-{label}-05-typed.png"))
+                        # conversation mode: the second and third turns only make sense with the session's memory
+                        page.fill("#docfilter", "국도 1호")
+                        page.locator("#doclist li[data-id='doc_ko_8bcc6a21a4']").click()
+                        page.wait_for_selector("table.tt", timeout=15000)
+                        page.fill("#docfilter", "")
+                        page.click("#chatbox summary")
+                        page.check("#chatmode")
+                        done = "() => /완료|보류|오류/.test(document.querySelector('#status').textContent) && document.querySelectorAll('#transcript li').length === %d"
+                        for n, said in enumerate(["국도 1호 자동차 전용도로 구간 중 호남로의 총연장은 몇 km입니까?", "그럼 서부간선도로는?", "차로수는?"], start=1):
+                            page.fill("#question", said)
+                            page.press("#question", "Enter")
+                            page.wait_for_function(done % n, timeout=120000)
+                        turns = page.locator("#transcript li").all_text_contents()
+                        check("desktop: conversation keeps three turns", len(turns) == 3, " / ".join(t[:60] for t in turns))
+                        check("desktop: follow-up answered from memory (row switch, then column switch)",
+                              len(turns) == 3 and "22.8" in turns[0] and "10.8" in turns[1] and "서부간선도로" in turns[2], " / ".join(t[-70:] for t in turns))
+                        check("desktop: result card says what memory filled in", "서부간선도로의 차로수" in (page.text_content(".memline") or ""), (page.text_content(".memline") or "")[:120])
+                        page.screenshot(path=str(out / f"{tag}-{label}-09-chat.png"))
+                        page.uncheck("#chatmode")
                         # chemistry corpus
                         page.click(".segbtn[data-corpus='chem_docs']")
                         page.wait_for_selector(".chip", timeout=15000)

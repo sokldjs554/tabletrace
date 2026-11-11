@@ -1,0 +1,11 @@
+{
+ "seed": 13,
+ "test_questions": 539,
+ "skipped": {
+  "no_row_label_in_question": 184
+ },
+ "dialogs": 681,
+ "row_switch": 327,
+ "column_switch": 354,
+ "tables": 169
+}

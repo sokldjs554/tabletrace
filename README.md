@@ -91,6 +91,7 @@ TableTrace는 이 문제를 **"모델은 제안하고, 도구가 실행·검증�
 | Agent 워크플로 | LangGraph 상태 그래프: retrieve → propose → (tool) → verify → finalize, 검증 실패 시 1회 보완 제안 | `agent/graph.py` |
 | 서비스 API | FastAPI: 문서/표 조회, 검색, 비동기 작업(큐 제한·동시 실행 제한·시간 초과), 트레이스, 계산 도구, 그래프 | `service/` |
 | 콘솔 | 3단 워크벤치(문서 / 본문·표 / 질문·결과), 근거 셀↔배지 연결, 실시간/저장 결과 구분, 모바일 탭, 키보드 조작 | `console/` |
+| 대화와 기억 | 여러 턴 대화(`POST /v1/chat`). 이전 턴의 표와 근거 셀을 기억해 "그럼 독전은?", "매출액은?" 같은 후속 질문을 완성. 사용자별로 이름 붙여 기억한 표, 선호, 질문 기록을 SQLite에 보관. 답은 항상 같은 검증 파이프라인이 냄 | `chat/` |
 | 학습 | SFT(PyTorch + Transformers), GRPO 방식 강화학습(검증기 보상), 평가 러너, 벤치마크 | `training/`, `eval/`, `bench/` |
 
 ## 5. 데이터 출처·라이선스
@@ -141,6 +142,10 @@ flowchart LR
 - **비동기 처리**: CPU 바운드 추론은 스레드 풀에서 실행하고 이벤트 루프는 상태 조회·정적 파일을 계속 처리합니다. 상태: `queued → running → done | failed | timeout`, 큐 초과 시 429.
 - **LangGraph를 쓴 이유**: 분기(검증 실패 → 보완 제안)가 있는 짧은 워크플로를 명시적 그래프로 두면 노드 경계가 곧 콘솔의 실행 추적 단계가 되고, 플래너(모델/휴리스틱/외부 엔진)를 바꿔 끼워도 그래프가 같습니다. `GET /v1/graph`가 Mermaid를 반환합니다.
 - **gRPC**: REST와 같은 런타임을 쓰는 gRPC API가 있습니다(`proto/tabletrace/service/pb/tabletrace.proto`, `service/grpc_server.py`). `Ask`(답 하나), `Calculate`, `Release`는 REST를 그대로 옮긴 것이고, **`AskStream`은 그래프의 각 단계(검색, 제안, 도구 호출, 검증)가 끝날 때마다 서버가 밀어 주는 스트리밍 호출**입니다. REST는 작업 상태를 주기적으로 물어야 하지만 gRPC에서는 단계가 도착하는 대로 보입니다. 동시 실행 수와 대기열 한도는 REST와 같은 설정을 쓰고, 넘치면 `RESOURCE_EXHAUSTED`로 거절합니다. `TABLETRACE_GRPC_PORT=50051`(Docker 기본값)로 켜고, `tabletrace grpc-ask "질문" --corpus ko_tables`로 써 볼 수 있습니다. 인증과 TLS는 없습니다.
+
+- **대화와 기억(챗봇, Personal Agent)**: `chat/` 패키지가 한 건짜리 질의응답 위에 대화를 얹습니다. 기억은 두 층입니다. **세션 기억**은 이번 대화의 턴들(어느 표였는지, 완성된 질문, 답, 근거 셀)이고 프로세스 메모리에 있다가 2시간 쓰지 않으면 지워집니다. **사용자 기억**은 SQLite에 남는 것으로, 이름을 붙여 기억한 표("이 표를 '박스오피스'로 기억해줘" 뒤에는 "박스오피스 표에서 …"로 다시 부름), 선호(답 형식, 기본 코퍼스), 최근 질문 기록입니다. 후속 질문은 **규칙으로** 완성합니다. 이전 답의 근거 셀이 어느 행·열이었는지를 읽어서 행 바꾸기("그럼 독전은?"), 열 바꾸기("매출액은?"), 지시어("그 영화의 개봉일은?") 세 가지를 처리하고, 무엇을 채웠는지를 응답과 실행 추적에 적습니다. 언어모델이 대화를 관리하지는 않습니다. 기억은 "어느 표의 어떤 질문인가"만 채우고, 답과 근거는 언제나 검증 파이프라인이 냅니다.
+  - 측정: 시험 표의 원래 질문 뒤에 틀로 만든 후속 질문을 붙인 2턴 대화 <!-- num:experiments/eval/dialog/heuristic.json:dialogs:int -->681<!-- /num -->개(행 바꾸기 <!-- num:experiments/eval/dialog/heuristic.json:memory.row_switch.n:int -->327<!-- /num -->, 열 바꾸기 <!-- num:experiments/eval/dialog/heuristic.json:memory.column_switch.n:int -->354<!-- /num -->). 휴리스틱 플래너는 후속 질문만 주면 <!-- num:experiments/eval/dialog/heuristic.json:no_memory.all.rate:pct -->1.0<!-- /num -->%, 기억을 쓰면 <!-- num:experiments/eval/dialog/heuristic.json:memory.all.rate:pct -->35.5<!-- /num -->%를 맞혔고, 첫 턴을 맞힌 대화만 보면 <!-- num:experiments/eval/dialog/heuristic.json:memory_when_first_turn_correct.rate:pct -->80.9<!-- /num -->%입니다. 첫 턴의 근거를 정답으로 넣어 준 상한은 <!-- num:experiments/eval/dialog/heuristic.json:oracle_memory.all.rate:pct -->54.9<!-- /num -->%입니다. mT5 플래너는 <!-- num:experiments/eval/dialog/neural.json:no_memory.all.rate:pct -->17.3<!-- /num -->% → <!-- num:experiments/eval/dialog/neural.json:memory.all.rate:pct -->22.9<!-- /num -->%로 이득이 작았습니다. 규칙이 만든 문장("○○의 △△은 무엇입니까?")은 어휘 겹침에는 쉽고, 학습 때 그런 문장을 보지 못한 mT5에는 어렵기 때문입니다(열 바꾸기 상한 <!-- num:experiments/eval/dialog/neural.json:oracle_memory.column_switch.rate:pct -->16.4<!-- /num -->% 대 휴리스틱 <!-- num:experiments/eval/dialog/heuristic.json:oracle_memory.column_switch.rate:pct -->77.4<!-- /num -->%).
+  - 한계: 후속 질문은 틀 두 가지로 만든 것이고 사람이 나눈 대화가 아닙니다. 주제 전환, 여러 표를 오가는 대화, 사용자 인증은 없습니다. EXAONE으로는 재지 않았습니다. (docs/REPORT.md §20.2)
 
 ## 8. 데이터 분할과 평가 방법
 
@@ -808,7 +813,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | GitHub Pages 공개 배포 | 완료 | build·deploy 작업 success. 소유자가 2026-11-08 브라우저에서 페이지가 열리는 것을 확인(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 접속하지 못함) |
 | 저장된 결과 데모 호스팅(대체 경로) | 완료(비공개 링크) | 단일 파일 `scripts/build_artifact_page.py` → claude.ai Artifact. 소유자가 공유해야 공개됨, 실시간 모드는 호스팅하지 않음 |
 | gRPC | 완료 | 단항 호출 3개와 단계별 스트리밍 1개, REST와 같은 런타임·한도(§7). 테스트 11개(`tests/test_grpc.py`). 인증·TLS 없음 |
-| 챗봇(여러 턴 대화), 메모리 결합, Personal Agent | 미구현 | 공고 원문에는 있으나 이 프로젝트의 범위 밖. 질문 한 건에 답하는 에이전트 서비스만 있음 |
+| 챗봇(여러 턴 대화), 메모리 결합, Personal Agent | 완료(규칙 기반, 좁은 범위) | `chat/`, `POST /v1/chat`, 콘솔의 대화 모드. 세션 기억과 사용자 기억(SQLite), 후속 질문 완성 3종. 2턴 대화 <!-- num:experiments/eval/dialog/heuristic.json:dialogs:int -->681<!-- /num -->개에서 기억 없이 <!-- num:experiments/eval/dialog/heuristic.json:no_memory.all.rate:pct -->1.0<!-- /num -->% → 기억 <!-- num:experiments/eval/dialog/heuristic.json:memory.all.rate:pct -->35.5<!-- /num -->%(휴리스틱), <!-- num:experiments/eval/dialog/neural.json:no_memory.all.rate:pct -->17.3<!-- /num -->% → <!-- num:experiments/eval/dialog/neural.json:memory.all.rate:pct -->22.9<!-- /num -->%(mT5). 후속 질문은 틀로 만든 것이고, 언어모델이 대화를 관리하지는 않음(§7). 테스트 23개 |
 | 데이터 구조 이해용 PLM 구현 | 미구현(직렬화·튜닝으로 대체) | 표를 좌표 붙은 텍스트로 바꿔 일반 언어모델을 튜닝. 행·열 임베딩을 갖는 구조 전용 PLM은 만들지 않음 |
 | 근거 셀 오류·검증기 운영점·표 겹침 효과 측정 | 완료(CPU, 저장된 예측 재분석 + mT5 재평가) | §9.6, docs/REPORT.md §19. EXAONE의 표 겹침 효과는 GPU가 필요해 재지 않음(질문 세트는 `data/ko/leak_probe_*.jsonl`) |
 | 가까운 논문 12편 원문 확인 | 완료 | docs/research/papers.md, docs/research/fulltext/ |
