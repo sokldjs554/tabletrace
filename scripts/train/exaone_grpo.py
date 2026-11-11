@@ -222,12 +222,12 @@ def main() -> None:
             att = torch.tensor([[1] * len(x) + [0] * (n - len(x)) for x in seqs[sl]], device=device)
             cmask = torch.tensor([[0] * len(p) + [1] * len(c) + [0] * (n - len(p) - len(c)) for p, c in zip(prompts[sl], comps[sl], strict=True)], device=device)
             with torch.autocast(device_type=device.type, dtype=dtype, enabled=dtype != torch.float32):
-                logp, mask = grpo.completion_logprobs(model(input_ids=ids, attention_mask=att).logits, ids, cmask)
+                logp, mask = grpo.completion_logprobs(model(input_ids=ids, attention_mask=att).logits.float(), ids, cmask)   # float32 whatever the model's precision
                 share = mask.sum() / max(1, total_tokens)                # the loss functions average over their own tokens
                 loss = grpo.policy_gradient_loss(logp, mask, adv[sl]) * share
                 pg_sum += float(loss)
                 if a.beta > 0:
-                    ref_logp, _ = grpo.completion_logprobs(reference_logits(ids, att), ids, cmask)
+                    ref_logp, _ = grpo.completion_logprobs(reference_logits(ids, att).float(), ids, cmask)
                     kl = grpo.kl_k3(logp, ref_logp, mask) * share
                     kl_sum += float(kl)
                     loss = loss + a.beta * kl

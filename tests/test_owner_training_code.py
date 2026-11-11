@@ -20,6 +20,8 @@ import pytest
 def owner_module(name: str):
     if importlib.util.find_spec(f"tabletrace.training.{name}") is None:
         pytest.skip(f"tabletrace/training/{name}.py is not written yet (owner training task, docs/rewrite/06_training_code.md)")
+    if name in ("grpo", "lm_loop"):                # tensor code: the module may import torch at the top (CI installs no torch)
+        pytest.importorskip("torch")
     return importlib.import_module(f"tabletrace.training.{name}")
 
 
