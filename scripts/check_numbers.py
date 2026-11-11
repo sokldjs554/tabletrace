@@ -1,7 +1,7 @@
 """README / REPORT numbers must come from artifacts.
 
-Any number wrapped as <!-- num:path/to/file.json:dotted.key[:pct|:int] --> 12.3 <!-- /num --> in README.md or
-docs/REPORT.md is compared with the JSON artifact (`:pct` shows 100*value with one decimal, `:int` a rounded integer).
+Any number wrapped as <!-- num:path/to/file.json:dotted.key[:pct|:int] --> 12.3 <!-- /num --> in README.md,
+docs/REPORT.md or docs/ONE_PAGE.md is compared with the JSON artifact (`:pct` shows 100*value with one decimal, `:int` a rounded integer).
 Mismatch -> non-zero exit. Run `--fix` to rewrite. Zero markers is reported as a failure in --strict mode so the
 check cannot silently pass on an empty set.
 """
@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+DOC_NAMES = ["README.md", "docs/REPORT.md", "docs/ONE_PAGE.md"]
+DOCS = [ROOT / f for f in DOC_NAMES]
 PAT = re.compile(r"<!-- num:(?P<file>[^:\s]+):(?P<key>[^:\s]+)(?::(?P<fmt>pct|int))? -->(?P<val>.*?)<!-- /num -->", re.S)
 
 
@@ -45,7 +47,7 @@ MACRO = re.compile(r"\{\{(?P<file>[^|{}\s]+)\|(?P<key>[^|{}\s]+)(?:\|(?P<fmt>pct
 def expand() -> int:
     """Turn {{file|key|fmt}} macros written in README/REPORT prose into verified <!-- num --> markers."""
     n = 0
-    for md in [ROOT / "README.md", ROOT / "docs" / "REPORT.md"]:
+    for md in DOCS:
         if not md.exists():
             continue
         text = md.read_text(encoding="utf-8")
@@ -69,7 +71,7 @@ def main() -> int:
         return expand()
     fix = "--fix" in sys.argv
     bad = 0
-    for md in [ROOT / "README.md", ROOT / "docs" / "REPORT.md"]:
+    for md in DOCS:
         if not md.exists():
             continue
         text = md.read_text(encoding="utf-8")
@@ -96,11 +98,11 @@ def main() -> int:
         new = PAT.sub(repl, text)
         if fix and new != text:
             md.write_text(new, encoding="utf-8")
-    n = sum(len(PAT.findall((ROOT / f).read_text(encoding="utf-8"))) for f in ["README.md", "docs/REPORT.md"] if (ROOT / f).exists())
+    n = sum(len(PAT.findall((ROOT / f).read_text(encoding="utf-8"))) for f in DOC_NAMES if (ROOT / f).exists())
     print(f"checked {n} numbers, {bad} mismatches{' (fixed)' if fix and bad else ''}")
     if "--strict" in sys.argv:
         leftovers = []
-        for md in [ROOT / "README.md", ROOT / "docs" / "REPORT.md"]:
+        for md in DOCS:
             if md.exists():
                 t = md.read_text(encoding="utf-8")
                 leftovers += [f"{md.name}: {tok}" for tok in ("(채움)", "@@PENDING", "{{") if tok in t]

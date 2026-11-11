@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     engine_tools: bool = False                # the engine model picks tools step by step (agent/toolcall.py) instead of writing one program
     engine_api_key: str = "EMPTY"
     entity_check: bool = True                 # verifier: the question's subject must occur in the cited rows (TABLETRACE_ENTITY_CHECK=0 turns it off)
+    second_opinion: str = ""                  # directory of a trained table encoder (encoder/second_opinion.py); empty: off
+    second_opinion_mode: str = "row"          # row: the encoder must pick the evidence row; cell: the evidence cell
     evidence_repair: bool = True              # verifier: re-point a lookup to the cell that holds the answer (TABLETRACE_EVIDENCE_REPAIR=0 withholds instead)
     threads: int = 0
     max_concurrent_jobs: int = 2

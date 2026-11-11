@@ -105,7 +105,12 @@ def build_runtime(settings: Settings):
         neural = NeuralPlanner(model_dir, threads=settings.threads or None, quantize=(settings.quantize_scope or settings.quantize))
     elif settings.planner == "neural":
         raise RuntimeError(f"planner=neural but model dir {model_dir} is missing")
-    return store, AgentRuntime(indexes, neural, entity_check=settings.entity_check, evidence_repair=settings.evidence_repair)
+    second = None
+    if settings.second_opinion:
+        from tabletrace.encoder.second_opinion import SecondOpinion
+
+        second = SecondOpinion(settings.second_opinion, mode=settings.second_opinion_mode)
+    return store, AgentRuntime(indexes, neural, entity_check=settings.entity_check, evidence_repair=settings.evidence_repair, second_opinion=second)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -140,7 +145,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         rt: AgentRuntime = state["runtime"]
         return {"version": __version__, "commit": git_commit(), "release": settings.release,
                 "planner": "neural" if rt.neural else "heuristic", "model_id": rt.neural.model_id if rt.neural else None,
-                "quantized": bool(rt.neural and rt.neural.quantized), "table_format": get_table_format(), "row_select": get_row_select(), "entity_check": rt.entity_check, "evidence_repair": rt.evidence_repair, "grpc_port": state.get("grpc_port"), "max_concurrent_jobs": settings.max_concurrent_jobs,
+                "quantized": bool(rt.neural and rt.neural.quantized), "table_format": get_table_format(), "row_select": get_row_select(), "entity_check": rt.entity_check, "evidence_repair": rt.evidence_repair,
+                "second_opinion": {"model": rt.second_opinion.model_id, "mode": rt.second_opinion.mode} if rt.second_opinion else None, "grpc_port": state.get("grpc_port"), "max_concurrent_jobs": settings.max_concurrent_jobs,
                 "job_timeout_s": settings.job_timeout_s}
 
     @app.get("/v1/corpora")

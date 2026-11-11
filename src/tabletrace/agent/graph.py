@@ -19,7 +19,17 @@ from langgraph.graph import END, StateGraph
 from tabletrace.agent.heuristic import plan as heuristic_plan
 from tabletrace.agent.program import serialize
 from tabletrace.retrieval.index import CorpusIndex
-from tabletrace.schema import AnswerResult, Corpus, Document, PlannerInfo, Program, Table, TraceStep
+from tabletrace.schema import (
+    AnswerResult,
+    Check,
+    Corpus,
+    Document,
+    PlannerInfo,
+    Program,
+    Table,
+    TraceStep,
+    Verdict,
+)
 from tabletrace.verify.verifier import Resolution, resolve
 
 MAX_PROPOSALS = 2
@@ -51,11 +61,12 @@ class AgentRuntime:
     """Holds indexes and planners; builds one compiled graph that nodes close over."""
 
     def __init__(self, indexes: dict[str, CorpusIndex], neural_planner: Any | None = None, entity_check: bool = True,
-                 evidence_repair: bool = True) -> None:
+                 evidence_repair: bool = True, second_opinion: Any | None = None) -> None:
         self.indexes = indexes
         self.neural = neural_planner
         self.entity_check = entity_check
         self.evidence_repair = evidence_repair      # False: a lookup whose cited cell does not hold the answer is withheld, not repaired
+        self.second_opinion = second_opinion        # encoder/second_opinion.py: a verified lookup is withheld when the table encoder points elsewhere
         self.graph = self._build()
 
     # ---- nodes -------------------------------------------------------------------------
@@ -119,6 +130,18 @@ class AgentRuntime:
         res = resolve(s["question"], s.get("table"), s.get("program"), context=s.get("context"),
                       passage_id=s.get("context_passage_id") or "context", entity_check=self.entity_check, repair=self.evidence_repair)
         trace = s["trace"] + res.trace
+        prog = s.get("program")
+        if self.second_opinion is not None and res.status == "answered" and prog is not None and prog.op == "lookup" and res.cells:
+            t1 = time.perf_counter()
+            agree, detail, info = self.second_opinion.agrees(s["question"], s["table"], res.cells[0])
+            trace.append(TraceStep(step="tool", tool="second_opinion", input={"question": s["question"], "evidence_cell": res.cells[0].cid},
+                                   output=info, ms=(time.perf_counter() - t1) * 1000))
+            check = Check(name="second_opinion", passed=agree, detail=detail)
+            if agree:
+                res.verdict.checks.append(check)
+            else:                                   # two independent readers disagree: withhold rather than send a possibly wrong answer
+                res = Resolution(status="abstained", answer=None, cells=[], calculation=None, trace=res.trace, spans=[],
+                                 verdict=Verdict(status="abstained", reason="verification_failed", checks=[*res.verdict.checks, check]))
         trace.append(TraceStep(step="verify", output={"status": res.status, "reason": res.verdict.reason,
                                                        "checks": [c.model_dump() for c in res.verdict.checks]},
                                ms=(time.perf_counter() - t0) * 1000))
