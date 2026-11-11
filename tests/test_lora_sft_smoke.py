@@ -71,6 +71,53 @@ def test_lora_sft_accepts_the_column_id_table_format(tmp_path):
     assert all(x["loss"] == x["loss"] for x in info["loss_log"])
 
 
+def test_lora_sft_on_two_processes_and_with_extra_data(tmp_path):
+    """torchrun with two CPU processes: each trains on half of the data, gradients are averaged, rank 0 saves once.
+    --extra-train adds a random sample from another file on top of --limit."""
+    model_dir = _tiny_model(tmp_path)
+    out = tmp_path / "lora_ddp"
+    r = subprocess.run([sys.executable, "-m", "torch.distributed.run", "--nproc_per_node", "2", str(ROOT / "scripts/train/exaone_lora_sft.py"),
+                        "--model", str(model_dir), "--dtype", "fp32", "--train", str(ROOT / "data/chem/synthetic_train.jsonl"),
+                        "--corpus", str(ROOT / "data/chem/documents.jsonl"), "--out", str(out), "--epochs", "1", "--bs", "2", "--grad-accum", "2",
+                        "--limit", "8", "--extra-train", str(ROOT / "data/chem/synthetic_train.jsonl"), "--extra-n", "8", "--seed", "3",
+                        "--lora-r", "4", "--max-len", "1536"], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-2000:]
+    info = json.loads((out / "train_info.json").read_text())
+    assert info["world_size"] == 2 and info["n_examples"] == 16 and info["steps"] == 2          # 16 examples / 2 processes / (2 x 2)
+    assert all(x["loss"] == x["loss"] for x in info["loss_log"]) and (out / "adapter_config.json").exists()
+
+
+def test_lora_sft_with_the_owner_written_loop(tmp_path):
+    """--loop owner: masking, schedule and loop from tabletrace.training.lm_loop (skipped until the owner writes it)."""
+    import importlib.util
+
+    if importlib.util.find_spec("tabletrace.training.lm_loop") is None:
+        pytest.skip("tabletrace/training/lm_loop.py is not written yet (owner training task, docs/rewrite/06_training_code.md)")
+    model_dir = _tiny_model(tmp_path)
+    out = tmp_path / "lora_owner"
+    r = subprocess.run([sys.executable, str(ROOT / "scripts/train/exaone_lora_sft.py"), "--model", str(model_dir), "--dtype", "fp32",
+                        "--train", str(ROOT / "data/chem/synthetic_train.jsonl"), "--corpus", str(ROOT / "data/chem/documents.jsonl"),
+                        "--out", str(out), "--epochs", "2", "--bs", "2", "--grad-accum", "2", "--limit", "16", "--lora-r", "4",
+                        "--max-len", "1536", "--loop", "owner", "--warmup-steps", "2", "--lr", "1e-3"], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-2000:]
+    info = json.loads((out / "train_info.json").read_text())
+    assert info["loop"].startswith("tabletrace.training.lm_loop") and info["steps"] == 8        # 16 examples / (2 x 2) x 2 epochs
+    assert [x["step"] for x in info["loss_log"]] == list(range(1, 9))
+    assert all(x["loss"] == x["loss"] for x in info["loss_log"])                                 # finite
+    assert info["loss_log"][0]["lr"] == pytest.approx(0.5e-3) and info["loss_log"][-1]["lr"] < info["loss_log"][2]["lr"]
+    assert (out / "adapter_config.json").exists()
+
+
+def test_owner_loop_is_asked_for_by_name_when_missing(tmp_path):
+    import importlib.util
+
+    if importlib.util.find_spec("tabletrace.training.lm_loop") is not None:
+        pytest.skip("lm_loop exists")
+    r = subprocess.run([sys.executable, str(ROOT / "scripts/train/exaone_lora_sft.py"), "--model", "none", "--train", "x", "--corpus", "x",
+                        "--out", str(tmp_path / "o"), "--loop", "owner"], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode != 0 and "docs/rewrite/06_training_code.md" in r.stderr
+
+
 def test_tokenizer_config_is_made_portable(tmp_path):
     """transformers 5 saves extra_special_tokens as a list and names the class TokenizersBackend; SGLang's 4.57 cannot read that."""
     sys.path.insert(0, str(ROOT / "scripts" / "serving"))
