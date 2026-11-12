@@ -96,6 +96,8 @@ def main() -> None:
     ap.add_argument("--grad-ckpt", action="store_true",
                     help="gradient checkpointing for the update pass: keeps the activations of one layer instead of all of them (less GPU memory, more time)")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--force-scaler", action="store_true",
+                    help="smoke tests only: use a gradient scaler on any device and precision, so that the fp16 GPU path of the update runs on CPU")
     ap.add_argument("--reward", choices=["verifier", "random"], default="verifier",
                     help="random: smoke tests only. A seeded random level replaces the reward so that the update path runs on a model that cannot write programs")
     a = ap.parse_args()
@@ -125,8 +127,8 @@ def main() -> None:
     model.eval()                                                         # dropout off: the scored log-probs are those sampled from
     params = [p for n, p in model.named_parameters() if p.requires_grad and ".ref." not in n]
     opt = torch.optim.AdamW(params, lr=a.lr, weight_decay=0.0)
-    scaler = torch.amp.GradScaler("cuda") if dtype == torch.float16 and cuda else None
     device = next(model.parameters()).device
+    scaler = torch.amp.GradScaler(device.type) if a.force_scaler or (dtype == torch.float16 and cuda) else None
 
     def update_mode() -> None:
         """Checkpointing is only applied in training mode. Dropout stays off, so the scored log-probabilities are still
@@ -228,6 +230,7 @@ def main() -> None:
         total_tokens = sum(len(c) for c in comps)
         opt.zero_grad(set_to_none=True)
         pg_sum = kl_sum = 0.0
+        backward_done = False
         if cuda:
             torch.cuda.empty_cache()                                     # hand the generation cache back before the update pass
         update_mode()
@@ -255,17 +258,20 @@ def main() -> None:
                     kl_sum += float(kl.detach())
                     loss = loss + a.beta * kl
             (scaler.scale(loss) if scaler else loss).backward()
-        if scaler:
+            backward_done = True
+        # When every group scored the same there was no backward pass at all. The scaler must then be left alone: with no
+        # gradients it records nothing in unscale_ and update() raises (the owner's first fp16 run stopped there).
+        if scaler and backward_done:
             scaler.unscale_(opt)
         norm = torch.nn.utils.clip_grad_norm_(params, 1.0)
-        applied = bool(torch.isfinite(norm)) and float(norm) > 0
+        applied = backward_done and bool(torch.isfinite(norm)) and float(norm) > 0
         if applied:
             if scaler:
                 scaler.step(opt)
             else:
                 opt.step()
             updates += 1
-        if scaler:
+        if scaler and backward_done:
             scaler.update()
         levels = Counter(info["level"] for _, info in scored)
         rec = {"step": step, "reward_mean": round(float(rewards.mean()), 4), "groups_all_equal": round(float((rewards.std(1) == 0).float().mean()), 3),

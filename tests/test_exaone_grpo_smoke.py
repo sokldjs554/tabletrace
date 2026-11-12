@@ -38,7 +38,7 @@ def run(tmp_path, name, *extra):
 
 
 def test_update_path_runs_with_non_zero_advantages(tmp_path):
-    out, info, log = run(tmp_path, "grpo_random", "--reward", "random", "--beta", "0.05", "--merge")
+    out, info, log = run(tmp_path, "grpo_random", "--reward", "random", "--beta", "0.05", "--merge", "--force-scaler")   # scaler: the fp16 GPU path
     steps = [x for x in log if "step" in x and "dev" not in x]
     assert len(steps) == 2 and info["steps"] == 2 and info["updates_applied"] >= 1
     assert all(sum(x[k] for k in ("correct", "repaired", "withheld", "wrong", "unparsable")) == 6 for x in steps)     # 2 prompts x 3 samples
@@ -48,7 +48,9 @@ def test_update_path_runs_with_non_zero_advantages(tmp_path):
 
 
 def test_real_reward_on_a_model_that_cannot_write_programs(tmp_path):
-    _out, info, log = run(tmp_path, "grpo_verifier", "--grad-ckpt")        # also covers the checkpointed update pass
+    # --grad-ckpt: the checkpointed update pass. --force-scaler: on a GPU in fp16 a step in which every group scores the same
+    # has no backward pass, and the gradient scaler must not be updated then (the owner's Kaggle run stopped on that).
+    _out, info, log = run(tmp_path, "grpo_verifier", "--grad-ckpt", "--force-scaler")
     steps = [x for x in log if "step" in x and "dev" not in x]
     assert info["reward"].startswith("tabletrace.training.evidence_reward")
     assert all(x["unparsable"] + x["withheld"] + x["wrong"] + x["correct"] + x["repaired"] == 6 for x in steps)
