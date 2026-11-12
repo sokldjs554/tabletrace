@@ -22,7 +22,7 @@
 | 공개 데모 (GitHub Pages, 저장된 실행 결과 모드) | <https://sokldjs554.github.io/tabletrace/> — 소유자가 2026-11-08 브라우저에서 열리는 것을 확인. 2026-11-10부터 EXAONE 전체 데이터 모델의 저장 출력(한국어 대표 질문 16개)을 볼 수 있고, 모델이 인용한 셀과 검증기가 고친 근거 셀이 표에 따로 표시된다 |
 | 최종 보고서 | `docs/REPORT.md` (공고 대조표 §3, 확인 가능한 사실 §17, 2차 시도 §18) |
 | README | `README.md` (결과 표 §9·§10, 수행/미수행 표 §14) |
-| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (54건) |
+| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (55건) |
 | 한 장 요약 | `docs/ONE_PAGE.md` (모든 수치가 산출물에 묶여 검사됨) |
 | GPU 보강 실험 노트북 | `notebooks/gpu_experiments_2.ipynb` (준비만 됨. 실행 안내는 `docs/experiments/gpu-runbook.md` 끝) |
 | 본인이 직접 쓴 학습 코드 | `src/tabletrace/training/evidence_reward.py`, `grpo.py`, `lm_loop.py` (명세 `docs/rewrite/06_training_code.md`, 테스트 `tests/test_owner_training_code.py`, 기록 `docs/rewrite/LOG.md`) |

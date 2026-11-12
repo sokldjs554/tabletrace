@@ -109,7 +109,7 @@ python -m tabletrace.eval.run --planner engine --engine-url http://127.0.0.1:800
 | A2 | 모델이 도구를 스스로 골라 표를 읽는 방식(Tool Calling) | 32B만 2장 | 30분 + 60분 |
 | B | 학습 데이터를 풀로 늘림(약 1만, 약 3.4만 문항) | 1장, 2장이면 DDP로 절반 | 1.5시간, 5시간 |
 | C | 멀티 GPU 학습(DDP) 속도 | 2장 | 15분 |
-| D | EXAONE 강화학습(GRPO). 본인이 쓴 `training/evidence_reward.py`와 `training/grpo.py`를 불러 쓴다(2026-11-12 병합, PR #6) | 1장 | 1.5~2시간 |
+| D | EXAONE 강화학습(GRPO). 본인이 쓴 `training/evidence_reward.py`와 `training/grpo.py`를 불러 쓴다(2026-11-12 병합, PR #6). T4 한 장에서는 `--chunk 1`(노트북 기본값). `--chunk 2`는 메모리가 넘쳤다 | 1장 | 1.5~2시간 |
 | E | 튜닝 모델을 4비트로 올렸을 때의 정확도·속도·메모리 | 1장 | 20분 |
 | F | 열 번호 형식: 시드 둘 더, 전체 데이터 | 1장 | 1시간 |
 | G | 영어 화학(교과서 두 세트, 논문 표 62문항) | 1장 | 30분 |

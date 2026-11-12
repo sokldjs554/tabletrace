@@ -93,6 +93,8 @@ def main() -> None:
     ap.add_argument("--entity-check", action="store_true", help="reward with the stricter verifier (subject check on)")
     ap.add_argument("--table-format", choices=TABLE_FORMATS, default="plain")
     ap.add_argument("--merge", action="store_true")
+    ap.add_argument("--grad-ckpt", action="store_true",
+                    help="gradient checkpointing for the update pass: keeps the activations of one layer instead of all of them (less GPU memory, more time)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--reward", choices=["verifier", "random"], default="verifier",
                     help="random: smoke tests only. A seeded random level replaces the reward so that the update path runs on a model that cannot write programs")
@@ -110,6 +112,9 @@ def main() -> None:
     if tok.pad_token_id is None:
         tok.pad_token = tok.eos_token
     base = AutoModelForCausalLM.from_pretrained(a.model, torch_dtype=dtype, device_map="auto" if cuda else None, trust_remote_code=a.trust_remote_code)
+    if a.grad_ckpt:
+        base.gradient_checkpointing_enable()
+        base.enable_input_require_grads()
     if a.adapter:
         model = PeftModel.from_pretrained(base, a.adapter, is_trainable=True)
         if a.beta > 0:
@@ -122,6 +127,15 @@ def main() -> None:
     opt = torch.optim.AdamW(params, lr=a.lr, weight_decay=0.0)
     scaler = torch.amp.GradScaler("cuda") if dtype == torch.float16 and cuda else None
     device = next(model.parameters()).device
+
+    def update_mode() -> None:
+        """Checkpointing is only applied in training mode. Dropout stays off, so the scored log-probabilities are still
+        those of the distribution that was sampled from."""
+        if a.grad_ckpt:
+            model.train()
+            for m in model.modules():
+                if isinstance(m, torch.nn.Dropout):
+                    m.eval()
 
     docs = load_docs(*[Path(c) for c in a.corpus])
     set_table_format(a.table_format)
@@ -146,6 +160,7 @@ def main() -> None:
         """-> (prompt ids, completion ids) for every sample, group by group. A completion ends with its first EOS."""
         prompts = [prompt_ids(e) for e in batch]
         ids, att = left_pad(prompts)
+        model.eval()                                                     # generation uses the key-value cache; checkpointing would switch it off
         with torch.no_grad(), torch.autocast(device_type=device.type, dtype=dtype, enabled=dtype != torch.float32):
             gen = model.generate(input_ids=ids, attention_mask=att, max_new_tokens=a.max_new, pad_token_id=tok.pad_token_id,
                                  **({"do_sample": False} if greedy else {"do_sample": True, "temperature": a.temperature, "top_p": 1.0, "top_k": 0, "num_return_sequences": n}))
@@ -213,6 +228,9 @@ def main() -> None:
         total_tokens = sum(len(c) for c in comps)
         opt.zero_grad(set_to_none=True)
         pg_sum = kl_sum = 0.0
+        if cuda:
+            torch.cuda.empty_cache()                                     # hand the generation cache back before the update pass
+        update_mode()
         for s in range(0, len(seqs), a.chunk):
             sl = slice(s, s + a.chunk)
             if float(adv[sl].abs().sum()) == 0.0 and a.beta == 0:
@@ -221,15 +239,20 @@ def main() -> None:
             ids = torch.tensor([x + [tok.pad_token_id] * (n - len(x)) for x in seqs[sl]], device=device)
             att = torch.tensor([[1] * len(x) + [0] * (n - len(x)) for x in seqs[sl]], device=device)
             cmask = torch.tensor([[0] * len(p) + [1] * len(c) + [0] * (n - len(p) - len(c)) for p, c in zip(prompts[sl], comps[sl], strict=True)], device=device)
+            # Only the generated tokens are scored and they sit at the end, so the vocabulary-sized tensors are cut to that
+            # region before they are made float32: `first` is the position that predicts the first generated token of the
+            # shortest prompt in the chunk. The scored token/logit pairs are the same as with the whole sequence.
+            first = min(len(p) for p in prompts[sl]) - 1
             with torch.autocast(device_type=device.type, dtype=dtype, enabled=dtype != torch.float32):
-                logp, mask = grpo.completion_logprobs(model(input_ids=ids, attention_mask=att).logits.float(), ids, cmask)   # float32 whatever the model's precision
+                logits = model(input_ids=ids, attention_mask=att).logits[:, first:].float()      # float32 whatever the model's precision
+                logp, mask = grpo.completion_logprobs(logits, ids[:, first:], cmask[:, first:])
                 share = mask.sum() / max(1, total_tokens)                # the loss functions average over their own tokens
                 loss = grpo.policy_gradient_loss(logp, mask, adv[sl]) * share
-                pg_sum += float(loss)
+                pg_sum += float(loss.detach())
                 if a.beta > 0:
-                    ref_logp, _ = grpo.completion_logprobs(reference_logits(ids, att).float(), ids, cmask)
+                    ref_logp, _ = grpo.completion_logprobs(reference_logits(ids, att)[:, first:].float(), ids[:, first:], cmask[:, first:])
                     kl = grpo.kl_k3(logp, ref_logp, mask) * share
-                    kl_sum += float(kl)
+                    kl_sum += float(kl.detach())
                     loss = loss + a.beta * kl
             (scaler.scale(loss) if scaler else loss).backward()
         if scaler:

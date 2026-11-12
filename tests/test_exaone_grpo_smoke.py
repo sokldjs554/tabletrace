@@ -48,7 +48,7 @@ def test_update_path_runs_with_non_zero_advantages(tmp_path):
 
 
 def test_real_reward_on_a_model_that_cannot_write_programs(tmp_path):
-    _out, info, log = run(tmp_path, "grpo_verifier")
+    _out, info, log = run(tmp_path, "grpo_verifier", "--grad-ckpt")        # also covers the checkpointed update pass
     steps = [x for x in log if "step" in x and "dev" not in x]
     assert info["reward"].startswith("tabletrace.training.evidence_reward")
     assert all(x["unparsable"] + x["withheld"] + x["wrong"] + x["correct"] + x["repaired"] == 6 for x in steps)
