@@ -74,3 +74,20 @@ def test_second_notebook_cells_are_valid_python():
                 continue
             out.append(ln)
         ast.parse("\n".join(out), filename=f"cell {i}")
+
+
+@pytest.mark.parametrize("notebook", ["notebooks/gpu_experiments.ipynb", "notebooks/gpu_experiments_2.ipynb"])
+def test_notebook_cells_do_not_import_the_package_in_the_kernel(notebook):
+    """The kernel starts before the setup cell installs the package, so `tabletrace` cannot be imported inside a cell
+    (the owner's Kaggle run of the reinforcement-learning section stopped on a find_spec call). Scripts run as new
+    processes and are fine; a cell that needs to know whether a module exists must look at the file."""
+    import json
+
+    for cell in json.loads((ROOT / notebook).read_text(encoding="utf-8"))["cells"]:
+        if cell["cell_type"] != "code":
+            continue
+        for line in "".join(cell["source"]).splitlines():
+            code = line.split("#", 1)[0].strip()
+            if code.startswith(("!", "%")):                # shell commands run in a new process
+                continue
+            assert not any(bad in code for bad in ("import tabletrace", "from tabletrace", "find_spec(")), line
