@@ -835,7 +835,7 @@ python3.11+ -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"            # 휴리스틱 플래너 + API + 콘솔 (torch 없음)
 pip install -e ".[model]"          # + PyTorch/Transformers (모델 플래너)
 python scripts/check_data.py       # 데이터 무결성
-pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->246<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
+pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->248<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
 tabletrace serve                   # http://127.0.0.1:8000  (모델이 models/mt5-small-tabletrace 에 있으면 자동 사용)
 ```
 
@@ -849,7 +849,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 
 ## 13. 테스트·CI·배포
 
-- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 소유자가 쓴 학습 코드(보상, GRPO 손실, 학습 루프), 모델 로딩, gRPC, 대화·기억, 행 선별, 도구 호출 플래너(대본 모의 서버), 표 인코더, 두 번째 의견, CPU 엔진 서버, 노트북이 넘기는 옵션 검사. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->246<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내 문구를 확인하는 테스트로, 그 파일이 생긴 뒤에는 건너뜁니다. 소유자가 직접 쓴 학습 코드의 테스트 35개(`docs/rewrite/06_training_code.md`)는 통과에 들어 있습니다. 모델 가중치가 없으면 모델 테스트도 skip됩니다.
+- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 소유자가 쓴 학습 코드(보상, GRPO 손실, 학습 루프), 모델 로딩, gRPC, 대화·기억, 행 선별, 도구 호출 플래너(대본 모의 서버), 표 인코더, 두 번째 의견, CPU 엔진 서버, 노트북이 넘기는 옵션 검사. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->248<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내 문구를 확인하는 테스트로, 그 파일이 생긴 뒤에는 건너뜁니다. 소유자가 직접 쓴 학습 코드의 테스트 35개(`docs/rewrite/06_training_code.md`)는 통과에 들어 있습니다. 모델 가중치가 없으면 모델 테스트도 skip됩니다.
 - **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·대표 질문·결과·근거 강조·보류·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 정적 모드에서는 EXAONE 저장 결과에 모델 이름이 붙는지, 근거를 고친 답에서 모델이 인용한 셀과 근거 셀이 따로 표시되는지도 봅니다. 두 모드 모두 푸터가 본문과 겹치지 않는지 검사합니다. 최종 실행: 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
 - **Docker**: 이미지(786 MB)를 이 세션에서 빌드하고 컨테이너 smoke(health·release·corpora·ask·콘솔)를 통과했습니다(`experiments/docker/smoke.json`). Docker Hub·ECR이 429를 돌려 MCR 베이스 이미지로 빌드했습니다.
 - **CI**: `.github/workflows/ci.yml`(ruff, pytest, 데이터 무결성, **README·REPORT 표·수치 대조**, Docker 빌드·smoke)가 GitHub Actions에서 실행되어 **전부 통과**했습니다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/41213002277): `test` 작업과 `docker` 작업 모두 success, 커밋 `0f38f8d`). 그 뒤 커밋의 실행 결과는 저장소 Actions 탭에서 확인하세요.

@@ -55,13 +55,41 @@ def test_every_code_cell_is_valid_python(notebook):
         compile(to_python(src), f"{notebook} cell {i}", "exec")
 
 
-def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch):
-    calls: list[tuple[str, str]] = []
+class DryRun:
+    """Notebook 2 with its shell lines recorded instead of run, in a fresh working directory under `root`."""
 
-    def _sh(cmd: str) -> None:
+    def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2):
+        self.calls: list[tuple[str, str]] = []
+        self.packs: list[int] = []
+        self.root = root
+        self.repo = repo = root / "tabletrace"
+        for d in ("experiments/eval", "experiments/bench", "src/tabletrace/training"):
+            (repo / d).mkdir(parents=True)
+        for m in ("evidence_reward", "grpo"):
+            (repo / "src/tabletrace/training" / f"{m}.py").write_text("")
+        bindir = root / "bin"
+        bindir.mkdir()
+        (bindir / "nvidia-smi").write_text("#!/bin/sh\necho 1000\necho 1000\n")
+        (bindir / "nvidia-smi").chmod(0o755)
+        monkeypatch.setenv("PATH", f"{bindir}{os.pathsep}{os.environ['PATH']}")
+        monkeypatch.chdir(repo)
+        if "requests" not in sys.modules:
+            try:
+                import requests  # noqa: F401
+            except ImportError:
+                monkeypatch.setitem(sys.modules, "requests", types.SimpleNamespace())
+        torch = types.SimpleNamespace(cuda=types.SimpleNamespace(get_device_name=lambda i: "Tesla T4", device_count=lambda: n_gpu))
+        self.ns = ns = {"_sh": self._sh, "os": os, "subprocess": subprocess, "time": time, "json": json, "glob": glob, "shutil": shutil, "torch": torch,
+                        "N_GPU": n_gpu, "ROOT": str(root), "VENV": str(root), "REPO_DIR": str(repo), "BACKUP": str(backup) if backup else None}
+        (_, _setup), (_, helpers), *self.sections = code_cells("notebooks/gpu_experiments_2.ipynb")     # the setup cell needs a GPU and the network
+        exec(compile(to_python(helpers, "call"), "helpers", "exec"), ns)
+        real_pack = ns["pack"]
+        ns.update(serve=lambda *a, **k: _Proc(), stop_servers=lambda: None, pack=lambda: (self.packs.append(1), real_pack())[1])
+
+    def _sh(self, cmd: str) -> None:
         kind = ("train" if "exaone_lora_sft.py" in cmd else "grpo" if "exaone_grpo.py" in cmd else "eval" if "tabletrace.eval.run" in cmd
                 else "bench" if "engine_bench" in cmd else "other")
-        calls.append((kind, cmd))
+        self.calls.append((kind, cmd))
         m = re.search(r"--out (\S+)", cmd)
         if not m:
             return
@@ -84,40 +112,25 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text("{}")
 
-    class Proc:
-        def terminate(self): pass
-        def wait(self): pass
+    def run_all(self) -> collections.Counter:
+        self.calls.clear()
+        self.packs.clear()
+        for i, src in self.sections:
+            exec(compile(to_python(src, "call"), f"cell {i}", "exec"), self.ns)
+        return collections.Counter(kind for kind, _ in self.calls)
 
-    repo = tmp_path / "tabletrace"
-    for d in ("experiments/eval", "experiments/bench", "src/tabletrace/training"):
-        (repo / d).mkdir(parents=True)
-    for m in ("evidence_reward", "grpo"):
-        (repo / "src/tabletrace/training" / f"{m}.py").write_text("")
-    bindir = tmp_path / "bin"
-    bindir.mkdir()
-    (bindir / "nvidia-smi").write_text("#!/bin/sh\necho 1000\necho 1000\n")
-    (bindir / "nvidia-smi").chmod(0o755)
-    monkeypatch.setenv("PATH", f"{bindir}{os.pathsep}{os.environ['PATH']}")
-    monkeypatch.chdir(repo)
-    if "requests" not in sys.modules:
-        try:
-            import requests  # noqa: F401
-        except ImportError:
-            monkeypatch.setitem(sys.modules, "requests", types.SimpleNamespace())
-    torch = types.SimpleNamespace(cuda=types.SimpleNamespace(get_device_name=lambda i: "Tesla T4", device_count=lambda: 2))
-    ns = {"_sh": _sh, "os": os, "subprocess": subprocess, "time": time, "json": json, "glob": glob, "shutil": shutil, "torch": torch, "N_GPU": 2,
-          "ROOT": str(tmp_path), "VENV": str(tmp_path), "REPO_DIR": str(repo)}
-    (_, _setup), (_, helpers), *sections = code_cells("notebooks/gpu_experiments_2.ipynb")     # the setup cell needs a GPU and the network
-    exec(compile(to_python(helpers, "call"), "helpers", "exec"), ns)
-    real_pack, packs = ns["pack"], []
-    ns.update(serve=lambda *a, **k: Proc(), stop_servers=lambda: None, pack=lambda: (packs.append(1), real_pack())[1])
+    def outputs(self) -> list[str]:
+        return sorted({re.search(r"--out (\S+)", c).group(1) for k, c in self.calls if k in ("train", "eval", "grpo")})
 
-    def run_all() -> collections.Counter:
-        calls.clear()
-        packs.clear()
-        for i, src in sections:
-            exec(compile(to_python(src, "call"), f"cell {i}", "exec"), ns)
-        return collections.Counter(kind for kind, _ in calls)
+
+class _Proc:
+    def terminate(self): pass
+    def wait(self): pass
+
+
+def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch)
+    repo, calls, packs, sections, run_all = run.repo, run.calls, run.packs, run.sections, run.run_all
 
     first = run_all()
     assert first["train"] == 8 and first["grpo"] == 1 and first["eval"] >= 60
@@ -139,8 +152,37 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     shutil.rmtree(repo / "experiments/eval/exaone_grpo_vllm_ko_test_ec")     # as if stopped during this evaluation
     (repo / "experiments/exaone_grpo/train_info.json").unlink()
     third = run_all()
-    redone = sorted({re.search(r"--out (\S+)", c).group(1) for k, c in calls if k in ("train", "eval", "grpo")})
     assert third["train"] == 1 and third["grpo"] == 1 and third["eval"] == 4
-    assert redone == ["experiments/eval/exaone_colid_s2_vllm_ko_custom", "experiments/eval/exaone_colid_s2_vllm_ko_custom_ec",
+    assert run.outputs() == ["experiments/eval/exaone_colid_s2_vllm_ko_custom", "experiments/eval/exaone_colid_s2_vllm_ko_custom_ec",
                       "experiments/eval/exaone_grpo_vllm_ko_test", "experiments/eval/exaone_grpo_vllm_ko_test_ec",
                       "experiments/exaone_grpo", "experiments/exaone_lora_colid_s2"]
+
+
+def test_notebook_2_restores_a_backup_in_a_new_session(tmp_path, monkeypatch):
+    """Colab deletes the working directory with the runtime. The result archive is also copied to a backup directory
+    (Google Drive there); a new session unpacks it, so finished evaluations are not repeated. The archive holds no
+    weights, so only the model that the reinforcement-learning section starts from is trained again."""
+    backup = tmp_path / "drive"
+    backup.mkdir()
+    (tmp_path / "s1").mkdir()
+    first = DryRun(tmp_path / "s1", monkeypatch, backup)
+    first.run_all()
+    assert (backup / "gpu_results_2.tgz").stat().st_size > 0
+
+    (tmp_path / "s2").mkdir()
+    second = DryRun(tmp_path / "s2", monkeypatch, backup)                    # a new session: nothing but the backup
+    assert (second.repo / "experiments/run_info_2.json").exists()            # unpacked when the helper cell ran
+    counts = second.run_all()
+    assert counts["eval"] == 0 and counts["grpo"] == 0 and counts["bench"] == 0
+    assert second.outputs() == ["experiments/exaone_lora_rlstart"]
+
+
+def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
+    """Colab's free runtime has one GPU: the 32B models and the two-GPU speed comparison are left out, nothing uses torchrun."""
+    run = DryRun(tmp_path, monkeypatch, n_gpu=1)
+    counts = run.run_all()
+    commands = [c for _, c in run.calls]
+    assert counts["grpo"] == 1 and counts["train"] == 6                      # no ddp1 / ddp2
+    assert not any("torchrun" in c for c in commands) and not any("32b" in o.lower() for o in run.outputs())
+    assert (tmp_path / "gpu_results_2.tgz").exists()
+

@@ -69,7 +69,7 @@
 | vLLM 텐서 병렬 TP=2 (T4 2장) | 41.0 요청/s, p50 678 ms; 점수는 1장과 같음 | `experiments/bench/engine_vllm_tp2_c32.json`, `experiments/eval/exaone_vllm_tp2_ko_test/metrics.json` |
 | SGLang (T4, 우회 모듈) | vLLM과 같은 답(699문항 중 1개 차이), 속도는 8.3 요청/s | `experiments/eval/exaone_sglang_ko_test/metrics.json`, `experiments/bench/engine_sglang_c32.json` |
 | mT5 2-스테이지 파이프라인 병렬 (T4 2장, NCCL) | 출력 일치, 처리량 이득 없음(설계상 겹치지 않음), 장치당 메모리 분할 | `experiments/bench/pp_*_gpu.json` |
-| 테스트·검증 | pytest 246개 통과(본인이 쓴 학습 코드의 테스트 35개 포함, 1개 건너뜀), E2E 실시간 21/21·정적 21/21, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
+| 테스트·검증 | pytest 248개 통과(본인이 쓴 학습 코드의 테스트 35개 포함, 1개 건너뜀), E2E 실시간 21/21·정적 21/21, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
 
 ## 4. 포트폴리오에 쓸 만한 과정 (전부 기록이 있음)
 
