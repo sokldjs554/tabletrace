@@ -22,7 +22,7 @@
 | 공개 데모 (GitHub Pages, 저장된 실행 결과 모드) | <https://sokldjs554.github.io/tabletrace/> — 소유자가 2026-11-08 브라우저에서 열리는 것을 확인. 2026-11-10부터 EXAONE 전체 데이터 모델의 저장 출력(한국어 대표 질문 16개)을 볼 수 있고, 모델이 인용한 셀과 검증기가 고친 근거 셀이 표에 따로 표시된다 |
 | 최종 보고서 | `docs/REPORT.md` (공고 대조표 §3, 확인 가능한 사실 §17, 2차 시도 §18) |
 | README | `README.md` (결과 표 §9·§10, 수행/미수행 표 §14) |
-| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (57건) |
+| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (58건) |
 | 한 장 요약 | `docs/ONE_PAGE.md` (모든 수치가 산출물에 묶여 검사됨) |
 | GPU 보강 실험 노트북 | `notebooks/gpu_experiments_2.ipynb` (준비만 됨. 실행 안내는 `docs/experiments/gpu-runbook.md` 끝) |
 | 본인이 직접 쓴 학습 코드 | `src/tabletrace/training/evidence_reward.py`, `grpo.py`, `lm_loop.py` (명세 `docs/rewrite/06_training_code.md`, 테스트 `tests/test_owner_training_code.py`, 기록 `docs/rewrite/LOG.md`) |
@@ -69,7 +69,7 @@
 | vLLM 텐서 병렬 TP=2 (T4 2장) | 41.0 요청/s, p50 678 ms; 점수는 1장과 같음 | `experiments/bench/engine_vllm_tp2_c32.json`, `experiments/eval/exaone_vllm_tp2_ko_test/metrics.json` |
 | SGLang (T4, 우회 모듈) | vLLM과 같은 답(699문항 중 1개 차이), 속도는 8.3 요청/s | `experiments/eval/exaone_sglang_ko_test/metrics.json`, `experiments/bench/engine_sglang_c32.json` |
 | mT5 2-스테이지 파이프라인 병렬 (T4 2장, NCCL) | 출력 일치, 처리량 이득 없음(설계상 겹치지 않음), 장치당 메모리 분할 | `experiments/bench/pp_*_gpu.json` |
-| 테스트·검증 | pytest 248개 통과(본인이 쓴 학습 코드의 테스트 35개 포함, 1개 건너뜀), E2E 실시간 21/21·정적 21/21, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
+| 테스트·검증 | pytest 250개 통과(본인이 쓴 학습 코드의 테스트 35개 포함, 1개 건너뜀), E2E 실시간 21/21·정적 21/21, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
 
 ## 4. 포트폴리오에 쓸 만한 과정 (전부 기록이 있음)
 

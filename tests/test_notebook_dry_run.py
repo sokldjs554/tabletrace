@@ -58,9 +58,10 @@ def test_every_code_cell_is_valid_python(notebook):
 class DryRun:
     """Notebook 2 with its shell lines recorded instead of run, in a fresh working directory under `root`."""
 
-    def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2):
+    def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2, run_32b: bool = False, dies: str | None = None):
         self.calls: list[tuple[str, str]] = []
         self.packs: list[int] = []
+        self.dies = dies                  # evaluations whose output path contains this never finish (the server died)
         self.root = root
         self.repo = repo = root / "tabletrace"
         for d in ("experiments/eval", "experiments/bench", "src/tabletrace/training"):
@@ -82,6 +83,9 @@ class DryRun:
         self.ns = ns = {"_sh": self._sh, "os": os, "subprocess": subprocess, "time": time, "json": json, "glob": glob, "shutil": shutil, "torch": torch,
                         "N_GPU": n_gpu, "ROOT": str(root), "VENV": str(root), "REPO_DIR": str(repo), "BACKUP": str(backup) if backup else None}
         (_, _setup), (_, helpers), *self.sections = code_cells("notebooks/gpu_experiments_2.ipynb")     # the setup cell needs a GPU and the network
+        if run_32b:
+            assert sum("RUN_32B = False" in src for _, src in self.sections) == 1
+            self.sections = [(i, src.replace("RUN_32B = False", "RUN_32B = True")) for i, src in self.sections]
         exec(compile(to_python(helpers, "call"), "helpers", "exec"), ns)
         real_pack = ns["pack"]
         ns.update(serve=lambda *a, **k: _Proc(), stop_servers=lambda: None, pack=lambda: (self.packs.append(1), real_pack())[1])
@@ -107,7 +111,8 @@ class DryRun:
             (out / "train_info.json").write_text(json.dumps(info))             # written last, as in the real scripts
         elif kind == "eval":
             out.mkdir(parents=True, exist_ok=True)
-            (out / "metrics.json").write_text("{}")
+            if not (self.dies and self.dies in str(out)):
+                (out / "metrics.json").write_text("{}")
         elif kind == "bench":
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text("{}")
@@ -184,5 +189,34 @@ def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
     commands = [c for _, c in run.calls]
     assert counts["grpo"] == 1 and counts["train"] == 6                      # no ddp1 / ddp2
     assert not any("torchrun" in c for c in commands) and not any("32b" in o.lower() for o in run.outputs())
+    assert (tmp_path / "gpu_results_2.tgz").exists()
+
+
+def test_notebook_2_runs_the_32b_models_only_when_asked_and_with_headroom(tmp_path, monkeypatch):
+    """The owner's first 32B run died of GPU memory during evaluation (95% preallocated, 8 concurrent requests). It is
+    now off by default; switched on, it is served with headroom and small batches and scored on a sample."""
+    (tmp_path / "off").mkdir()
+    off = DryRun(tmp_path / "off", monkeypatch)
+    off.run_all()
+    assert not any("32b" in o for o in off.outputs())
+
+    (tmp_path / "on").mkdir()
+    on = DryRun(tmp_path / "on", monkeypatch, run_32b=True)
+    served = []
+    on.ns["serve"] = lambda model, **kw: (served.append((model, kw)), _Proc())[1]
+    on.run_all()
+    big = [kw for model, kw in served if "32B" in model]
+    assert len(big) == 2 and all(kw["gpu_util"] <= 0.90 and "--max-num-seqs 2" in kw["extra"] and "--max-num-batched-tokens" in kw["extra"] for kw in big)
+    first_pass = [c for k, c in on.calls if k == "eval" and "32b" in re.search(r"--out (\S+)", c).group(1) and "--replay-from" not in c]
+    assert first_pass and all("--concurrency 2 " in c and "--sample" in c for c in first_pass)
+    assert any("ref_32b_awq_ko_test" in o for o in on.outputs()) and any("tools_32b_awq_unseen_dev100" in o for o in on.outputs())
+
+
+def test_notebook_2_goes_on_when_a_server_dies_during_evaluation(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, run_32b=True, dies="ref_32b_awq")
+    counts = run.run_all()
+    mine = [c for k, c in run.calls if k == "eval" and "ref_32b_awq" in re.search(r"--out (\S+)", c).group(1)]
+    assert len(mine) == 1 and "--replay-from" not in mine[0]                 # no second set, no re-verification of a missing file
+    assert counts["grpo"] == 1 and counts["train"] == 8                      # the other sections still ran
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
