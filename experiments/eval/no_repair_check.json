@@ -143,9 +143,29 @@
    "questions_that_differ": 0,
    "verified_em_with_repair": 0.4979,
    "max_in": 672
+  },
+  "exaone_rlstart2b_vllm_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 379,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.2589,
+   "verified_em_replayed": 0.2589,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.5308,
+   "max_in": 672
+  },
+  "exaone_grpo2b_vllm_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 359,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.2704,
+   "verified_em_replayed": 0.2704,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.5536,
+   "max_in": 672
   }
  },
- "runs_checked": 14,
- "questions_checked": 9786,
+ "runs_checked": 16,
+ "questions_checked": 11184,
  "questions_that_differ": 0
 }

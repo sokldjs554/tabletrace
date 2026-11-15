@@ -89,6 +89,15 @@ PAIRS = [
     ("rlstart2_vs_plain300_ko_test", "exaone_vllm_ko_test", "exaone_rlstart2_vllm_ko_test"),
     ("rlstart2_vs_plain300_ko_test_ec", "exaone_vllm_ko_test_ec", "exaone_rlstart2_vllm_ko_test_ec"),
     ("full_vs_grpo2_ko_test_ec", "exaone_grpo2_vllm_ko_test_ec", "exaone_full_vllm_ko_test_ec"),
+    # control run of the second RL experiment (a later session): balanced sampling as in the first experiment, everything else as in the second.
+    # It has its own start model (rlstart2b): the first session's weights were gone, and a model trained again is not the same model
+    ("grpo2b_vs_rlstart2b_ko_test", "exaone_rlstart2b_vllm_ko_test", "exaone_grpo2b_vllm_ko_test"),
+    ("grpo2b_vs_rlstart2b_ko_test_ec", "exaone_rlstart2b_vllm_ko_test_ec", "exaone_grpo2b_vllm_ko_test_ec"),
+    ("grpo2b_vs_rlstart2b_ko_custom_ec", "exaone_rlstart2b_vllm_ko_custom_ec", "exaone_grpo2b_vllm_ko_custom_ec"),
+    ("rlstart2b_vs_rlstart2_ko_test", "exaone_rlstart2_vllm_ko_test", "exaone_rlstart2b_vllm_ko_test"),          # same setting trained twice: training-run variation
+    ("rlstart2b_vs_rlstart2_ko_test_ec", "exaone_rlstart2_vllm_ko_test_ec", "exaone_rlstart2b_vllm_ko_test_ec"),
+    ("grpo2_vs_grpo2b_ko_test", "exaone_grpo2b_vllm_ko_test", "exaone_grpo2_vllm_ko_test"),                       # natural against balanced sampling, two sessions apart
+    ("grpo2_vs_grpo2b_ko_test_ec", "exaone_grpo2b_vllm_ko_test_ec", "exaone_grpo2_vllm_ko_test_ec"),
     # untuned EXAONE of two sizes, same prompt and verifier
     ("ref_7p8b_vs_ref_1p2b_ko_test", "ref_1p2b_ko_test", "ref_7p8b_awq_ko_test"),
     ("ref_7p8b_vs_ref_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "ref_7p8b_awq_ko_test_ec"),

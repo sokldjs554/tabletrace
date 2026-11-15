@@ -30,7 +30,7 @@ def test_run_names_hold_no_dots():
     assert [n for n in names if "." in n] == []
 
 
-@pytest.mark.parametrize("script, out", [("rl2_analysis.py", "rl2_analysis.json"), ("gpu3_summary.py", "gpu3_summary.json")])
+@pytest.mark.parametrize("script, out", [("rl2_analysis.py", "rl2_analysis.json"), ("rl2_analysis.py", "rl2_control_analysis.json"), ("gpu3_summary.py", "gpu3_summary.json")])
 def test_derived_files_are_reproduced_from_the_predictions(script, out):
     stored = (EVAL / out).read_text(encoding="utf-8")
     r = subprocess.run([sys.executable, str(ROOT / "scripts" / script)], cwd=ROOT, capture_output=True, text=True)
@@ -70,9 +70,10 @@ def test_analysis_says_what_did_not_improve():
     assert all(v["unparsable"] == 0 for v in t["dev"].values())
 
 
-def test_replay_record_covers_every_run_of_the_session():
-    d = json.loads((EVAL / "replay_check_gpu3.json").read_text(encoding="utf-8"))
-    assert d["replays"] == 2 * len(d["runs"]) == 22 and d["questions_that_differ"] == 0
+@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8)])
+def test_replay_record_covers_every_run_of_the_session(session, replays):
+    d = json.loads((EVAL / f"replay_check_{session}.json").read_text(encoding="utf-8"))
+    assert d["replays"] == 2 * len(d["runs"]) == replays and d["questions_that_differ"] == 0
     for run, res in d["runs"].items():
         n = len(rows(run))
         assert res["first_pass"]["questions"] == res["subject_check"]["questions"] == n == len(rows(run + "_ec"))
@@ -93,3 +94,42 @@ def test_a_stored_run_gives_the_same_verdicts_when_verified_again(tmp_path):
     assert set(again) == set(stored)
     for q, s in stored.items():
         assert [again[q][k] for k in ("pred_status", "pred_answer", "pred_cells", "verified_correct")] == [s[k] for k in ("pred_status", "pred_answer", "pred_cells", "verified_correct")]
+
+
+def test_control_run_shows_that_the_batch_mix_decides_and_the_write_up_keeps_the_limits():
+    """The control keeps the first experiment's balanced sampling and changes nothing else. What the documents say about
+    it must follow from the stored predictions and training record."""
+    c = json.loads((EVAL / "rl2_control_analysis.json").read_text(encoding="utf-8"))
+    a = json.loads((EVAL / "rl2_analysis.json").read_text(encoding="utf-8"))
+    # cited cells: no change in the control, a clear change in the main experiment, and the two changes differ
+    assert c["raw"]["sign_test_cited_gold_cell_lookup"]["p_two_sided"] > 0.05 and a["raw"]["sign_test_cited_gold_cell_lookup"]["p_two_sided"] < 0.001
+    dd = c["main_minus_control"]["first_pass"]
+    assert dd["cited_gold_cell_lookup"]["p_two_sided"] < 0.001 and dd["cited_gold_cell_lookup"]["net_change_main"] > 10 * max(1, dd["cited_gold_cell_lookup"]["net_change_control"])
+    # verified EM: the gains of the two arms do NOT differ significantly; a document must not say they do
+    assert dd["verified_correct_all"]["p_two_sided"] > 0.05
+    # the control collapsed during training although no prompt was cut
+    t = c["training"]
+    assert t["sampling"] == "balanced" and t["prompts_cut_train"] == t["prompts_cut_dev"] == 0
+    assert t["kept_step"] == 25 and t["phases"]["p4"]["withheld_rate"] > 0.95 and t["dev_last"]["correct"] < t["dev_first"]["correct"]
+    assert a["training"]["phases"]["p4"]["correct"] > a["training"]["phases"]["p1"]["correct"]
+    # the two arms have different start models, and the comparison says so
+    assert c["start"] != a["start"] and c["start_models"]["same_raw_output"] < c["start_models"]["questions"]
+    report = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
+    sec = report[report.index("### 22.7 대조군"):]
+    for needle in ("세션과 시작 모델이 다르다", "프롬프트 수정이 필요했는지는 모른다", "유의하게 다르지 않다", "한 번, 시드 하나"):
+        assert needle in sec, needle
+    handoff = (ROOT / "docs" / "HANDOFF.md").read_text(encoding="utf-8")
+    assert "까닭이 학습 스크립트가 프롬프트를 자르는 결함으로 밝혀져 고친 뒤 다시 돌렸다. 두 번째" not in handoff      # the sentence the control refuted
+
+
+def test_control_headline_numbers_follow_from_the_predictions():
+    a, b = rows("exaone_rlstart2b_vllm_ko_test"), rows("exaone_grpo2b_vllm_ko_test")
+    assert set(a) == set(b) == set(rows(START))
+    lookup = [q for q in a if a[q]["gold_status"] == "answered" and a[q]["gold_op"] == "lookup"]
+    c = json.loads((EVAL / "rl2_control_analysis.json").read_text(encoding="utf-8"))
+    assert c["raw"]["start"]["lookup_cited_gold_cell"] == sum(bool(a[q]["cells_exact_raw"]) for q in lookup)
+    assert c["raw"]["rl"]["lookup_cited_gold_cell"] == sum(bool(b[q]["cells_exact_raw"]) for q in lookup)
+    pt = json.loads((EVAL / "paired_tests.json").read_text(encoding="utf-8"))["grpo2b_vs_rlstart2b_ko_test"]
+    assert pt["candidate_better"] == sum(b[q]["verified_correct"] and not a[q]["verified_correct"] for q in a)
+    assert pt["reference_better"] == sum(a[q]["verified_correct"] and not b[q]["verified_correct"] for q in a)
+

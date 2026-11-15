@@ -27,4 +27,9 @@
   - 묶음 안의 이름 `ref_1.2b_*`, `ref_7.8b_awq_*`, `tools_1.2b_*`는 넣으면서 `1p2b`, `7p8b`로 바꿨다(문서의 수치 묶기가 점을 경로 구분자로 쓴다). 파일 내용은 손대지 않았다. `_ec`의 `meta.replay_from`에는 원래 이름이 남아 있다.
   - 받은 뒤 `scripts/replay_check.py`로 저장된 모델 출력을 이 저장소의 검증기로 다시 검증했다. 22회, 8,290문항에서 판정(상태, 답, 근거 셀, 정오, 근거 복구)이 다른 문항은 0개다(`replay_check_gpu3.json`). 토크나이저는 EXAONE-4.0-1.2B, 입력 예산 672.
   - 서버: vLLM, 1.2B는 `DTYPE=half`, 7.8B AWQ는 `auto`. 튜닝 없는 모델의 평가는 동시 8건, 도구 호출은 4건. 강화학습 모델과 시작 모델은 병합 가중치를 vLLM으로 올려 동시 16건으로 평가했다(노트북의 기본값).
-  - 이 실행에는 대조군(`exaone_grpo2b`)과 32B가 없다. 둘 다 노트북에서 선택 실행이고 꺼져 있었다.
+  - 이 실행에는 대조군(`exaone_grpo2b`)과 32B가 없다. 둘 다 노트북에서 선택 실행이고 꺼져 있었다. 대조군은 아래 세션에서 돌렸다.
+- **2번 노트북, 2026-11-15 뒤의 세션 (Kaggle Tesla T4 ×2, 커밋 `f3ce40e`, `experiments/run_info_2_control.json`)**: 강화학습 대조군. D절 첫 셀의 `RUN_CONTROL = True`. 결과 묶음을 소유자가 건넸다. 묶음에는 저장소에서 받아 온 앞 세션의 결과도 그대로 들어 있었다(52개 파일, 저장소의 것과 바이트까지 같음). 새 파일은 평가 8건 `exaone_rlstart2b_vllm_ko_{test,custom}`, `exaone_grpo2b_vllm_ko_{test,custom}`와 각각의 `_ec`, 학습 기록 `experiments/exaone_lora_rlstart2b/train_info.json`(300문항, 18걸음, 정답 잘림 0), `experiments/exaone_grpo2b/train_info.json`과 `train_log.jsonl`(200걸음, 120걸음 갱신, 남긴 모델은 25걸음째)이다.
+  - 새 세션에는 앞 세션의 시작 모델 가중치가 없다. 노트북이 시작 모델을 같은 설정으로 다시 학습해 `exaone_rlstart2b`라는 이름으로 따로 평가했고, 대조군은 그 모델에서 시작했다(`train_info.json`의 `args.adapter`). 두 학습 명령에서 다른 것은 `--sampling`과 `--adapter`, `--out`뿐이다.
+  - 묶음의 `experiments/run_info_2.json`은 `run_info_2_control.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_control.log`로 이름을 바꿔 넣었다(앞 세션의 같은 이름 파일을 덮어쓰지 않으려고). 내용은 그대로다.
+  - `scripts/replay_check.py --session control`로 다시 검증했다. 8회, 2,916문항에서 판정이 다른 문항은 0개다(`replay_check_control.json`).
+  - 같은 시작 모델에서 본 실험을 한 번 더 돌리는 선택(`RUN_REPEAT`, `exaone_grpo2c`)은 꺼져 있었다.

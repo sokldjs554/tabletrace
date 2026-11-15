@@ -290,7 +290,7 @@ def supplement_sections() -> list[dict]:
     out.extend(gpu3_cards())
     out.append({"title": "재지 못한 것", "status": "prep",
                 "description": "풀 전부(약 3.4만 문항) 학습, 큰 모델의 튜닝, 도구 호출 형식으로 튜닝한 모델, 튜닝 모델의 4비트 서빙(bitsandbytes는 그 vLLM 버전에 없는 방식이었다). "
-                               "두 번째 강화학습의 대조군과 반복 실행, 길이 결함을 고친 설정의 전체 데이터 미세조정, 전체 데이터 모델의 확신도 곡선. "
+                               "두 번째 강화학습과 대조군의 반복 실행(실험마다 한 번씩이다), 같은 시작 모델에서 둘을 나란히 돌린 실행, 길이 결함을 고친 설정의 전체 데이터 미세조정, 전체 데이터 모델의 확신도 곡선. "
                                "2차 GPU 실험은 결과 파일이 남지 않아 그 실험들의 문항별 분석이 없다."})
     return out
 
@@ -342,10 +342,49 @@ def gpu3_cards() -> list[dict]:
             "notes": ["근거 셀 오류가 줄었다. 보상은 정답 셀 표시를 쓰지 않는다. 복구 없이 통과한 정답에 1.0점, 검증기가 근거를 고쳐야 했던 정답에 0.3점을 주는 차이만으로 모델이 답이 든 셀을 인용하는 쪽으로 움직였다.",
                       "계산 문항은 풀게 된 것이 아니다. 두 모델 모두 계산 프로그램을 한 번도 쓰지 않았다. 시작 모델은 셀 값 하나를 답으로 내서 틀린 답이 나갔고, 강화학습 뒤에는 스스로 계산한 수를 답으로 써서 검증기가 내보내지 않는다. 보류가 늘어난 것은 거의 전부 여기서 왔다.",
                       f"개발셋 {tr['dev_first']['n']}문항의 평균 보상은 시작 {tr['dev_first']['mean_reward']} → {tr['kept_step']}걸음 {tr['dev_kept']['mean_reward']}(최고) → {tr['steps']}걸음 {tr['dev_last']['mean_reward']}. 문법 오류는 모든 점검에서 {tr['dev_first']['unparsable']}개다(첫 실험에서는 매번 16개).",
-                      f"한계. 한 번 돌렸고 시드가 하나다. 대조군이 없어 넷 가운데 무엇이 효과를 냈는지 모른다. 같은 학습 풀 전체로 미세조정한 모델({pct(full['verified_em'])})이 훨씬 높고 학습도 빠르다"
+                      f"한계. 한 번 돌렸고 시드가 하나다. 넷을 한꺼번에 바꿨고, 무엇이 효과를 냈는지는 아래 대조군 카드가 가른다. 같은 학습 풀 전체로 미세조정한 모델({pct(full['verified_em'])})이 훨씬 높고 학습도 빠르다"
                       f"({a['cost']['sft_full_data_minutes']}분 대 {a['cost']['rl_200_steps_minutes']}분). 수작업 30문항에서는 차이가 유의하지 않다.",
-                      "역할. 보상 함수와 GRPO 손실의 구현, 두 번의 GPU 실행은 소유자가 했다. 첫 실험의 기록에서 결함을 찾아 학습 스크립트를 고친 것과 결과 분석은 AI 도구가 했다."],
+                      "역할. 보상 함수와 GRPO 손실의 구현, GPU 실행(첫 실험, 두 번째 실험, 대조군)은 소유자가 했다. 첫 실험의 기록에서 결함을 찾아 학습 스크립트를 고친 것, 대조군의 설계, 결과 분석은 AI 도구가 했다."],
             "artifact": src + ". 분석: experiments/eval/rl2_analysis.json (scripts/rl2_analysis.py), paired_tests.json, no_repair_check.json"}]
+    c = load(EXP / "eval" / "rl2_control_analysis.json")
+    rpc = load(EXP / "eval" / "replay_check_control.json")
+    if c and rpc:
+        sb, gb = c["start"], c["rl"]
+        cs, cr, ct = m(sb), m(gb), c["training"]
+        dd = c["main_minus_control"]["first_pass"]
+
+        def arrow(x, y, f=pct):
+            return f"{f(x)} → {f(y)}"
+
+        def diff(key: str) -> str:
+            v = dd[key]
+            return f"{v['questions_changed_more_in_main']} 대 {v['questions_changed_more_in_control']}, p {v['p_display']}"
+
+        plain = str
+        co_s, co_r = c["first_pass"]["outcomes"]["start"], c["first_pass"]["outcomes"]["rl"]
+        rows = [
+            [f"조회 {a['raw']['start']['lookup_questions']}문항에서 인용한 셀이 정답 셀인 문항", arrow(a["raw"]["start"]["lookup_cited_gold_cell"], a["raw"]["rl"]["lookup_cited_gold_cell"], plain),
+             arrow(c["raw"]["start"]["lookup_cited_gold_cell"], c["raw"]["rl"]["lookup_cited_gold_cell"], plain) + f" (p {c['raw']['sign_test_cited_gold_cell_lookup']['p_display']})", diff("cited_gold_cell_lookup")],
+            ["검증기가 근거 셀을 고쳐서 내보낸 비율", arrow(s1["evidence_repaired_rate"], r1["evidence_repaired_rate"]), arrow(cs["evidence_repaired_rate"], cr["evidence_repaired_rate"]), ""],
+            ["verified EM (주어 검사 없음)", arrow(s1["verified_em"], r1["verified_em"]), arrow(cs["verified_em"], cr["verified_em"]) + f" ({pair('grpo2b_vs_rlstart2b_ko_test')})", diff("verified_correct_all")],
+            ["틀린 답이 나간 문항", arrow(o_s["all"]["wrong"], o_r["all"]["wrong"], plain), arrow(co_s["all"]["wrong"], co_r["all"]["wrong"], plain), f"p {dd['wrong_answer_all']['p_display']}"],
+            ["답이 나가지 않은 문항", arrow(o_s["all"]["withheld"], o_r["all"]["withheld"], plain), arrow(co_s["all"]["withheld"], co_r["all"]["withheld"], plain), f"p {dd['withheld_all']['p_display']}"],
+            ["남긴 모델", f"{tr['kept_step']}걸음째", f"{ct['kept_step']}걸음째", ""],
+            [f"갱신한 걸음 ({tr['steps']}걸음 중)", tr["updates_applied"], ct["updates_applied"], ""],
+            [f"학습 마지막 50걸음의 표본 {ct['phases']['p4']['samples']:,}개 중 답이 나가지 않은 것", f"{tr['phases']['p4']['withheld']:,}", f"{ct['phases']['p4']['withheld']:,}", ""],
+            [f"개발 {ct['dev_first']['n']}문항에서 복구 없이 정답: 시작 → 끝", arrow(tr["dev_first"]["correct"], tr["dev_last"]["correct"], plain), arrow(ct["dev_first"]["correct"], ct["dev_last"]["correct"], plain), ""],
+        ]
+        mix = c["prompt_mix"]
+        out.append({"title": "EXAONE 강화학습, 대조군 — 배치 구성만 첫 실험처럼 되돌리면 (2026-11-15 뒤의 세션)", "status": "done",
+                    "description": "두 번째 실험에서 무엇이 효과를 냈는지 가르는 실행이다. 학습 프롬프트를 조회·계산·보류 질문에서 같은 수로 뽑는 것(첫 실험의 방식)만 다르고 나머지는 두 번째 실험과 같다. "
+                                   "새 세션에는 앞 실험의 시작 모델 가중치가 없어서 시작 모델을 같은 설정으로 다시 학습해 따로 평가했다. 그래서 두 실험을 각자의 시작 모델과 견주고, 마지막 열은 문항마다 두 실험의 변화가 다른 문항에서 부호 검정을 한 것이다.",
+                    "columns": ["지표", "두 번째 실험 (실제 비율): 시작 → 뒤", "대조군 (같은 수): 시작 → 뒤", "변화의 차이 (두 번째 실험 쪽 대 대조군 쪽)"], "rows": rows,
+                    "notes": ["근거 셀의 개선은 배치를 실제 문항 비율로 뽑았을 때만 나타났다. 대조군은 프롬프트가 잘리지 않았는데도 첫 실험처럼 무너졌다. 50걸음을 지나면서 모델이 거의 모든 질문에 검증되지 않는 답을 썼다.",
+                              "프롬프트 잘림을 고친 것만으로는 효과가 나지 않았다. 첫 실험이 듣지 않은 까닭은 프롬프트 잘림이 아니라 배치 구성이었다. 프롬프트 수정이 따로 필요했는지는 재지 않았다.",
+                              "verified EM의 증가폭은 두 실험이 유의하게 다르지 않다. 두 번째 실험이 분명히 나은 것은 근거 셀과 틀린 답의 수다.",
+                              f"해석. 300문항 모델은 계산 프로그램과 abstain을 쓰지 않는다. 그런 질문에서 받을 수 있는 가장 높은 점수는 0점이고, 그 길은 검증되지 않는 답을 쓰는 것이다. 같은 수로 뽑으면 배치의 {pct(mix['balanced_share_without_lookup'])}가 그런 질문이고, 실제 비율로 뽑으면 {pct(mix['natural']['lookup'])}가 조회 질문이다.",
+                              f"한계. 두 실험 모두 한 번씩이고 세션과 시작 모델이 다르다(시작 모델의 verified EM {pct(s1['verified_em'])} 대 {pct(cs['verified_em'])}). 같은 시작 모델에서 둘을 나란히 돌린 실행은 없다."],
+                    "artifact": f"experiments/eval/rl2_control_analysis.json (scripts/rl2_analysis.py), experiments/exaone_grpo2b/. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rpc['replays']}건을 다시 검증했고({rpc['questions_checked']:,}문항) 판정이 다른 문항은 {rpc['questions_that_differ']}개다"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     big = g2["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"] if g2 else None
     rows = []

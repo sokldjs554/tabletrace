@@ -1,0 +1,134 @@
+{
+ "n_examples": 300,
+ "world_size": 1,
+ "steps": 18,
+ "dtype": "torch.float16",
+ "wall_s": 153.4,
+ "gpu": "Tesla T4",
+ "loop": "builtin",
+ "max_in": 672,
+ "targets_missing": 0,
+ "targets_cut_short": 0,
+ "args": {
+  "model": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+  "train": [
+   "data/ko/train.jsonl",
+   "data/ko/synthetic_train.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "out": "experiments/exaone_lora_rlstart2b",
+  "dtype": "auto",
+  "trust_remote_code": false,
+  "epochs": 1.0,
+  "bs": 2,
+  "grad_accum": 8,
+  "lr": 0.0002,
+  "max_len": 960,
+  "max_in": 672,
+  "lora_r": 16,
+  "grad_ckpt": true,
+  "merge": true,
+  "limit": 300,
+  "tokenizer": null,
+  "table_format": "plain",
+  "seed": 0,
+  "extra_train": [],
+  "extra_n": 0,
+  "loop": "builtin",
+  "warmup_steps": 0
+ },
+ "loss_log": [
+  {
+   "step": 1,
+   "of": 18,
+   "loss": 1.3277
+  },
+  {
+   "step": 2,
+   "of": 18,
+   "loss": 1.6208
+  },
+  {
+   "step": 3,
+   "of": 18,
+   "loss": 2.0561
+  },
+  {
+   "step": 4,
+   "of": 18,
+   "loss": 1.1721
+  },
+  {
+   "step": 5,
+   "of": 18,
+   "loss": 2.068
+  },
+  {
+   "step": 6,
+   "of": 18,
+   "loss": 0.5237
+  },
+  {
+   "step": 7,
+   "of": 18,
+   "loss": 0.7302
+  },
+  {
+   "step": 8,
+   "of": 18,
+   "loss": 0.1724
+  },
+  {
+   "step": 9,
+   "of": 18,
+   "loss": 0.6909
+  },
+  {
+   "step": 10,
+   "of": 18,
+   "loss": 0.2608
+  },
+  {
+   "step": 11,
+   "of": 18,
+   "loss": 0.0443
+  },
+  {
+   "step": 12,
+   "of": 18,
+   "loss": 0.7311
+  },
+  {
+   "step": 13,
+   "of": 18,
+   "loss": 0.0856
+  },
+  {
+   "step": 14,
+   "of": 18,
+   "loss": 0.2087
+  },
+  {
+   "step": 15,
+   "of": 18,
+   "loss": 0.148
+  },
+  {
+   "step": 16,
+   "of": 18,
+   "loss": 0.1765
+  },
+  {
+   "step": 17,
+   "of": 18,
+   "loss": 0.0725
+  },
+  {
+   "step": 18,
+   "of": 18,
+   "loss": 0.2208
+  }
+ ]
+}

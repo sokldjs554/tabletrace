@@ -1,0 +1,160 @@
+{
+ "algorithm": "GRPO-style group-normalised policy gradient, on-policy, one update per sampled batch",
+ "reward": "tabletrace.training.evidence_reward (owner-written)",
+ "steps": 200,
+ "updates_applied": 120,
+ "kept_step": 25,
+ "dev_history": [
+  {
+   "step": 0,
+   "n": 128,
+   "mean_reward": 0.1367,
+   "correct": 25,
+   "repaired": 45,
+   "withheld": 17,
+   "wrong": 40,
+   "unparsable": 1
+  },
+  {
+   "step": 25,
+   "n": 128,
+   "mean_reward": 0.1688,
+   "correct": 28,
+   "repaired": 42,
+   "withheld": 21,
+   "wrong": 36,
+   "unparsable": 1
+  },
+  {
+   "step": 50,
+   "n": 128,
+   "mean_reward": 0.1406,
+   "correct": 23,
+   "repaired": 25,
+   "withheld": 57,
+   "wrong": 21,
+   "unparsable": 2
+  },
+  {
+   "step": 75,
+   "n": 128,
+   "mean_reward": 0.1469,
+   "correct": 18,
+   "repaired": 16,
+   "withheld": 86,
+   "wrong": 8,
+   "unparsable": 0
+  },
+  {
+   "step": 100,
+   "n": 128,
+   "mean_reward": 0.0383,
+   "correct": 6,
+   "repaired": 3,
+   "withheld": 115,
+   "wrong": 4,
+   "unparsable": 0
+  },
+  {
+   "step": 125,
+   "n": 128,
+   "mean_reward": 0.0281,
+   "correct": 5,
+   "repaired": 2,
+   "withheld": 117,
+   "wrong": 4,
+   "unparsable": 0
+  },
+  {
+   "step": 150,
+   "n": 128,
+   "mean_reward": 0.0484,
+   "correct": 7,
+   "repaired": 4,
+   "withheld": 113,
+   "wrong": 4,
+   "unparsable": 0
+  },
+  {
+   "step": 175,
+   "n": 128,
+   "mean_reward": 0.0484,
+   "correct": 7,
+   "repaired": 4,
+   "withheld": 113,
+   "wrong": 4,
+   "unparsable": 0
+  },
+  {
+   "step": 200,
+   "n": 128,
+   "mean_reward": 0.0633,
+   "correct": 8,
+   "repaired": 7,
+   "withheld": 109,
+   "wrong": 4,
+   "unparsable": 0
+  }
+ ],
+ "train_prompts": {
+  "lookup": 2647,
+  "calc": 680,
+  "abstain": 260
+ },
+ "sampling": "balanced",
+ "dev_sample": "random",
+ "dev_kinds": {
+  "abstain": 8,
+  "lookup": 96,
+  "calc": 24
+ },
+ "max_in": 672,
+ "prompts_cut": {
+  "train": 0,
+  "dev": 0
+ },
+ "dtype": "torch.float16",
+ "gpu": "Tesla T4",
+ "wall_s": 4380.6,
+ "args": {
+  "model": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+  "adapter": "experiments/exaone_lora_rlstart2b",
+  "tokenizer": null,
+  "train": [
+   "data/ko/train.jsonl",
+   "data/ko/synthetic_train.jsonl"
+  ],
+  "dev": [
+   "data/ko/dev.jsonl",
+   "data/ko/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "out": "experiments/exaone_grpo2b",
+  "dtype": "auto",
+  "trust_remote_code": false,
+  "steps": 200,
+  "prompts": 4,
+  "group": 8,
+  "chunk": 1,
+  "temperature": 1.0,
+  "lr": 2e-05,
+  "beta": 0.0,
+  "max_len": 960,
+  "max_in": 672,
+  "sampling": "balanced",
+  "dev_sample": "random",
+  "max_new": 64,
+  "lora_r": 16,
+  "dev_n": 128,
+  "eval_every": 25,
+  "entity_check": false,
+  "table_format": "plain",
+  "merge": true,
+  "grad_ckpt": false,
+  "seed": 0,
+  "force_scaler": false,
+  "reward": "verifier"
+ }
+}

@@ -59,7 +59,7 @@ class DryRun:
     """Notebook 2 with its shell lines recorded instead of run, in a fresh working directory under `root`."""
 
     def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2, run_32b: bool = False, dies: str | None = None,
-                 remote: Path | None = None, control: bool = False, repeat: bool = False, cloned_results: bool = False):
+                 remote: Path | None = None, control: bool = False, repeat: bool = False, cloned_results: bool | str = False):
         self.calls: list[tuple[str, str]] = []
         self.packs: list[int] = []
         self.dies = dies                  # evaluations whose output path contains this never finish (the server died)
@@ -77,6 +77,8 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
+                if cloned_results == "before the control run" and ("rlstart2b" in str(f) or "grpo2b" in str(f)):
+                    continue              # the repository as it was when the owner ran the control
                 dest = repo / f.relative_to(ROOT)
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(f, dest)
@@ -309,13 +311,15 @@ def test_notebook_2_reinforcement_learning_control_run_differs_only_in_sampling(
 
 
 RL_CELLS = "RL_RUNS"            # the two cells of section D
+BEFORE = "before the control run"
 
 
 def test_control_run_in_a_new_session_trains_and_evaluates_its_own_start_model(tmp_path, monkeypatch):
-    """The first run's results are in the repository; its weights are not. A new session that runs the control must not
-    compare it with the stored start model: a model trained again is not the same model. So it trains its own start
-    model under another name, evaluates it, and starts from it. The finished main experiment is not repeated."""
-    run = DryRun(tmp_path, monkeypatch, control=True, cloned_results=True)
+    """How the control was run on 2026-11-15. The first run's results were in the repository; its weights were not. A
+    new session must not compare the control with the stored start model: a model trained again is not the same model.
+    So it trains its own start model under an unused name, evaluates it, and starts from it. The finished main
+    experiment is not repeated."""
+    run = DryRun(tmp_path, monkeypatch, control=True, cloned_results=BEFORE)
     counts = run.run_all(only=RL_CELLS)
     assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8             # (start + control) x (test + custom) x (first pass + subject check)
     assert run.outputs() == [f"experiments/eval/{name}_vllm_ko_{s}{ec}" for name in ("exaone_grpo2b", "exaone_rlstart2b") for s in ("custom", "test") for ec in ("", "_ec")] + [
@@ -333,9 +337,39 @@ def test_control_run_in_a_new_session_trains_and_evaluates_its_own_start_model(t
     assert run.run_all(only=RL_CELLS) == collections.Counter()                              # run again: nothing left to do
 
 
+def test_the_recorded_control_run_matches_what_the_notebook_does(tmp_path, monkeypatch):
+    """The stored training record of the control names the start model and the sampler the dry run expects."""
+    args = json.loads((ROOT / "experiments/exaone_grpo2b/train_info.json").read_text())["args"]
+    main = json.loads((ROOT / "experiments/exaone_grpo2/train_info.json").read_text())["args"]
+    assert args["adapter"] == "experiments/exaone_lora_rlstart2b" and args["sampling"] == "balanced" and main["sampling"] == "natural"
+    assert {k for k in set(args) | set(main) if args.get(k) != main.get(k)} == {"adapter", "out", "sampling"}
+
+
 def test_without_a_flag_a_new_session_does_nothing_in_the_rl_section(tmp_path, monkeypatch):
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
-    assert run.run_all(only=RL_CELLS) == collections.Counter()
+    for state in (BEFORE, True):
+        (tmp_path / str(state)).mkdir()
+        run = DryRun(tmp_path / str(state), monkeypatch, cloned_results=state)
+        assert run.run_all(only=RL_CELLS) == collections.Counter()
+
+
+def test_now_that_the_control_is_stored_only_the_repeat_is_left(tmp_path, monkeypatch):
+    """The repository holds the main experiment and the control (2026-11-15). The control flag has nothing to do. The
+    repeat trains a start model under the next unused name: the stored evaluations of the earlier start models belong
+    to other weights and must stay as they are."""
+    (tmp_path / "control").mkdir()
+    assert DryRun(tmp_path / "control", monkeypatch, control=True, cloned_results=True).run_all(only=RL_CELLS) == collections.Counter()
+
+    (tmp_path / "repeat").mkdir()
+    run = DryRun(tmp_path / "repeat", monkeypatch, repeat=True, cloned_results=True)
+    counts = run.run_all(only=RL_CELLS)
+    assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8
+    assert run.outputs() == [f"experiments/eval/{name}_vllm_ko_{s}{ec}" for name in ("exaone_grpo2c", "exaone_rlstart2c") for s in ("custom", "test") for ec in ("", "_ec")] + [
+        "experiments/exaone_grpo2c", "experiments/exaone_lora_rlstart2c"]
+    rl = next(c for k, c in run.calls if k == "grpo")
+    assert "--adapter experiments/exaone_lora_rlstart2c " in rl and "--sampling natural" in rl
+    for name in ("exaone_rlstart2_vllm", "exaone_rlstart2b_vllm", "exaone_grpo2_vllm", "exaone_grpo2b_vllm"):          # stored results are untouched
+        f = f"experiments/eval/{name}_ko_test_ec/metrics.json"
+        assert (run.repo / f).read_text() == (ROOT / f).read_text()
 
 
 def test_a_fresh_clone_skips_the_sections_whose_results_are_in_the_repository(tmp_path, monkeypatch):
@@ -347,7 +381,7 @@ def test_a_fresh_clone_skips_the_sections_whose_results_are_in_the_repository(tm
 
 
 def test_control_and_repeat_start_from_the_same_model_and_differ_only_in_sampling(tmp_path, monkeypatch):
-    run = DryRun(tmp_path, monkeypatch, control=True, repeat=True, cloned_results=True)
+    run = DryRun(tmp_path, monkeypatch, control=True, repeat=True, cloned_results=BEFORE)
     counts = run.run_all(only=RL_CELLS)
     rl = [c for k, c in run.calls if k == "grpo"]
     assert counts["train"] == 1 and len(rl) == 2
@@ -357,18 +391,31 @@ def test_control_and_repeat_start_from_the_same_model_and_differ_only_in_samplin
     assert strip(rl[0]) == strip(rl[1]) and "--adapter experiments/exaone_lora_rlstart2b " in rl[0]
 
 
-def test_an_interrupted_control_session_evaluates_the_start_model_it_trains_again(tmp_path, monkeypatch):
-    """If the session dies after the start model was evaluated and before RL finished, the next session has that
-    evaluation (restored) but not the weights. It trains the start model again, so the old evaluation is thrown away
-    and made again: an evaluation always belongs to the weights RL starts from."""
-    run = DryRun(tmp_path, monkeypatch, control=True, cloned_results=True)
+def test_an_interrupted_session_does_not_reuse_the_name_of_a_start_model_whose_weights_are_gone(tmp_path, monkeypatch):
+    """If a session dies after its start model was evaluated and before RL finished, the next session has that
+    evaluation (restored) but not the weights. It trains a start model under the next unused name and leaves the old
+    evaluation alone: an evaluation always belongs to the weights it was made with."""
+    run = DryRun(tmp_path, monkeypatch, control=True, cloned_results=BEFORE)
     for s in ("test", "custom"):
         d = run.repo / f"experiments/eval/exaone_rlstart2b_vllm_ko_{s}_ec"
         d.mkdir(parents=True)
         (d / "metrics.json").write_text('{"from": "an earlier session"}')
     counts = run.run_all(only=RL_CELLS)
     assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8
-    assert (run.repo / "experiments/eval/exaone_rlstart2b_vllm_ko_test_ec/metrics.json").read_text() == "{}"
+    assert (run.repo / "experiments/eval/exaone_rlstart2b_vllm_ko_test_ec/metrics.json").read_text() == '{"from": "an earlier session"}'
+    assert "--adapter experiments/exaone_lora_rlstart2c " in next(c for k, c in run.calls if k == "grpo")
+    assert any("exaone_rlstart2c_vllm_ko_test_ec" in o for o in run.outputs())
+
+
+def test_a_half_finished_start_evaluation_is_made_again_with_the_new_weights(tmp_path, monkeypatch):
+    """A name counts as used only when its evaluation is complete. A piece of an evaluation made with other weights
+    (one set finished, the other not) is removed before the start model trained now is evaluated."""
+    run = DryRun(tmp_path, monkeypatch, control=True, cloned_results=BEFORE)
+    d = run.repo / "experiments/eval/exaone_rlstart2b_vllm_ko_test_ec"
+    d.mkdir(parents=True)
+    (d / "metrics.json").write_text('{"from": "other weights"}')
+    counts = run.run_all(only=RL_CELLS)
+    assert counts["eval"] == 8 and (d / "metrics.json").read_text() == "{}"
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

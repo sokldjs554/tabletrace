@@ -575,6 +575,69 @@
   "p_two_sided": 7.451219394136646e-32,
   "p_display": "<0.001"
  },
+ "grpo2b_vs_rlstart2b_ko_test": {
+  "reference": "exaone_rlstart2b_vllm_ko_test",
+  "candidate": "exaone_grpo2b_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 32,
+  "reference_better": 16,
+  "p_two_sided": 0.0293049467205293,
+  "p_display": "0.029"
+ },
+ "grpo2b_vs_rlstart2b_ko_test_ec": {
+  "reference": "exaone_rlstart2b_vllm_ko_test_ec",
+  "candidate": "exaone_grpo2b_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 29,
+  "reference_better": 13,
+  "p_two_sided": 0.019520472782460274,
+  "p_display": "0.020"
+ },
+ "grpo2b_vs_rlstart2b_ko_custom_ec": {
+  "reference": "exaone_rlstart2b_vllm_ko_custom_ec",
+  "candidate": "exaone_grpo2b_vllm_ko_custom_ec",
+  "n": 30,
+  "candidate_better": 1,
+  "reference_better": 1,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "rlstart2b_vs_rlstart2_ko_test": {
+  "reference": "exaone_rlstart2_vllm_ko_test",
+  "candidate": "exaone_rlstart2b_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 7,
+  "reference_better": 22,
+  "p_two_sided": 0.008130058646202087,
+  "p_display": "0.008"
+ },
+ "rlstart2b_vs_rlstart2_ko_test_ec": {
+  "reference": "exaone_rlstart2_vllm_ko_test_ec",
+  "candidate": "exaone_rlstart2b_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 7,
+  "reference_better": 22,
+  "p_two_sided": 0.008130058646202087,
+  "p_display": "0.008"
+ },
+ "grpo2_vs_grpo2b_ko_test": {
+  "reference": "exaone_grpo2b_vllm_ko_test",
+  "candidate": "exaone_grpo2_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 51,
+  "reference_better": 23,
+  "p_two_sided": 0.0015162236642818612,
+  "p_display": "0.002"
+ },
+ "grpo2_vs_grpo2b_ko_test_ec": {
+  "reference": "exaone_grpo2b_vllm_ko_test_ec",
+  "candidate": "exaone_grpo2_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 48,
+  "reference_better": 21,
+  "p_two_sided": 0.0015503169494868645,
+  "p_display": "0.002"
+ },
  "ref_7p8b_vs_ref_1p2b_ko_test": {
   "reference": "ref_1p2b_ko_test",
   "candidate": "ref_7p8b_awq_ko_test",
