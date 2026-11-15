@@ -59,7 +59,7 @@ class DryRun:
     """Notebook 2 with its shell lines recorded instead of run, in a fresh working directory under `root`."""
 
     def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2, run_32b: bool = False, dies: str | None = None,
-                 remote: Path | None = None, control: bool = False, repeat: bool = False, cloned_results: bool | str = False):
+                 remote: Path | None = None, control: bool = False, repeat: bool = False, cloned_results: bool | str = False, old_setting: bool = True):
         self.calls: list[tuple[str, str]] = []
         self.packs: list[int] = []
         self.dies = dies                  # evaluations whose output path contains this never finish (the server died)
@@ -102,6 +102,9 @@ class DryRun:
         if control:
             assert sum("RUN_CONTROL = False" in src for _, src in self.sections) == 1
             self.sections = [(i, src.replace("RUN_CONTROL = False", "RUN_CONTROL = True")) for i, src in self.sections]
+        if not old_setting:
+            assert sum("RUN_OLD_SETTING = True" in src for _, src in self.sections) == 1
+            self.sections = [(i, src.replace("RUN_OLD_SETTING = True", "RUN_OLD_SETTING = False")) for i, src in self.sections]
         if repeat:
             assert sum("RUN_REPEAT = False" in src for _, src in self.sections) == 1
             self.sections = [(i, src.replace("RUN_REPEAT = False", "RUN_REPEAT = True")) for i, src in self.sections]
@@ -159,7 +162,7 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     repo, calls, packs, sections, run_all = run.repo, run.calls, run.packs, run.sections, run.run_all
 
     first = run_all()
-    assert first["train"] == 8 and first["grpo"] == 1 and first["eval"] >= 50
+    assert first["train"] == 10 and first["grpo"] == 1 and first["eval"] >= 50               # 8 + the two full-data runs of section I
     assert len(packs) >= len(sections) - 1                                   # every section ends by packing what exists so far
     assert Path.cwd() == repo                                                # pack() moves away for the download link and must come back
     names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
@@ -212,7 +215,7 @@ def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
     run = DryRun(tmp_path, monkeypatch, n_gpu=1)
     counts = run.run_all()
     commands = [c for _, c in run.calls]
-    assert counts["grpo"] == 1 and counts["train"] == 6                      # no ddp1 / ddp2
+    assert counts["grpo"] == 1 and counts["train"] == 8                      # no ddp1 / ddp2
     assert not any("torchrun" in c for c in commands) and not any("32b" in o.lower() for o in run.outputs())
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
@@ -242,7 +245,7 @@ def test_notebook_2_goes_on_when_a_server_dies_during_evaluation(tmp_path, monke
     counts = run.run_all()
     mine = [c for k, c in run.calls if k == "eval" and "ref_32b_awq" in re.search(r"--out (\S+)", c).group(1)]
     assert len(mine) == 1 and "--replay-from" not in mine[0]                 # no second set, no re-verification of a missing file
-    assert counts["grpo"] == 1 and counts["train"] == 8                      # the other sections still ran
+    assert counts["grpo"] == 1 and counts["train"] == 10                     # the other sections still ran
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
 
@@ -444,6 +447,44 @@ def test_a_half_finished_start_evaluation_is_made_again_with_the_new_weights(tmp
     (d / "metrics.json").write_text('{"from": "other weights"}')
     counts = run.run_all(only=RL_CELLS)
     assert counts["eval"] == 8 and (d / "metrics.json").read_text() == "{}"
+
+
+FULL_CELL = "FULL_RUNS"         # the cell of section I
+
+
+def test_full_data_fine_tuning_is_repeated_with_whole_targets_next_to_the_old_setting(tmp_path, monkeypatch):
+    """Every EXAONE fine-tuning so far cut the target of 15% of the training examples (issue 66). Section I trains on
+    the full data with a cap that cuts nothing, and once more with the old cap in the same session: two trainings of
+    the old setting already differed (84.3% and 87.1%), so the corrected run needs a partner from the same session.
+    The two commands must differ in the length options only."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    counts = run.run_all(only=FULL_CELL)
+    assert counts["train"] == 2 and counts["eval"] == 8 and counts["grpo"] == 0
+    new, old = [c for k, c in run.calls if k == "train"]
+    assert "--limit 0 " in new and "--max-in 672" in new and "--max-len 960" in new and "--out experiments/exaone_lora_full2" in new
+    assert "--limit 0 " in old and "--max-in" not in old and "--max-len 768" in old and "--out experiments/exaone_lora_full2old" in old
+    strip = lambda c: " ".join(re.sub(r"--max-in \d+|--max-len \d+|--out \S+", "", c).split())          # noqa: E731
+    assert strip(new) == strip(old)
+    first = json.loads((ROOT / "experiments/exaone_lora_full/train_info.json").read_text())
+    assert first["n_examples"] == 3587                                       # what `--limit 0` trains on, as in the first notebook
+    assert run.outputs() == [f"experiments/eval/exaone_{tag}_vllm_ko_{s}{ec}" for tag in ("full2", "full2old") for s in ("custom", "test") for ec in ("", "_ec")] + [
+        "experiments/exaone_lora_full2", "experiments/exaone_lora_full2old"]
+    assert all("--confidence" in c for k, c in run.calls if k == "eval" and "--replay-from" not in c)       # the curve of a full-data model is still missing
+    assert [k for k, _ in run.calls if k in ("train", "eval")][:5] == ["train", "eval", "eval", "eval", "eval"]   # the corrected run is finished and packed first
+    assert not list((run.repo / "experiments").glob("exaone_lora_full2*/merged"))                            # weights freed after evaluation
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any("exaone_full2_vllm_ko_test_ec" in n for n in names) and any(n.endswith("exaone_lora_full2old/train_info.json") for n in names)
+    stored = (ROOT / "experiments/eval/exaone_full_vllm_ko_test/metrics.json").read_text()
+    assert (run.repo / "experiments/eval/exaone_full_vllm_ko_test/metrics.json").read_text() == stored      # the first notebook's result keeps its name
+
+    assert run.run_all(only=FULL_CELL) == collections.Counter()                                              # run again: nothing left to do
+
+
+def test_full_data_section_can_run_the_corrected_setting_alone(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True, old_setting=False)
+    counts = run.run_all(only=FULL_CELL)
+    assert counts["train"] == 1 and counts["eval"] == 4
+    assert "--max-in 672" in next(c for k, c in run.calls if k == "train") and not any("full2old" in o for o in run.outputs())
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):
