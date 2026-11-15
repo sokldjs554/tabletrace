@@ -36,6 +36,7 @@ RUNS = [
     ("ref_1p2b_ko_test", "engine", "exaone", 672), ("ref_7p8b_awq_ko_test", "engine", "exaone", 672),
     # control run of the second RL experiment and its own start model
     ("exaone_rlstart2b_vllm_ko_test", "engine", "exaone", 672), ("exaone_grpo2b_vllm_ko_test", "engine", "exaone", 672),
+    ("exaone_grpo2c_vllm_ko_test", "engine", "exaone", 672),          # the main experiment once more, from the control's start model
 ]
 
 

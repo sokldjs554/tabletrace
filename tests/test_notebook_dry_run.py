@@ -77,8 +77,9 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                if cloned_results == "before the control run" and ("rlstart2b" in str(f) or "grpo2b" in str(f)):
-                    continue              # the repository as it was when the owner ran the control
+                later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c"), "before the repeat run": ("grpo2c",)}.get(cloned_results, ())
+                if any(x in str(f) for x in later):
+                    continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(f, dest)
@@ -312,6 +313,7 @@ def test_notebook_2_reinforcement_learning_control_run_differs_only_in_sampling(
 
 RL_CELLS = "RL_RUNS"            # the two cells of section D
 BEFORE = "before the control run"
+BEFORE_REPEAT = "before the repeat run"
 
 
 def test_control_run_in_a_new_session_trains_and_evaluates_its_own_start_model(tmp_path, monkeypatch):
@@ -346,21 +348,21 @@ def test_the_recorded_control_run_matches_what_the_notebook_does(tmp_path, monke
 
 
 def test_without_a_flag_a_new_session_does_nothing_in_the_rl_section(tmp_path, monkeypatch):
-    for state in (BEFORE, True):
+    for state in (BEFORE, BEFORE_REPEAT, True):
         (tmp_path / str(state)).mkdir()
         run = DryRun(tmp_path / str(state), monkeypatch, cloned_results=state)
         assert run.run_all(only=RL_CELLS) == collections.Counter()
 
 
-def test_now_that_the_control_is_stored_only_the_repeat_is_left(tmp_path, monkeypatch):
-    """The repository holds the main experiment and the control (2026-11-15). The control flag has nothing to do. The
-    repeat trains a start model under the next unused name: the stored evaluations of the earlier start models belong
-    to other weights and must stay as they are."""
+def test_repeat_in_a_new_session_without_weights_gets_its_own_start_model(tmp_path, monkeypatch):
+    """The repository as it was after the control. The control flag has nothing to do. Without the weights of an
+    earlier start model the repeat trains one under the next unused name: the stored evaluations of the earlier start
+    models belong to other weights and must stay as they are."""
     (tmp_path / "control").mkdir()
-    assert DryRun(tmp_path / "control", monkeypatch, control=True, cloned_results=True).run_all(only=RL_CELLS) == collections.Counter()
+    assert DryRun(tmp_path / "control", monkeypatch, control=True, cloned_results=BEFORE_REPEAT).run_all(only=RL_CELLS) == collections.Counter()
 
     (tmp_path / "repeat").mkdir()
-    run = DryRun(tmp_path / "repeat", monkeypatch, repeat=True, cloned_results=True)
+    run = DryRun(tmp_path / "repeat", monkeypatch, repeat=True, cloned_results=BEFORE_REPEAT)
     counts = run.run_all(only=RL_CELLS)
     assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8
     assert run.outputs() == [f"experiments/eval/{name}_vllm_ko_{s}{ec}" for name in ("exaone_grpo2c", "exaone_rlstart2c") for s in ("custom", "test") for ec in ("", "_ec")] + [
@@ -370,6 +372,32 @@ def test_now_that_the_control_is_stored_only_the_repeat_is_left(tmp_path, monkey
     for name in ("exaone_rlstart2_vllm", "exaone_rlstart2b_vllm", "exaone_grpo2_vllm", "exaone_grpo2b_vllm"):          # stored results are untouched
         f = f"experiments/eval/{name}_ko_test_ec/metrics.json"
         assert (run.repo / f).read_text() == (ROOT / f).read_text()
+
+
+def test_repeat_uses_the_control_start_model_when_its_weights_are_still_there(tmp_path, monkeypatch):
+    """How the repeat was run on 2026-11-15: the working directory of the control session was still on Kaggle, with the
+    weights of the control's start model. The repeat starts from them, trains no start model and evaluates none, so
+    repeat and control differ in the sampler only. The stored training record says the same."""
+    run = DryRun(tmp_path, monkeypatch, repeat=True, cloned_results=BEFORE_REPEAT)
+    start = run.repo / "experiments/exaone_lora_rlstart2b"
+    (start / "merged").mkdir(parents=True, exist_ok=True)
+    (start / "adapter_config.json").write_text("{}")
+    (start / "merged" / "config.json").write_text("{}")
+    counts = run.run_all(only=RL_CELLS)
+    assert counts["train"] == 0 and counts["grpo"] == 1 and counts["eval"] == 4
+    rl = next(c for k, c in run.calls if k == "grpo")
+    assert "--adapter experiments/exaone_lora_rlstart2b " in rl and "--sampling natural" in rl and "--out experiments/exaone_grpo2c" in rl
+    assert not any("rlstart2" in o for o in run.outputs())
+    repeat = json.loads((ROOT / "experiments/exaone_grpo2c/train_info.json").read_text())["args"]
+    control = json.loads((ROOT / "experiments/exaone_grpo2b/train_info.json").read_text())["args"]
+    assert repeat["adapter"] == control["adapter"] == "experiments/exaone_lora_rlstart2b"
+    assert {k for k in set(repeat) | set(control) if repeat.get(k) != control.get(k)} == {"out", "sampling"}
+
+
+def test_with_everything_stored_no_flag_starts_a_run(tmp_path, monkeypatch):
+    """Main experiment, control and repeat are in the repository. Neither flag trains or evaluates anything."""
+    run = DryRun(tmp_path, monkeypatch, control=True, repeat=True, cloned_results=True)
+    assert run.run_all(only=RL_CELLS) == collections.Counter()
 
 
 def test_a_fresh_clone_skips_the_sections_whose_results_are_in_the_repository(tmp_path, monkeypatch):

@@ -30,7 +30,8 @@ def test_run_names_hold_no_dots():
     assert [n for n in names if "." in n] == []
 
 
-@pytest.mark.parametrize("script, out", [("rl2_analysis.py", "rl2_analysis.json"), ("rl2_analysis.py", "rl2_control_analysis.json"), ("gpu3_summary.py", "gpu3_summary.json")])
+@pytest.mark.parametrize("script, out", [("rl2_analysis.py", "rl2_analysis.json"), ("rl2_analysis.py", "rl2_control_analysis.json"), ("rl2_analysis.py", "rl2_repeat_analysis.json"),
+                                         ("gpu3_summary.py", "gpu3_summary.json")])
 def test_derived_files_are_reproduced_from_the_predictions(script, out):
     stored = (EVAL / out).read_text(encoding="utf-8")
     r = subprocess.run([sys.executable, str(ROOT / "scripts" / script)], cwd=ROOT, capture_output=True, text=True)
@@ -70,7 +71,7 @@ def test_analysis_says_what_did_not_improve():
     assert all(v["unparsable"] == 0 for v in t["dev"].values())
 
 
-@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8)])
+@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8), ("repeat", 4)])
 def test_replay_record_covers_every_run_of_the_session(session, replays):
     d = json.loads((EVAL / f"replay_check_{session}.json").read_text(encoding="utf-8"))
     assert d["replays"] == 2 * len(d["runs"]) == replays and d["questions_that_differ"] == 0
@@ -133,3 +134,33 @@ def test_control_headline_numbers_follow_from_the_predictions():
     assert pt["candidate_better"] == sum(b[q]["verified_correct"] and not a[q]["verified_correct"] for q in a)
     assert pt["reference_better"] == sum(a[q]["verified_correct"] and not b[q]["verified_correct"] for q in a)
 
+
+
+
+def test_repeat_run_reproduces_the_main_experiment_and_separates_from_the_control_on_the_same_start_model():
+    """The main experiment was run once more, from the control's start model. The documents say three things; each must
+    follow from the stored predictions: the result came out again, the comparison with the control needs no correction
+    for the start model, and verified EM still does not separate the two samplers."""
+    r = json.loads((EVAL / "rl2_repeat_analysis.json").read_text(encoding="utf-8"))
+    a = json.loads((EVAL / "rl2_analysis.json").read_text(encoding="utf-8"))
+    c = json.loads((EVAL / "rl2_control_analysis.json").read_text(encoding="utf-8"))
+    assert r["start"] == c["start"] and r["same_start_model_as_control"] and r["training_args_that_differ_from_control"] == ["out", "sampling"]
+    assert r["training"]["dev_first"] == c["training"]["dev_first"]                         # the same model before RL, checked on the same dev questions
+    # the result came out again
+    assert r["raw"]["sign_test_cited_gold_cell_lookup"]["p_two_sided"] < 0.001 and r["first_pass"]["sign_tests"]["correct_all"]["p_two_sided"] < 0.01
+    assert r["raw"]["rl"]["lookup_cited_gold_cell"] > 1.5 * r["raw"]["start"]["lookup_cited_gold_cell"]
+    assert r["main_minus_repeat"]["first_pass"]["verified_correct_all"]["p_two_sided"] > 0.05
+    # against the control, same start model: cited cells differ, verified EM does not
+    d = r["repeat_minus_control"]["first_pass"]
+    assert d["cited_gold_cell_lookup"]["p_two_sided"] < 0.001 and d["wrong_answer_all"]["p_two_sided"] < 0.001
+    assert d["verified_correct_all"]["p_two_sided"] > 0.05
+    b, k = rows(RL.replace("grpo2", "grpo2c")), rows("exaone_grpo2b_vllm_ko_test")              # the direct comparison, recomputed
+    lookup = [q for q in b if b[q]["gold_status"] == "answered" and b[q]["gold_op"] == "lookup"]
+    assert d["cited_gold_cell_lookup"]["questions_changed_more_in_repeat"] == sum(bool(b[q]["cells_exact_raw"]) and not k[q]["cells_exact_raw"] for q in lookup)
+    assert d["cited_gold_cell_lookup"]["questions_changed_more_in_control"] == sum(bool(k[q]["cells_exact_raw"]) and not b[q]["cells_exact_raw"] for q in lookup)
+    # what did not improve stays stated
+    assert r["first_pass"]["outcomes"]["rl"]["calc"]["correct"] == 0 and a["first_pass"]["outcomes"]["rl"]["calc"]["correct"] == 0
+    report = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
+    sec = report[report.index("### 22.8 본 실험의 반복"):]
+    for needle in ("본 실험은 두 번, 대조군은 한 번이다", "강화학습의 시드는 같았다", "여전히 대조군과 유의하게 다르지 않다", "계산과 보류는 이번에도 배우지 못했다"):
+        assert needle in sec, needle

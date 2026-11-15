@@ -11,7 +11,10 @@ The control run (balanced sampling as in the first experiment, everything else a
 session with its own start model. It gets the same analysis, and a comparison of the two arms: for every question the
 change in the main experiment minus the change in the control (a sign test on the questions where the two differ).
 
-  python scripts/rl2_analysis.py     # -> experiments/eval/rl2_analysis.json, experiments/eval/rl2_control_analysis.json
+The main experiment was then run once more ("repeat"), from the control's start model: its weights were still in the
+session. Repeat and control differ in the sampler only, so their comparison needs no correction for the start model.
+
+  python scripts/rl2_analysis.py     # -> experiments/eval/rl2_analysis.json, rl2_control_analysis.json, rl2_repeat_analysis.json
 """
 from __future__ import annotations
 
@@ -25,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EVAL = ROOT / "experiments" / "eval"
 START, RL = "exaone_rlstart2_vllm_ko_test", "exaone_grpo2_vllm_ko_test"
 START_C, RL_C = "exaone_rlstart2b_vllm_ko_test", "exaone_grpo2b_vllm_ko_test"          # the control run and its own start model
+RL_R = "exaone_grpo2c_vllm_ko_test"                                                    # the main experiment once more, from the control's start model
 CALC = ("diff", "sum", "avg")
 OUTCOMES = ("correct", "wrong", "withheld")
 
@@ -150,13 +154,15 @@ def cost() -> dict:
     return {"start_sft_300_minutes": minutes("exaone_lora_rlstart2"), "rl_200_steps_minutes": minutes("exaone_grpo2"), "sft_full_data_minutes": minutes("exaone_lora_full")}
 
 
-def arms() -> dict:
-    """Main experiment against the control, question by question. Each arm has its own start model, so the quantity
-    compared is the change an arm made: +1 if RL gained the property on that question, -1 if it lost it, 0 otherwise.
-    The sign test runs on the questions where the two arms changed differently."""
+def arms(first: tuple[str, str] = (START, RL), second: tuple[str, str] = (START_C, RL_C), names: tuple[str, str] = ("main", "control")) -> dict:
+    """One arm against another, question by question. Each arm has its own start model, so the quantity compared is
+    the change an arm made: +1 if RL gained the property on that question, -1 if it lost it, 0 otherwise. The sign test
+    runs on the questions where the two arms changed differently. (With one start model for both arms this is the
+    plain paired comparison of the two models after RL.)"""
     out: dict = {}
+    na, nb = names
     for label, suffix in (("first_pass", ""), ("subject_check", "_ec")):
-        a0, a1, c0, c1 = load(START + suffix), load(RL + suffix), load(START_C + suffix), load(RL_C + suffix)
+        a0, a1, c0, c1 = load(first[0] + suffix), load(first[1] + suffix), load(second[0] + suffix), load(second[1] + suffix)
         assert set(a0) == set(c0)
         res = {}
         for name, qs, hit in (
@@ -172,8 +178,8 @@ def arms() -> dict:
             more_in_main = sum(main_change[q] > control_change[q] for q in qs)
             more_in_control = sum(main_change[q] < control_change[q] for q in qs)
             p = exact_p(more_in_main, more_in_main + more_in_control)
-            res[name] = {"n": len(qs), "net_change_main": sum(main_change.values()), "net_change_control": sum(control_change.values()),
-                         "questions_changed_more_in_main": more_in_main, "questions_changed_more_in_control": more_in_control,
+            res[name] = {"n": len(qs), f"net_change_{na}": sum(main_change.values()), f"net_change_{nb}": sum(control_change.values()),
+                         f"questions_changed_more_in_{na}": more_in_main, f"questions_changed_more_in_{nb}": more_in_control,
                          "p_two_sided": p, "p_display": "<0.001" if p < 0.001 else f"{p:.3f}"}
         out[label] = res
     return out
@@ -206,7 +212,17 @@ def main() -> None:
                "prompt_mix": prompt_mix()}
     dest_c = EVAL / "rl2_control_analysis.json"
     dest_c.write_text(json.dumps(control, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    for title, d in (("main experiment (natural sampling)", out), ("control (balanced sampling)", control)):
+    info_r = json.loads((ROOT / "experiments" / "exaone_grpo2c" / "train_info.json").read_text(encoding="utf-8"))["args"]
+    info_c = json.loads((ROOT / "experiments" / "exaone_grpo2b" / "train_info.json").read_text(encoding="utf-8"))["args"]
+    repeat = {"start": START_C, "rl": RL_R, "first_pass": setting("", START_C, RL_R), "subject_check": setting("_ec", START_C, RL_R), "raw": raw_side(START_C, RL_R),
+              "training": training("exaone_grpo2c"), "delta_rl_minus_start": deltas(START_C, RL_R),
+              "repeat_minus_control": arms((START_C, RL_R), (START_C, RL_C), ("repeat", "control")),          # same start model: sampler only
+              "main_minus_repeat": arms((START, RL), (START_C, RL_R), ("main", "repeat")),                    # the two runs of the main experiment
+              "training_args_that_differ_from_control": sorted(k for k in set(info_r) | set(info_c) if info_r.get(k) != info_c.get(k)),
+              "same_start_model_as_control": info_r["adapter"] == info_c["adapter"]}
+    dest_r = EVAL / "rl2_repeat_analysis.json"
+    dest_r.write_text(json.dumps(repeat, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    for title, d in (("main experiment (natural sampling)", out), ("control (balanced sampling)", control), ("repeat of the main experiment (natural sampling, the control's start model)", repeat)):
         print("==", title)
         for s in ("first_pass", "subject_check"):
             for k in ("all", "lookup", "calc", "unanswerable"):
@@ -220,7 +236,13 @@ def main() -> None:
     for s, res in control["main_minus_control"].items():
         print(s, {k: (v["net_change_main"], v["net_change_control"], v["questions_changed_more_in_main"], v["questions_changed_more_in_control"], v["p_display"]) for k, v in res.items()})
     print("start models:", control["start_models"])
-    print("->", dest.relative_to(ROOT), dest_c.relative_to(ROOT))
+    print("== repeat minus control (same start model)")
+    for s, res in repeat["repeat_minus_control"].items():
+        print(s, {k: (v["net_change_repeat"], v["net_change_control"], v["questions_changed_more_in_repeat"], v["questions_changed_more_in_control"], v["p_display"]) for k, v in res.items()})
+    print("== main minus repeat (two runs of the main experiment)")
+    for s, res in repeat["main_minus_repeat"].items():
+        print(s, {k: (v["net_change_main"], v["net_change_repeat"], v["questions_changed_more_in_main"], v["questions_changed_more_in_repeat"], v["p_display"]) for k, v in res.items()})
+    print("->", dest.relative_to(ROOT), dest_c.relative_to(ROOT), dest_r.relative_to(ROOT))
 
 
 if __name__ == "__main__":

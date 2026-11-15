@@ -32,4 +32,8 @@
   - 새 세션에는 앞 세션의 시작 모델 가중치가 없다. 노트북이 시작 모델을 같은 설정으로 다시 학습해 `exaone_rlstart2b`라는 이름으로 따로 평가했고, 대조군은 그 모델에서 시작했다(`train_info.json`의 `args.adapter`). 두 학습 명령에서 다른 것은 `--sampling`과 `--adapter`, `--out`뿐이다.
   - 묶음의 `experiments/run_info_2.json`은 `run_info_2_control.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_control.log`로 이름을 바꿔 넣었다(앞 세션의 같은 이름 파일을 덮어쓰지 않으려고). 내용은 그대로다.
   - `scripts/replay_check.py --session control`로 다시 검증했다. 8회, 2,916문항에서 판정이 다른 문항은 0개다(`replay_check_control.json`).
-  - 같은 시작 모델에서 본 실험을 한 번 더 돌리는 선택(`RUN_REPEAT`, `exaone_grpo2c`)은 꺼져 있었다.
+  - 같은 시작 모델에서 본 실험을 한 번 더 돌리는 선택(`RUN_REPEAT`, `exaone_grpo2c`)은 꺼져 있었다. 아래 세션에서 돌렸다.
+- **2번 노트북, 2026-11-15 그다음 세션 (Kaggle Tesla T4 ×2, 커밋 `401da7e`, `experiments/run_info_2_repeat.json`)**: 본 실험의 반복. D절 첫 셀의 `RUN_REPEAT = True`. 소유자가 묶음 두 개를 건넸다. 첫 묶음(16:38)은 D절 첫 셀 뒤의 것으로 새 파일이 없다. 대조군 세션의 작업 폴더가 Kaggle에 남아 있었고, 노트북이 그 시작 모델(`exaone_rlstart2b`)의 가중치를 찾아 시작 모델 학습과 평가를 건너뛰었다. 둘째 묶음(18:07)의 새 파일은 평가 4건 `exaone_grpo2c_vllm_ko_{test,custom}`와 각각의 `_ec`, 학습 기록 `experiments/exaone_grpo2c/train_info.json`과 `train_log.jsonl`(200걸음, 192걸음 갱신, 남긴 모델은 200걸음째)이다. 나머지 72개 파일은 저장소의 것과 바이트까지 같다.
+  - 반복 실행과 대조군은 같은 가중치에서 시작했다. 두 학습 명령에서 다른 것은 `--sampling`과 `--out`뿐이다. 개발셋의 0걸음 점검이 대조군과 숫자까지 같다. 본 실험 1회째와 다른 것은 `--adapter`와 `--out`이다.
+  - 묶음의 `run_info_2.json`은 `run_info_2_repeat.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_repeat.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
+  - `scripts/replay_check.py --session repeat`로 다시 검증했다. 4회, 1,458문항에서 판정이 다른 문항은 0개다(`replay_check_repeat.json`).

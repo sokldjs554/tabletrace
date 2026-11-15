@@ -290,7 +290,7 @@ def supplement_sections() -> list[dict]:
     out.extend(gpu3_cards())
     out.append({"title": "재지 못한 것", "status": "prep",
                 "description": "풀 전부(약 3.4만 문항) 학습, 큰 모델의 튜닝, 도구 호출 형식으로 튜닝한 모델, 튜닝 모델의 4비트 서빙(bitsandbytes는 그 vLLM 버전에 없는 방식이었다). "
-                               "두 번째 강화학습과 대조군의 반복 실행(실험마다 한 번씩이다), 같은 시작 모델에서 둘을 나란히 돌린 실행, 길이 결함을 고친 설정의 전체 데이터 미세조정, 전체 데이터 모델의 확신도 곡선. "
+                               "강화학습의 시드를 바꾼 실행(본 실험은 시작 모델을 달리해 두 번, 대조군은 한 번 돌렸다), 프롬프트 수정만의 효과, 길이 결함을 고친 설정의 전체 데이터 미세조정, 전체 데이터 모델의 확신도 곡선. "
                                "2차 GPU 실험은 결과 파일이 남지 않아 그 실험들의 문항별 분석이 없다."})
     return out
 
@@ -342,7 +342,7 @@ def gpu3_cards() -> list[dict]:
             "notes": ["근거 셀 오류가 줄었다. 보상은 정답 셀 표시를 쓰지 않는다. 복구 없이 통과한 정답에 1.0점, 검증기가 근거를 고쳐야 했던 정답에 0.3점을 주는 차이만으로 모델이 답이 든 셀을 인용하는 쪽으로 움직였다.",
                       "계산 문항은 풀게 된 것이 아니다. 두 모델 모두 계산 프로그램을 한 번도 쓰지 않았다. 시작 모델은 셀 값 하나를 답으로 내서 틀린 답이 나갔고, 강화학습 뒤에는 스스로 계산한 수를 답으로 써서 검증기가 내보내지 않는다. 보류가 늘어난 것은 거의 전부 여기서 왔다.",
                       f"개발셋 {tr['dev_first']['n']}문항의 평균 보상은 시작 {tr['dev_first']['mean_reward']} → {tr['kept_step']}걸음 {tr['dev_kept']['mean_reward']}(최고) → {tr['steps']}걸음 {tr['dev_last']['mean_reward']}. 문법 오류는 모든 점검에서 {tr['dev_first']['unparsable']}개다(첫 실험에서는 매번 16개).",
-                      f"한계. 한 번 돌렸고 시드가 하나다. 넷을 한꺼번에 바꿨고, 무엇이 효과를 냈는지는 아래 대조군 카드가 가른다. 같은 학습 풀 전체로 미세조정한 모델({pct(full['verified_em'])})이 훨씬 높고 학습도 빠르다"
+                      f"한계. 이 카드는 1회째다(아래 반복 실행 카드에서 같은 결과가 다시 나왔다). 넷을 한꺼번에 바꿨고, 무엇이 효과를 냈는지는 아래 대조군 카드가 가른다. 같은 학습 풀 전체로 미세조정한 모델({pct(full['verified_em'])})이 훨씬 높고 학습도 빠르다"
                       f"({a['cost']['sft_full_data_minutes']}분 대 {a['cost']['rl_200_steps_minutes']}분). 수작업 30문항에서는 차이가 유의하지 않다.",
                       "역할. 보상 함수와 GRPO 손실의 구현, GPU 실행(첫 실험, 두 번째 실험, 대조군)은 소유자가 했다. 첫 실험의 기록에서 결함을 찾아 학습 스크립트를 고친 것, 대조군의 설계, 결과 분석은 AI 도구가 했다."],
             "artifact": src + ". 분석: experiments/eval/rl2_analysis.json (scripts/rl2_analysis.py), paired_tests.json, no_repair_check.json"}]
@@ -383,8 +383,42 @@ def gpu3_cards() -> list[dict]:
                               "프롬프트 잘림을 고친 것만으로는 효과가 나지 않았다. 첫 실험이 듣지 않은 까닭은 프롬프트 잘림이 아니라 배치 구성이었다. 프롬프트 수정이 따로 필요했는지는 재지 않았다.",
                               "verified EM의 증가폭은 두 실험이 유의하게 다르지 않다. 두 번째 실험이 분명히 나은 것은 근거 셀과 틀린 답의 수다.",
                               f"해석. 300문항 모델은 계산 프로그램과 abstain을 쓰지 않는다. 그런 질문에서 받을 수 있는 가장 높은 점수는 0점이고, 그 길은 검증되지 않는 답을 쓰는 것이다. 같은 수로 뽑으면 배치의 {pct(mix['balanced_share_without_lookup'])}가 그런 질문이고, 실제 비율로 뽑으면 {pct(mix['natural']['lookup'])}가 조회 질문이다.",
-                              f"한계. 두 실험 모두 한 번씩이고 세션과 시작 모델이 다르다(시작 모델의 verified EM {pct(s1['verified_em'])} 대 {pct(cs['verified_em'])}). 같은 시작 모델에서 둘을 나란히 돌린 실행은 없다."],
+                              f"한계. 이 카드의 두 실험은 세션과 시작 모델이 다르다(시작 모델의 verified EM {pct(s1['verified_em'])} 대 {pct(cs['verified_em'])}). 같은 시작 모델에서의 비교는 아래 반복 실행 카드에 있고 결론은 같다."],
                     "artifact": f"experiments/eval/rl2_control_analysis.json (scripts/rl2_analysis.py), experiments/exaone_grpo2b/. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rpc['replays']}건을 다시 검증했고({rpc['questions_checked']:,}문항) 판정이 다른 문항은 {rpc['questions_that_differ']}개다"})
+    r = load(EXP / "eval" / "rl2_repeat_analysis.json")
+    rpr = load(EXP / "eval" / "replay_check_repeat.json")
+    if c and rpc and r and rpr:
+        gc = r["rl"]
+        rr, rt = m(gc), r["training"]
+        rc_ = r["repeat_minus_control"]["first_pass"]
+        ro_s, ro_r = r["first_pass"]["outcomes"]["start"], r["first_pass"]["outcomes"]["rl"]
+
+        def direct(key: str) -> str:
+            v = rc_[key]
+            return f"{v['questions_changed_more_in_repeat']} 대 {v['questions_changed_more_in_control']}, p {v['p_display']}"
+
+        rows = [
+            ["배치 구성, 시작 모델", "실제 비율, rlstart2", "실제 비율, rlstart2b", "같은 수, rlstart2b", ""],
+            [f"조회 {r['raw']['start']['lookup_questions']}문항에서 인용한 셀이 정답 셀인 문항", arrow(a["raw"]["start"]["lookup_cited_gold_cell"], a["raw"]["rl"]["lookup_cited_gold_cell"], plain),
+             arrow(r["raw"]["start"]["lookup_cited_gold_cell"], r["raw"]["rl"]["lookup_cited_gold_cell"], plain), arrow(c["raw"]["start"]["lookup_cited_gold_cell"], c["raw"]["rl"]["lookup_cited_gold_cell"], plain), direct("cited_gold_cell_lookup")],
+            ["인용 셀 정확도", arrow(s1["evidence_cells_exact_raw"], r1["evidence_cells_exact_raw"]), arrow(cs["evidence_cells_exact_raw"], rr["evidence_cells_exact_raw"]), arrow(cs["evidence_cells_exact_raw"], cr["evidence_cells_exact_raw"]), ""],
+            ["검증기가 근거 셀을 고쳐서 내보낸 비율", arrow(s1["evidence_repaired_rate"], r1["evidence_repaired_rate"]), arrow(cs["evidence_repaired_rate"], rr["evidence_repaired_rate"]), arrow(cs["evidence_repaired_rate"], cr["evidence_repaired_rate"]), ""],
+            ["verified EM (주어 검사 없음)", arrow(s1["verified_em"], r1["verified_em"]) + f" (p {pt['grpo2_vs_rlstart2_ko_test']['p_display']})", arrow(cs["verified_em"], rr["verified_em"]) + f" (p {pt['grpo2c_vs_rlstart2b_ko_test']['p_display']})",
+             arrow(cs["verified_em"], cr["verified_em"]) + f" (p {pt['grpo2b_vs_rlstart2b_ko_test']['p_display']})", direct("verified_correct_all")],
+            ["틀린 답이 나간 문항", arrow(o_s["all"]["wrong"], o_r["all"]["wrong"], plain), arrow(ro_s["all"]["wrong"], ro_r["all"]["wrong"], plain), arrow(co_s["all"]["wrong"], co_r["all"]["wrong"], plain), direct("wrong_answer_all")],
+            [f"계산 {ro_r['calc']['n']}문항의 정답 (강화학습 뒤)", o_r["calc"]["correct"], ro_r["calc"]["correct"], co_r["calc"]["correct"], ""],
+            ["남긴 모델", f"{tr['kept_step']}걸음째", f"{rt['kept_step']}걸음째", f"{ct['kept_step']}걸음째", ""],
+        ]
+        mr = r["main_minus_repeat"]["first_pass"]
+        out.append({"title": "EXAONE 강화학습, 반복 실행 — 대조군과 같은 시작 모델에서 한 번 더 (2026-11-15 그다음 세션)", "status": "done",
+                    "description": "두 번째 실험을 한 번 더 돌렸다. 대조군을 돌린 세션의 파일이 남아 있어서 대조군과 같은 시작 모델의 가중치에서 시작했다. 반복 실행과 대조군의 학습 명령에서 다른 것은 표본 추출 방식뿐이다. "
+                                   "마지막 열은 반복 실행과 대조군을 문항 단위로 견준 부호 검정이다(반복 실행에서만 대 대조군에서만).",
+                    "columns": ["지표", "두 번째 실험 1회째: 시작 → 뒤", "2회째 (반복): 시작 → 뒤", "대조군: 시작 → 뒤", "2회째 대 대조군 (같은 시작 모델)"], "rows": rows,
+                    "notes": [f"두 번째 실험의 결과가 다시 나왔다. 두 번 다 인용 셀 정확도와 verified EM이 올랐고, 두 실행의 변화량은 유의하게 다르지 않다(verified EM p {mr['verified_correct_all']['p_display']}, 인용 셀 p {mr['cited_gold_cell_lookup']['p_display']}).",
+                              "같은 시작 모델에서 표본 추출만 바꾸면 근거 셀에서 결과가 갈린다. 세션과 시작 모델이 다른 두 실험을 변화량으로 견준 대조군 카드의 결론이 같은 시작 모델에서도 그대로다.",
+                              "verified EM은 대조군과 여전히 유의하게 다르지 않다. 계산과 보류는 이번에도 배우지 못했다.",
+                              "남은 한계. 본 실험은 두 번, 대조군은 한 번이다. 두 번의 본 실험은 시작 모델이 달랐고 강화학습의 시드는 같았다."],
+                    "artifact": f"experiments/eval/rl2_repeat_analysis.json (scripts/rl2_analysis.py), experiments/exaone_grpo2c/. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rpr['replays']}건을 다시 검증했고({rpr['questions_checked']:,}문항) 판정이 다른 문항은 {rpr['questions_that_differ']}개다"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     big = g2["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"] if g2 else None
     rows = []

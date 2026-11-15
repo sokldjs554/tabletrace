@@ -98,6 +98,14 @@ PAIRS = [
     ("rlstart2b_vs_rlstart2_ko_test_ec", "exaone_rlstart2_vllm_ko_test_ec", "exaone_rlstart2b_vllm_ko_test_ec"),
     ("grpo2_vs_grpo2b_ko_test", "exaone_grpo2b_vllm_ko_test", "exaone_grpo2_vllm_ko_test"),                       # natural against balanced sampling, two sessions apart
     ("grpo2_vs_grpo2b_ko_test_ec", "exaone_grpo2b_vllm_ko_test_ec", "exaone_grpo2_vllm_ko_test_ec"),
+    # the main experiment once more (natural sampling), started from the control's start model: the weights were still in the session.
+    # Repeat and control differ in the sampler only
+    ("grpo2c_vs_rlstart2b_ko_test", "exaone_rlstart2b_vllm_ko_test", "exaone_grpo2c_vllm_ko_test"),
+    ("grpo2c_vs_rlstart2b_ko_test_ec", "exaone_rlstart2b_vllm_ko_test_ec", "exaone_grpo2c_vllm_ko_test_ec"),
+    ("grpo2c_vs_rlstart2b_ko_custom_ec", "exaone_rlstart2b_vllm_ko_custom_ec", "exaone_grpo2c_vllm_ko_custom_ec"),
+    ("grpo2c_vs_grpo2b_ko_test", "exaone_grpo2b_vllm_ko_test", "exaone_grpo2c_vllm_ko_test"),                     # natural against balanced, same start model
+    ("grpo2c_vs_grpo2b_ko_test_ec", "exaone_grpo2b_vllm_ko_test_ec", "exaone_grpo2c_vllm_ko_test_ec"),
+    ("grpo2c_vs_grpo2_ko_test", "exaone_grpo2_vllm_ko_test", "exaone_grpo2c_vllm_ko_test"),                       # the two runs of the main experiment (different start models)
     # untuned EXAONE of two sizes, same prompt and verifier
     ("ref_7p8b_vs_ref_1p2b_ko_test", "ref_1p2b_ko_test", "ref_7p8b_awq_ko_test"),
     ("ref_7p8b_vs_ref_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "ref_7p8b_awq_ko_test_ec"),

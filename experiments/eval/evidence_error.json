@@ -2546,6 +2546,256 @@
    }
   }
  },
+ "exaone_grpo2c_vllm_ko_custom": {
+  "lookup_questions": 13,
+  "correct_lookup_answers": 12,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 8,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 4,
+  "loose": {
+   "k": 4,
+   "n": 12,
+   "rate": 0.3333,
+   "lo": 0.1381,
+   "hi": 0.6094
+  },
+  "strict": {
+   "k": 4,
+   "n": 12,
+   "rate": 0.3333,
+   "lo": 0.1381,
+   "hi": 0.6094
+  },
+  "strict_where": {
+   "same_row": 4
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 3,
+   "answered_without_repair": 0,
+   "withheld": 1
+  },
+  "raw": {
+   "n": 30,
+   "answered": 30,
+   "coverage": 1.0,
+   "answered_correct": 15,
+   "answered_wrong": 15,
+   "accuracy_when_answered": {
+    "k": 15,
+    "n": 30,
+    "rate": 0.5,
+    "lo": 0.3315,
+    "hi": 0.6685
+   },
+   "wrong_answer_rate": {
+    "k": 15,
+    "n": 30,
+    "rate": 0.5,
+    "lo": 0.3315,
+    "hi": 0.6685
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 17,
+   "coverage": 0.5667,
+   "answered_correct": 11,
+   "answered_wrong": 6,
+   "accuracy_when_answered": {
+    "k": 11,
+    "n": 17,
+    "rate": 0.6471,
+    "lo": 0.413,
+    "hi": 0.8269
+   },
+   "wrong_answer_rate": {
+    "k": 6,
+    "n": 30,
+    "rate": 0.2,
+    "lo": 0.0951,
+    "hi": 0.3731
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 12,
+   "coverage": 0.4,
+   "answered_correct": 8,
+   "answered_wrong": 4,
+   "accuracy_when_answered": {
+    "k": 8,
+    "n": 12,
+    "rate": 0.6667,
+    "lo": 0.3906,
+    "hi": 0.8619
+   },
+   "wrong_answer_rate": {
+    "k": 4,
+    "n": 30,
+    "rate": 0.1333,
+    "lo": 0.0531,
+    "hi": 0.2968
+   }
+  },
+  "verified_em": 0.4,
+  "verified_em_no_repair": 0.3333,
+  "repaired_answers": 5,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 4
+  },
+  "verifier_subject_check": {
+   "n": 30,
+   "answered": 16,
+   "coverage": 0.5333,
+   "answered_correct": 11,
+   "answered_wrong": 5,
+   "accuracy_when_answered": {
+    "k": 11,
+    "n": 16,
+    "rate": 0.6875,
+    "lo": 0.444,
+    "hi": 0.8584
+   },
+   "wrong_answer_rate": {
+    "k": 5,
+    "n": 30,
+    "rate": 0.1667,
+    "lo": 0.0734,
+    "hi": 0.3356
+   }
+  }
+ },
+ "exaone_grpo2c_vllm_ko_test": {
+  "lookup_questions": 539,
+  "correct_lookup_answers": 388,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 266,
+  "same_value_elsewhere": 1,
+  "no_answer_in_cell": 121,
+  "loose": {
+   "k": 122,
+   "n": 388,
+   "rate": 0.3144,
+   "lo": 0.2702,
+   "hi": 0.3623
+  },
+  "strict": {
+   "k": 121,
+   "n": 388,
+   "rate": 0.3119,
+   "lo": 0.2678,
+   "hi": 0.3596
+  },
+  "strict_where": {
+   "other_row_and_column": 1,
+   "same_column": 3,
+   "same_row": 117
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 115,
+   "answered_without_repair": 0,
+   "withheld": 6
+  },
+  "raw": {
+   "n": 699,
+   "answered": 698,
+   "coverage": 0.9986,
+   "answered_correct": 405,
+   "answered_wrong": 293,
+   "accuracy_when_answered": {
+    "k": 405,
+    "n": 698,
+    "rate": 0.5802,
+    "lo": 0.5433,
+    "hi": 0.6163
+   },
+   "wrong_answer_rate": {
+    "k": 293,
+    "n": 699,
+    "rate": 0.4192,
+    "lo": 0.3831,
+    "hi": 0.4561
+   }
+  },
+  "verifier": {
+   "n": 699,
+   "answered": 524,
+   "coverage": 0.7496,
+   "answered_correct": 388,
+   "answered_wrong": 136,
+   "accuracy_when_answered": {
+    "k": 388,
+    "n": 524,
+    "rate": 0.7405,
+    "lo": 0.7013,
+    "hi": 0.7761
+   },
+   "wrong_answer_rate": {
+    "k": 136,
+    "n": 699,
+    "rate": 0.1946,
+    "lo": 0.1669,
+    "hi": 0.2255
+   }
+  },
+  "verifier_no_repair": {
+   "n": 699,
+   "answered": 345,
+   "coverage": 0.4936,
+   "answered_correct": 273,
+   "answered_wrong": 72,
+   "accuracy_when_answered": {
+    "k": 273,
+    "n": 345,
+    "rate": 0.7913,
+    "lo": 0.7453,
+    "hi": 0.8309
+   },
+   "wrong_answer_rate": {
+    "k": 72,
+    "n": 699,
+    "rate": 0.103,
+    "lo": 0.0826,
+    "hi": 0.1278
+   }
+  },
+  "verified_em": 0.5751,
+  "verified_em_no_repair": 0.4363,
+  "repaired_answers": 179,
+  "verifier_changes": {
+   "gained": 6,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 6,
+   "lost": 23
+  },
+  "verifier_subject_check": {
+   "n": 699,
+   "answered": 472,
+   "coverage": 0.6753,
+   "answered_correct": 370,
+   "answered_wrong": 102,
+   "accuracy_when_answered": {
+    "k": 370,
+    "n": 472,
+    "rate": 0.7839,
+    "lo": 0.7446,
+    "hi": 0.8187
+   },
+   "wrong_answer_rate": {
+    "k": 102,
+    "n": 699,
+    "rate": 0.1459,
+    "lo": 0.1217,
+    "hi": 0.174
+   }
+  }
+ },
  "exaone_rlstart2_vllm_ko_custom": {
   "lookup_questions": 13,
   "correct_lookup_answers": 11,

@@ -6,6 +6,7 @@ repository. If the outcome of any question differs, the stored numbers do not be
 
   python scripts/replay_check.py --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B                      # -> experiments/eval/replay_check_gpu3.json
   python scripts/replay_check.py --session control --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B    # -> experiments/eval/replay_check_control.json
+  python scripts/replay_check.py --session repeat --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B     # -> experiments/eval/replay_check_repeat.json
 """
 from __future__ import annotations
 
@@ -26,6 +27,9 @@ SESSIONS = {                   # all were evaluated with an input budget of 672 
     ],
     "control": [               # the control run of the second RL experiment (2026-11-15, a later session with its own start model)
         "exaone_rlstart2b_vllm_ko_test", "exaone_rlstart2b_vllm_ko_custom", "exaone_grpo2b_vllm_ko_test", "exaone_grpo2b_vllm_ko_custom",
+    ],
+    "repeat": [                # the main experiment once more, from the control's start model (2026-11-15, the session after)
+        "exaone_grpo2c_vllm_ko_test", "exaone_grpo2c_vllm_ko_custom",
     ],
 }
 FIELDS = ("pred_status", "pred_answer", "pred_cells", "verified_correct", "evidence_repaired")

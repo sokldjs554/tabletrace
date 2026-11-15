@@ -1,0 +1,41 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "max_in": 672,
+ "runs": {
+  "exaone_grpo2c_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5751,
+    "verified_em_replayed": 0.5751
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5637,
+    "verified_em_replayed": 0.5637
+   }
+  },
+  "exaone_grpo2c_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4,
+    "verified_em_replayed": 0.4
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4333,
+    "verified_em_replayed": 0.4333
+   }
+  }
+ },
+ "replays": 4,
+ "questions_checked": 1458,
+ "questions_that_differ": 0
+}
