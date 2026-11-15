@@ -30,7 +30,8 @@ from tabletrace.schema import (
     TraceStep,
     Verdict,
 )
-from tabletrace.verify.verifier import Resolution, resolve
+from tabletrace.verify.guard import resolve_guarded
+from tabletrace.verify.verifier import Resolution
 
 MAX_PROPOSALS = 2
 
@@ -127,7 +128,7 @@ class AgentRuntime:
 
     def verify(self, s: AgentState) -> AgentState:
         t0 = time.perf_counter()
-        res = resolve(s["question"], s.get("table"), s.get("program"), context=s.get("context"),
+        res = resolve_guarded(s["question"], s.get("table"), s.get("program"), context=s.get("context"),
                       passage_id=s.get("context_passage_id") or "context", entity_check=self.entity_check, repair=self.evidence_repair)
         trace = s["trace"] + res.trace
         prog = s.get("program")

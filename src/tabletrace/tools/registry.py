@@ -24,7 +24,7 @@ class LookupArgs(BaseModel):
 
 
 class FindArgs(BaseModel):
-    text: str = Field(min_length=1, max_length=200)
+    text: str = Field(min_length=1, max_length=2000)   # the verifier looks a model's answer up here; a long answer must give 'no such cell', not an error
     exact: bool = True
 
 

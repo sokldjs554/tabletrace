@@ -27,6 +27,7 @@ from tabletrace.model.serialize import (
     set_table_format,
 )
 from tabletrace.training.data import build_examples, load_docs, read_records
+from tabletrace.verify.guard import resolve_guarded
 from tabletrace.verify.verifier import resolve
 
 
@@ -111,6 +112,11 @@ def main() -> None:
         # Re-verify the stored raw planner outputs of an earlier run with the current verifier; no model is loaded.
         with open(Path(a.replay_from) / "predictions.jsonl", encoding="utf-8") as fh:
             old_rows = {r["qid"]: r for r in map(json.loads, fh)}
+        # The replayed run may have scored a sample (--sample). Re-verify exactly its questions, and say so in the meta.
+        old_sample = json.loads((Path(a.replay_from) / "metrics.json").read_text(encoding="utf-8"))["meta"].get("sample")
+        if old_sample and not a.sample:
+            a.sample, a.sample_seed = old_sample["n"], old_sample["seed"]
+        examples = [e for e in examples if e.qid in old_rows]
         if json.loads((Path(a.replay_from) / "metrics.json").read_text(encoding="utf-8"))["meta"].get("tool_calling"):
             from dataclasses import (
                 replace,  # a tool-calling run read the whole table: verify against the whole table again
@@ -193,7 +199,8 @@ def main() -> None:
     rec_by_qid = {r["qid"]: r for r in recs}
     for e, (prog, raw, _n, ms) in zip(examples, plans, strict=True):
         gold_res = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=False)
-        res = resolve(e.question, e.table, prog, context=e.context, entity_check=not a.no_entity_check, column_check=a.column_check, **verify_opts)
+        # the planner's program: a tool refusing it must count as "no answer", not end the run
+        res = resolve_guarded(e.question, e.table, prog, context=e.context, entity_check=not a.no_entity_check, column_check=a.column_check, **verify_opts)
         # what the subject check alone would do to the GOLD program: the abstention rate a perfect planner would suffer
         gold_chk = resolve(e.question, e.table_full or e.table, e.gold, context=e.context_full or e.context, entity_check=True)
         gold_subject_fail = gold_res.status == "answered" and gold_chk.status == "abstained"
