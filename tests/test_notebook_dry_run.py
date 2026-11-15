@@ -58,7 +58,8 @@ def test_every_code_cell_is_valid_python(notebook):
 class DryRun:
     """Notebook 2 with its shell lines recorded instead of run, in a fresh working directory under `root`."""
 
-    def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2, run_32b: bool = False, dies: str | None = None):
+    def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2, run_32b: bool = False, dies: str | None = None,
+                 remote: Path | None = None):
         self.calls: list[tuple[str, str]] = []
         self.packs: list[int] = []
         self.dies = dies                  # evaluations whose output path contains this never finish (the server died)
@@ -82,7 +83,10 @@ class DryRun:
         torch = types.SimpleNamespace(cuda=types.SimpleNamespace(get_device_name=lambda i: "Tesla T4", device_count=lambda: n_gpu))
         self.ns = ns = {"_sh": self._sh, "os": os, "subprocess": subprocess, "time": time, "json": json, "glob": glob, "shutil": shutil, "torch": torch,
                         "N_GPU": n_gpu, "ROOT": str(root), "VENV": str(root), "REPO_DIR": str(repo), "BACKUP": str(backup) if backup else None,
-                        "ON_COLAB": False}
+                        "ON_COLAB": False,
+                        # a local bare repository stands in for GitHub; without one nothing is pushed and nothing is fetched
+                        "REPO": str(remote) if remote else "https://example.invalid/none", "GH_TOKEN": "dummy-token" if remote else None,
+                        "RESULT_BRANCH": "gpu-results-2", "RESTORE": bool(remote or backup)}
         (_, _setup), (_, helpers), *self.sections = code_cells("notebooks/gpu_experiments_2.ipynb")     # the setup cell needs a GPU and the network
         if run_32b:
             assert sum("RUN_32B = False" in src for _, src in self.sections) == 1
@@ -240,4 +244,37 @@ def test_pack_uses_the_colab_download_only_on_colab(tmp_path, monkeypatch):
     run.ns["ON_COLAB"] = True
     run.ns["pack"]()
     assert downloads == [str(tmp_path / "gpu_results_2.tgz")] and len(links) == 1
+
+
+def test_notebook_2_pushes_results_to_a_branch_and_a_new_session_restores_them(tmp_path, monkeypatch, capsys):
+    """The owner's results were lost twice with the Kaggle session. With a GH_TOKEN secret every pack() also pushes the
+    archive to a results branch; a new session fetches it, so finished evaluations are skipped. The token is passed to
+    git in a header option and must not appear in what the notebook prints."""
+    remote = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "-q", "--bare", str(remote)], check=True)
+    (tmp_path / "s1").mkdir()
+    first = DryRun(tmp_path / "s1", monkeypatch, remote=remote)
+    first.run_all()
+    heads = subprocess.run(["git", "--git-dir", str(remote), "for-each-ref", "--format=%(refname)"], capture_output=True, text=True).stdout.split()
+    assert heads == ["refs/heads/gpu-results-2"]
+    files = subprocess.run(["git", "--git-dir", str(remote), "ls-tree", "--name-only", "gpu-results-2"], capture_output=True, text=True).stdout.split()
+    assert sorted(files) == ["gpu_results_2.tgz", "run_info_2.json"]
+    printed = capsys.readouterr().out
+    assert "GitHub에 올렸습니다" in printed and "dummy-token" not in printed
+
+    (tmp_path / "s2").mkdir()
+    second = DryRun(tmp_path / "s2", monkeypatch, remote=remote)             # a new session: an empty working directory
+    assert (second.repo / "experiments/run_info_2.json").exists()
+    counts = second.run_all()
+    assert counts["eval"] == 0 and counts["grpo"] == 0
+    assert second.outputs() == ["experiments/exaone_lora_rlstart"]
+
+
+def test_a_failed_push_is_reported_without_stopping_or_leaking_the_token(tmp_path, monkeypatch, capsys):
+    run = DryRun(tmp_path, monkeypatch, remote=tmp_path / "no-such-remote.git")
+    run.ns["RESTORE"] = False
+    counts = run.run_all()
+    printed = capsys.readouterr().out
+    assert counts["grpo"] == 1 and (tmp_path / "gpu_results_2.tgz").exists()
+    assert "GitHub에 올리지 못했습니다" in printed and "dummy-token" not in printed
 

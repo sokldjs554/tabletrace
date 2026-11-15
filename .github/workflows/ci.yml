@@ -1,6 +1,8 @@
 name: ci
 on:
   push:
+    branches-ignore:
+      - "gpu-results-*"     # written by the GPU notebook: an archive only, nothing to test
   pull_request:
 jobs:
   test:
