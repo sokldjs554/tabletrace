@@ -59,7 +59,7 @@ class DryRun:
     """Notebook 2 with its shell lines recorded instead of run, in a fresh working directory under `root`."""
 
     def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2, run_32b: bool = False, dies: str | None = None,
-                 remote: Path | None = None, control: bool = False):
+                 remote: Path | None = None, control: bool = False, repeat: bool = False, cloned_results: bool = False):
         self.calls: list[tuple[str, str]] = []
         self.packs: list[int] = []
         self.dies = dies                  # evaluations whose output path contains this never finish (the server died)
@@ -75,6 +75,11 @@ class DryRun:
         (bindir / "nvidia-smi").chmod(0o755)
         monkeypatch.setenv("PATH", f"{bindir}{os.pathsep}{os.environ['PATH']}")
         monkeypatch.chdir(repo)
+        if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
+            for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
+                dest = repo / f.relative_to(ROOT)
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(f, dest)
         if "requests" not in sys.modules:
             try:
                 import requests  # noqa: F401
@@ -94,6 +99,9 @@ class DryRun:
         if control:
             assert sum("RUN_CONTROL = False" in src for _, src in self.sections) == 1
             self.sections = [(i, src.replace("RUN_CONTROL = False", "RUN_CONTROL = True")) for i, src in self.sections]
+        if repeat:
+            assert sum("RUN_REPEAT = False" in src for _, src in self.sections) == 1
+            self.sections = [(i, src.replace("RUN_REPEAT = False", "RUN_REPEAT = True")) for i, src in self.sections]
         exec(compile(to_python(helpers, "call"), "helpers", "exec"), ns)
         real_pack = ns["pack"]
         ns.update(serve=lambda *a, **k: _Proc(), stop_servers=lambda: None, pack=lambda: (self.packs.append(1), real_pack())[1])
@@ -125,11 +133,13 @@ class DryRun:
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text("{}")
 
-    def run_all(self) -> collections.Counter:
+    def run_all(self, only: str | None = None) -> collections.Counter:
+        """Run every section, or only the cells whose source holds `only` (the way the owner runs single sections)."""
         self.calls.clear()
         self.packs.clear()
         for i, src in self.sections:
-            exec(compile(to_python(src, "call"), f"cell {i}", "exec"), self.ns)
+            if only is None or only in src:
+                exec(compile(to_python(src, "call"), f"cell {i}", "exec"), self.ns)
         return collections.Counter(kind for kind, _ in self.calls)
 
     def outputs(self) -> list[str]:
@@ -178,7 +188,7 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
 def test_notebook_2_restores_a_backup_in_a_new_session(tmp_path, monkeypatch):
     """Colab deletes the working directory with the runtime. The result archive is also copied to a backup directory
     (Google Drive there); a new session unpacks it, so finished evaluations are not repeated. The archive holds no
-    weights, so only the model that the reinforcement-learning section starts from is trained again."""
+    weights, but with every evaluation finished no model is needed, so nothing is trained either."""
     backup = tmp_path / "drive"
     backup.mkdir()
     (tmp_path / "s1").mkdir()
@@ -191,7 +201,7 @@ def test_notebook_2_restores_a_backup_in_a_new_session(tmp_path, monkeypatch):
     assert (second.repo / "experiments/run_info_2.json").exists()            # unpacked when the helper cell ran
     counts = second.run_all()
     assert counts["eval"] == 0 and counts["grpo"] == 0 and counts["bench"] == 0
-    assert second.outputs() == ["experiments/exaone_lora_rlstart2"]
+    assert second.outputs() == []
 
 
 def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
@@ -274,7 +284,7 @@ def test_notebook_2_pushes_results_to_a_branch_and_a_new_session_restores_them(t
     assert (second.repo / "experiments/run_info_2.json").exists()
     counts = second.run_all()
     assert counts["eval"] == 0 and counts["grpo"] == 0
-    assert second.outputs() == ["experiments/exaone_lora_rlstart2"]
+    assert second.outputs() == []
 
 
 def test_a_failed_push_is_reported_without_stopping_or_leaking_the_token(tmp_path, monkeypatch, capsys):
@@ -296,4 +306,101 @@ def test_notebook_2_reinforcement_learning_control_run_differs_only_in_sampling(
     strip = lambda c: re.sub(r"--sampling \w+|--out \S+", "", c)                                  # noqa: E731
     assert strip(rl[0]) == strip(rl[1])
     assert any("exaone_grpo2b_vllm_ko_test" in o for o in run.outputs())
+
+
+RL_CELLS = "RL_RUNS"            # the two cells of section D
+
+
+def test_control_run_in_a_new_session_trains_and_evaluates_its_own_start_model(tmp_path, monkeypatch):
+    """The first run's results are in the repository; its weights are not. A new session that runs the control must not
+    compare it with the stored start model: a model trained again is not the same model. So it trains its own start
+    model under another name, evaluates it, and starts from it. The finished main experiment is not repeated."""
+    run = DryRun(tmp_path, monkeypatch, control=True, cloned_results=True)
+    counts = run.run_all(only=RL_CELLS)
+    assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8             # (start + control) x (test + custom) x (first pass + subject check)
+    assert run.outputs() == [f"experiments/eval/{name}_vllm_ko_{s}{ec}" for name in ("exaone_grpo2b", "exaone_rlstart2b") for s in ("custom", "test") for ec in ("", "_ec")] + [
+        "experiments/exaone_grpo2b", "experiments/exaone_lora_rlstart2b"]
+    start = next(c for k, c in run.calls if k == "train")
+    assert "--limit 300" in start and "--max-in 672" in start and "--max-len 960" in start
+    rl = next(c for k, c in run.calls if k == "grpo")
+    assert "--adapter experiments/exaone_lora_rlstart2b " in rl and "--sampling balanced" in rl and "--dev-sample random" in rl and "--max-in 672" in rl
+    assert [k for k, _ in run.calls if k in ("train", "grpo")] == ["train", "grpo"]         # the start model exists before RL begins
+    stored = json.loads((ROOT / "experiments/exaone_lora_rlstart2/train_info.json").read_text())
+    assert json.loads((run.repo / "experiments/exaone_lora_rlstart2/train_info.json").read_text()) == stored      # the first run's record is left alone
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any(n.endswith("exaone_grpo2b/train_info.json") for n in names) and any("exaone_rlstart2b_vllm_ko_test_ec" in n for n in names)
+
+    assert run.run_all(only=RL_CELLS) == collections.Counter()                              # run again: nothing left to do
+
+
+def test_without_a_flag_a_new_session_does_nothing_in_the_rl_section(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    assert run.run_all(only=RL_CELLS) == collections.Counter()
+
+
+def test_a_fresh_clone_skips_the_sections_whose_results_are_in_the_repository(tmp_path, monkeypatch):
+    """Sections A and A2 were finished on 2026-11-15 and their results are committed under dot-free names; the notebook
+    must find them under the same names."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    run.run_all(only="REFS")
+    assert [o for o in run.outputs() if "ref_" in o or "tools_" in o] == []
+
+
+def test_control_and_repeat_start_from_the_same_model_and_differ_only_in_sampling(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, control=True, repeat=True, cloned_results=True)
+    counts = run.run_all(only=RL_CELLS)
+    rl = [c for k, c in run.calls if k == "grpo"]
+    assert counts["train"] == 1 and len(rl) == 2
+    assert "--sampling balanced" in rl[0] and "--out experiments/exaone_grpo2b" in rl[0]    # the control first: it is what was asked for
+    assert "--sampling natural" in rl[1] and "--out experiments/exaone_grpo2c" in rl[1]
+    strip = lambda c: re.sub(r"--sampling \w+|--out \S+", "", c)                                  # noqa: E731
+    assert strip(rl[0]) == strip(rl[1]) and "--adapter experiments/exaone_lora_rlstart2b " in rl[0]
+
+
+def test_an_interrupted_control_session_evaluates_the_start_model_it_trains_again(tmp_path, monkeypatch):
+    """If the session dies after the start model was evaluated and before RL finished, the next session has that
+    evaluation (restored) but not the weights. It trains the start model again, so the old evaluation is thrown away
+    and made again: an evaluation always belongs to the weights RL starts from."""
+    run = DryRun(tmp_path, monkeypatch, control=True, cloned_results=True)
+    for s in ("test", "custom"):
+        d = run.repo / f"experiments/eval/exaone_rlstart2b_vllm_ko_{s}_ec"
+        d.mkdir(parents=True)
+        (d / "metrics.json").write_text('{"from": "an earlier session"}')
+    counts = run.run_all(only=RL_CELLS)
+    assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8
+    assert (run.repo / "experiments/eval/exaone_rlstart2b_vllm_ko_test_ec/metrics.json").read_text() == "{}"
+
+
+def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):
+    """Results of an earlier session lie untracked in the working directory; the same paths are tracked in the newer
+    main. `git pull` stops there, and the notebook used to go on with the old code without saying so."""
+    setup = code_cells("notebooks/gpu_experiments_2.ipynb")[0][1]
+    update = [line[1:] for line in setup.splitlines() if line.startswith("!git fetch")]
+    assert len(update) == 1 and not [line for line in setup.splitlines() if line.startswith("!git pull")]
+
+    def git(cwd, *args):
+        r = subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args], cwd=cwd, capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr
+        return r.stdout.strip()
+
+    origin, clone = tmp_path / "origin", tmp_path / "clone"
+    origin.mkdir()
+    git(origin, "init", "-q", "-b", "main")
+    (origin / "code.py").write_text("old\n")
+    git(origin, "add", "-A")
+    git(origin, "commit", "-q", "-m", "one")
+    git(tmp_path, "clone", "-q", str(origin), str(clone))
+    (clone / "results").mkdir()
+    (clone / "results" / "metrics.json").write_text("made in the earlier session\n")       # untracked here
+    (clone / "weights.bin").write_text("large\n")                                           # untracked, not in the repository
+    (origin / "code.py").write_text("new\n")
+    (origin / "results").mkdir()
+    (origin / "results" / "metrics.json").write_text("committed\n")                        # the same path, now tracked
+    git(origin, "add", "-A")
+    git(origin, "commit", "-q", "-m", "two")
+    assert subprocess.run(["git", "pull", "-q"], cwd=clone, capture_output=True).returncode != 0      # what used to happen
+    r = subprocess.run(["bash", "-c", update[0]], cwd=clone, capture_output=True, text=True)
+    assert "갱신하지 못했습니다" not in r.stdout, r.stdout + r.stderr
+    assert (clone / "code.py").read_text() == "new\n" and git(clone, "rev-parse", "HEAD") == git(origin, "rev-parse", "HEAD")
+    assert (clone / "results" / "metrics.json").read_text() == "committed\n" and (clone / "weights.bin").read_text() == "large\n"
 
