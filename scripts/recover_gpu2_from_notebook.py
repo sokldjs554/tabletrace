@@ -214,6 +214,36 @@ def main() -> None:
         derived["size_32b"] = {"program_minus_tools_ec": delta("ref_32b_awq_ko_test", "tools_32b_awq_ko_test", "verified_em"),
                                "tools_32b_minus_1p2b_ec": delta("tools_32b_awq_ko_test", "tools_1p2b_ko_test", "verified_em")}
 
+    # ---- against the first notebook's stored results (another session: not paired, not even the same day)
+    def stored(name):
+        f = ROOT / "experiments" / "eval" / name / "metrics.json"
+        return json.loads(f.read_text(encoding="utf-8"))["metrics"] if f.exists() else None
+
+    full_v1, plain300_v1 = stored("exaone_full_vllm_ko_test"), stored("exaone_vllm_ko_test")
+    if full_v1:
+        cross = {}
+        for tag, k in (("pool7000", "exaone_pool7000_vllm_ko_test"), ("full_colid", "exaone_full_colid_vllm_ko_test"), ("kochem", "exaone_kochem_vllm_ko_test")):
+            if k in evals:
+                n = em(k, "v1")["n"]
+                a, b = round(em(k, "v1")["verified_em"] * n), round(full_v1["verified_em"] * n)
+                cross[tag] = {"verified_em_v1_delta": round(em(k, "v1")["verified_em"] - full_v1["verified_em"], 4), "correct": a, "correct_full": b,
+                              "unpaired_p": two_proportion_p(b, a, n)}
+        derived["vs_first_notebook_full"] = cross
+    if plain300_v1 and "exaone_rlstart_vllm_ko_test" in evals:
+        derived["same_setting_two_sessions"] = {          # 300 examples, plain format, seed 0: trained and scored again in this run
+            "verified_em_v1_delta": round(em("exaone_rlstart_vllm_ko_test", "v1")["verified_em"] - plain300_v1["verified_em"], 4),
+            "repaired_delta": round(em("exaone_rlstart_vllm_ko_test", "v1")["evidence_repaired_rate"] - plain300_v1["evidence_repaired_rate"], 4)}
+    if "exaone_q_fp16_pool7000_vllm_ko_test" in evals and "exaone_pool7000_vllm_ko_test" in evals:
+        n = em("exaone_pool7000_vllm_ko_test", "v1")["n"]
+        derived["same_model_served_twice"] = {"questions_different_at_most": abs(round(em("exaone_q_fp16_pool7000_vllm_ko_test", "v1")["verified_em"] * n)
+                                                                              - round(em("exaone_pool7000_vllm_ko_test", "v1")["verified_em"] * n))}
+    if grpo["dev_history"]:
+        first, last = grpo["dev_history"][0], grpo["dev_history"][-1]
+        best = max(grpo["dev_history"], key=lambda h: (h["mean_reward"], -h["step"]))
+        derived["grpo_dev"] = {"best_step": best["step"], "best_reward": best["mean_reward"], "first_reward": first["mean_reward"], "last_reward": last["mean_reward"],
+                               "withheld_first": first["withheld"], "withheld_last": last["withheld"], "correct_first": first["correct"], "correct_last": last["correct"],
+                               "unparsable_every_check": first["unparsable"] if len({h["unparsable"] for h in grpo["dev_history"]}) == 1 else None, "n": first["n"]}
+
     failed = [
         {"what": "ref_1.2b (untuned 1.2B, few-shot)", "why": "already evaluated in an earlier session of the same day; the cell skipped it, so nothing was printed in this output"},
         {"what": "ref_7.8b_awq on the Korean test set", "why": "the evaluation stopped on a tool error: one answer was longer than the cell-search tool accepted (fixed: tests/test_eval_robustness.py). Its 30-question set finished"},

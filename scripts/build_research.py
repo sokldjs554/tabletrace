@@ -219,10 +219,71 @@ def supplement_sections() -> list[dict]:
                     "columns": ["모델", "조건", "문턱 없음: 응답률", "문턱 없음: 위험", "응답률 10%에서 위험", "30%", "50%", "70%", "AUROC"], "rows": rows,
                     "notes": ["작은 모델에서는 확신도가 약한 신호다. 가장 확신하는 답만 내보내도 위험이 크게 줄지 않는다.", "EXAONE은 GPU 평가에서 로그 확률을 저장해야 그릴 수 있다."],
                     "artifact": "experiments/eval/risk_coverage.json (scripts/risk_coverage.py)"})
-    out.append({"title": "준비만 한 것 — GPU에서 돌려야 하는 실험", "status": "prep",
-                "description": "notebooks/gpu_experiments_2.ipynb: 튜닝하지 않은 EXAONE 7.8B·32B 참고선, 모델이 도구를 스스로 고르는 방식(Tool Calling), 학습 데이터 확대(약 1만, 3.4만 문항), "
-                               "멀티 GPU 학습(DDP) 속도, EXAONE 강화학습(GRPO), 4비트 서빙, 열 번호 형식의 전체 데이터·시드 추가, 화학, 큰 표. "
-                               "스크립트는 작은 무작위 모델과 모의 서버로 CPU에서 시험했다. 강화학습의 보상과 손실, 학습 루프는 저장소 소유자가 직접 썼다(docs/rewrite/LOG.md, PR #6). 이 코드로 학습한 결과는 아직 없다."})
+    g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
+    if g2:
+        E = g2["evals"]
+
+        def em(name, which="v1", key="verified_em"):
+            e = E.get(name, {}).get(which)
+            return e["metrics"][key] if e else None
+
+        def p_(v):
+            return pct(v) if v is not None else "–"
+
+        src = ("experiments/gpu2_2026-11-14/recovered.json (scripts/recover_gpu2_from_notebook.py). 소유자가 2026-11-14에 Kaggle T4 두 장에서 실행. "
+               "결과 파일은 세션과 함께 사라져, 노트북에 남은 출력에서 읽어 낸 값이다. 문항별 예측이 없어 대응 검정은 없다")
+        st, gr = "exaone_rlstart_vllm_ko_test", "exaone_grpo_vllm_ko_test"
+        rows = [[label, p_(em(st, "ec", k)), p_(em(gr, "ec", k))] for label, k in (
+            ("verified EM (주어 검사 포함)", "verified_em"), ("모델이 쓴 답이 맞은 비율", "raw_answer_em_answerable"),
+            ("모델이 인용한 셀이 정답 셀과 같은 비율", "evidence_cells_exact_raw"), ("검증기가 근거 셀을 고쳐서 내보낸 비율", "evidence_repaired_rate"),
+            ("답할 수 있는 질문을 보류한 비율", "false_abstain_rate"))]
+        gd, gi = g2["derived"]["grpo_dev"], g2["grpo"]
+        out.append({"title": "EXAONE 강화학습 — 저장소 소유자가 직접 쓴 보상과 손실 (2차 GPU 실험)", "status": "done",
+                    "description": f"300문항으로 튜닝한 EXAONE-4.0-1.2B에서 시작해 GRPO {gi['steps']}걸음(걸음마다 프롬프트 4 × 표본 8). 보상은 검증기의 결과다: 복구 없이 통과한 정답 +1.0, "
+                                   "근거를 고쳐야 정답 +0.3, 답이 나가지 않음 0, 틀린 답 −0.5, 문법 오류 −1.0. 보상 함수와 GRPO 손실은 소유자가 명세와 테스트만 보고 썼다(docs/rewrite/LOG.md, PR #6). 한국어 test 699문항.",
+                    "columns": ["지표", "시작 모델 (300문항 SFT)", f"강화학습 뒤 ({gi['kept_step']}걸음 모델)"], "rows": rows,
+                    "notes": ["근거 셀 오류는 줄지 않았다. 인용 셀 정확도와 근거 복구 비율이 그대로다.",
+                              f"개발셋 {gd['n']}문항의 평균 보상은 시작 {gd['first_reward']} → {gd['best_step']}걸음 {gd['best_reward']}(최고) → {gi['steps']}걸음 {gd['last_reward']}. "
+                              f"학습이 길어질수록 답이 나가지 않은 문항이 {gd['withheld_first']}개에서 {gd['withheld_last']}개로 늘었다.",
+                              f"verified EM의 차이는 {g2['derived']['grpo_vs_start']['correct_delta']}문항이다(독립 표본 근사 p {g2['derived']['grpo_vs_start']['unpaired_p']})."],
+                    "artifact": src})
+        full = load(EXP / "eval" / "exaone_full_vllm_ko_test" / "metrics.json")
+        rows = []
+        for label, name in (("EXAONE 32B AWQ, 튜닝 없음, 예시 6개", "ref_32b_awq_ko_test"), ("EXAONE 32B AWQ, 도구 호출", "tools_32b_awq_ko_test"),
+                            ("EXAONE 1.2B, 튜닝 없음, 도구 호출", "tools_1p2b_ko_test"), ("EXAONE 1.2B, 10,587문항으로 튜닝", "exaone_pool7000_vllm_ko_test")):
+            if name in E:
+                rows.append([label, p_(em(name)), p_(em(name, "ec")), p_(em(name, "v1", "evidence_repaired_rate")), round(em(name, "v1", "mean_ms_per_example"))])
+        if full:
+            rows.append(["EXAONE 1.2B, 3,588문항으로 튜닝 (1번 노트북)", pct(full["metrics"]["verified_em"]), "–", pct(full["metrics"]["evidence_repaired_rate"]), round(full["metrics"]["mean_ms_per_example"])])
+        out.append({"title": "큰 EXAONE을 튜닝 없이, 그리고 모델이 도구를 고르는 방식 (2차 GPU 실험)", "status": "done",
+                    "description": "튜닝하지 않은 EXAONE 32B(4비트 AWQ)를 T4 두 장에 텐서 병렬로 올려 같은 검증기로 채점했다. 한국어 test 699문항.",
+                    "columns": ["모델", "verified EM (주어 검사 없음)", "(주어 검사 포함)", "근거 복구 비율", "문항당 시간(ms)"], "rows": rows,
+                    "notes": ["튜닝하지 않은 32B는 튜닝한 1.2B보다 낮다. 큰 모델도 답은 맞고 근거 셀이 틀리는 일이 있다.",
+                              "같은 32B라도 표를 보여 주고 프로그램 한 줄을 쓰게 하는 쪽이 도구 호출보다 높다.",
+                              "튜닝하지 않은 7.8B의 test 평가는 도구 오류로 중단됐고, 1.2B에 예시만 준 기준선은 출력에 남지 않았다."],
+                    "artifact": src})
+        rows = []
+        for label, name, which in (("큰 표 3,072문항: 앞에서부터 (672토큰)", "exaone_pool7000_first672_vllm_unseen_dev", "v1"),
+                                   ("큰 표: 질문과 겹치는 행 (672토큰)", "exaone_pool7000_overlap672_vllm_unseen_dev", "v1"),
+                                   ("큰 표: 앞에서부터 (1,500토큰)", "exaone_pool7000_first1500_vllm_unseen_dev", "v1"),
+                                   ("화학 논문 표 62문항 (한국어+화학 튜닝)", "exaone_kochem_vllm_chem_papers", "ec"),
+                                   ("화학 교과서 수작업 32문항", "exaone_kochem_vllm_chem_custom", "ec"),
+                                   ("열 번호 형식 300문항 시드 1: 근거 복구 비율", "exaone_colid_s1_vllm_ko_test", "rep"),
+                                   ("열 번호 형식 300문항 시드 2: 근거 복구 비율", "exaone_colid_s2_vllm_ko_test", "rep"),
+                                   ("plain 형식 300문항 시드 0: 근거 복구 비율", "exaone_rlstart_vllm_ko_test", "rep")):
+            if name in E:
+                rows.append([label, p_(em(name, "v1", "evidence_repaired_rate") if which == "rep" else em(name, which))])
+        if g2.get("ddp"):
+            rows.append(["GPU 두 장 학습(DDP), 1,000문항", f"{g2['ddp']['one_gpu_s']}초 → {g2['ddp']['two_gpu_s']}초 ({g2['ddp']['speedup']}배)"])
+        out.append({"title": "큰 표, 영어 화학, 열 번호 형식, 학습 병렬 (2차 GPU 실험)", "status": "done",
+                    "description": "튜닝한 EXAONE-4.0-1.2B로 잰 나머지 실험이다. 큰 표는 공개 dev 분할에서 학습에 없던 표의 질문이다.",
+                    "columns": ["실험", "값"], "rows": rows,
+                    "notes": ["행 선별은 EXAONE에서도 통한다. 화학 논문 표에서 EXAONE은 휴리스틱(43.5%)을 넘었다.",
+                              "열 번호 형식이 근거 복구를 없애는 효과는 시드 셋에서 같다."],
+                    "artifact": src})
+    out.append({"title": "재지 못한 것", "status": "prep",
+                "description": "풀 전부(약 3.4만 문항) 학습, 큰 모델의 튜닝, 도구 호출 형식으로 튜닝한 모델, 튜닝 모델의 4비트 서빙(bitsandbytes는 그 vLLM 버전에 없는 방식이었다), "
+                               "튜닝하지 않은 7.8B의 test 평가. 2차 GPU 실험은 결과 파일이 남지 않아 문항별 분석(대응 검정, 확신도 곡선)이 없다."})
     return out
 
 

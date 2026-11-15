@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->253<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->259<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -512,7 +512,7 @@ SKN24-FINAL-3Team(ALPLED), SKN20-FINAL-6TEAM(bizi), SKN27-FINAL-1Team(밥벌이)
 | (해결됨) GitHub Actions 실행 | 푸시 후 실행·통과 | 위 §3 |
 | (해결됨) GitHub Pages 접속 확인 | 소유자가 2026-11-08 브라우저에서 열리는 것을 확인 | 개발 컨테이너의 네트워크에서는 `github.io`가 차단되어 작성자는 Actions 성공 기록만 봄 |
 | (해결됨) EXAONE 다운로드·튜닝·서빙 | 소유자가 Kaggle T4에서 노트북으로 실행(§18.3). 개발 컨테이너에서는 `huggingface.co` 차단·GPU 없음 | 결과 파일 수령(`train_info.json`, 예측 파일, 벤치). 전체 데이터 학습은 하지 않음 |
-| (해결됨) 멀티 GPU 병렬 실측 | 소유자가 Kaggle T4 ×2에서 노트북 4번 절을 돌려 결과 파일을 보냄(§9, §18.3) | 작성자 쪽에는 GPU가 없어 직접 실행은 못 함. DDP는 2026-11-11에 구현하고 CPU 두 프로세스로 시험했으나 GPU에서는 돌리지 않음(§20.8) |
+| (해결됨) 멀티 GPU 병렬 실측 | 소유자가 Kaggle T4 ×2에서 노트북 4번 절을 돌려 결과 파일을 보냄(§9, §18.3) | 작성자 쪽에는 GPU가 없어 직접 실행은 못 함. 학습 병렬(DDP)은 2026-11-14에 소유자가 T4 두 장에서 돌림(§21.5) |
 | (해결됨) SGLang 실행 | T4는 SGLang 미지원(`sgl_kernel`에 sm75 커널 없음)이라 두 번 실패, 세 번째는 config.json 호환 문제. 우회 모듈과 설정 복원으로 네 번째에 성공(§18.3, `experiments/serving/sglang_t4_failure.md`) | Ampere 이상에서의 제 성능 측정은 하지 않음(유료 GPU) |
 | (해결됨) 채용 공고 원문 확인 | 2026-11-09까지 `www.lgresearch.ai` 차단. 소유자가 허용 호스트에 추가해 2026-11-10에 읽음 | 원문 문구와 항목별 대응을 `docs/research/job-posting.md`에 기록. 원문에만 있는 항목은 §3 표 아래 |
 | 논문·특허 기반 화학 데이터 | PMC·ChemRxiv·Google Patents 등 차단 | OpenStax 교과서 데이터 표 사용 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 | `training/rl_grpo.py`, §7, §18, 이슈 23–24 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->253<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->259<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -582,7 +582,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 - "mT5로 기준선보다 좋은 모델을 만들었다"(전체 평가에서 <!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% 대 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.verified_em:pct -->36.2<!-- /num -->%. 기준선을 넘은 것은 EXAONE 1.2B 전체 데이터 LoRA(<!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.verified_em:pct -->84.3<!-- /num -->%)이며 1회 실행·GPU·4배 모델이다), "EXAONE이 실제 표의 계산을 잘한다"(계산·보류 평가 문항은 학습과 같은 템플릿의 합성), "강화학습으로 ko test 점수를 올렸다"(v3도 그대로), "모든 int8로 최적화했다"(정확도 하락), "mT5를 vLLM/SGLang으로 서빙했다"(두 엔진이 mT5를 지원하지 않음. vLLM 서빙은 EXAONE 모델), "EXAONE이 mT5보다 튜닝이 잘 됐다"(모델 크기·사전학습·하드웨어가 달라 같은 조건 비교가 아님).
 - 공개 배포·GitHub Actions 실행·운영 경험, 실제 사용자 트래픽.
 - 화학 논문·특허로 학습한 모델(학습은 교과서 표뿐이고, 논문 표는 평가용 62문항만 있다. 특허는 없다), 실사용 질문 분포에서의 일반 성능.
-- "공고의 모든 항목을 같은 깊이로 했다". 원문에만 있던 항목(gRPC, 챗봇, 메모리 결합, Personal Agent, 구조 이해 PLM)은 2026-11-11에 좁은 범위로 더했다(§20). 대화는 규칙 기반이고, 모델이 도구를 고르는 방식·큰 EXAONE·EXAONE 강화학습·DDP는 준비만 했고 GPU에서 돌리지 않았다. 프로젝트가 정면으로 맞춘 것은 테이블이해 묶음이다.
+- "공고의 모든 항목을 같은 깊이로 했다". 원문에만 있던 항목(gRPC, 챗봇, 메모리 결합, Personal Agent, 구조 이해 PLM)은 2026-11-11에 좁은 범위로 더했다(§20). 대화는 규칙 기반이다. 모델이 도구를 고르는 방식·큰 EXAONE·EXAONE 강화학습·DDP는 소유자가 2026-11-14에 한 번씩 돌렸고(§21), 결과 파일이 남지 않아 수치만 있다. 프로젝트가 정면으로 맞춘 것은 테이블이해 묶음이다.
 
 ## 18. 2차 시도 — 1차에서 실패한 것을 고쳐 다시 돌린 결과
 
@@ -982,7 +982,7 @@ E2E는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /nu
 
 ## 20. 공고 대조 뒤 보강한 것 (2026-11-11)
 
-공고 원문과 대조했을 때 비어 있던 항목을 하나씩 채운 기록이다. 절마다 "한 것", "측정", "하지 않은 것"을 나눠 적는다. 소유자가 GPU에서 돌려야 하는 것은 준비까지만 했고 그렇게 적었다.
+공고 원문과 대조했을 때 비어 있던 항목을 하나씩 채운 기록이다. 절마다 "한 것", "측정", "하지 않은 것"을 나눠 적는다. 소유자가 GPU에서 돌려야 하는 것은 이 절에서는 준비까지만 했고 그렇게 적었다. 돌린 결과는 §21에 있다.
 
 ### 20.1 gRPC
 
@@ -1025,7 +1025,7 @@ REST와 같은 런타임을 쓰는 gRPC 서버를 넣었다(`proto/tabletrace/se
 - 시험·개발 표와 **같은 위키 문서**에 있는 표 <!-- num:data/ko/pool_report.json:pool_tables_dropped_same_page_as_dev_or_test:int -->43<!-- /num -->개는 뺐다. 같은 문서의 다른 표로 점수가 오르는 일을 막기 위해서다.
 - 이 점검을 하다가 기존 분할의 사실 하나를 알게 되어 적는다. 기존 분할은 표 단위라서, 시험 표 <!-- num:data/ko/pool_report.json:main_split_pages_shared.test_tables:int -->180<!-- /num -->개 가운데 <!-- num:data/ko/pool_report.json:main_split_pages_shared.test_tables_on_a_page_with_a_train_table:int -->5<!-- /num -->개는 학습 표와 같은 문서에 있다(표는 다르다). 기존 결과는 그대로 두었다.
 - 공개 파일에는 글자 그대로 반복된 기록이 있어 <!-- num:data/ko/pool_report.json:repeated_records_dropped:int -->12<!-- /num -->건을 뺐다.
-- 쓰는 곳: 표 인코더의 사전학습과 확대 학습(§20.5), EXAONE 학습 데이터 확대(`notebooks/gpu_experiments_2.ipynb` B절, 소유자 실행 예정). `scripts/check_data.py`가 풀의 정답 셀 <!-- num:data/ko/pool_report.json:pool_questions_total:int -->29,907<!-- /num -->개를 모두 대조한다.
+- 쓰는 곳: 표 인코더의 사전학습과 확대 학습(§20.5), EXAONE 학습 데이터 확대(`notebooks/gpu_experiments_2.ipynb` B절, 결과는 §21.4). `scripts/check_data.py`가 풀의 정답 셀 <!-- num:data/ko/pool_report.json:pool_questions_total:int -->29,907<!-- /num -->개를 모두 대조한다.
 
 ### 20.4 큰 표와 공개 dev 분할
 
@@ -1160,11 +1160,11 @@ mT5는 CPU 시간 때문에 시드 13으로 뽑은 1,000문항이다. 같은 문
 - 이 함수들을 불러 쓰는 쪽은 연결해 두었다. `exaone_grpo.py`는 모델 불러오기, 샘플 생성, 기록, 저장만 한다. 세 파일이 없으면 안내와 함께 멈춘다. 두 스크립트의 CPU 시험(`tests/test_exaone_grpo_smoke.py`, `tests/test_lora_sft_smoke.py`)은 파일이 생기면 자동으로 돈다.
 - 소유자의 구현은 전용 테스트 35개를 통과했다. 리뷰에서 임시 구현과 견주었을 때 보상 함수는 저장된 모델 출력 66,450회 호출에서 차이가 없었고, 깨뜨린 입력 6,000개에서 예외가 없었다. GRPO 함수와 학습 루프도 무작위 입력에서 같았다.
 - 첫 CI는 실패했다. 소유자의 코드가 아니라 AI 도구가 쓴 테스트가 토치 없는 환경을 건너뛰지 않아서였고, 테스트를 고쳤다(`docs/dev/issues-log.md` 53).
-- "강화학습 보상과 손실, 학습 루프를 직접 썼다"는 2026-11-12부터 사실이다. 범위는 이 세 파일이다. 이 코드로 EXAONE을 학습한 결과는 아직 없다(§20.8).
+- "강화학습 보상과 손실, 학습 루프를 직접 썼다"는 2026-11-12부터 사실이다. 범위는 이 세 파일이다. 이 코드로 EXAONE을 학습한 결과는 §21.1에 있다.
 
-### 20.8 GPU 보강 실험 — 준비만 했고 돌리지 않았다
+### 20.8 GPU 보강 실험 — 준비 (결과는 §21)
 
-`notebooks/gpu_experiments_2.ipynb`. 소유자가 Kaggle 무료 GPU에서 돌린다. 작성자는 실행해 보지 못했고, CPU에서 확인한 것은 스크립트의 작은 무작위 모델 시험뿐이다.
+`notebooks/gpu_experiments_2.ipynb`. 소유자가 Kaggle 무료 GPU에서 돌린다. 작성자는 실행해 보지 못했고, CPU에서 확인한 것은 스크립트의 작은 무작위 모델 시험뿐이다. **소유자가 2026-11-14에 돌렸고 결과는 §21에 있다.** 아래 표는 준비할 때의 계획이다.
 
 | 절 | 공고 대조에서의 약점 | 재는 것 |
 |---|---|---|
@@ -1221,5 +1221,190 @@ mT5-small 최종 모델, 한국어 시험 <!-- num:experiments/eval/risk_coverag
 
 - **커밋 기록.** 대부분의 커밋에 AI 공동 작성 표식이 있다. 지우거나 고쳐 쓰지 않는다. 소유자가 직접 쓴 코드는 소유자 계정의 커밋으로 따로 들어와 있다(`docs/rewrite/LOG.md`).
 - **검수.** 수작업 질문(한국어 30, 화학 교과서 32, 화학 논문 62)은 AI 도구가 썼고 여러 사람이 검수하지 않았다. 답이 표·계산기와 맞는지만 기계로 확인한다.
-- **GPU에서만 잴 수 있는 것.** §20.8의 실험은 준비 상태다. 결과가 오기 전에는 "했다"고 쓰지 않는다.
+- **GPU에서만 잴 수 있는 것.** §20.8의 실험은 소유자가 돌렸고 결과는 §21에 있다. 결과 파일이 남지 않아 문항별 분석(대응 검정, 확신도 곡선, 복구를 끈 정답률)은 하지 못했다. 그 분석이 필요하면 다시 돌려야 한다.
 - **전형의 다른 단계.** 코딩테스트와 인성검사는 이 저장소와 무관하다.
+
+## 21. 2차 GPU 실험 결과 (2026-11-14, 실행 화면의 출력에서 복원)
+
+§20.8에서 준비만 해 둔 실험을 소유자가 Kaggle(T4 두 장)에서 돌렸다. A절부터 H절까지 끝까지 돌았다. **그런데 결과 파일은 남지 않았다.** 묶음을 내려받기 전에 Kaggle 세션이 새로 시작되어 작업 폴더가 비워졌다(같은 일이 두 번 있었다. `docs/dev/issues-log.md` 57, 59, 60).
+
+남은 것은 노트북의 셀 출력이다. 평가 스크립트는 끝날 때 지표 전체를 화면에 찍고, 학습 스크립트는 걸음마다 기록을 찍는다. 소유자가 그 노트북을 내려받아 건넸고, 거기서 수치를 읽어 냈다.
+
+- 원자료: `experiments/gpu2_2026-11-14/notebook_with_outputs.ipynb` (내려받은 그대로)
+- 읽어 낸 결과: `experiments/gpu2_2026-11-14/recovered.json` (`scripts/recover_gpu2_from_notebook.py`가 만든다. 테스트 `tests/test_recover_gpu2.py`가 같은 파일이 다시 나오는지 본다)
+- 평가 <!-- num:experiments/gpu2_2026-11-14/recovered.json:provenance.evaluations -->60<!-- /num -->건(이름 31개, 각각 주어 검사 없는 첫 평가와 주어 검사를 넣은 재검증), 학습 8건, 강화학습 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.steps -->200<!-- /num -->걸음의 기록.
+
+**이 절의 수치를 읽을 때 지킬 것.**
+
+1. **문항별 예측이 없다.** 그래서 이 프로젝트가 다른 곳에서 쓰는 대응 검정(같은 문항에서 한쪽만 맞힌 수)을 할 수 없다. 차이는 문항 수로 적고, p값이 있으면 "두 비율의 독립 표본 근사"라고 밝힌다. 같은 문항을 푼 두 모델에는 보수적인 근사다.
+2. **설정마다 한 번 돌렸다.**
+3. 표의 "v1"은 주어 검사 없는 검증기, "ec"는 주어 검사를 넣은 검증기다(§18과 같은 구분).
+4. 1번 노트북의 결과와 견준 줄은 **다른 세션끼리의 비교**다. 같은 설정(300문항, plain, 시드 0)을 이번에 다시 학습해 평가한 값은 1번 노트북과 verified EM이 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.same_setting_two_sessions.verified_em_v1_delta:pct -->0.1<!-- /num -->%p 달랐다. 같은 모델을 서버를 다시 띄워 두 번 평가한 값은 많아야 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.same_model_served_twice.questions_different_at_most -->1<!-- /num -->문항 달랐다.
+
+### 21.1 직접 쓴 보상과 손실로 한 EXAONE 강화학습 (D절)
+
+§20.7에서 소유자가 쓴 보상(`training/evidence_reward.py`)과 GRPO 손실(`training/grpo.py`)로 EXAONE-4.0-1.2B를 학습했다. 시작 모델은 300문항으로 튜닝한 모델이다. 답은 맞히지만 인용 셀이 자주 틀리는 모델이라, 보상이 그 오류를 줄이는지 보려는 실험이었다.
+
+- 한 걸음에 프롬프트 4개 × 표본 8개 = <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.samples_per_step -->32<!-- /num -->개. <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.steps -->200<!-- /num -->걸음, <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.minutes -->68.63<!-- /num -->분(T4 한 장).
+- <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.updates_applied -->172<!-- /num -->걸음에서 갱신했다. 나머지는 모든 그룹의 표본 점수가 같아 배울 것이 없던 걸음이다.
+- 25걸음마다 개발셋 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.n -->64<!-- /num -->문항을 풀어 평균 보상이 가장 높은 모델을 남긴다. 평균 보상은 시작 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.first_reward -->0.017<!-- /num --> → 25걸음 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.best_reward -->0.058<!-- /num -->(최고) → 200걸음 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.last_reward -->-0.059<!-- /num -->였다. **남은 모델은 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.kept_step -->25<!-- /num -->걸음째의 것이다.**
+
+한국어 test <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_grpo_vllm_ko_test.ec.metrics.n -->699<!-- /num -->문항.
+
+| | 시작 모델(300문항 SFT) | 강화학습 뒤(<!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.kept_step -->25<!-- /num -->걸음 모델) | 차이(%p) |
+|---|---:|---:|---:|
+| verified EM (v1) | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.v1.metrics.verified_em:pct -->53.2<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_grpo_vllm_ko_test.v1.metrics.verified_em:pct -->54.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.verified_em_v1_delta:pct -->1.3<!-- /num --> |
+| verified EM (ec) | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.ec.metrics.verified_em:pct -->52.8<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_grpo_vllm_ko_test.ec.metrics.verified_em:pct -->53.8<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.verified_em_ec_delta:pct -->1.0<!-- /num --> |
+| 모델이 쓴 답이 맞은 비율 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.ec.metrics.raw_answer_em_answerable:pct -->58.4<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_grpo_vllm_ko_test.ec.metrics.raw_answer_em_answerable:pct -->60.7<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.raw_answer_delta:pct -->2.3<!-- /num --> |
+| **모델이 인용한 셀이 정답 셀과 같은 비율** | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.ec.metrics.evidence_cells_exact_raw:pct -->22.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_grpo_vllm_ko_test.ec.metrics.evidence_cells_exact_raw:pct -->21.7<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.cells_exact_raw_delta:pct -->-0.8<!-- /num --> |
+| **검증기가 근거 셀을 고쳐서 내보낸 비율** | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.ec.metrics.evidence_repaired_rate:pct -->55.2<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_grpo_vllm_ko_test.ec.metrics.evidence_repaired_rate:pct -->54.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.repaired_delta:pct -->-0.6<!-- /num --> |
+| 답할 수 있는 질문을 보류한 비율 (ec) | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.ec.metrics.false_abstain_rate:pct -->22.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_grpo_vllm_ko_test.ec.metrics.false_abstain_rate:pct -->25.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.false_abstain_delta:pct -->2.9<!-- /num --> |
+| 수작업 30문항 verified EM (ec) | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_custom.ec.metrics.verified_em:pct -->43.3<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_grpo_vllm_ko_custom.ec.metrics.verified_em:pct -->40.0<!-- /num -->% | |
+
+**읽는 법.**
+
+- **근거 셀 오류는 줄지 않았다.** 인용 셀 정확도와 근거 복구 비율이 그대로다. 이 실험의 목표가 이것이었으므로, 결과는 "이 보상과 이 설정으로는 되지 않았다"이다.
+- verified EM은 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.correct_start -->369<!-- /num -->문항에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.correct_grpo -->376<!-- /num -->문항으로 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.correct_delta -->7<!-- /num -->문항 늘었다. 독립 표본 근사 p <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.unpaired_p -->0.708<!-- /num -->로, 차이가 있다고 할 수 없다.
+- **학습이 길어질수록 모델이 답을 덜 냈다.** 개발셋에서 아무 답도 나가지 않은 문항이 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.withheld_first -->7<!-- /num -->개에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.withheld_last -->23<!-- /num -->개로 늘고, 정답은 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.correct_first -->16<!-- /num -->개에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.correct_last -->9<!-- /num -->개로 줄었다. 학습 표본에서도 틀린 답은 처음 50걸음 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.phases.s1_50.wrong -->454<!-- /num -->개에서 마지막 50걸음 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.phases.s151_200.wrong -->63<!-- /num -->개로 줄었지만, 답이 나가지 않은 표본이 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.phases.s1_50.withheld -->691<!-- /num -->개에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.phases.s151_200.withheld -->1,001<!-- /num -->개로 늘었다.
+- 개발셋 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.n -->64<!-- /num -->문항 가운데 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.unparsable_every_check -->16<!-- /num -->문항은 아홉 번의 점검에서 매번 문법 오류였다. 강화학습으로 움직이지 않은 부분이다.
+
+**왜 그랬는지(추정, 확인하지 않았다).** 두 가지가 겹친 것으로 본다. 첫째, 보상이 틀린 답(−0.5)보다 보류(0)를 낫게 친다. 답을 맞힐 힘이 약한 모델에게는 답을 덜 내는 쪽이 가장 쉬운 개선이다. 둘째, 학습 스크립트가 프롬프트를 조회·계산·보류 질문에서 같은 수로 뽑는다. 학습 풀 <!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:train_prompts_total -->3,587<!-- /num -->문항 가운데 보류 질문은 <!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:train_prompts.abstain -->260<!-- /num -->개(<!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:abstain_share_of_train:pct -->7.2<!-- /num -->%)인데 배치에서는 3분의 1을 차지한다. 보류하면 점수를 받는 질문이 실제보다 네다섯 배 자주 나온 셈이다. 이 표본 추출은 AI 도구가 쓴 스크립트(`scripts/train/exaone_grpo.py`)의 설계이고, 소유자가 쓴 보상과 손실 함수의 문제가 아니다.
+
+**쓸 수 있는 문장과 쓰면 안 되는 문장.** "검증기 결과를 보상으로 삼는 강화학습의 보상 함수와 GRPO 손실을 직접 구현해 EXAONE 1.2B에 적용했고, 근거 셀 오류는 줄지 않았으며 모델이 보류 쪽으로 움직이는 것을 관찰했다"는 쓸 수 있다. "강화학습으로 성능을 올렸다"는 쓰면 안 된다. mT5-small 예비 실험(§8, §18)과 같은 방향의 결과이고, 선행 연구의 "강화학습이 SFT를 못 넘는" 사례(§19.4)와도 어긋나지 않는다.
+
+### 21.2 큰 EXAONE을 튜닝 없이 (A절)
+
+튜닝하지 않은 EXAONE에 예시 6개(조회 2, 계산 2, 보류 2)를 보여 주고 같은 문법으로 답하게 해서 같은 검증기로 채점했다. 4비트 AWQ 모델을 vLLM으로 올렸다(32B는 T4 두 장, 텐서 병렬).
+
+| 모델 | 세트 | 문항 | verified EM (v1) | (ec) | 모델 답 정답률 | 인용 셀 정확 | 근거 복구 | 문항당 시간(ms) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| EXAONE 4.0 32B AWQ, 튜닝 없음 | 한국어 test | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.n -->699<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.verified_em:pct -->77.2<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.ec.metrics.verified_em:pct -->74.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.raw_answer_em_answerable:pct -->73.8<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.evidence_cells_exact_raw:pct -->63.9<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.evidence_repaired_rate:pct -->15.6<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.mean_ms_per_example:int -->15,969<!-- /num --> |
+| 같은 모델 | 수작업 30 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_custom.v1.metrics.n -->30<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_custom.v1.metrics.verified_em:pct -->73.3<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_custom.ec.metrics.verified_em:pct -->73.3<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_custom.v1.metrics.raw_answer_em_answerable:pct -->80.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_custom.v1.metrics.evidence_cells_exact_raw:pct -->56.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_custom.v1.metrics.evidence_repaired_rate:pct -->8.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_custom.v1.metrics.mean_ms_per_example:int -->19,488<!-- /num --> |
+| EXAONE 3.5 7.8B AWQ, 튜닝 없음 | 수작업 30 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_7p8b_awq_ko_custom.v1.metrics.n -->30<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_7p8b_awq_ko_custom.v1.metrics.verified_em:pct -->50.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_7p8b_awq_ko_custom.ec.metrics.verified_em:pct -->50.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_7p8b_awq_ko_custom.v1.metrics.raw_answer_em_answerable:pct -->56.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_7p8b_awq_ko_custom.v1.metrics.evidence_cells_exact_raw:pct -->44.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_7p8b_awq_ko_custom.v1.metrics.evidence_repaired_rate:pct -->0.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_7p8b_awq_ko_custom.v1.metrics.mean_ms_per_example:int -->12,646<!-- /num --> |
+| 참고: 1.2B를 3,588문항으로 튜닝(1번 노트북) | 한국어 test | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.n -->699<!-- /num --> | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.verified_em:pct -->84.3<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test_ec/metrics.json:metrics.verified_em:pct -->81.5<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.raw_answer_em_answerable:pct -->79.3<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->85.5<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.evidence_repaired_rate:pct -->1.4<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.mean_ms_per_example:int -->2,511<!-- /num --> |
+| 참고: 1.2B를 10,587문항으로 튜닝(§21.4) | 한국어 test | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.n -->699<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.verified_em:pct -->88.7<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.ec.metrics.verified_em:pct -->85.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.raw_answer_em_answerable:pct -->84.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.evidence_cells_exact_raw:pct -->88.9<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->0.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.mean_ms_per_example:int -->2,539<!-- /num --> |
+
+- **튜닝하지 않은 32B는 튜닝한 1.2B보다 낮다.** test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.verified_em:pct -->77.2<!-- /num -->% 대 <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.verified_em:pct -->84.3<!-- /num -->%(<!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.verified_em:pct -->88.7<!-- /num -->%). 수작업 30문항에서는 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_custom.ec.metrics.verified_em:pct -->73.3<!-- /num -->%로 10,587문항 모델(<!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_custom.ec.metrics.verified_em:pct -->73.3<!-- /num -->%)과 같다. 30문항이라 한두 문항 차이는 의미가 없다.
+- **큰 모델도 답은 맞고 근거 셀이 틀리는 일이 있다.** 32B의 근거 복구 비율은 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.evidence_repaired_rate:pct -->15.6<!-- /num -->%다. 튜닝한 1.2B는 <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.evidence_repaired_rate:pct -->1.4<!-- /num -->%다. 근거 셀을 정확히 짚는 것은 모델 크기보다 이 과제로 학습했는지에 달려 있었다.
+- 32B는 문항당 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.v1.metrics.mean_ms_per_example:int -->15,969<!-- /num -->ms(동시 8건의 평균), 튜닝한 1.2B는 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.mean_ms_per_example:int -->2,539<!-- /num -->ms다.
+- **빠진 것.** 7.8B의 test 평가는 도구 오류로 중단됐다(§21.10). 1.2B에 예시만 준 기준선은 같은 날 앞 세션에서 끝나 있어 이 출력에 찍히지 않았다. 그래서 "모델 크기에 따른 추세"는 말할 수 없고, 32B 한 점과 7.8B의 30문항만 있다.
+- 32B 서버는 첫 시도에서 평가 도중 GPU 메모리 부족으로 죽었고(문제 58), 같은 설정의 다음 시도에서 끝까지 돌았다. T4 두 장에서 이 모델은 빠듯하다.
+
+### 21.3 모델이 도구를 고르는 방식 (A2절)
+
+§20.6의 에이전트를 GPU에서 돌렸다. 모델은 표 본문을 보지 않고 제목·열 이름·행 수만 받은 뒤 도구로 표를 읽고 답을 제출한다. vLLM의 도구 호출 해석(`--tool-call-parser hermes`)을 켰다.
+
+| 모델 | 세트 | 문항 | verified EM (v1) | (ec) | 문법 오류 | 모델 호출(평균) | 제출로 끝남 | 보류로 끝남 | 걸음 한도 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1.2B, 튜닝 없음 | 한국어 test | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.v1.metrics.n -->699<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.v1.metrics.verified_em:pct -->14.4<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.ec.metrics.verified_em:pct -->14.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.v1.metrics.parse_fail_rate:pct -->5.7<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.v1.metrics.tool_calling.model_calls_mean -->2.98<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.v1.metrics.tool_calling.finished_by.submit -->280<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.v1.metrics.tool_calling.finished_by.abstain -->379<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.v1.metrics.tool_calling.finished_by.max_steps -->34<!-- /num --> |
+| 1.2B | 큰 표 500문항 표본 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_unseen_dev500.v1.metrics.n -->500<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_unseen_dev500.v1.metrics.verified_em:pct -->12.0<!-- /num -->% | 재검증 실패 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_unseen_dev500.v1.metrics.parse_fail_rate:pct -->3.4<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_unseen_dev500.v1.metrics.tool_calling.model_calls_mean -->2.62<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_unseen_dev500.v1.metrics.tool_calling.finished_by.submit -->183<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_unseen_dev500.v1.metrics.tool_calling.finished_by.abstain -->300<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_unseen_dev500.v1.metrics.tool_calling.finished_by.max_steps -->12<!-- /num --> |
+| 32B AWQ, 튜닝 없음 | 한국어 test | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.v1.metrics.n -->699<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.v1.metrics.verified_em:pct -->53.6<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.ec.metrics.verified_em:pct -->51.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.v1.metrics.parse_fail_rate:pct -->7.6<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.v1.metrics.tool_calling.model_calls_mean -->3.42<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.v1.metrics.tool_calling.finished_by.submit -->530<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.v1.metrics.tool_calling.finished_by.abstain -->116<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.v1.metrics.tool_calling.finished_by.max_steps -->53<!-- /num --> |
+| 32B AWQ | 큰 표 500문항 표본 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_unseen_dev500.v1.metrics.n -->500<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_unseen_dev500.v1.metrics.verified_em:pct -->44.0<!-- /num -->% | 재검증 실패 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_unseen_dev500.v1.metrics.parse_fail_rate:pct -->17.8<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_unseen_dev500.v1.metrics.tool_calling.model_calls_mean -->3.66<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_unseen_dev500.v1.metrics.tool_calling.finished_by.submit -->337<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_unseen_dev500.v1.metrics.tool_calling.finished_by.abstain -->74<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_unseen_dev500.v1.metrics.tool_calling.finished_by.max_steps -->89<!-- /num --> |
+
+- **도구 호출은 모델이 커야 쓸 만하다.** 1.2B는 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_1p2b_ko_test.ec.metrics.verified_em:pct -->14.0<!-- /num -->%, 32B는 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.ec.metrics.verified_em:pct -->51.5<!-- /num -->%로 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.size_32b.tools_32b_minus_1p2b_ec:pct -->37.5<!-- /num -->%p 차이다. 1.2B는 CPU에서 30문항을 돌렸을 때(§20.6, <!-- num:experiments/eval/tool_calling_cpu.json:runs.tools.verified_em.rate:pct -->16.7<!-- /num -->%)와 같은 모습이다. 표를 한 번 찾아보고 대부분 보류한다.
+- **같은 32B라도 표를 직접 보여 주고 프로그램 한 줄을 쓰게 하는 쪽이 낫다.** 프로그램 방식(§21.2) <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.ref_32b_awq_ko_test.ec.metrics.verified_em:pct -->74.5<!-- /num -->% 대 도구 호출 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.tools_32b_awq_ko_test.ec.metrics.verified_em:pct -->51.5<!-- /num -->%, <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.size_32b.program_minus_tools_ec:pct -->23.0<!-- /num -->%p 차이. 도구 호출은 표가 입력에 들어가지 않아도 된다는 점이 장점인데, 이 크기의 표에서는 그 장점이 필요 없다.
+- 큰 표 표본의 재검증(주어 검사)은 실패했다. 표본 평가를 재검증할 때 생기는 결함이었고 고쳤다(§21.10).
+
+### 21.4 학습 데이터 확대 (B절)
+
+학습 풀(§20.3)에서 7,000문항을 더해 <!-- num:experiments/gpu2_2026-11-14/recovered.json:training.pool7000.examples:int -->10,587<!-- /num -->문항으로 1.2B를 튜닝했다. <!-- num:experiments/gpu2_2026-11-14/recovered.json:training.pool7000.steps -->330<!-- /num -->걸음, GPU 두 장(DDP)으로 <!-- num:experiments/gpu2_2026-11-14/recovered.json:training.pool7000.minutes -->49.9<!-- /num -->분.
+
+| | 학습 문항 | verified EM (v1) | (ec) | 인용 셀 정확 | 근거 복구 | 수작업 30 (ec) |
+|---|---:|---:|---:|---:|---:|---:|
+| 1번 노트북의 전체 데이터 모델 | 3,588 | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.verified_em:pct -->84.3<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test_ec/metrics.json:metrics.verified_em:pct -->81.5<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->85.5<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.evidence_repaired_rate:pct -->1.4<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_custom_ec/metrics.json:metrics.verified_em:pct -->66.7<!-- /num -->% |
+| 풀 7,000문항 추가 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:training.pool7000.examples:int -->10,587<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.verified_em:pct -->88.7<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.ec.metrics.verified_em:pct -->85.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.evidence_cells_exact_raw:pct -->88.9<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->0.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_vllm_ko_custom.ec.metrics.verified_em:pct -->73.3<!-- /num -->% |
+
+test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_notebook_full.pool7000.correct_full -->589<!-- /num -->문항 → <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_notebook_full.pool7000.correct -->620<!-- /num -->문항, <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_notebook_full.pool7000.verified_em_v1_delta:pct -->4.4<!-- /num -->%p(독립 표본 근사 p <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_notebook_full.pool7000.unpaired_p -->0.015<!-- /num -->). **다른 세션끼리의 비교**라는 점을 붙여야 한다. 아래 §21.7과 §21.8의 모델도 같은 3,588문항 안팎으로 학습했는데 1번 노트북의 값보다 3~4%p 높게 나왔다. 그래서 이 차이를 모두 "데이터를 늘린 효과"로 읽으면 안 된다. 풀 전부(약 3.4만 문항)로 학습하는 실험은 돌리지 않았다.
+
+### 21.5 멀티 GPU 학습 속도 (C절)
+
+같은 1,000문항을 GPU 한 장과 두 장(`torchrun`, DDP)으로 학습했다.
+
+| | 걸음 | 시간(초) |
+|---|---:|---:|
+| GPU 한 장 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:ddp.one_gpu_steps -->62<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:ddp.one_gpu_s -->519<!-- /num --> |
+| GPU 두 장 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:ddp.two_gpu_steps -->31<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:ddp.two_gpu_s -->284<!-- /num --> |
+
+**<!-- num:experiments/gpu2_2026-11-14/recovered.json:ddp.speedup -->1.83<!-- /num -->배.** 두 장일 때는 프로세스마다 데이터의 절반을 맡아 걸음 수가 절반이 된다. 정확도는 견주지 않았다(속도만 잰 실험이다). §21.4의 10,587문항 학습은 실제로 이 방식으로 돌았다. §9의 멀티 GPU 항목은 추론(텐서 병렬)이었고, 학습 병렬의 실측은 이것이 처음이다.
+
+### 21.6 서빙 처리량, 그리고 4비트 서빙은 되지 않았다 (E절)
+
+10,587문항 모델을 vLLM(fp16, T4 한 장)으로 올리고 64건을 보냈다.
+
+| 동시 요청 | 초당 처리 | 지연 중앙값(ms) | 지연 95백분위(ms) |
+|---:|---:|---:|---:|
+| 1 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c1.throughput_req_per_s -->2.39<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c1.p50_ms -->411.9<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c1.p95_ms -->520.1<!-- /num --> |
+| 8 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c8.throughput_req_per_s -->14.64<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c8.p50_ms -->495.2<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c8.p95_ms -->669.8<!-- /num --> |
+| 32 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c32.throughput_req_per_s -->25.16<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c32.p50_ms -->1,053.5<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:bench.fp16.c32.p95_ms -->1,487.8<!-- /num --> |
+
+**bitsandbytes 4비트 서빙은 재지 못했다.** 이 vLLM 버전에는 그 양자화 방식이 없어서 서버가 뜨지 않았다(`Unknown quantization method: bitsandbytes`). vLLM으로 4비트 모델을 올린 실측은 §21.2의 AWQ 모델(7.8B, 32B)이다. 튜닝한 모델을 4비트로 만드는 것은 하지 않았다.
+
+### 21.7 열 번호 형식: 시드 둘 더, 그리고 전체 데이터 (F절)
+
+§19.7의 결과(300문항·시드 하나)를 넓혔다. 한국어 test <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.v1.metrics.n -->699<!-- /num -->문항, 검증기 v1.
+
+| 형식 | 학습 문항 | 시드 | 세션 | verified EM | 인용 셀 정확 | 근거 복구 |
+|---|---:|---:|---|---:|---:|---:|
+| plain | 300 | 0 | 1번 노트북 | <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.verified_em:pct -->53.1<!-- /num -->% | <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->23.1<!-- /num -->% | <!-- num:experiments/eval/exaone_vllm_ko_test/metrics.json:metrics.evidence_repaired_rate:pct -->55.9<!-- /num -->% |
+| plain | 300 | 0 | 이번 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.v1.metrics.verified_em:pct -->53.2<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.v1.metrics.evidence_cells_exact_raw:pct -->22.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->55.2<!-- /num -->% |
+| colid | 300 | 0 | 1번 노트북 | <!-- num:experiments/eval/exaone_colid_vllm_ko_test/metrics.json:metrics.verified_em:pct -->51.1<!-- /num -->% | <!-- num:experiments/eval/exaone_colid_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->54.5<!-- /num -->% | <!-- num:experiments/eval/exaone_colid_vllm_ko_test/metrics.json:metrics.evidence_repaired_rate:pct -->4.2<!-- /num -->% |
+| colid | 300 | 1 | 이번 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_colid_s1_vllm_ko_test.v1.metrics.verified_em:pct -->52.8<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_colid_s1_vllm_ko_test.v1.metrics.evidence_cells_exact_raw:pct -->57.0<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_colid_s1_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->3.7<!-- /num -->% |
+| colid | 300 | 2 | 이번 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_colid_s2_vllm_ko_test.v1.metrics.verified_em:pct -->52.2<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_colid_s2_vllm_ko_test.v1.metrics.evidence_cells_exact_raw:pct -->56.1<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_colid_s2_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->4.3<!-- /num -->% |
+| plain | 3,588 | 0 | 1번 노트북 | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.verified_em:pct -->84.3<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->85.5<!-- /num -->% | <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.evidence_repaired_rate:pct -->1.4<!-- /num -->% |
+| colid | <!-- num:experiments/gpu2_2026-11-14/recovered.json:training.full_colid.examples:int -->3,588<!-- /num --> | 0 | 이번 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_full_colid_vllm_ko_test.v1.metrics.verified_em:pct -->88.4<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_full_colid_vllm_ko_test.v1.metrics.evidence_cells_exact_raw:pct -->88.4<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_full_colid_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->0.0<!-- /num -->% |
+
+- **300문항에서의 효과는 시드 세 개에서 같다.** 근거 복구 비율이 plain <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_rlstart_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->55.2<!-- /num -->% 안팎에서 colid <!-- num:experiments/eval/exaone_colid_vllm_ko_test/metrics.json:metrics.evidence_repaired_rate:pct -->4.2<!-- /num -->%, <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_colid_s1_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->3.7<!-- /num -->%, <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_colid_s2_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->4.3<!-- /num -->%로 내려간다. verified EM은 달라지지 않는다. §19.7의 관찰이 한 번의 우연이 아니었다.
+- **전체 데이터에서는 차이를 말할 수 없다.** colid의 근거 복구는 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_full_colid_vllm_ko_test.v1.metrics.evidence_repaired_rate:pct -->0.0<!-- /num -->%, plain은 <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.evidence_repaired_rate:pct -->1.4<!-- /num -->%로 둘 다 작다. 데이터가 충분하면 plain 형식으로도 근거 셀을 배운다는 §19.7의 예상과 맞다. verified EM은 colid 쪽이 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_notebook_full.full_colid.verified_em_v1_delta:pct -->4.2<!-- /num -->%p 높게 나왔지만 세션이 다르고 입력 길이 한도도 다르다(colid는 800토큰, plain은 672토큰). 형식의 효과라고 할 수 없다.
+
+### 21.8 영어 화학에서의 EXAONE (G절)
+
+한국어 3,588문항에 화학 합성 질문을 더한 <!-- num:experiments/gpu2_2026-11-14/recovered.json:training.kochem.examples:int -->4,383<!-- /num -->문항으로 1.2B를 튜닝했다(<!-- num:experiments/gpu2_2026-11-14/recovered.json:training.kochem.steps -->273<!-- /num -->걸음, <!-- num:experiments/gpu2_2026-11-14/recovered.json:training.kochem.minutes -->36.9<!-- /num -->분).
+
+| 세트 | 문항 | verified EM | 참고 |
+|---|---:|---:|---|
+| 화학 교과서 수작업 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_chem_custom.ec.metrics.n -->32<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_chem_custom.ec.metrics.verified_em:pct -->68.8<!-- /num -->% | |
+| 화학 합성 dev | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_chem_syndev.ec.metrics.n -->80<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_chem_syndev.ec.metrics.verified_em:pct -->92.5<!-- /num -->% | 학습 질문과 같은 틀로 만든 세트 |
+| **화학 논문 표**(arXiv 12편, §20.10) | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_chem_papers.ec.metrics.n -->62<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_chem_papers.ec.metrics.verified_em:pct -->80.7<!-- /num -->% | 휴리스틱 <!-- num:experiments/eval/heuristic_chem_papers/metrics.json:metrics.verified_em:pct -->43.5<!-- /num -->%, mT5-small <!-- num:experiments/eval/rl_v3_chem_papers/metrics.json:metrics.verified_em:pct -->22.6<!-- /num -->% |
+| 한국어 test | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_ko_test.v1.metrics.n -->699<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_ko_test.v1.metrics.verified_em:pct -->87.4<!-- /num -->% (v1), <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_ko_test.ec.metrics.verified_em:pct -->84.3<!-- /num -->% (ec) | 화학을 함께 학습해도 한국어 성능이 유지됨 |
+| 한국어 수작업 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_ko_custom.ec.metrics.n -->30<!-- /num --> | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_ko_custom.ec.metrics.verified_em:pct -->70.0<!-- /num -->% | |
+
+- **논문 표에서 EXAONE이 휴리스틱을 넘었다.** <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_kochem_vllm_chem_papers.ec.metrics.verified_em:pct -->80.7<!-- /num -->% 대 <!-- num:experiments/eval/heuristic_chem_papers/metrics.json:metrics.verified_em:pct -->43.5<!-- /num -->%. mT5-small은 휴리스틱보다 낮았다(§20.10). 학습에는 교과서 표만 썼고 논문 표는 평가에만 썼다. 62문항이고 한 번 돌렸다.
+- 한 모델이 한국어 표와 영어 화학 표를 함께 다룬다는 처음의 설정을 EXAONE으로 확인한 결과다.
+
+### 21.9 큰 표 (H절)
+
+공개 dev 분할에서 학습에 없던 표의 <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_first672_vllm_unseen_dev.v1.metrics.n -->3,072<!-- /num -->문항(§20.4)을 10,587문항 모델로 풀었다.
+
+| 보여 주는 행 | 입력 한도(토큰) | verified EM (v1) | (ec) | 문항당 시간(ms) |
+|---|---:|---:|---:|---:|
+| 앞에서부터 | 672 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_first672_vllm_unseen_dev.v1.metrics.verified_em:pct -->72.6<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_first672_vllm_unseen_dev.ec.metrics.verified_em:pct -->68.3<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_first672_vllm_unseen_dev.v1.metrics.mean_ms_per_example:int -->3,388<!-- /num --> |
+| 질문과 겹치는 행 | 672 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_overlap672_vllm_unseen_dev.v1.metrics.verified_em:pct -->85.2<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_overlap672_vllm_unseen_dev.ec.metrics.verified_em:pct -->80.2<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_overlap672_vllm_unseen_dev.v1.metrics.mean_ms_per_example:int -->3,419<!-- /num --> |
+| 앞에서부터 | 1,500 | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_first1500_vllm_unseen_dev.v1.metrics.verified_em:pct -->86.2<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_first1500_vllm_unseen_dev.ec.metrics.verified_em:pct -->81.5<!-- /num -->% | <!-- num:experiments/gpu2_2026-11-14/recovered.json:evals.exaone_pool7000_first1500_vllm_unseen_dev.v1.metrics.mean_ms_per_example:int -->5,637<!-- /num --> |
+
+- **행 선별이 EXAONE에서도 통한다.** 같은 672토큰에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.large_tables.overlap_minus_first_v1:pct -->12.6<!-- /num -->%p(v1), <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.large_tables.overlap_minus_first_ec:pct -->11.8<!-- /num -->%p(ec) 올랐다. mT5-small에서 본 방향(§20.4)과 같다.
+- **행을 고르는 것이 입력을 두 배로 늘리는 것과 비슷한 효과를 냈다.** 겹치는 행 672토큰과 앞에서부터 1,500토큰의 차이는 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.large_tables.first1500_minus_overlap672_ec:pct -->1.3<!-- /num -->%p(ec)이고, 1,500토큰은 문항당 시간이 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.large_tables.latency_ratio_1500_to_672 -->1.66<!-- /num -->배다.
+- 같은 세트에서 휴리스틱은 <!-- num:experiments/eval/large_tables.json:runs.heuristic_overlap512.all.verified_em.rate:pct -->27.7<!-- /num -->%, mT5-small은 1,000문항 표본에서 <!-- num:experiments/eval/large_tables.json:runs.mt5_overlap512.all.verified_em.rate:pct -->37.8<!-- /num -->%였다(§20.4). 학습에 없던 표에서도 튜닝한 EXAONE은 80%대를 낸다.
+
+### 21.10 이 실행에서 드러난 결함
+
+| 무엇 | 까닭 | 조치 |
+|---|---|---|
+| 7.8B의 test 평가가 중단됨 | 모델이 200자가 넘는 답을 하나 냈고, 검증기가 그 답을 표에서 찾으려 도구를 부르다가 도구의 글자 수 제한에 걸려 예외가 났다. 한 문항 때문에 699문항 평가가 끝났다 | 도구의 한도를 2,000자로 올림(프로그램 문법이 전체 400자까지만 받는다). 평가와 서비스가 검증기를 `verify/guard.py`를 거쳐 부르게 해서, 도구가 거부하면 "답 없음"이 되게 함. 소유자가 쓴 검증기는 그대로다. `tests/test_eval_robustness.py` |
+| 표본 평가의 재검증이 실패 | 재검증이 데이터 전체를 다시 만들고 표본에 없는 문항을 찾았다 | 재검증이 원래 실행의 문항만 다시 보게 함. 같은 테스트 파일 |
+| bitsandbytes 4비트 서빙 | 이 vLLM에 그 방식이 없다 | 재지 못함으로 기록. 노트북에서 그 단계를 뺌 |
+| 32B 서버가 첫 시도에서 메모리 부족 | 메모리의 95%를 미리 잡게 했다 | 노트북에서 32B를 선택 실행으로 바꾸고 여유를 둠(문제 58). 이 표의 32B 결과는 고치기 전 설정이 두 번째 시도에서 통과한 것이다 |
+| 결과 파일이 두 번 사라짐 | Kaggle 세션이 바뀌면 작업 폴더가 비워진다. 내려받기 링크도 뜨지 않았다 | 결과를 절마다 GitHub의 결과 브랜치로 올리게 함(문제 57, 59, 60). 이번 결과는 그 전의 실행이라 출력에서 복원했다 |
+
+### 21.11 공고 대조에서의 약점이 어떻게 달라졌나
+
+| 약점(§20) | 이번에 생긴 근거 | 여전히 없는 것 |
+|---|---|---|
+| 강화학습이 mT5-small 예비 실험뿐 | EXAONE 1.2B에 소유자가 쓴 보상·손실로 200걸음(§21.1) | 효과. 근거 오류가 줄지 않았다 |
+| 모델이 3억·12억뿐 | 32B(AWQ)를 T4 두 장에 올려 699문항 평가(§21.2), 도구 호출 평가(§21.3) | 큰 모델의 튜닝. 7.8B의 test, 크기별 추세 |
+| 학습에 쓴 질문이 원본의 일부 | 10,587문항 학습(§21.4) | 풀 전부(약 3.4만) |
+| 학습 병렬(DDP)이 없다 | GPU 두 장 학습 <!-- num:experiments/gpu2_2026-11-14/recovered.json:ddp.speedup -->1.83<!-- /num -->배(§21.5) | 두 장보다 많은 구성 |
+| 화학에서 EXAONE을 재지 않았다 | 교과서 두 세트와 논문 표(§21.8) | 논문·특허 본문 |
+| 큰 표 | EXAONE으로 3,072문항(§21.9) | |
+| 도구를 모델이 고르지 않는다 | 1.2B와 32B로 GPU 실측(§21.3) | 도구 호출 형식으로 튜닝한 모델 |
+| 열 번호 형식이 300문항·1회 | 시드 둘 더, 전체 데이터(§21.7) | |
+| 추론 쪽(양자화) | fp16 처리량, AWQ 모델 서빙(§21.6) | 튜닝 모델의 4비트 |

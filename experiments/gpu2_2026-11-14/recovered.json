@@ -8282,6 +8282,45 @@
   "size_32b": {
    "program_minus_tools_ec": 0.2304,
    "tools_32b_minus_1p2b_ec": 0.3748
+  },
+  "vs_first_notebook_full": {
+   "pool7000": {
+    "verified_em_v1_delta": 0.0444,
+    "correct": 620,
+    "correct_full": 589,
+    "unpaired_p": 0.0153
+   },
+   "full_colid": {
+    "verified_em_v1_delta": 0.0415,
+    "correct": 618,
+    "correct_full": 589,
+    "unpaired_p": 0.0239
+   },
+   "kochem": {
+    "verified_em_v1_delta": 0.0315,
+    "correct": 611,
+    "correct_full": 589,
+    "unpaired_p": 0.0915
+   }
+  },
+  "same_setting_two_sessions": {
+   "verified_em_v1_delta": 0.0014,
+   "repaired_delta": -0.0077
+  },
+  "same_model_served_twice": {
+   "questions_different_at_most": 1
+  },
+  "grpo_dev": {
+   "best_step": 25,
+   "best_reward": 0.0578,
+   "first_reward": 0.0172,
+   "last_reward": -0.0594,
+   "withheld_first": 7,
+   "withheld_last": 23,
+   "correct_first": 16,
+   "correct_last": 9,
+   "unparsable_every_check": 16,
+   "n": 64
   }
  },
  "failed": [

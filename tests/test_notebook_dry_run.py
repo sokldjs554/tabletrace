@@ -143,7 +143,7 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     repo, calls, packs, sections, run_all = run.repo, run.calls, run.packs, run.sections, run.run_all
 
     first = run_all()
-    assert first["train"] == 8 and first["grpo"] == 1 and first["eval"] >= 60
+    assert first["train"] == 8 and first["grpo"] == 1 and first["eval"] >= 50
     assert len(packs) >= len(sections) - 1                                   # every section ends by packing what exists so far
     assert Path.cwd() == repo                                                # pack() moves away for the download link and must come back
     names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()

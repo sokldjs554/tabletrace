@@ -1,0 +1,91 @@
+{
+ "what": "one reinforcement-learning step on CPU with the real EXAONE-4.0-1.2B and a freshly tuned 2-step adapter, run before the owner's GPU run to check the path end to end (sampling, the owner's reward and loss, update, save)",
+ "date": "2026-11-12",
+ "train_prompts": {
+  "lookup": 2647,
+  "calc": 680,
+  "abstain": 260
+ },
+ "train_prompts_total": 3587,
+ "abstain_share_of_train": 0.0725,
+ "dtype": "torch.float32",
+ "device": "cpu",
+ "steps": 1,
+ "updates_applied": 1,
+ "wall_s": 59.0,
+ "step_log": [
+  {
+   "step": 1,
+   "reward_mean": -0.75,
+   "groups_all_equal": 0.5,
+   "pg_loss": 0.13022,
+   "kl": 0.0,
+   "grad_norm": 5.4784,
+   "update_applied": true,
+   "correct": 0,
+   "repaired": 0,
+   "withheld": 1,
+   "wrong": 0,
+   "unparsable": 3,
+   "minutes": 0.85
+  }
+ ],
+ "dev_log": [
+  {
+   "step": 0,
+   "n": 2,
+   "mean_reward": -1.0,
+   "correct": 0,
+   "repaired": 0,
+   "withheld": 0,
+   "wrong": 0,
+   "unparsable": 2
+  },
+  {
+   "step": 1,
+   "n": 2,
+   "mean_reward": -1.0,
+   "correct": 0,
+   "repaired": 0,
+   "withheld": 0,
+   "wrong": 0,
+   "unparsable": 2
+  }
+ ],
+ "args": {
+  "model": "models/exaone-4.0-1.2b",
+  "adapter": "(scratch directory, not kept)",
+  "tokenizer": null,
+  "train": [
+   "data/ko/train.jsonl",
+   "data/ko/synthetic_train.jsonl"
+  ],
+  "dev": [
+   "data/ko/dev.jsonl",
+   "data/ko/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "out": "(scratch directory, not kept)",
+  "dtype": "fp32",
+  "trust_remote_code": false,
+  "steps": 1,
+  "prompts": 2,
+  "group": 2,
+  "chunk": 2,
+  "temperature": 1.0,
+  "lr": 2e-05,
+  "beta": 0.0,
+  "max_len": 768,
+  "max_new": 40,
+  "lora_r": 16,
+  "dev_n": 2,
+  "eval_every": 1,
+  "entity_check": false,
+  "table_format": "plain",
+  "merge": false,
+  "seed": 0,
+  "reward": "verifier"
+ }
+}
