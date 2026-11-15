@@ -85,7 +85,16 @@ def main() -> None:
     ap.add_argument("--temperature", type=float, default=1.0)
     ap.add_argument("--lr", type=float, default=2e-5)
     ap.add_argument("--beta", type=float, default=0.0, help="weight of the KL term to the starting adapter (0: no reference pass)")
-    ap.add_argument("--max-len", type=int, default=768)
+    ap.add_argument("--max-len", type=int, default=768, help="cap on the prompt tokens (the generated tokens come on top)")
+    ap.add_argument("--max-in", type=int, default=None,
+                    help="token budget of the question-and-table text. Default: --max-len minus 96, as in the first run (2026-11-14). That leaves "
+                         "too little room for the system prompt and chat template (about 147 tokens), so the longest prompts lose their BEGINNING "
+                         "(docs/dev/issues-log.md 66). For whole prompts give both, e.g. --max-in 672 --max-len 960")
+    ap.add_argument("--sampling", choices=["balanced", "natural"], default="balanced",
+                    help="balanced: every step draws its prompts in turn from lookup, calculation and no-answer questions (the first run; no-answer "
+                         "questions are then about a third of the batches and 7%% of the data). natural: uniformly from all training questions")
+    ap.add_argument("--dev-sample", choices=["first", "random"], default="first",
+                    help="which --dev-n dev questions choose the kept step: the first ones of the files (the first run; all lookups) or a seeded random sample")
     ap.add_argument("--max-new", type=int, default=64)
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--dev-n", type=int, default=64, help="dev questions scored greedily every --eval-every steps")
@@ -141,16 +150,28 @@ def main() -> None:
 
     docs = load_docs(*[Path(c) for c in a.corpus])
     set_table_format(a.table_format)
-    train = build_examples(read_records([Path(p) for p in a.train]), docs, tok, a.max_len - 96, drop_truncated_gold=True)
-    dev = build_examples(read_records([Path(p) for p in a.dev]), docs, tok, a.max_len - 96, drop_truncated_gold=True)[: a.dev_n] if a.dev else []
+    max_in = a.max_in if a.max_in is not None else a.max_len - 96
+    train = build_examples(read_records([Path(p) for p in a.train]), docs, tok, max_in, drop_truncated_gold=True)
+    dev = build_examples(read_records([Path(p) for p in a.dev]), docs, tok, max_in, drop_truncated_gold=True) if a.dev else []
+    if a.dev_sample == "random" and len(dev) > a.dev_n:
+        dev = random.Random(a.seed).sample(dev, a.dev_n)
+    dev = dev[: a.dev_n]
     pools: dict[str, list[Example]] = {}
     for e in train:
         pools.setdefault(kind(e), []).append(e)
     kinds = sorted(pools)
 
-    def prompt_ids(e: Example) -> list[int]:
+    def full_prompt_ids(e: Example) -> list[int]:
         msgs = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": e.input_text}]
-        return tok(tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True), add_special_tokens=False).input_ids[-(a.max_len - 8):]
+        return tok(tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True), add_special_tokens=False).input_ids
+
+    def prompt_ids(e: Example) -> list[int]:
+        return full_prompt_ids(e)[-(a.max_len - 8):]              # a longer prompt loses its beginning; counted below
+
+    prompts_cut = {name: sum(len(full_prompt_ids(e)) > a.max_len - 8 for e in exs) for name, exs in (("train", train), ("dev", dev))}
+    if prompts_cut["train"] or prompts_cut["dev"]:
+        print(f"WARNING: --max-len {a.max_len} cuts the beginning of {prompts_cut['train']} of {len(train)} training prompts and "
+              f"{prompts_cut['dev']} of {len(dev)} dev prompts. Raise --max-len or lower --max-in.", flush=True)
 
     def left_pad(seqs: list[list[int]]) -> tuple[torch.Tensor, torch.Tensor]:
         n = max(len(s) for s in seqs)
@@ -221,7 +242,10 @@ def main() -> None:
     t0 = time.time()
     updates = 0
     for step in range(1, a.steps + 1):
-        batch = [rnd.choice(pools[kinds[(step * a.prompts + i) % len(kinds)]]) for i in range(a.prompts)]
+        if a.sampling == "natural":
+            batch = [rnd.choice(train) for _ in range(a.prompts)]
+        else:
+            batch = [rnd.choice(pools[kinds[(step * a.prompts + i) % len(kinds)]]) for i in range(a.prompts)]
         prompts, comps = sample(batch, a.group, greedy=False)
         scored = [score(batch[i // a.group], c) for i, c in enumerate(comps)]
         rewards = torch.tensor([r for r, _ in scored], dtype=torch.float32).view(a.prompts, a.group)
@@ -302,6 +326,7 @@ def main() -> None:
         "algorithm": "GRPO-style group-normalised policy gradient, on-policy, one update per sampled batch",
         "reward": "tabletrace.training.evidence_reward (owner-written)" if a.reward == "verifier" else "random (smoke test)",
         "steps": a.steps, "updates_applied": updates, "kept_step": kept, "dev_history": history, "train_prompts": {k: len(v) for k, v in pools.items()},
+        "sampling": a.sampling, "dev_sample": a.dev_sample, "dev_kinds": dict(Counter(kind(e) for e in dev)), "max_in": max_in, "prompts_cut": prompts_cut,
         "dtype": str(dtype), "gpu": torch.cuda.get_device_name(0) if cuda else "cpu", "wall_s": round(time.time() - t0, 1), "args": vars(a)}, indent=1))
 
 

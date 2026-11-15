@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->259<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->262<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 | `training/rl_grpo.py`, §7, §18, 이슈 23–24 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->259<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->262<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -1266,9 +1266,9 @@ mT5-small 최종 모델, 한국어 시험 <!-- num:experiments/eval/risk_coverag
 - **근거 셀 오류는 줄지 않았다.** 인용 셀 정확도와 근거 복구 비율이 그대로다. 이 실험의 목표가 이것이었으므로, 결과는 "이 보상과 이 설정으로는 되지 않았다"이다.
 - verified EM은 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.correct_start -->369<!-- /num -->문항에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.correct_grpo -->376<!-- /num -->문항으로 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.correct_delta -->7<!-- /num -->문항 늘었다. 독립 표본 근사 p <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_vs_start.unpaired_p -->0.708<!-- /num -->로, 차이가 있다고 할 수 없다.
 - **학습이 길어질수록 모델이 답을 덜 냈다.** 개발셋에서 아무 답도 나가지 않은 문항이 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.withheld_first -->7<!-- /num -->개에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.withheld_last -->23<!-- /num -->개로 늘고, 정답은 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.correct_first -->16<!-- /num -->개에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.correct_last -->9<!-- /num -->개로 줄었다. 학습 표본에서도 틀린 답은 처음 50걸음 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.phases.s1_50.wrong -->454<!-- /num -->개에서 마지막 50걸음 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.phases.s151_200.wrong -->63<!-- /num -->개로 줄었지만, 답이 나가지 않은 표본이 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.phases.s1_50.withheld -->691<!-- /num -->개에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:grpo.phases.s151_200.withheld -->1,001<!-- /num -->개로 늘었다.
-- 개발셋 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.n -->64<!-- /num -->문항 가운데 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.unparsable_every_check -->16<!-- /num -->문항은 아홉 번의 점검에서 매번 문법 오류였다. 강화학습으로 움직이지 않은 부분이다.
+- 개발셋 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.n -->64<!-- /num -->문항 가운데 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.grpo_dev.unparsable_every_check -->16<!-- /num -->문항은 아홉 번의 점검에서 매번 문법 오류였다. 강화학습으로 움직이지 않은 부분이다. **이 16문항의 까닭은 나중에 찾았다. 학습 스크립트가 긴 프롬프트의 앞부분을 잘라 내고 있었다(§21.12).**
 
-**왜 그랬는지(추정, 확인하지 않았다).** 두 가지가 겹친 것으로 본다. 첫째, 보상이 틀린 답(−0.5)보다 보류(0)를 낫게 친다. 답을 맞힐 힘이 약한 모델에게는 답을 덜 내는 쪽이 가장 쉬운 개선이다. 둘째, 학습 스크립트가 프롬프트를 조회·계산·보류 질문에서 같은 수로 뽑는다. 학습 풀 <!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:train_prompts_total -->3,587<!-- /num -->문항 가운데 보류 질문은 <!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:train_prompts.abstain -->260<!-- /num -->개(<!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:abstain_share_of_train:pct -->7.2<!-- /num -->%)인데 배치에서는 3분의 1을 차지한다. 보류하면 점수를 받는 질문이 실제보다 네다섯 배 자주 나온 셈이다. 이 표본 추출은 AI 도구가 쓴 스크립트(`scripts/train/exaone_grpo.py`)의 설계이고, 소유자가 쓴 보상과 손실 함수의 문제가 아니다.
+**왜 그랬는지.** 확인한 것 하나와 추정 둘이 있다. 확인한 것은 프롬프트 잘림이다(§21.12). 학습 프롬프트의 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.train.prompts_cut_share:pct -->12.2<!-- /num -->%와 개발셋 앞 64문항 가운데 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.dev_first_64_prompts_cut_in_rl -->16<!-- /num -->문항이 앞부분이 잘린 채 모델에 들어갔다. 그 문항들에서는 모델이 무엇을 내든 문법 오류였다. 나머지 둘은 추정이다. 첫째, 보상이 틀린 답(−0.5)보다 보류(0)를 낫게 친다. 답을 맞힐 힘이 약한 모델에게는 답을 덜 내는 쪽이 가장 쉬운 개선이다. 둘째, 학습 스크립트가 프롬프트를 조회·계산·보류 질문에서 같은 수로 뽑는다. 학습 풀 <!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:train_prompts_total -->3,587<!-- /num -->문항 가운데 보류 질문은 <!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:train_prompts.abstain -->260<!-- /num -->개(<!-- num:experiments/gpu2_2026-11-14/cpu_one_step_check.json:abstain_share_of_train:pct -->7.2<!-- /num -->%)인데 배치에서는 3분의 1을 차지한다. 보류하면 점수를 받는 질문이 실제보다 네다섯 배 자주 나온 셈이다. 이 표본 추출은 AI 도구가 쓴 스크립트(`scripts/train/exaone_grpo.py`)의 설계이고, 소유자가 쓴 보상과 손실 함수의 문제가 아니다.
 
 **쓸 수 있는 문장과 쓰면 안 되는 문장.** "검증기 결과를 보상으로 삼는 강화학습의 보상 함수와 GRPO 손실을 직접 구현해 EXAONE 1.2B에 적용했고, 근거 셀 오류는 줄지 않았으며 모델이 보류 쪽으로 움직이는 것을 관찰했다"는 쓸 수 있다. "강화학습으로 성능을 올렸다"는 쓰면 안 된다. mT5-small 예비 실험(§8, §18)과 같은 방향의 결과이고, 선행 연구의 "강화학습이 SFT를 못 넘는" 사례(§19.4)와도 어긋나지 않는다.
 
@@ -1399,7 +1399,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 | 약점(§20) | 이번에 생긴 근거 | 여전히 없는 것 |
 |---|---|---|
-| 강화학습이 mT5-small 예비 실험뿐 | EXAONE 1.2B에 소유자가 쓴 보상·손실로 200걸음(§21.1) | 효과. 근거 오류가 줄지 않았다 |
+| 강화학습이 mT5-small 예비 실험뿐 | EXAONE 1.2B에 소유자가 쓴 보상·손실로 200걸음(§21.1) | 효과. 근거 오류가 줄지 않았다. 그 실행에는 학습 스크립트의 결함이 있었고, 고친 두 번째 실험은 준비만 됐다(§21.12) |
 | 모델이 3억·12억뿐 | 32B(AWQ)를 T4 두 장에 올려 699문항 평가(§21.2), 도구 호출 평가(§21.3) | 큰 모델의 튜닝. 7.8B의 test, 크기별 추세 |
 | 학습에 쓴 질문이 원본의 일부 | 10,587문항 학습(§21.4) | 풀 전부(약 3.4만) |
 | 학습 병렬(DDP)이 없다 | GPU 두 장 학습 <!-- num:experiments/gpu2_2026-11-14/recovered.json:ddp.speedup -->1.83<!-- /num -->배(§21.5) | 두 장보다 많은 구성 |
@@ -1408,3 +1408,22 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 | 도구를 모델이 고르지 않는다 | 1.2B와 32B로 GPU 실측(§21.3) | 도구 호출 형식으로 튜닝한 모델 |
 | 열 번호 형식이 300문항·1회 | 시드 둘 더, 전체 데이터(§21.7) | |
 | 추론 쪽(양자화) | fp16 처리량, AWQ 모델 서빙(§21.6) | 튜닝 모델의 4비트 |
+
+### 21.12 그 뒤에 찾은 결함: 길이 한도가 정답과 프롬프트를 잘랐다 (2026-11-15)
+
+§21.1의 "개발셋 16문항이 매번 문법 오류"를 따라가다 찾았다. **AI 도구가 쓴 학습 스크립트 두 개의 결함이고, 이 저장소의 모든 EXAONE 튜닝 결과에 걸려 있다.**
+
+- 학습 스크립트는 질문과 표의 글에 `--max-len`에서 96토큰을 뺀 만큼을 준다. 남긴 96토큰에 시스템 프롬프트, 대화 틀, 정답이 들어가야 하는데, 시스템 프롬프트와 대화 틀만 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:system_prompt_and_template_tokens -->147<!-- /num -->토큰이다.
+- **미세조정**(`exaone_lora_sft.py`)은 넘치는 예제의 끝을 잘랐다. 끝에 있는 것은 정답이다. 한국어 학습 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.train.examples:int -->3,587<!-- /num -->문항 가운데 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.train.targets_missing -->385<!-- /num -->문항은 정답이 통째로, <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.train.targets_cut_short -->153<!-- /num -->문항은 일부가 잘렸다. 합쳐 **<!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.train.targets_cut_share:pct -->15.0<!-- /num -->%**다. 잘린 것은 모두 표가 긴 문항이다.
+- **강화학습**(`exaone_grpo.py`)은 넘치는 프롬프트의 앞을 잘랐다. 앞에 있는 것은 시스템 프롬프트다. 학습 프롬프트 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.train.prompts_cut_in_rl -->436<!-- /num -->개(<!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.train.prompts_cut_share:pct -->12.2<!-- /num -->%), 개발셋 앞 64문항 가운데 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.dev_first_64_prompts_cut_in_rl -->16<!-- /num -->문항이다. §21.1의 16문항과 같은 수다.
+- 어느 쪽도 경고를 내지 않았다. 작은 무작위 모델로 한 CPU 시험은 길이를 넉넉히 줘서 이 경로를 타지 않았다.
+
+**이것이 뜻하는 것.**
+
+1. 1번 노트북과 이번 실행의 EXAONE 튜닝 모델은 모두 학습 예제의 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.as_run_until_2026_11_14.train.targets_cut_share:pct -->15.0<!-- /num -->%에서 정답을 보지 못하거나 잘린 정답을 봤다. 수치는 그 상태로 잰 것이고 그 자체로는 사실이다. 다만 **결함이 없는 학습의 성능이 아니다.** 고치면 얼마나 달라지는지는 재지 않았다. 표가 긴 문항에서 차이가 날 것으로 예상하지만 예상일 뿐이다.
+2. 평가는 영향이 없다. 평가는 서버에 프롬프트 전체를 보낸다.
+3. §21.1의 강화학습 결과는 "보상이 듣지 않았다"가 아니라 **"결함이 있는 학습 스크립트로 한 실행에서 듣지 않았다"**로 읽어야 한다.
+
+**고친 것.** 두 스크립트에 입력 한도를 따로 주는 `--max-in`을 넣었다. `--max-in 672 --max-len 960`이면 학습과 개발 문항 어디서도 잘리지 않는다(<!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.corrected.train.targets_cut_share:pct -->0.0<!-- /num -->%, 가장 긴 예제 <!-- num:experiments/gpu2_2026-11-14/length_cap_check.json:settings.corrected.train.longest_prompt_plus_target -->882<!-- /num -->토큰). 기본값은 예전 그대로 두어 지난 실행을 재현할 수 있게 했고, 잘리는 예제가 있으면 수를 세어 경고하고 `train_info.json`에 적는다. 강화학습 스크립트에는 프롬프트를 전체 학습 문항에서 고르게 뽑는 `--sampling natural`과 개발 문항을 무작위로 고르는 `--dev-sample random`도 넣었다. 수치는 `scripts/check_length_cap.py`가 EXAONE 토크나이저로 센 것이다(`experiments/gpu2_2026-11-14/length_cap_check.json`). 실제 EXAONE-4.0-1.2B로 CPU에서 한 걸음을 돌려 새 설정에서 잘린 프롬프트가 없음을 확인했다.
+
+**준비만 된 것(돌리지 않았다).** 노트북 2의 D절을 두 번째 실험으로 바꿨다. 시작 모델을 잘리지 않는 길이로 다시 학습하고, 프롬프트를 실제 비율로 뽑고, 개발 문항 128개를 무작위로 골라 같은 보상으로 200걸음을 돈다. 배치 구성만 첫 실험처럼 둔 대조군도 선택해서 돌릴 수 있다. A절은 첫 실행에서 빠진 두 값(예시만 준 1.2B, 7.8B의 test)을 채운다. 결과가 오기 전에는 쓰지 않는다.

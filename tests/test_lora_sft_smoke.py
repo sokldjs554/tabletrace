@@ -87,6 +87,24 @@ def test_lora_sft_on_two_processes_and_with_extra_data(tmp_path):
     assert all(x["loss"] == x["loss"] for x in info["loss_log"]) and (out / "adapter_config.json").exists()
 
 
+def test_lora_sft_counts_targets_lost_to_the_length_cap(tmp_path):
+    """Every fine-tuning run up to 2026-11-14 left 96 tokens of room for a system prompt and chat template of about 147:
+    15% of the Korean training examples lost part or all of their target to --max-len, silently. The script now counts
+    such examples, warns, and records the count; --max-in sets the input budget apart from the cap."""
+    model_dir = _tiny_model(tmp_path)
+    base = [sys.executable, str(ROOT / "scripts/train/exaone_lora_sft.py"), "--model", str(model_dir), "--dtype", "fp32",
+            "--train", str(ROOT / "data/chem/synthetic_train.jsonl"), "--corpus", str(ROOT / "data/chem/documents.jsonl"),
+            "--epochs", "1", "--bs", "2", "--grad-accum", "2", "--limit", "8", "--lora-r", "4"]
+    r = subprocess.run([*base, "--max-in", "1200", "--max-len", "1900", "--out", str(tmp_path / "whole")], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-2000:]
+    info = json.loads((tmp_path / "whole" / "train_info.json").read_text())
+    assert info["max_in"] == 1200 and info["targets_missing"] == 0 and info["targets_cut_short"] == 0 and "WARNING" not in r.stdout
+    r = subprocess.run([*base, "--max-in", "1200", "--max-len", "600", "--out", str(tmp_path / "cut")], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-2000:]
+    info = json.loads((tmp_path / "cut" / "train_info.json").read_text())
+    assert info["targets_missing"] + info["targets_cut_short"] > 0 and "cuts the target of" in r.stdout
+
+
 def test_lora_sft_with_the_owner_written_loop(tmp_path):
     """--loop owner: masking, schedule and loop from tabletrace.training.lm_loop (skipped until the owner writes it)."""
     import importlib.util

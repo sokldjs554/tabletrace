@@ -59,7 +59,7 @@ class DryRun:
     """Notebook 2 with its shell lines recorded instead of run, in a fresh working directory under `root`."""
 
     def __init__(self, root: Path, monkeypatch, backup: Path | None = None, n_gpu: int = 2, run_32b: bool = False, dies: str | None = None,
-                 remote: Path | None = None):
+                 remote: Path | None = None, control: bool = False):
         self.calls: list[tuple[str, str]] = []
         self.packs: list[int] = []
         self.dies = dies                  # evaluations whose output path contains this never finish (the server died)
@@ -91,6 +91,9 @@ class DryRun:
         if run_32b:
             assert sum("RUN_32B = False" in src for _, src in self.sections) == 1
             self.sections = [(i, src.replace("RUN_32B = False", "RUN_32B = True")) for i, src in self.sections]
+        if control:
+            assert sum("RUN_CONTROL = False" in src for _, src in self.sections) == 1
+            self.sections = [(i, src.replace("RUN_CONTROL = False", "RUN_CONTROL = True")) for i, src in self.sections]
         exec(compile(to_python(helpers, "call"), "helpers", "exec"), ns)
         real_pack = ns["pack"]
         ns.update(serve=lambda *a, **k: _Proc(), stop_servers=lambda: None, pack=lambda: (self.packs.append(1), real_pack())[1])
@@ -147,10 +150,14 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     assert len(packs) >= len(sections) - 1                                   # every section ends by packing what exists so far
     assert Path.cwd() == repo                                                # pack() moves away for the download link and must come back
     names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
-    assert any(n.endswith("exaone_grpo/train_info.json") for n in names) and any("exaone_rlstart_vllm_ko_test" in n for n in names)
+    assert any(n.endswith("exaone_grpo2/train_info.json") for n in names) and any("exaone_rlstart2_vllm_ko_test" in n for n in names)
     assert any(n.endswith("run_info_2.json") for n in names) and not any("merged" in n for n in names)
     kept = sorted(q.parent.name for q in (repo / "experiments").glob("*/merged"))
-    assert kept == ["exaone_lora_pool7000", "exaone_lora_rlstart"]           # the two that later sections serve again
+    assert kept == ["exaone_lora_pool7000", "exaone_lora_rlstart2"]          # the two that later sections serve again
+    rl = [c for k, c in calls if k == "grpo"]
+    assert len(rl) == 1 and all(x in rl[0] for x in ("--sampling natural", "--dev-sample random", "--max-in 672", "--max-len 960", "--chunk 1"))
+    start = [c for k, c in calls if k == "train" and "exaone_lora_rlstart2" in c]
+    assert len(start) == 1 and "--max-in 672" in start[0] and "--max-len 960" in start[0]      # whole prompts and whole targets (issue 66)
     ddp = [c for k, c in calls if k == "train" and "exaone_lora_ddp" in c]
     assert len(ddp) == 2 and not any("--merge" in c.split() for c in ddp)    # the speed runs keep no merged model
 
@@ -159,13 +166,13 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
 
     (repo / "experiments/exaone_lora_colid_s2/train_info.json").unlink()     # as if stopped during this training
     shutil.rmtree(repo / "experiments/eval/exaone_colid_s2_vllm_ko_custom_ec")
-    shutil.rmtree(repo / "experiments/eval/exaone_grpo_vllm_ko_test_ec")     # as if stopped during this evaluation
-    (repo / "experiments/exaone_grpo/train_info.json").unlink()
+    shutil.rmtree(repo / "experiments/eval/exaone_grpo2_vllm_ko_test_ec")    # as if stopped during this evaluation
+    (repo / "experiments/exaone_grpo2/train_info.json").unlink()
     third = run_all()
     assert third["train"] == 1 and third["grpo"] == 1 and third["eval"] == 4
     assert run.outputs() == ["experiments/eval/exaone_colid_s2_vllm_ko_custom", "experiments/eval/exaone_colid_s2_vllm_ko_custom_ec",
-                      "experiments/eval/exaone_grpo_vllm_ko_test", "experiments/eval/exaone_grpo_vllm_ko_test_ec",
-                      "experiments/exaone_grpo", "experiments/exaone_lora_colid_s2"]
+                      "experiments/eval/exaone_grpo2_vllm_ko_test", "experiments/eval/exaone_grpo2_vllm_ko_test_ec",
+                      "experiments/exaone_grpo2", "experiments/exaone_lora_colid_s2"]
 
 
 def test_notebook_2_restores_a_backup_in_a_new_session(tmp_path, monkeypatch):
@@ -184,7 +191,7 @@ def test_notebook_2_restores_a_backup_in_a_new_session(tmp_path, monkeypatch):
     assert (second.repo / "experiments/run_info_2.json").exists()            # unpacked when the helper cell ran
     counts = second.run_all()
     assert counts["eval"] == 0 and counts["grpo"] == 0 and counts["bench"] == 0
-    assert second.outputs() == ["experiments/exaone_lora_rlstart"]
+    assert second.outputs() == ["experiments/exaone_lora_rlstart2"]
 
 
 def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
@@ -267,7 +274,7 @@ def test_notebook_2_pushes_results_to_a_branch_and_a_new_session_restores_them(t
     assert (second.repo / "experiments/run_info_2.json").exists()
     counts = second.run_all()
     assert counts["eval"] == 0 and counts["grpo"] == 0
-    assert second.outputs() == ["experiments/exaone_lora_rlstart"]
+    assert second.outputs() == ["experiments/exaone_lora_rlstart2"]
 
 
 def test_a_failed_push_is_reported_without_stopping_or_leaking_the_token(tmp_path, monkeypatch, capsys):
@@ -277,4 +284,16 @@ def test_a_failed_push_is_reported_without_stopping_or_leaking_the_token(tmp_pat
     printed = capsys.readouterr().out
     assert counts["grpo"] == 1 and (tmp_path / "gpu_results_2.tgz").exists()
     assert "GitHub에 올리지 못했습니다" in printed and "dummy-token" not in printed
+
+
+def test_notebook_2_reinforcement_learning_control_run_differs_only_in_sampling(tmp_path, monkeypatch):
+    """The second experiment fixes two things at once (whole prompts, natural sampling). The optional control keeps the
+    first run's balanced sampling with everything else equal, so the effect of the sampling can be told apart."""
+    run = DryRun(tmp_path, monkeypatch, control=True)
+    counts = run.run_all()
+    rl = [c for k, c in run.calls if k == "grpo"]
+    assert counts["grpo"] == 2 and "--sampling natural" in rl[0] and "--sampling balanced" in rl[1]
+    strip = lambda c: re.sub(r"--sampling \w+|--out \S+", "", c)                                  # noqa: E731
+    assert strip(rl[0]) == strip(rl[1])
+    assert any("exaone_grpo2b_vllm_ko_test" in o for o in run.outputs())
 

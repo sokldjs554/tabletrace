@@ -245,7 +245,9 @@ def supplement_sections() -> list[dict]:
                     "notes": ["근거 셀 오류는 줄지 않았다. 인용 셀 정확도와 근거 복구 비율이 그대로다.",
                               f"개발셋 {gd['n']}문항의 평균 보상은 시작 {gd['first_reward']} → {gd['best_step']}걸음 {gd['best_reward']}(최고) → {gi['steps']}걸음 {gd['last_reward']}. "
                               f"학습이 길어질수록 답이 나가지 않은 문항이 {gd['withheld_first']}개에서 {gd['withheld_last']}개로 늘었다.",
-                              f"verified EM의 차이는 {g2['derived']['grpo_vs_start']['correct_delta']}문항이다(독립 표본 근사 p {g2['derived']['grpo_vs_start']['unpaired_p']})."],
+                              f"verified EM의 차이는 {g2['derived']['grpo_vs_start']['correct_delta']}문항이다(독립 표본 근사 p {g2['derived']['grpo_vs_start']['unpaired_p']}).",
+                              "이 실행 뒤에 학습 스크립트의 결함을 찾았다. 긴 프롬프트의 앞부분이 잘려 들어갔고(학습 프롬프트의 12.2%, 개발셋 64문항 중 16문항), "
+                              "미세조정에서는 학습 예제의 15.0%에서 정답이 잘렸다. 이 표는 그 상태로 잰 값이다. 고친 설정의 두 번째 실험은 준비만 되어 있다."],
                     "artifact": src})
         full = load(EXP / "eval" / "exaone_full_vllm_ko_test" / "metrics.json")
         rows = []

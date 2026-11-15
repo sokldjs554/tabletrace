@@ -53,7 +53,11 @@ def main() -> None:
     ap.add_argument("--bs", type=int, default=2)
     ap.add_argument("--grad-accum", type=int, default=8)
     ap.add_argument("--lr", type=float, default=2e-4)
-    ap.add_argument("--max-len", type=int, default=768)
+    ap.add_argument("--max-len", type=int, default=768, help="hard cap on prompt + target tokens of one training example")
+    ap.add_argument("--max-in", type=int, default=None,
+                    help="token budget of the question-and-table text. Default: --max-len minus 96, which is what every run up to 2026-11-14 used "
+                         "and which is too little room: the system prompt and chat template alone take about 147 tokens, so the longest examples "
+                         "lose their target to the cap (docs/dev/issues-log.md 66). For complete targets give both, e.g. --max-in 672 --max-len 960")
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--grad-ckpt", action="store_true", help="gradient checkpointing: less memory, slower")
     ap.add_argument("--merge", action="store_true", help="also save the merged model to <out>/merged")
@@ -109,11 +113,12 @@ def main() -> None:
         model.print_trainable_parameters()
     docs = load_docs(*[Path(c) for c in a.corpus])
     set_table_format(a.table_format)
-    exs = build_examples(read_records([Path(p) for p in a.train]), docs, tok, a.max_len - 96, drop_truncated_gold=True)
+    max_in = a.max_in if a.max_in is not None else a.max_len - 96
+    exs = build_examples(read_records([Path(p) for p in a.train]), docs, tok, max_in, drop_truncated_gold=True)
     if a.limit:
         exs = exs[: a.limit]
     if a.extra_train:
-        extra = build_examples(read_records([Path(p) for p in a.extra_train]), docs, tok, a.max_len - 96, drop_truncated_gold=True)
+        extra = build_examples(read_records([Path(p) for p in a.extra_train]), docs, tok, max_in, drop_truncated_gold=True)
         if a.extra_n and a.extra_n < len(extra):
             extra = random.Random(a.seed).sample(extra, a.extra_n)
         exs = exs + extra
@@ -123,9 +128,16 @@ def main() -> None:
         prompt = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
         p_ids = tok(prompt, add_special_tokens=False).input_ids
         t_ids = tok(e.target_text + tok.eos_token, add_special_tokens=False).input_ids
+        over = len(p_ids) + len(t_ids) - a.max_len
+        if over > 0:                                   # the cap cuts the END: the target goes first
+            cut["missing" if len(p_ids) >= a.max_len else "short"] += 1
         return (p_ids + t_ids)[: a.max_len], ([-100] * len(p_ids) + t_ids)[: a.max_len], min(len(p_ids), a.max_len)
 
+    cut = {"missing": 0, "short": 0}                  # examples whose target is cut off entirely / cut short by --max-len
     data = [encode(e) for e in exs]
+    if main_rank and (cut["missing"] or cut["short"]):
+        print(f"WARNING: --max-len {a.max_len} cuts the target of {cut['missing'] + cut['short']} of {len(data)} examples "
+              f"({cut['missing']} entirely, {cut['short']} short). Raise --max-len or lower --max-in.", flush=True)
     params = [p for p in model.parameters() if p.requires_grad]
     opt = torch.optim.AdamW(params, lr=a.lr)
     scaler = torch.amp.GradScaler("cuda") if use_scaler else None
@@ -214,6 +226,7 @@ def main() -> None:
     gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
     (out / "train_info.json").write_text(json.dumps({"n_examples": n_examples, "world_size": world, "steps": step, "dtype": str(dtype), "wall_s": round(time.time() - t0, 1), "gpu": gpu,
                                                     "loop": "tabletrace.training.lm_loop (owner-written)" if lm_loop is not None else "builtin",
+                                                    "max_in": max_in, "targets_missing": cut["missing"], "targets_cut_short": cut["short"],
                                                     "args": vars(a), "loss_log": log}, indent=1))
 
 

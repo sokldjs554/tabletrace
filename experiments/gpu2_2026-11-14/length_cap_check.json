@@ -1,0 +1,53 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "table_format": "plain",
+ "system_prompt_and_template_tokens": 147,
+ "settings": {
+  "as_run_until_2026_11_14": {
+   "max_in": 672,
+   "max_len": 768,
+   "train": {
+    "examples": 3587,
+    "targets_missing": 385,
+    "targets_cut_short": 153,
+    "targets_cut_share": 0.15,
+    "prompts_cut_in_rl": 436,
+    "prompts_cut_share": 0.1216,
+    "longest_prompt_plus_target": 882
+   },
+   "dev": {
+    "examples": 239,
+    "targets_missing": 51,
+    "targets_cut_short": 5,
+    "targets_cut_share": 0.2343,
+    "prompts_cut_in_rl": 55,
+    "prompts_cut_share": 0.2301,
+    "longest_prompt_plus_target": 856
+   },
+   "dev_first_64_prompts_cut_in_rl": 16
+  },
+  "corrected": {
+   "max_in": 672,
+   "max_len": 960,
+   "train": {
+    "examples": 3587,
+    "targets_missing": 0,
+    "targets_cut_short": 0,
+    "targets_cut_share": 0.0,
+    "prompts_cut_in_rl": 0,
+    "prompts_cut_share": 0.0,
+    "longest_prompt_plus_target": 882
+   },
+   "dev": {
+    "examples": 239,
+    "targets_missing": 0,
+    "targets_cut_short": 0,
+    "targets_cut_share": 0.0,
+    "prompts_cut_in_rl": 0,
+    "prompts_cut_share": 0.0,
+    "longest_prompt_plus_target": 856
+   },
+   "dev_first_64_prompts_cut_in_rl": 0
+  }
+ }
+}

@@ -34,7 +34,9 @@ def run(tmp_path, name, *extra):
                         "--chunk", "2", "--max-len", "1536", "--max-new", "8", "--dev-n", "4", "--eval-every", "1", "--lora-r", "4", *extra],
                        cwd=ROOT, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr[-3000:]
-    return out, json.loads((out / "train_info.json").read_text()), [json.loads(x) for x in (out / "train_log.jsonl").read_text().splitlines()]
+    info = json.loads((out / "train_info.json").read_text())
+    info["_stdout"] = r.stdout
+    return out, info, [json.loads(x) for x in (out / "train_log.jsonl").read_text().splitlines()]
 
 
 def test_update_path_runs_with_non_zero_advantages(tmp_path):
@@ -56,3 +58,17 @@ def test_real_reward_on_a_model_that_cannot_write_programs(tmp_path):
     assert all(x["unparsable"] + x["withheld"] + x["wrong"] + x["correct"] + x["repaired"] == 6 for x in steps)
     assert all(x["reward_mean"] <= 0.0 for x in steps)                      # random text earns nothing
     assert all(x["update_applied"] is False for x in steps if x["groups_all_equal"] == 1.0)   # equal rewards: no update, no NaN
+
+
+def test_second_experiment_options_and_the_cut_prompt_count(tmp_path):
+    """The first GPU run drew a third of its prompts from no-answer questions and cut the beginning off every prompt
+    longer than the cap (12% of the training prompts, 16 of the 64 dev prompts), unnoticed. The script now counts cut
+    prompts and says so, can draw prompts uniformly, and can pick the dev questions at random."""
+    _out, info, log = run(tmp_path, "grpo_natural", "--sampling", "natural", "--dev-sample", "random", "--max-in", "1200", "--max-len", "1536")
+    assert info["sampling"] == "natural" and info["dev_sample"] == "random" and info["max_in"] == 1200
+    assert info["prompts_cut"] == {"train": 0, "dev": 0} and "WARNING" not in info["_stdout"]
+    assert sum(info["dev_kinds"].values()) == 4 and len([x for x in log if "step" in x and "dev" not in x]) == 2
+    _out, info, _log = run(tmp_path, "grpo_cut", "--max-in", "1200", "--max-len", "700")      # the cap is far below what the prompts need
+    assert info["sampling"] == "balanced" and info["dev_sample"] == "first"                    # the defaults are the first run's
+    assert info["prompts_cut"]["train"] > 0 and "cuts the beginning of" in info["_stdout"]
+
