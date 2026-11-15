@@ -81,7 +81,8 @@ class DryRun:
                 monkeypatch.setitem(sys.modules, "requests", types.SimpleNamespace())
         torch = types.SimpleNamespace(cuda=types.SimpleNamespace(get_device_name=lambda i: "Tesla T4", device_count=lambda: n_gpu))
         self.ns = ns = {"_sh": self._sh, "os": os, "subprocess": subprocess, "time": time, "json": json, "glob": glob, "shutil": shutil, "torch": torch,
-                        "N_GPU": n_gpu, "ROOT": str(root), "VENV": str(root), "REPO_DIR": str(repo), "BACKUP": str(backup) if backup else None}
+                        "N_GPU": n_gpu, "ROOT": str(root), "VENV": str(root), "REPO_DIR": str(repo), "BACKUP": str(backup) if backup else None,
+                        "ON_COLAB": False}
         (_, _setup), (_, helpers), *self.sections = code_cells("notebooks/gpu_experiments_2.ipynb")     # the setup cell needs a GPU and the network
         if run_32b:
             assert sum("RUN_32B = False" in src for _, src in self.sections) == 1
@@ -219,4 +220,24 @@ def test_notebook_2_goes_on_when_a_server_dies_during_evaluation(tmp_path, monke
     assert len(mine) == 1 and "--replay-from" not in mine[0]                 # no second set, no re-verification of a missing file
     assert counts["grpo"] == 1 and counts["train"] == 8                      # the other sections still ran
     assert (tmp_path / "gpu_results_2.tgz").exists()
+
+
+def test_pack_uses_the_colab_download_only_on_colab(tmp_path, monkeypatch):
+    """Kaggle's image also ships the google.colab package. Its files.download() only works in Colab's front end; in a
+    Kaggle notebook it showed "Javascript Error: download is not defined" and the download link never appeared. The
+    platform is therefore decided by the working directory (ON_COLAB), not by whether the import succeeds."""
+    downloads, links = [], []
+    colab = types.ModuleType("google.colab")
+    colab.files = types.SimpleNamespace(download=downloads.append)
+    display = types.ModuleType("IPython.display")
+    display.FileLink = lambda path: path
+    display.display = links.append
+    for name, module in (("google", types.ModuleType("google")), ("google.colab", colab), ("IPython", types.ModuleType("IPython")), ("IPython.display", display)):
+        monkeypatch.setitem(sys.modules, name, module)
+    run = DryRun(tmp_path, monkeypatch)
+    run.ns["pack"]()                                                         # as on Kaggle: the package imports, ON_COLAB is False
+    assert links == ["gpu_results_2.tgz"] and not downloads and Path.cwd() == run.repo
+    run.ns["ON_COLAB"] = True
+    run.ns["pack"]()
+    assert downloads == [str(tmp_path / "gpu_results_2.tgz")] and len(links) == 1
 
