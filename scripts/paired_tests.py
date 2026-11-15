@@ -78,6 +78,27 @@ PAIRS = [
     ("heuristic_512_overlap_vs_whole_table_unseen_dev", "heuristic_unseen_dev", "heuristic_unseen_dev_overlap512"),
     # chemistry-paper tables
     ("rl_v3_vs_heuristic_chem_papers", "heuristic_chem_papers", "rl_v3_chem_papers"),
+    # third GPU session (2026-11-15). Second RL experiment: whole prompts, natural question mix, owner's reward and loss
+    ("grpo2_vs_rlstart2_ko_test", "exaone_rlstart2_vllm_ko_test", "exaone_grpo2_vllm_ko_test"),
+    ("grpo2_vs_rlstart2_ko_test_ec", "exaone_rlstart2_vllm_ko_test_ec", "exaone_grpo2_vllm_ko_test_ec"),
+    ("grpo2_vs_rlstart2_ko_custom", "exaone_rlstart2_vllm_ko_custom", "exaone_grpo2_vllm_ko_custom"),
+    ("grpo2_vs_rlstart2_ko_custom_ec", "exaone_rlstart2_vllm_ko_custom_ec", "exaone_grpo2_vllm_ko_custom_ec"),
+    ("subject_check_on_grpo2_ko_test", "exaone_grpo2_vllm_ko_test", "exaone_grpo2_vllm_ko_test_ec"),
+    ("subject_check_on_rlstart2_ko_test", "exaone_rlstart2_vllm_ko_test", "exaone_rlstart2_vllm_ko_test_ec"),
+    # the 300-example start model trained with whole targets against the earlier 300-example model (targets cut): two sessions apart
+    ("rlstart2_vs_plain300_ko_test", "exaone_vllm_ko_test", "exaone_rlstart2_vllm_ko_test"),
+    ("rlstart2_vs_plain300_ko_test_ec", "exaone_vllm_ko_test_ec", "exaone_rlstart2_vllm_ko_test_ec"),
+    ("full_vs_grpo2_ko_test_ec", "exaone_grpo2_vllm_ko_test_ec", "exaone_full_vllm_ko_test_ec"),
+    # untuned EXAONE of two sizes, same prompt and verifier
+    ("ref_7p8b_vs_ref_1p2b_ko_test", "ref_1p2b_ko_test", "ref_7p8b_awq_ko_test"),
+    ("ref_7p8b_vs_ref_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "ref_7p8b_awq_ko_test_ec"),
+    ("tuned_1p2b_vs_ref_7p8b_ko_test_ec", "ref_7p8b_awq_ko_test_ec", "exaone_full_vllm_ko_test_ec"),
+    ("tuned_300_vs_ref_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "exaone_rlstart2_vllm_ko_test_ec"),
+    ("tuned_300_vs_ref_7p8b_ko_test", "ref_7p8b_awq_ko_test", "exaone_rlstart2_vllm_ko_test"),
+    ("tuned_300_vs_ref_7p8b_ko_test_ec", "ref_7p8b_awq_ko_test_ec", "exaone_rlstart2_vllm_ko_test_ec"),
+    # untuned 1.2B: the model picks tools itself against one program proposal, same model
+    ("tools_vs_program_1p2b_ko_test", "ref_1p2b_ko_test", "tools_1p2b_ko_test"),
+    ("tools_vs_program_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "tools_1p2b_ko_test_ec"),
 ]
 
 

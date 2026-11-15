@@ -318,6 +318,1262 @@
     "risk": 0.6008,
     "signal": "sum_logprob"
    }
+  },
+  "exaone_rlstart2_vllm_ko_test": {
+   "run": "exaone_rlstart2_vllm_ko_test",
+   "questions": 699,
+   "with_confidence": 699,
+   "unanswerable": 50,
+   "curves": {
+    "model/mean_logprob": {
+     "system": "model",
+     "signal": "mean_logprob",
+     "no_threshold": {
+      "coverage": 0.9986,
+      "risk": 0.4499,
+      "answers": 698,
+      "wrong": 314,
+      "risk_ci": {
+       "k": 314,
+       "n": 698,
+       "rate": 0.4499,
+       "lo": 0.4133,
+       "hi": 0.4869
+      }
+     },
+     "aurc": 0.295,
+     "auroc_right_vs_wrong": 0.6997,
+     "risk_at_coverage_pct": {
+      "10": 0.1857,
+      "20": 0.2,
+      "30": 0.2381,
+      "40": 0.2571,
+      "50": 0.2886,
+      "60": 0.3317,
+      "70": 0.362,
+      "80": 0.3953,
+      "90": 0.4293
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0358,
+       "risk": 0.04,
+       "answers": 25,
+       "threshold": -0.0321
+      },
+      "10": {
+       "coverage": 0.0429,
+       "risk": 0.1,
+       "answers": 30,
+       "threshold": -0.0334
+      },
+      "30": {
+       "coverage": 0.5365,
+       "risk": 0.2987,
+       "answers": 375,
+       "threshold": -0.0778
+      }
+     }
+    },
+    "model/min_logprob": {
+     "system": "model",
+     "signal": "min_logprob",
+     "no_threshold": {
+      "coverage": 0.9986,
+      "risk": 0.4499,
+      "answers": 698,
+      "wrong": 314,
+      "risk_ci": {
+       "k": 314,
+       "n": 698,
+       "rate": 0.4499,
+       "lo": 0.4133,
+       "hi": 0.4869
+      }
+     },
+     "aurc": 0.3888,
+     "auroc_right_vs_wrong": 0.5992,
+     "risk_at_coverage_pct": {
+      "10": 0.4143,
+      "20": 0.3571,
+      "30": 0.3571,
+      "40": 0.3571,
+      "50": 0.3771,
+      "60": 0.3962,
+      "70": 0.3947,
+      "80": 0.4061,
+      "90": 0.4388
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      }
+     }
+    },
+    "model/sum_logprob": {
+     "system": "model",
+     "signal": "sum_logprob",
+     "no_threshold": {
+      "coverage": 0.9986,
+      "risk": 0.4499,
+      "answers": 698,
+      "wrong": 314,
+      "risk_ci": {
+       "k": 314,
+       "n": 698,
+       "rate": 0.4499,
+       "lo": 0.4133,
+       "hi": 0.4869
+      }
+     },
+     "aurc": 0.2852,
+     "auroc_right_vs_wrong": 0.7192,
+     "risk_at_coverage_pct": {
+      "10": 0.1286,
+      "20": 0.1643,
+      "30": 0.2,
+      "40": 0.2429,
+      "50": 0.2943,
+      "60": 0.315,
+      "70": 0.3497,
+      "80": 0.3953,
+      "90": 0.4277
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.5508,
+       "risk": 0.2987,
+       "answers": 385,
+       "threshold": -1.5589
+      }
+     }
+    },
+    "verifier/mean_logprob": {
+     "system": "verifier",
+     "signal": "mean_logprob",
+     "no_threshold": {
+      "coverage": 0.8684,
+      "risk": 0.3822,
+      "answers": 607,
+      "wrong": 232,
+      "risk_ci": {
+       "k": 232,
+       "n": 607,
+       "rate": 0.3822,
+       "lo": 0.3444,
+       "hi": 0.4215
+      }
+     },
+     "aurc": 0.2483,
+     "auroc_right_vs_wrong": 0.6812,
+     "risk_at_coverage_pct": {
+      "10": 0.1714,
+      "20": 0.1786,
+      "30": 0.2048,
+      "40": 0.2179,
+      "50": 0.26,
+      "60": 0.3103,
+      "70": 0.3415,
+      "80": 0.3721,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0343,
+       "risk": 0.0417,
+       "answers": 24,
+       "threshold": -0.0321
+      },
+      "10": {
+       "coverage": 0.0515,
+       "risk": 0.0833,
+       "answers": 36,
+       "threshold": -0.0352
+      },
+      "30": {
+       "coverage": 0.5651,
+       "risk": 0.2987,
+       "answers": 395,
+       "threshold": -0.0869
+      }
+     }
+    },
+    "verifier/min_logprob": {
+     "system": "verifier",
+     "signal": "min_logprob",
+     "no_threshold": {
+      "coverage": 0.8684,
+      "risk": 0.3822,
+      "answers": 607,
+      "wrong": 232,
+      "risk_ci": {
+       "k": 232,
+       "n": 607,
+       "rate": 0.3822,
+       "lo": 0.3444,
+       "hi": 0.4215
+      }
+     },
+     "aurc": 0.3242,
+     "auroc_right_vs_wrong": 0.6011,
+     "risk_at_coverage_pct": {
+      "10": 0.3429,
+      "20": 0.2786,
+      "30": 0.281,
+      "40": 0.3,
+      "50": 0.32,
+      "60": 0.3365,
+      "70": 0.3374,
+      "80": 0.381,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.402,
+       "risk": 0.2989,
+       "answers": 281,
+       "threshold": -0.9323
+      }
+     }
+    },
+    "verifier/sum_logprob": {
+     "system": "verifier",
+     "signal": "sum_logprob",
+     "no_threshold": {
+      "coverage": 0.8684,
+      "risk": 0.3822,
+      "answers": 607,
+      "wrong": 232,
+      "risk_ci": {
+       "k": 232,
+       "n": 607,
+       "rate": 0.3822,
+       "lo": 0.3444,
+       "hi": 0.4215
+      }
+     },
+     "aurc": 0.2394,
+     "auroc_right_vs_wrong": 0.703,
+     "risk_at_coverage_pct": {
+      "10": 0.1143,
+      "20": 0.1429,
+      "30": 0.1762,
+      "40": 0.2143,
+      "50": 0.2571,
+      "60": 0.2888,
+      "70": 0.3354,
+      "80": 0.3703,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.6309,
+       "risk": 0.2993,
+       "answers": 441,
+       "threshold": -1.925
+      }
+     }
+    }
+   },
+   "best_signal_for_verifier": "sum_logprob",
+   "model_at_verifier_coverage": {
+    "answers": 607,
+    "risk": 0.4201,
+    "signal": "sum_logprob"
+   }
+  },
+  "exaone_grpo2_vllm_ko_test": {
+   "run": "exaone_grpo2_vllm_ko_test",
+   "questions": 699,
+   "with_confidence": 699,
+   "unanswerable": 50,
+   "curves": {
+    "model/mean_logprob": {
+     "system": "model",
+     "signal": "mean_logprob",
+     "no_threshold": {
+      "coverage": 0.9986,
+      "risk": 0.4083,
+      "answers": 698,
+      "wrong": 285,
+      "risk_ci": {
+       "k": 285,
+       "n": 698,
+       "rate": 0.4083,
+       "lo": 0.3724,
+       "hi": 0.4452
+      }
+     },
+     "aurc": 0.221,
+     "auroc_right_vs_wrong": 0.7508,
+     "risk_at_coverage_pct": {
+      "10": 0.0571,
+      "20": 0.1143,
+      "30": 0.1524,
+      "40": 0.1964,
+      "50": 0.2,
+      "60": 0.253,
+      "70": 0.3027,
+      "80": 0.347,
+      "90": 0.38
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0944,
+       "risk": 0.0455,
+       "answers": 66,
+       "threshold": -0.0035
+      },
+      "10": {
+       "coverage": 0.1459,
+       "risk": 0.098,
+       "answers": 102,
+       "threshold": -0.0063
+      },
+      "30": {
+       "coverage": 0.6967,
+       "risk": 0.2998,
+       "answers": 487,
+       "threshold": -0.0729
+      }
+     }
+    },
+    "model/min_logprob": {
+     "system": "model",
+     "signal": "min_logprob",
+     "no_threshold": {
+      "coverage": 0.9986,
+      "risk": 0.4083,
+      "answers": 698,
+      "wrong": 285,
+      "risk_ci": {
+       "k": 285,
+       "n": 698,
+       "rate": 0.4083,
+       "lo": 0.3724,
+       "hi": 0.4452
+      }
+     },
+     "aurc": 0.2327,
+     "auroc_right_vs_wrong": 0.7354,
+     "risk_at_coverage_pct": {
+      "10": 0.1143,
+      "20": 0.1286,
+      "30": 0.1667,
+      "40": 0.1821,
+      "50": 0.2257,
+      "60": 0.2673,
+      "70": 0.3027,
+      "80": 0.347,
+      "90": 0.3911
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0601,
+       "risk": 0.0476,
+       "answers": 42,
+       "threshold": -0.027
+      },
+      "10": {
+       "coverage": 0.0773,
+       "risk": 0.0926,
+       "answers": 54,
+       "threshold": -0.0341
+      },
+      "30": {
+       "coverage": 0.6938,
+       "risk": 0.299,
+       "answers": 485,
+       "threshold": -0.7451
+      }
+     }
+    },
+    "model/sum_logprob": {
+     "system": "model",
+     "signal": "sum_logprob",
+     "no_threshold": {
+      "coverage": 0.9986,
+      "risk": 0.4083,
+      "answers": 698,
+      "wrong": 285,
+      "risk_ci": {
+       "k": 285,
+       "n": 698,
+       "rate": 0.4083,
+       "lo": 0.3724,
+       "hi": 0.4452
+      }
+     },
+     "aurc": 0.2092,
+     "auroc_right_vs_wrong": 0.7825,
+     "risk_at_coverage_pct": {
+      "10": 0.0857,
+      "20": 0.1143,
+      "30": 0.1429,
+      "40": 0.1536,
+      "50": 0.1943,
+      "60": 0.2363,
+      "70": 0.2822,
+      "80": 0.3238,
+      "90": 0.372
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0701,
+       "risk": 0.0408,
+       "answers": 49,
+       "threshold": -0.0562
+      },
+      "10": {
+       "coverage": 0.1745,
+       "risk": 0.0984,
+       "answers": 122,
+       "threshold": -0.1742
+      },
+      "30": {
+       "coverage": 0.7396,
+       "risk": 0.2998,
+       "answers": 517,
+       "threshold": -1.6618
+      }
+     }
+    },
+    "verifier/mean_logprob": {
+     "system": "verifier",
+     "signal": "mean_logprob",
+     "no_threshold": {
+      "coverage": 0.7754,
+      "risk": 0.2546,
+      "answers": 542,
+      "wrong": 138,
+      "risk_ci": {
+       "k": 138,
+       "n": 542,
+       "rate": 0.2546,
+       "lo": 0.2198,
+       "hi": 0.2929
+      }
+     },
+     "aurc": 0.1417,
+     "auroc_right_vs_wrong": 0.6901,
+     "risk_at_coverage_pct": {
+      "10": 0.0571,
+      "20": 0.0929,
+      "30": 0.1286,
+      "40": 0.15,
+      "50": 0.1629,
+      "60": 0.1981,
+      "70": 0.2454,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0987,
+       "risk": 0.0435,
+       "answers": 69,
+       "threshold": -0.0038
+      },
+      "10": {
+       "coverage": 0.2046,
+       "risk": 0.0979,
+       "answers": 143,
+       "threshold": -0.012
+      },
+      "30": {
+       "coverage": 0.7754,
+       "risk": 0.2546,
+       "answers": 542,
+       "threshold": -0.2793
+      }
+     }
+    },
+    "verifier/min_logprob": {
+     "system": "verifier",
+     "signal": "min_logprob",
+     "no_threshold": {
+      "coverage": 0.7754,
+      "risk": 0.2546,
+      "answers": 542,
+      "wrong": 138,
+      "risk_ci": {
+       "k": 138,
+       "n": 542,
+       "rate": 0.2546,
+       "lo": 0.2198,
+       "hi": 0.2929
+      }
+     },
+     "aurc": 0.1523,
+     "auroc_right_vs_wrong": 0.6718,
+     "risk_at_coverage_pct": {
+      "10": 0.0857,
+      "20": 0.1143,
+      "30": 0.1381,
+      "40": 0.1571,
+      "50": 0.18,
+      "60": 0.2005,
+      "70": 0.2474,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0687,
+       "risk": 0.0417,
+       "answers": 48,
+       "threshold": -0.0318
+      },
+      "10": {
+       "coverage": 0.1731,
+       "risk": 0.0992,
+       "answers": 121,
+       "threshold": -0.1169
+      },
+      "30": {
+       "coverage": 0.7754,
+       "risk": 0.2546,
+       "answers": 542,
+       "threshold": -4.3624
+      }
+     }
+    },
+    "verifier/sum_logprob": {
+     "system": "verifier",
+     "signal": "sum_logprob",
+     "no_threshold": {
+      "coverage": 0.7754,
+      "risk": 0.2546,
+      "answers": 542,
+      "wrong": 138,
+      "risk_ci": {
+       "k": 138,
+       "n": 542,
+       "rate": 0.2546,
+       "lo": 0.2198,
+       "hi": 0.2929
+      }
+     },
+     "aurc": 0.1391,
+     "auroc_right_vs_wrong": 0.7007,
+     "risk_at_coverage_pct": {
+      "10": 0.0714,
+      "20": 0.1,
+      "30": 0.119,
+      "40": 0.1393,
+      "50": 0.16,
+      "60": 0.1981,
+      "70": 0.2454,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0787,
+       "risk": 0.0364,
+       "answers": 55,
+       "threshold": -0.0641
+      },
+      "10": {
+       "coverage": 0.2332,
+       "risk": 0.0982,
+       "answers": 163,
+       "threshold": -0.2965
+      },
+      "30": {
+       "coverage": 0.7754,
+       "risk": 0.2546,
+       "answers": 542,
+       "threshold": -6.2252
+      }
+     }
+    }
+   },
+   "best_signal_for_verifier": "sum_logprob",
+   "model_at_verifier_coverage": {
+    "answers": 542,
+    "risk": 0.3173,
+    "signal": "sum_logprob"
+   }
+  },
+  "ref_1p2b_ko_test": {
+   "run": "ref_1p2b_ko_test",
+   "questions": 699,
+   "with_confidence": 699,
+   "unanswerable": 50,
+   "curves": {
+    "model/mean_logprob": {
+     "system": "model",
+     "signal": "mean_logprob",
+     "no_threshold": {
+      "coverage": 0.8898,
+      "risk": 0.6961,
+      "answers": 622,
+      "wrong": 433,
+      "risk_ci": {
+       "k": 433,
+       "n": 622,
+       "rate": 0.6961,
+       "lo": 0.6589,
+       "hi": 0.731
+      }
+     },
+     "aurc": 0.5543,
+     "auroc_right_vs_wrong": 0.7086,
+     "risk_at_coverage_pct": {
+      "10": 0.4286,
+      "20": 0.4429,
+      "30": 0.5333,
+      "40": 0.5571,
+      "50": 0.58,
+      "60": 0.6086,
+      "70": 0.6421,
+      "80": 0.6744,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.0429,
+       "risk": 0.3,
+       "answers": 30,
+       "threshold": -0.0311
+      }
+     }
+    },
+    "model/min_logprob": {
+     "system": "model",
+     "signal": "min_logprob",
+     "no_threshold": {
+      "coverage": 0.8898,
+      "risk": 0.6961,
+      "answers": 622,
+      "wrong": 433,
+      "risk_ci": {
+       "k": 433,
+       "n": 622,
+       "rate": 0.6961,
+       "lo": 0.6589,
+       "hi": 0.731
+      }
+     },
+     "aurc": 0.5834,
+     "auroc_right_vs_wrong": 0.6805,
+     "risk_at_coverage_pct": {
+      "10": 0.4714,
+      "20": 0.5286,
+      "30": 0.5571,
+      "40": 0.5786,
+      "50": 0.6,
+      "60": 0.6134,
+      "70": 0.6421,
+      "80": 0.6798,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      }
+     }
+    },
+    "model/sum_logprob": {
+     "system": "model",
+     "signal": "sum_logprob",
+     "no_threshold": {
+      "coverage": 0.8898,
+      "risk": 0.6961,
+      "answers": 622,
+      "wrong": 433,
+      "risk_ci": {
+       "k": 433,
+       "n": 622,
+       "rate": 0.6961,
+       "lo": 0.6589,
+       "hi": 0.731
+      }
+     },
+     "aurc": 0.5481,
+     "auroc_right_vs_wrong": 0.7369,
+     "risk_at_coverage_pct": {
+      "10": 0.3714,
+      "20": 0.4786,
+      "30": 0.5333,
+      "40": 0.5393,
+      "50": 0.56,
+      "60": 0.5943,
+      "70": 0.6278,
+      "80": 0.6619,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      }
+     }
+    },
+    "verifier/mean_logprob": {
+     "system": "verifier",
+     "signal": "mean_logprob",
+     "no_threshold": {
+      "coverage": 0.4635,
+      "risk": 0.5309,
+      "answers": 324,
+      "wrong": 172,
+      "risk_ci": {
+       "k": 172,
+       "n": 324,
+       "rate": 0.5309,
+       "lo": 0.4765,
+       "hi": 0.5845
+      }
+     },
+     "aurc": 0.4094,
+     "auroc_right_vs_wrong": 0.6639,
+     "risk_at_coverage_pct": {
+      "10": 0.2857,
+      "20": 0.4071,
+      "30": 0.4524,
+      "40": 0.5,
+      "50": null,
+      "60": null,
+      "70": null,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.1144,
+       "risk": 0.3,
+       "answers": 80,
+       "threshold": -0.0558
+      }
+     }
+    },
+    "verifier/min_logprob": {
+     "system": "verifier",
+     "signal": "min_logprob",
+     "no_threshold": {
+      "coverage": 0.4635,
+      "risk": 0.5309,
+      "answers": 324,
+      "wrong": 172,
+      "risk_ci": {
+       "k": 172,
+       "n": 324,
+       "rate": 0.5309,
+       "lo": 0.4765,
+       "hi": 0.5845
+      }
+     },
+     "aurc": 0.453,
+     "auroc_right_vs_wrong": 0.6166,
+     "risk_at_coverage_pct": {
+      "10": 0.3714,
+      "20": 0.4857,
+      "30": 0.4619,
+      "40": 0.4964,
+      "50": null,
+      "60": null,
+      "70": null,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.0386,
+       "risk": 0.2963,
+       "answers": 27,
+       "threshold": -0.3524
+      }
+     }
+    },
+    "verifier/sum_logprob": {
+     "system": "verifier",
+     "signal": "sum_logprob",
+     "no_threshold": {
+      "coverage": 0.4635,
+      "risk": 0.5309,
+      "answers": 324,
+      "wrong": 172,
+      "risk_ci": {
+       "k": 172,
+       "n": 324,
+       "rate": 0.5309,
+       "lo": 0.4765,
+       "hi": 0.5845
+      }
+     },
+     "aurc": 0.4051,
+     "auroc_right_vs_wrong": 0.6841,
+     "risk_at_coverage_pct": {
+      "10": 0.3,
+      "20": 0.4143,
+      "30": 0.4381,
+      "40": 0.4786,
+      "50": null,
+      "60": null,
+      "70": null,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "30": {
+       "coverage": 0.1016,
+       "risk": 0.2958,
+       "answers": 71,
+       "threshold": -1.1168
+      }
+     }
+    }
+   },
+   "best_signal_for_verifier": "sum_logprob",
+   "model_at_verifier_coverage": {
+    "answers": 324,
+    "risk": 0.5525,
+    "signal": "sum_logprob"
+   }
+  },
+  "ref_7p8b_awq_ko_test": {
+   "run": "ref_7p8b_awq_ko_test",
+   "questions": 699,
+   "with_confidence": 699,
+   "unanswerable": 50,
+   "curves": {
+    "model/mean_logprob": {
+     "system": "model",
+     "signal": "mean_logprob",
+     "no_threshold": {
+      "coverage": 0.8097,
+      "risk": 0.4276,
+      "answers": 566,
+      "wrong": 242,
+      "risk_ci": {
+       "k": 242,
+       "n": 566,
+       "rate": 0.4276,
+       "lo": 0.3874,
+       "hi": 0.4687
+      }
+     },
+     "aurc": 0.2574,
+     "auroc_right_vs_wrong": 0.7231,
+     "risk_at_coverage_pct": {
+      "10": 0.0857,
+      "20": 0.1571,
+      "30": 0.2095,
+      "40": 0.2571,
+      "50": 0.3029,
+      "60": 0.3532,
+      "70": 0.3967,
+      "80": 0.4275,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.1302,
+       "risk": 0.0989,
+       "answers": 91,
+       "threshold": -0.0092
+      },
+      "30": {
+       "coverage": 0.4893,
+       "risk": 0.2982,
+       "answers": 342,
+       "threshold": -0.0967
+      }
+     }
+    },
+    "model/min_logprob": {
+     "system": "model",
+     "signal": "min_logprob",
+     "no_threshold": {
+      "coverage": 0.8097,
+      "risk": 0.4276,
+      "answers": 566,
+      "wrong": 242,
+      "risk_ci": {
+       "k": 242,
+       "n": 566,
+       "rate": 0.4276,
+       "lo": 0.3874,
+       "hi": 0.4687
+      }
+     },
+     "aurc": 0.2713,
+     "auroc_right_vs_wrong": 0.687,
+     "risk_at_coverage_pct": {
+      "10": 0.1,
+      "20": 0.1571,
+      "30": 0.2286,
+      "40": 0.2643,
+      "50": 0.34,
+      "60": 0.3771,
+      "70": 0.4151,
+      "80": 0.4258,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.1059,
+       "risk": 0.0946,
+       "answers": 74,
+       "threshold": -0.0938
+      },
+      "30": {
+       "coverage": 0.4464,
+       "risk": 0.2981,
+       "answers": 312,
+       "threshold": -0.8978
+      }
+     }
+    },
+    "model/sum_logprob": {
+     "system": "model",
+     "signal": "sum_logprob",
+     "no_threshold": {
+      "coverage": 0.8097,
+      "risk": 0.4276,
+      "answers": 566,
+      "wrong": 242,
+      "risk_ci": {
+       "k": 242,
+       "n": 566,
+       "rate": 0.4276,
+       "lo": 0.3874,
+       "hi": 0.4687
+      }
+     },
+     "aurc": 0.2537,
+     "auroc_right_vs_wrong": 0.7338,
+     "risk_at_coverage_pct": {
+      "10": 0.0857,
+      "20": 0.1714,
+      "30": 0.2048,
+      "40": 0.2464,
+      "50": 0.3029,
+      "60": 0.3461,
+      "70": 0.3885,
+      "80": 0.4275,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.1102,
+       "risk": 0.0909,
+       "answers": 77,
+       "threshold": -0.1594
+      },
+      "30": {
+       "coverage": 0.4979,
+       "risk": 0.2989,
+       "answers": 348,
+       "threshold": -3.861
+      }
+     }
+    },
+    "verifier/mean_logprob": {
+     "system": "verifier",
+     "signal": "mean_logprob",
+     "no_threshold": {
+      "coverage": 0.5808,
+      "risk": 0.2389,
+      "answers": 406,
+      "wrong": 97,
+      "risk_ci": {
+       "k": 97,
+       "n": 406,
+       "rate": 0.2389,
+       "lo": 0.2,
+       "hi": 0.2827
+      }
+     },
+     "aurc": 0.1328,
+     "auroc_right_vs_wrong": 0.7042,
+     "risk_at_coverage_pct": {
+      "10": 0.0571,
+      "20": 0.1,
+      "30": 0.1143,
+      "40": 0.1607,
+      "50": 0.2086,
+      "60": null,
+      "70": null,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.2489,
+       "risk": 0.0977,
+       "answers": 174,
+       "threshold": -0.0312
+      },
+      "30": {
+       "coverage": 0.5808,
+       "risk": 0.2389,
+       "answers": 406,
+       "threshold": -0.4466
+      }
+     }
+    },
+    "verifier/min_logprob": {
+     "system": "verifier",
+     "signal": "min_logprob",
+     "no_threshold": {
+      "coverage": 0.5808,
+      "risk": 0.2389,
+      "answers": 406,
+      "wrong": 97,
+      "risk_ci": {
+       "k": 97,
+       "n": 406,
+       "rate": 0.2389,
+       "lo": 0.2,
+       "hi": 0.2827
+      }
+     },
+     "aurc": 0.1418,
+     "auroc_right_vs_wrong": 0.6776,
+     "risk_at_coverage_pct": {
+      "10": 0.0714,
+      "20": 0.1214,
+      "30": 0.1286,
+      "40": 0.1786,
+      "50": 0.2257,
+      "60": null,
+      "70": null,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0,
+       "risk": null,
+       "answers": 0,
+       "threshold": null
+      },
+      "10": {
+       "coverage": 0.1903,
+       "risk": 0.0977,
+       "answers": 133,
+       "threshold": -0.2549
+      },
+      "30": {
+       "coverage": 0.5808,
+       "risk": 0.2389,
+       "answers": 406,
+       "threshold": -2.5796
+      }
+     }
+    },
+    "verifier/sum_logprob": {
+     "system": "verifier",
+     "signal": "sum_logprob",
+     "no_threshold": {
+      "coverage": 0.5808,
+      "risk": 0.2389,
+      "answers": 406,
+      "wrong": 97,
+      "risk_ci": {
+       "k": 97,
+       "n": 406,
+       "rate": 0.2389,
+       "lo": 0.2,
+       "hi": 0.2827
+      }
+     },
+     "aurc": 0.1301,
+     "auroc_right_vs_wrong": 0.7141,
+     "risk_at_coverage_pct": {
+      "10": 0.0571,
+      "20": 0.1143,
+      "30": 0.1286,
+      "40": 0.1643,
+      "50": 0.1971,
+      "60": null,
+      "70": null,
+      "80": null,
+      "90": null
+     },
+     "max_coverage_with_risk_under_pct": {
+      "5": {
+       "coverage": 0.0873,
+       "risk": 0.0492,
+       "answers": 61,
+       "threshold": -0.1281
+      },
+      "10": {
+       "coverage": 0.2346,
+       "risk": 0.0976,
+       "answers": 164,
+       "threshold": -0.5471
+      },
+      "30": {
+       "coverage": 0.5808,
+       "risk": 0.2389,
+       "answers": 406,
+       "threshold": -28.5858
+      }
+     }
+    }
+   },
+   "best_signal_for_verifier": "sum_logprob",
+   "model_at_verifier_coverage": {
+    "answers": 406,
+    "risk": 0.3399,
+    "signal": "sum_logprob"
+   }
   }
  }
 }

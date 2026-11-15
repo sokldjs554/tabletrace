@@ -365,6 +365,211 @@
    }
   }
  },
+ "exaone_base_fewshot_cpu_ko_custom": {
+  "lookup_questions": 13,
+  "correct_lookup_answers": 5,
+  "correct_answer_by_other_op": 1,
+  "cited_gold": 1,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 4,
+  "loose": {
+   "k": 4,
+   "n": 5,
+   "rate": 0.8,
+   "lo": 0.3755,
+   "hi": 0.9638
+  },
+  "strict": {
+   "k": 4,
+   "n": 5,
+   "rate": 0.8,
+   "lo": 0.3755,
+   "hi": 0.9638
+  },
+  "strict_where": {
+   "other_row_and_column": 1,
+   "same_row": 3
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 1,
+   "answered_without_repair": 0,
+   "withheld": 3
+  },
+  "raw": {
+   "n": 30,
+   "answered": 22,
+   "coverage": 0.7333,
+   "answered_correct": 8,
+   "answered_wrong": 14,
+   "accuracy_when_answered": {
+    "k": 8,
+    "n": 22,
+    "rate": 0.3636,
+    "lo": 0.1973,
+    "hi": 0.5705
+   },
+   "wrong_answer_rate": {
+    "k": 14,
+    "n": 30,
+    "rate": 0.4667,
+    "lo": 0.3023,
+    "hi": 0.6386
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 10,
+   "coverage": 0.3333,
+   "answered_correct": 3,
+   "answered_wrong": 7,
+   "accuracy_when_answered": {
+    "k": 3,
+    "n": 10,
+    "rate": 0.3,
+    "lo": 0.1078,
+    "hi": 0.6032
+   },
+   "wrong_answer_rate": {
+    "k": 7,
+    "n": 30,
+    "rate": 0.2333,
+    "lo": 0.1179,
+    "hi": 0.4093
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 8,
+   "coverage": 0.2667,
+   "answered_correct": 2,
+   "answered_wrong": 6,
+   "accuracy_when_answered": {
+    "k": 2,
+    "n": 8,
+    "rate": 0.25,
+    "lo": 0.0715,
+    "hi": 0.5907
+   },
+   "wrong_answer_rate": {
+    "k": 6,
+    "n": 30,
+    "rate": 0.2,
+    "lo": 0.0951,
+    "hi": 0.3731
+   }
+  },
+  "verified_em": 0.2,
+  "verified_em_no_repair": 0.1667,
+  "repaired_answers": 2,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 5
+  }
+ },
+ "exaone_base_tools_cpu_ko_custom": {
+  "lookup_questions": 13,
+  "correct_lookup_answers": 0,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 0,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 0,
+  "loose": {
+   "k": 0,
+   "n": 0,
+   "rate": null,
+   "lo": null,
+   "hi": null
+  },
+  "strict": {
+   "k": 0,
+   "n": 0,
+   "rate": null,
+   "lo": null,
+   "hi": null
+  },
+  "strict_where": {},
+  "verifier_on_strict": {
+   "repaired_and_answered": 0,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 30,
+   "answered": 4,
+   "coverage": 0.1333,
+   "answered_correct": 0,
+   "answered_wrong": 4,
+   "accuracy_when_answered": {
+    "k": 0,
+    "n": 4,
+    "rate": 0.0,
+    "lo": 0.0,
+    "hi": 0.4899
+   },
+   "wrong_answer_rate": {
+    "k": 4,
+    "n": 30,
+    "rate": 0.1333,
+    "lo": 0.0531,
+    "hi": 0.2968
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 1,
+   "coverage": 0.0333,
+   "answered_correct": 0,
+   "answered_wrong": 1,
+   "accuracy_when_answered": {
+    "k": 0,
+    "n": 1,
+    "rate": 0.0,
+    "lo": 0.0,
+    "hi": 0.7935
+   },
+   "wrong_answer_rate": {
+    "k": 1,
+    "n": 30,
+    "rate": 0.0333,
+    "lo": 0.0059,
+    "hi": 0.1667
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 1,
+   "coverage": 0.0333,
+   "answered_correct": 0,
+   "answered_wrong": 1,
+   "accuracy_when_answered": {
+    "k": 0,
+    "n": 1,
+    "rate": 0.0,
+    "lo": 0.0,
+    "hi": 0.7935
+   },
+   "wrong_answer_rate": {
+    "k": 1,
+    "n": 30,
+    "rate": 0.0333,
+    "lo": 0.0059,
+    "hi": 0.1667
+   }
+  },
+  "verified_em": 0.1667,
+  "verified_em_no_repair": 0.1667,
+  "repaired_answers": 0,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 0
+  }
+ },
  "exaone_colid_vllm_ko_custom": {
   "lookup_questions": 13,
   "correct_lookup_answers": 13,
@@ -1839,6 +2044,505 @@
     "rate": 0.1202,
     "lo": 0.0981,
     "hi": 0.1464
+   }
+  }
+ },
+ "exaone_grpo2_vllm_ko_custom": {
+  "lookup_questions": 13,
+  "correct_lookup_answers": 13,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 9,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 4,
+  "loose": {
+   "k": 4,
+   "n": 13,
+   "rate": 0.3077,
+   "lo": 0.1268,
+   "hi": 0.5763
+  },
+  "strict": {
+   "k": 4,
+   "n": 13,
+   "rate": 0.3077,
+   "lo": 0.1268,
+   "hi": 0.5763
+  },
+  "strict_where": {
+   "same_row": 4
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 4,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 30,
+   "answered": 30,
+   "coverage": 1.0,
+   "answered_correct": 15,
+   "answered_wrong": 15,
+   "accuracy_when_answered": {
+    "k": 15,
+    "n": 30,
+    "rate": 0.5,
+    "lo": 0.3315,
+    "hi": 0.6685
+   },
+   "wrong_answer_rate": {
+    "k": 15,
+    "n": 30,
+    "rate": 0.5,
+    "lo": 0.3315,
+    "hi": 0.6685
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 20,
+   "coverage": 0.6667,
+   "answered_correct": 13,
+   "answered_wrong": 7,
+   "accuracy_when_answered": {
+    "k": 13,
+    "n": 20,
+    "rate": 0.65,
+    "lo": 0.4329,
+    "hi": 0.8188
+   },
+   "wrong_answer_rate": {
+    "k": 7,
+    "n": 30,
+    "rate": 0.2333,
+    "lo": 0.1179,
+    "hi": 0.4093
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 12,
+   "coverage": 0.4,
+   "answered_correct": 9,
+   "answered_wrong": 3,
+   "accuracy_when_answered": {
+    "k": 9,
+    "n": 12,
+    "rate": 0.75,
+    "lo": 0.4677,
+    "hi": 0.9111
+   },
+   "wrong_answer_rate": {
+    "k": 3,
+    "n": 30,
+    "rate": 0.1,
+    "lo": 0.0346,
+    "hi": 0.2562
+   }
+  },
+  "verified_em": 0.4333,
+  "verified_em_no_repair": 0.4,
+  "repaired_answers": 8,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 2
+  },
+  "verifier_subject_check": {
+   "n": 30,
+   "answered": 19,
+   "coverage": 0.6333,
+   "answered_correct": 13,
+   "answered_wrong": 6,
+   "accuracy_when_answered": {
+    "k": 13,
+    "n": 19,
+    "rate": 0.6842,
+    "lo": 0.4601,
+    "hi": 0.8464
+   },
+   "wrong_answer_rate": {
+    "k": 6,
+    "n": 30,
+    "rate": 0.2,
+    "lo": 0.0951,
+    "hi": 0.3731
+   }
+  }
+ },
+ "exaone_grpo2_vllm_ko_test": {
+  "lookup_questions": 539,
+  "correct_lookup_answers": 403,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 255,
+  "same_value_elsewhere": 1,
+  "no_answer_in_cell": 147,
+  "loose": {
+   "k": 148,
+   "n": 403,
+   "rate": 0.3672,
+   "lo": 0.3216,
+   "hi": 0.4154
+  },
+  "strict": {
+   "k": 147,
+   "n": 403,
+   "rate": 0.3648,
+   "lo": 0.3192,
+   "hi": 0.4128
+  },
+  "strict_where": {
+   "other_row_and_column": 1,
+   "same_column": 4,
+   "same_row": 142
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 140,
+   "answered_without_repair": 0,
+   "withheld": 7
+  },
+  "raw": {
+   "n": 699,
+   "answered": 698,
+   "coverage": 0.9986,
+   "answered_correct": 413,
+   "answered_wrong": 285,
+   "accuracy_when_answered": {
+    "k": 413,
+    "n": 698,
+    "rate": 0.5917,
+    "lo": 0.5548,
+    "hi": 0.6276
+   },
+   "wrong_answer_rate": {
+    "k": 285,
+    "n": 699,
+    "rate": 0.4077,
+    "lo": 0.3719,
+    "hi": 0.4446
+   }
+  },
+  "verifier": {
+   "n": 699,
+   "answered": 542,
+   "coverage": 0.7754,
+   "answered_correct": 404,
+   "answered_wrong": 138,
+   "accuracy_when_answered": {
+    "k": 404,
+    "n": 542,
+    "rate": 0.7454,
+    "lo": 0.7071,
+    "hi": 0.7802
+   },
+   "wrong_answer_rate": {
+    "k": 138,
+    "n": 699,
+    "rate": 0.1974,
+    "lo": 0.1696,
+    "hi": 0.2286
+   }
+  },
+  "verifier_no_repair": {
+   "n": 699,
+   "answered": 324,
+   "coverage": 0.4635,
+   "answered_correct": 263,
+   "answered_wrong": 61,
+   "accuracy_when_answered": {
+    "k": 263,
+    "n": 324,
+    "rate": 0.8117,
+    "lo": 0.7656,
+    "hi": 0.8505
+   },
+   "wrong_answer_rate": {
+    "k": 61,
+    "n": 699,
+    "rate": 0.0873,
+    "lo": 0.0685,
+    "hi": 0.1105
+   }
+  },
+  "verified_em": 0.5937,
+  "verified_em_no_repair": 0.4192,
+  "repaired_answers": 218,
+  "verifier_changes": {
+   "gained": 8,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 8,
+   "lost": 17
+  },
+  "verifier_subject_check": {
+   "n": 699,
+   "answered": 491,
+   "coverage": 0.7024,
+   "answered_correct": 387,
+   "answered_wrong": 104,
+   "accuracy_when_answered": {
+    "k": 387,
+    "n": 491,
+    "rate": 0.7882,
+    "lo": 0.7499,
+    "hi": 0.822
+   },
+   "wrong_answer_rate": {
+    "k": 104,
+    "n": 699,
+    "rate": 0.1488,
+    "lo": 0.1243,
+    "hi": 0.1771
+   }
+  }
+ },
+ "exaone_rlstart2_vllm_ko_custom": {
+  "lookup_questions": 13,
+  "correct_lookup_answers": 11,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 2,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 9,
+  "loose": {
+   "k": 9,
+   "n": 11,
+   "rate": 0.8182,
+   "lo": 0.523,
+   "hi": 0.9486
+  },
+  "strict": {
+   "k": 9,
+   "n": 11,
+   "rate": 0.8182,
+   "lo": 0.523,
+   "hi": 0.9486
+  },
+  "strict_where": {
+   "same_row": 9
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 7,
+   "answered_without_repair": 0,
+   "withheld": 2
+  },
+  "raw": {
+   "n": 30,
+   "answered": 30,
+   "coverage": 1.0,
+   "answered_correct": 14,
+   "answered_wrong": 16,
+   "accuracy_when_answered": {
+    "k": 14,
+    "n": 30,
+    "rate": 0.4667,
+    "lo": 0.3023,
+    "hi": 0.6386
+   },
+   "wrong_answer_rate": {
+    "k": 16,
+    "n": 30,
+    "rate": 0.5333,
+    "lo": 0.3614,
+    "hi": 0.6977
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 24,
+   "coverage": 0.8,
+   "answered_correct": 9,
+   "answered_wrong": 15,
+   "accuracy_when_answered": {
+    "k": 9,
+    "n": 24,
+    "rate": 0.375,
+    "lo": 0.2116,
+    "hi": 0.5729
+   },
+   "wrong_answer_rate": {
+    "k": 15,
+    "n": 30,
+    "rate": 0.5,
+    "lo": 0.3315,
+    "hi": 0.6685
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 5,
+   "coverage": 0.1667,
+   "answered_correct": 2,
+   "answered_wrong": 3,
+   "accuracy_when_answered": {
+    "k": 2,
+    "n": 5,
+    "rate": 0.4,
+    "lo": 0.1176,
+    "hi": 0.7693
+   },
+   "wrong_answer_rate": {
+    "k": 3,
+    "n": 30,
+    "rate": 0.1,
+    "lo": 0.0346,
+    "hi": 0.2562
+   }
+  },
+  "verified_em": 0.3,
+  "verified_em_no_repair": 0.1667,
+  "repaired_answers": 19,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 5
+  },
+  "verifier_subject_check": {
+   "n": 30,
+   "answered": 23,
+   "coverage": 0.7667,
+   "answered_correct": 9,
+   "answered_wrong": 14,
+   "accuracy_when_answered": {
+    "k": 9,
+    "n": 23,
+    "rate": 0.3913,
+    "lo": 0.2216,
+    "hi": 0.5921
+   },
+   "wrong_answer_rate": {
+    "k": 14,
+    "n": 30,
+    "rate": 0.4667,
+    "lo": 0.3023,
+    "hi": 0.6386
+   }
+  }
+ },
+ "exaone_rlstart2_vllm_ko_test": {
+  "lookup_questions": 539,
+  "correct_lookup_answers": 382,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 144,
+  "same_value_elsewhere": 1,
+  "no_answer_in_cell": 237,
+  "loose": {
+   "k": 238,
+   "n": 382,
+   "rate": 0.623,
+   "lo": 0.5734,
+   "hi": 0.6702
+  },
+  "strict": {
+   "k": 237,
+   "n": 382,
+   "rate": 0.6204,
+   "lo": 0.5708,
+   "hi": 0.6677
+  },
+  "strict_where": {
+   "same_column": 3,
+   "same_row": 234
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 224,
+   "answered_without_repair": 0,
+   "withheld": 13
+  },
+  "raw": {
+   "n": 699,
+   "answered": 698,
+   "coverage": 0.9986,
+   "answered_correct": 384,
+   "answered_wrong": 314,
+   "accuracy_when_answered": {
+    "k": 384,
+    "n": 698,
+    "rate": 0.5501,
+    "lo": 0.5131,
+    "hi": 0.5867
+   },
+   "wrong_answer_rate": {
+    "k": 314,
+    "n": 699,
+    "rate": 0.4492,
+    "lo": 0.4127,
+    "hi": 0.4863
+   }
+  },
+  "verifier": {
+   "n": 699,
+   "answered": 607,
+   "coverage": 0.8684,
+   "answered_correct": 375,
+   "answered_wrong": 232,
+   "accuracy_when_answered": {
+    "k": 375,
+    "n": 607,
+    "rate": 0.6178,
+    "lo": 0.5785,
+    "hi": 0.6556
+   },
+   "wrong_answer_rate": {
+    "k": 232,
+    "n": 699,
+    "rate": 0.3319,
+    "lo": 0.298,
+    "hi": 0.3676
+   }
+  },
+  "verifier_no_repair": {
+   "n": 699,
+   "answered": 221,
+   "coverage": 0.3162,
+   "answered_correct": 150,
+   "answered_wrong": 71,
+   "accuracy_when_answered": {
+    "k": 150,
+    "n": 221,
+    "rate": 0.6787,
+    "lo": 0.6146,
+    "hi": 0.7368
+   },
+   "wrong_answer_rate": {
+    "k": 71,
+    "n": 699,
+    "rate": 0.1016,
+    "lo": 0.0813,
+    "hi": 0.1262
+   }
+  },
+  "verified_em": 0.5522,
+  "verified_em_no_repair": 0.2632,
+  "repaired_answers": 386,
+  "verifier_changes": {
+   "gained": 6,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 6,
+   "lost": 15
+  },
+  "verifier_subject_check": {
+   "n": 699,
+   "answered": 553,
+   "coverage": 0.7911,
+   "answered_correct": 359,
+   "answered_wrong": 194,
+   "accuracy_when_answered": {
+    "k": 359,
+    "n": 553,
+    "rate": 0.6492,
+    "lo": 0.6085,
+    "hi": 0.6878
+   },
+   "wrong_answer_rate": {
+    "k": 194,
+    "n": 699,
+    "rate": 0.2775,
+    "lo": 0.2456,
+    "hi": 0.3119
    }
   }
  },
@@ -3660,6 +4364,107 @@
    }
   }
  },
+ "heuristic_chem_papers": {
+  "lookup_questions": 33,
+  "correct_lookup_answers": 16,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 16,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 0,
+  "loose": {
+   "k": 0,
+   "n": 16,
+   "rate": 0.0,
+   "lo": 0.0,
+   "hi": 0.1936
+  },
+  "strict": {
+   "k": 0,
+   "n": 16,
+   "rate": 0.0,
+   "lo": 0.0,
+   "hi": 0.1936
+  },
+  "strict_where": {},
+  "verifier_on_strict": {
+   "repaired_and_answered": 0,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 62,
+   "answered": 44,
+   "coverage": 0.7097,
+   "answered_correct": 16,
+   "answered_wrong": 28,
+   "accuracy_when_answered": {
+    "k": 16,
+    "n": 44,
+    "rate": 0.3636,
+    "lo": 0.2378,
+    "hi": 0.5113
+   },
+   "wrong_answer_rate": {
+    "k": 28,
+    "n": 62,
+    "rate": 0.4516,
+    "lo": 0.3342,
+    "hi": 0.5747
+   }
+  },
+  "verifier": {
+   "n": 62,
+   "answered": 44,
+   "coverage": 0.7097,
+   "answered_correct": 20,
+   "answered_wrong": 24,
+   "accuracy_when_answered": {
+    "k": 20,
+    "n": 44,
+    "rate": 0.4545,
+    "lo": 0.3171,
+    "hi": 0.5993
+   },
+   "wrong_answer_rate": {
+    "k": 24,
+    "n": 62,
+    "rate": 0.3871,
+    "lo": 0.2758,
+    "hi": 0.5115
+   }
+  },
+  "verifier_no_repair": {
+   "n": 62,
+   "answered": 44,
+   "coverage": 0.7097,
+   "answered_correct": 20,
+   "answered_wrong": 24,
+   "accuracy_when_answered": {
+    "k": 20,
+    "n": 44,
+    "rate": 0.4545,
+    "lo": 0.3171,
+    "hi": 0.5993
+   },
+   "wrong_answer_rate": {
+    "k": 24,
+    "n": 62,
+    "rate": 0.3871,
+    "lo": 0.2758,
+    "hi": 0.5115
+   }
+  },
+  "verified_em": 0.4355,
+  "verified_em_no_repair": 0.4355,
+  "repaired_answers": 0,
+  "verifier_changes": {
+   "gained": 4,
+   "gained_calculation": 4,
+   "gained_calculation_with_gold_cells": 4,
+   "gained_lookup": 0,
+   "lost": 0
+  }
+ },
  "heuristic_ko_custom": {
   "lookup_questions": 13,
   "correct_lookup_answers": 5,
@@ -4104,6 +4909,813 @@
    "gained_calculation_with_gold_cells": 0,
    "gained_lookup": 0,
    "lost": 0
+  }
+ },
+ "heuristic_unseen_dev": {
+  "lookup_questions": 3072,
+  "correct_lookup_answers": 833,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 832,
+  "same_value_elsewhere": 1,
+  "no_answer_in_cell": 0,
+  "loose": {
+   "k": 1,
+   "n": 833,
+   "rate": 0.0012,
+   "lo": 0.0002,
+   "hi": 0.0068
+  },
+  "strict": {
+   "k": 0,
+   "n": 833,
+   "rate": 0.0,
+   "lo": 0.0,
+   "hi": 0.0046
+  },
+  "strict_where": {},
+  "verifier_on_strict": {
+   "repaired_and_answered": 0,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 3072,
+   "answered": 1573,
+   "coverage": 0.512,
+   "answered_correct": 833,
+   "answered_wrong": 740,
+   "accuracy_when_answered": {
+    "k": 833,
+    "n": 1573,
+    "rate": 0.5296,
+    "lo": 0.5049,
+    "hi": 0.5541
+   },
+   "wrong_answer_rate": {
+    "k": 740,
+    "n": 3072,
+    "rate": 0.2409,
+    "lo": 0.2261,
+    "hi": 0.2563
+   }
+  },
+  "verifier": {
+   "n": 3072,
+   "answered": 1538,
+   "coverage": 0.5007,
+   "answered_correct": 834,
+   "answered_wrong": 704,
+   "accuracy_when_answered": {
+    "k": 834,
+    "n": 1538,
+    "rate": 0.5423,
+    "lo": 0.5173,
+    "hi": 0.567
+   },
+   "wrong_answer_rate": {
+    "k": 704,
+    "n": 3072,
+    "rate": 0.2292,
+    "lo": 0.2146,
+    "hi": 0.2444
+   }
+  },
+  "verifier_no_repair": {
+   "n": 3072,
+   "answered": 1538,
+   "coverage": 0.5007,
+   "answered_correct": 834,
+   "answered_wrong": 704,
+   "accuracy_when_answered": {
+    "k": 834,
+    "n": 1538,
+    "rate": 0.5423,
+    "lo": 0.5173,
+    "hi": 0.567
+   },
+   "wrong_answer_rate": {
+    "k": 704,
+    "n": 3072,
+    "rate": 0.2292,
+    "lo": 0.2146,
+    "hi": 0.2444
+   }
+  },
+  "verified_em": 0.2715,
+  "verified_em_no_repair": 0.2715,
+  "repaired_answers": 0,
+  "verifier_changes": {
+   "gained": 1,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 1,
+   "lost": 0
+  }
+ },
+ "heuristic_unseen_dev_first512": {
+  "lookup_questions": 3072,
+  "correct_lookup_answers": 640,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 638,
+  "same_value_elsewhere": 2,
+  "no_answer_in_cell": 0,
+  "loose": {
+   "k": 2,
+   "n": 640,
+   "rate": 0.0031,
+   "lo": 0.0009,
+   "hi": 0.0113
+  },
+  "strict": {
+   "k": 0,
+   "n": 640,
+   "rate": 0.0,
+   "lo": 0.0,
+   "hi": 0.006
+  },
+  "strict_where": {},
+  "verifier_on_strict": {
+   "repaired_and_answered": 0,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 3072,
+   "answered": 1392,
+   "coverage": 0.4531,
+   "answered_correct": 640,
+   "answered_wrong": 752,
+   "accuracy_when_answered": {
+    "k": 640,
+    "n": 1392,
+    "rate": 0.4598,
+    "lo": 0.4337,
+    "hi": 0.486
+   },
+   "wrong_answer_rate": {
+    "k": 752,
+    "n": 3072,
+    "rate": 0.2448,
+    "lo": 0.2299,
+    "hi": 0.2603
+   }
+  },
+  "verifier": {
+   "n": 3072,
+   "answered": 1368,
+   "coverage": 0.4453,
+   "answered_correct": 641,
+   "answered_wrong": 727,
+   "accuracy_when_answered": {
+    "k": 641,
+    "n": 1368,
+    "rate": 0.4686,
+    "lo": 0.4422,
+    "hi": 0.4951
+   },
+   "wrong_answer_rate": {
+    "k": 727,
+    "n": 3072,
+    "rate": 0.2367,
+    "lo": 0.222,
+    "hi": 0.252
+   }
+  },
+  "verifier_no_repair": {
+   "n": 3072,
+   "answered": 1368,
+   "coverage": 0.4453,
+   "answered_correct": 641,
+   "answered_wrong": 727,
+   "accuracy_when_answered": {
+    "k": 641,
+    "n": 1368,
+    "rate": 0.4686,
+    "lo": 0.4422,
+    "hi": 0.4951
+   },
+   "wrong_answer_rate": {
+    "k": 727,
+    "n": 3072,
+    "rate": 0.2367,
+    "lo": 0.222,
+    "hi": 0.252
+   }
+  },
+  "verified_em": 0.2087,
+  "verified_em_no_repair": 0.2087,
+  "repaired_answers": 0,
+  "verifier_changes": {
+   "gained": 1,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 1,
+   "lost": 0
+  }
+ },
+ "heuristic_unseen_dev_overlap512": {
+  "lookup_questions": 3072,
+  "correct_lookup_answers": 851,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 850,
+  "same_value_elsewhere": 1,
+  "no_answer_in_cell": 0,
+  "loose": {
+   "k": 1,
+   "n": 851,
+   "rate": 0.0012,
+   "lo": 0.0002,
+   "hi": 0.0066
+  },
+  "strict": {
+   "k": 0,
+   "n": 851,
+   "rate": 0.0,
+   "lo": 0.0,
+   "hi": 0.0045
+  },
+  "strict_where": {},
+  "verifier_on_strict": {
+   "repaired_and_answered": 0,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 3072,
+   "answered": 1598,
+   "coverage": 0.5202,
+   "answered_correct": 851,
+   "answered_wrong": 747,
+   "accuracy_when_answered": {
+    "k": 851,
+    "n": 1598,
+    "rate": 0.5325,
+    "lo": 0.508,
+    "hi": 0.5569
+   },
+   "wrong_answer_rate": {
+    "k": 747,
+    "n": 3072,
+    "rate": 0.2432,
+    "lo": 0.2283,
+    "hi": 0.2586
+   }
+  },
+  "verifier": {
+   "n": 3072,
+   "answered": 1566,
+   "coverage": 0.5098,
+   "answered_correct": 852,
+   "answered_wrong": 714,
+   "accuracy_when_answered": {
+    "k": 852,
+    "n": 1566,
+    "rate": 0.5441,
+    "lo": 0.5193,
+    "hi": 0.5686
+   },
+   "wrong_answer_rate": {
+    "k": 714,
+    "n": 3072,
+    "rate": 0.2324,
+    "lo": 0.2178,
+    "hi": 0.2477
+   }
+  },
+  "verifier_no_repair": {
+   "n": 3072,
+   "answered": 1566,
+   "coverage": 0.5098,
+   "answered_correct": 852,
+   "answered_wrong": 714,
+   "accuracy_when_answered": {
+    "k": 852,
+    "n": 1566,
+    "rate": 0.5441,
+    "lo": 0.5193,
+    "hi": 0.5686
+   },
+   "wrong_answer_rate": {
+    "k": 714,
+    "n": 3072,
+    "rate": 0.2324,
+    "lo": 0.2178,
+    "hi": 0.2477
+   }
+  },
+  "verified_em": 0.2773,
+  "verified_em_no_repair": 0.2773,
+  "repaired_answers": 0,
+  "verifier_changes": {
+   "gained": 1,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 1,
+   "lost": 0
+  }
+ },
+ "ref_1p2b_ko_custom": {
+  "lookup_questions": 13,
+  "correct_lookup_answers": 5,
+  "correct_answer_by_other_op": 3,
+  "cited_gold": 1,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 4,
+  "loose": {
+   "k": 4,
+   "n": 5,
+   "rate": 0.8,
+   "lo": 0.3755,
+   "hi": 0.9638
+  },
+  "strict": {
+   "k": 4,
+   "n": 5,
+   "rate": 0.8,
+   "lo": 0.3755,
+   "hi": 0.9638
+  },
+  "strict_where": {
+   "same_row": 4
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 3,
+   "answered_without_repair": 0,
+   "withheld": 1
+  },
+  "raw": {
+   "n": 30,
+   "answered": 26,
+   "coverage": 0.8667,
+   "answered_correct": 12,
+   "answered_wrong": 14,
+   "accuracy_when_answered": {
+    "k": 12,
+    "n": 26,
+    "rate": 0.4615,
+    "lo": 0.2876,
+    "hi": 0.6454
+   },
+   "wrong_answer_rate": {
+    "k": 14,
+    "n": 30,
+    "rate": 0.4667,
+    "lo": 0.3023,
+    "hi": 0.6386
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 11,
+   "coverage": 0.3667,
+   "answered_correct": 5,
+   "answered_wrong": 6,
+   "accuracy_when_answered": {
+    "k": 5,
+    "n": 11,
+    "rate": 0.4545,
+    "lo": 0.2127,
+    "hi": 0.7199
+   },
+   "wrong_answer_rate": {
+    "k": 6,
+    "n": 30,
+    "rate": 0.2,
+    "lo": 0.0951,
+    "hi": 0.3731
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 8,
+   "coverage": 0.2667,
+   "answered_correct": 2,
+   "answered_wrong": 6,
+   "accuracy_when_answered": {
+    "k": 2,
+    "n": 8,
+    "rate": 0.25,
+    "lo": 0.0715,
+    "hi": 0.5907
+   },
+   "wrong_answer_rate": {
+    "k": 6,
+    "n": 30,
+    "rate": 0.2,
+    "lo": 0.0951,
+    "hi": 0.3731
+   }
+  },
+  "verified_em": 0.2667,
+  "verified_em_no_repair": 0.1667,
+  "repaired_answers": 3,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 7
+  },
+  "verifier_subject_check": {
+   "n": 30,
+   "answered": 10,
+   "coverage": 0.3333,
+   "answered_correct": 5,
+   "answered_wrong": 5,
+   "accuracy_when_answered": {
+    "k": 5,
+    "n": 10,
+    "rate": 0.5,
+    "lo": 0.2366,
+    "hi": 0.7634
+   },
+   "wrong_answer_rate": {
+    "k": 5,
+    "n": 30,
+    "rate": 0.1667,
+    "lo": 0.0734,
+    "hi": 0.3356
+   }
+  }
+ },
+ "ref_1p2b_ko_test": {
+  "lookup_questions": 539,
+  "correct_lookup_answers": 180,
+  "correct_answer_by_other_op": 7,
+  "cited_gold": 32,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 148,
+  "loose": {
+   "k": 148,
+   "n": 180,
+   "rate": 0.8222,
+   "lo": 0.7598,
+   "hi": 0.8712
+  },
+  "strict": {
+   "k": 148,
+   "n": 180,
+   "rate": 0.8222,
+   "lo": 0.7598,
+   "hi": 0.8712
+  },
+  "strict_where": {
+   "other_row_and_column": 12,
+   "outside_table": 12,
+   "same_column": 1,
+   "same_row": 118,
+   "several_cells": 5
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 112,
+   "answered_without_repair": 0,
+   "withheld": 36
+  },
+  "raw": {
+   "n": 699,
+   "answered": 622,
+   "coverage": 0.8898,
+   "answered_correct": 189,
+   "answered_wrong": 433,
+   "accuracy_when_answered": {
+    "k": 189,
+    "n": 622,
+    "rate": 0.3039,
+    "lo": 0.269,
+    "hi": 0.3411
+   },
+   "wrong_answer_rate": {
+    "k": 433,
+    "n": 699,
+    "rate": 0.6195,
+    "lo": 0.5829,
+    "hi": 0.6547
+   }
+  },
+  "verifier": {
+   "n": 699,
+   "answered": 324,
+   "coverage": 0.4635,
+   "answered_correct": 152,
+   "answered_wrong": 172,
+   "accuracy_when_answered": {
+    "k": 152,
+    "n": 324,
+    "rate": 0.4691,
+    "lo": 0.4155,
+    "hi": 0.5235
+   },
+   "wrong_answer_rate": {
+    "k": 172,
+    "n": 699,
+    "rate": 0.2461,
+    "lo": 0.2156,
+    "hi": 0.2793
+   }
+  },
+  "verifier_no_repair": {
+   "n": 699,
+   "answered": 134,
+   "coverage": 0.1917,
+   "answered_correct": 39,
+   "answered_wrong": 95,
+   "accuracy_when_answered": {
+    "k": 39,
+    "n": 134,
+    "rate": 0.291,
+    "lo": 0.2208,
+    "hi": 0.3729
+   },
+   "wrong_answer_rate": {
+    "k": 95,
+    "n": 699,
+    "rate": 0.1359,
+    "lo": 0.1125,
+    "hi": 0.1633
+   }
+  },
+  "verified_em": 0.2704,
+  "verified_em_no_repair": 0.1144,
+  "repaired_answers": 190,
+  "verifier_changes": {
+   "gained": 7,
+   "gained_calculation": 5,
+   "gained_calculation_with_gold_cells": 5,
+   "gained_lookup": 2,
+   "lost": 44
+  },
+  "verifier_subject_check": {
+   "n": 699,
+   "answered": 292,
+   "coverage": 0.4177,
+   "answered_correct": 146,
+   "answered_wrong": 146,
+   "accuracy_when_answered": {
+    "k": 146,
+    "n": 292,
+    "rate": 0.5,
+    "lo": 0.443,
+    "hi": 0.557
+   },
+   "wrong_answer_rate": {
+    "k": 146,
+    "n": 699,
+    "rate": 0.2089,
+    "lo": 0.1804,
+    "hi": 0.2406
+   }
+  }
+ },
+ "ref_7p8b_awq_ko_custom": {
+  "lookup_questions": 13,
+  "correct_lookup_answers": 8,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 7,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 1,
+  "loose": {
+   "k": 1,
+   "n": 8,
+   "rate": 0.125,
+   "lo": 0.0224,
+   "hi": 0.4709
+  },
+  "strict": {
+   "k": 1,
+   "n": 8,
+   "rate": 0.125,
+   "lo": 0.0224,
+   "hi": 0.4709
+  },
+  "strict_where": {
+   "same_row": 1
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 0,
+   "answered_without_repair": 0,
+   "withheld": 1
+  },
+  "raw": {
+   "n": 30,
+   "answered": 22,
+   "coverage": 0.7333,
+   "answered_correct": 14,
+   "answered_wrong": 8,
+   "accuracy_when_answered": {
+    "k": 14,
+    "n": 22,
+    "rate": 0.6364,
+    "lo": 0.4295,
+    "hi": 0.8027
+   },
+   "wrong_answer_rate": {
+    "k": 8,
+    "n": 30,
+    "rate": 0.2667,
+    "lo": 0.1418,
+    "hi": 0.4445
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 13,
+   "coverage": 0.4333,
+   "answered_correct": 11,
+   "answered_wrong": 2,
+   "accuracy_when_answered": {
+    "k": 11,
+    "n": 13,
+    "rate": 0.8462,
+    "lo": 0.5777,
+    "hi": 0.9567
+   },
+   "wrong_answer_rate": {
+    "k": 2,
+    "n": 30,
+    "rate": 0.0667,
+    "lo": 0.0185,
+    "hi": 0.2132
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 12,
+   "coverage": 0.4,
+   "answered_correct": 11,
+   "answered_wrong": 1,
+   "accuracy_when_answered": {
+    "k": 11,
+    "n": 12,
+    "rate": 0.9167,
+    "lo": 0.6461,
+    "hi": 0.9851
+   },
+   "wrong_answer_rate": {
+    "k": 1,
+    "n": 30,
+    "rate": 0.0333,
+    "lo": 0.0059,
+    "hi": 0.1667
+   }
+  },
+  "verified_em": 0.5,
+  "verified_em_no_repair": 0.5333,
+  "repaired_answers": 1,
+  "verifier_changes": {
+   "gained": 2,
+   "gained_calculation": 1,
+   "gained_calculation_with_gold_cells": 1,
+   "gained_lookup": 1,
+   "lost": 5
+  },
+  "verifier_subject_check": {
+   "n": 30,
+   "answered": 13,
+   "coverage": 0.4333,
+   "answered_correct": 11,
+   "answered_wrong": 2,
+   "accuracy_when_answered": {
+    "k": 11,
+    "n": 13,
+    "rate": 0.8462,
+    "lo": 0.5777,
+    "hi": 0.9567
+   },
+   "wrong_answer_rate": {
+    "k": 2,
+    "n": 30,
+    "rate": 0.0667,
+    "lo": 0.0185,
+    "hi": 0.2132
+   }
+  }
+ },
+ "ref_7p8b_awq_ko_test": {
+  "lookup_questions": 539,
+  "correct_lookup_answers": 306,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 160,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 146,
+  "loose": {
+   "k": 146,
+   "n": 306,
+   "rate": 0.4771,
+   "lo": 0.4218,
+   "hi": 0.533
+  },
+  "strict": {
+   "k": 146,
+   "n": 306,
+   "rate": 0.4771,
+   "lo": 0.4218,
+   "hi": 0.533
+  },
+  "strict_where": {
+   "other_row_and_column": 2,
+   "outside_table": 1,
+   "same_column": 6,
+   "same_row": 109,
+   "several_cells": 28
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 107,
+   "answered_without_repair": 0,
+   "withheld": 39
+  },
+  "raw": {
+   "n": 699,
+   "answered": 566,
+   "coverage": 0.8097,
+   "answered_correct": 324,
+   "answered_wrong": 242,
+   "accuracy_when_answered": {
+    "k": 324,
+    "n": 566,
+    "rate": 0.5724,
+    "lo": 0.5313,
+    "hi": 0.6126
+   },
+   "wrong_answer_rate": {
+    "k": 242,
+    "n": 699,
+    "rate": 0.3462,
+    "lo": 0.3119,
+    "hi": 0.3822
+   }
+  },
+  "verifier": {
+   "n": 699,
+   "answered": 406,
+   "coverage": 0.5808,
+   "answered_correct": 309,
+   "answered_wrong": 97,
+   "accuracy_when_answered": {
+    "k": 309,
+    "n": 406,
+    "rate": 0.7611,
+    "lo": 0.7173,
+    "hi": 0.8
+   },
+   "wrong_answer_rate": {
+    "k": 97,
+    "n": 699,
+    "rate": 0.1388,
+    "lo": 0.1151,
+    "hi": 0.1664
+   }
+  },
+  "verifier_no_repair": {
+   "n": 699,
+   "answered": 264,
+   "coverage": 0.3777,
+   "answered_correct": 202,
+   "answered_wrong": 62,
+   "accuracy_when_answered": {
+    "k": 202,
+    "n": 264,
+    "rate": 0.7652,
+    "lo": 0.7104,
+    "hi": 0.8123
+   },
+   "wrong_answer_rate": {
+    "k": 62,
+    "n": 699,
+    "rate": 0.0887,
+    "lo": 0.0698,
+    "hi": 0.1121
+   }
+  },
+  "verified_em": 0.4979,
+  "verified_em_no_repair": 0.3548,
+  "repaired_answers": 142,
+  "verifier_changes": {
+   "gained": 30,
+   "gained_calculation": 17,
+   "gained_calculation_with_gold_cells": 14,
+   "gained_lookup": 13,
+   "lost": 45
+  },
+  "verifier_subject_check": {
+   "n": 699,
+   "answered": 386,
+   "coverage": 0.5522,
+   "answered_correct": 297,
+   "answered_wrong": 89,
+   "accuracy_when_answered": {
+    "k": 297,
+    "n": 386,
+    "rate": 0.7694,
+    "lo": 0.7249,
+    "hi": 0.8087
+   },
+   "wrong_answer_rate": {
+    "k": 89,
+    "n": 699,
+    "rate": 0.1273,
+    "lo": 0.1046,
+    "hi": 0.1541
+   }
   }
  },
  "rl_ko_chem_custom": {
@@ -4970,6 +6582,110 @@
    }
   }
  },
+ "rl_v3_chem_papers": {
+  "lookup_questions": 33,
+  "correct_lookup_answers": 8,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 3,
+  "same_value_elsewhere": 1,
+  "no_answer_in_cell": 4,
+  "loose": {
+   "k": 5,
+   "n": 8,
+   "rate": 0.625,
+   "lo": 0.3057,
+   "hi": 0.8632
+  },
+  "strict": {
+   "k": 4,
+   "n": 8,
+   "rate": 0.5,
+   "lo": 0.2152,
+   "hi": 0.7848
+  },
+  "strict_where": {
+   "outside_table": 1,
+   "same_row": 3
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 2,
+   "answered_without_repair": 0,
+   "withheld": 2
+  },
+  "raw": {
+   "n": 62,
+   "answered": 46,
+   "coverage": 0.7419,
+   "answered_correct": 8,
+   "answered_wrong": 38,
+   "accuracy_when_answered": {
+    "k": 8,
+    "n": 46,
+    "rate": 0.1739,
+    "lo": 0.0909,
+    "hi": 0.3072
+   },
+   "wrong_answer_rate": {
+    "k": 38,
+    "n": 62,
+    "rate": 0.6129,
+    "lo": 0.4885,
+    "hi": 0.7242
+   }
+  },
+  "verifier": {
+   "n": 62,
+   "answered": 29,
+   "coverage": 0.4677,
+   "answered_correct": 6,
+   "answered_wrong": 23,
+   "accuracy_when_answered": {
+    "k": 6,
+    "n": 29,
+    "rate": 0.2069,
+    "lo": 0.0985,
+    "hi": 0.3839
+   },
+   "wrong_answer_rate": {
+    "k": 23,
+    "n": 62,
+    "rate": 0.371,
+    "lo": 0.2616,
+    "hi": 0.4954
+   }
+  },
+  "verifier_no_repair": {
+   "n": 62,
+   "answered": 8,
+   "coverage": 0.129,
+   "answered_correct": 4,
+   "answered_wrong": 4,
+   "accuracy_when_answered": {
+    "k": 4,
+    "n": 8,
+    "rate": 0.5,
+    "lo": 0.2152,
+    "hi": 0.7848
+   },
+   "wrong_answer_rate": {
+    "k": 4,
+    "n": 62,
+    "rate": 0.0645,
+    "lo": 0.0254,
+    "hi": 0.1545
+   }
+  },
+  "verified_em": 0.2258,
+  "verified_em_no_repair": 0.2258,
+  "repaired_answers": 21,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 2
+  }
+ },
  "rl_v3_chem_syndev": {
   "lookup_questions": 40,
   "correct_lookup_answers": 27,
@@ -5093,6 +6809,110 @@
     "lo": 0.1171,
     "hi": 0.2866
    }
+  }
+ },
+ "rl_v3_conf_ko_test": {
+  "lookup_questions": 539,
+  "correct_lookup_answers": 209,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 99,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 110,
+  "loose": {
+   "k": 110,
+   "n": 209,
+   "rate": 0.5263,
+   "lo": 0.4588,
+   "hi": 0.5929
+  },
+  "strict": {
+   "k": 110,
+   "n": 209,
+   "rate": 0.5263,
+   "lo": 0.4588,
+   "hi": 0.5929
+  },
+  "strict_where": {
+   "other_row_and_column": 3,
+   "same_row": 107
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 105,
+   "answered_without_repair": 0,
+   "withheld": 5
+  },
+  "raw": {
+   "n": 699,
+   "answered": 568,
+   "coverage": 0.8126,
+   "answered_correct": 209,
+   "answered_wrong": 359,
+   "accuracy_when_answered": {
+    "k": 209,
+    "n": 568,
+    "rate": 0.368,
+    "lo": 0.3293,
+    "hi": 0.4084
+   },
+   "wrong_answer_rate": {
+    "k": 359,
+    "n": 699,
+    "rate": 0.5136,
+    "lo": 0.4766,
+    "hi": 0.5505
+   }
+  },
+  "verifier": {
+   "n": 699,
+   "answered": 501,
+   "coverage": 0.7167,
+   "answered_correct": 206,
+   "answered_wrong": 295,
+   "accuracy_when_answered": {
+    "k": 206,
+    "n": 501,
+    "rate": 0.4112,
+    "lo": 0.3689,
+    "hi": 0.4548
+   },
+   "wrong_answer_rate": {
+    "k": 295,
+    "n": 699,
+    "rate": 0.422,
+    "lo": 0.3859,
+    "hi": 0.459
+   }
+  },
+  "verifier_no_repair": {
+   "n": 699,
+   "answered": 218,
+   "coverage": 0.3119,
+   "answered_correct": 101,
+   "answered_wrong": 117,
+   "accuracy_when_answered": {
+    "k": 101,
+    "n": 218,
+    "rate": 0.4633,
+    "lo": 0.3983,
+    "hi": 0.5296
+   },
+   "wrong_answer_rate": {
+    "k": 117,
+    "n": 699,
+    "rate": 0.1674,
+    "lo": 0.1415,
+    "hi": 0.1969
+   }
+  },
+  "verified_em": 0.3276,
+  "verified_em_no_repair": 0.2017,
+  "repaired_answers": 283,
+  "verifier_changes": {
+   "gained": 2,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 2,
+   "lost": 5
   }
  },
  "rl_v3_ko_custom": {
@@ -5678,6 +7498,214 @@
    "lost": 11
   }
  },
+ "rl_v3_unseen_dev_first": {
+  "lookup_questions": 1000,
+  "correct_lookup_answers": 300,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 135,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 165,
+  "loose": {
+   "k": 165,
+   "n": 300,
+   "rate": 0.55,
+   "lo": 0.4934,
+   "hi": 0.6053
+  },
+  "strict": {
+   "k": 165,
+   "n": 300,
+   "rate": 0.55,
+   "lo": 0.4934,
+   "hi": 0.6053
+  },
+  "strict_where": {
+   "other_row_and_column": 1,
+   "same_row": 164
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 151,
+   "answered_without_repair": 0,
+   "withheld": 14
+  },
+  "raw": {
+   "n": 1000,
+   "answered": 710,
+   "coverage": 0.71,
+   "answered_correct": 300,
+   "answered_wrong": 410,
+   "accuracy_when_answered": {
+    "k": 300,
+    "n": 710,
+    "rate": 0.4225,
+    "lo": 0.3867,
+    "hi": 0.4592
+   },
+   "wrong_answer_rate": {
+    "k": 410,
+    "n": 1000,
+    "rate": 0.41,
+    "lo": 0.3799,
+    "hi": 0.4408
+   }
+  },
+  "verifier": {
+   "n": 1000,
+   "answered": 576,
+   "coverage": 0.576,
+   "answered_correct": 290,
+   "answered_wrong": 286,
+   "accuracy_when_answered": {
+    "k": 290,
+    "n": 576,
+    "rate": 0.5035,
+    "lo": 0.4628,
+    "hi": 0.5441
+   },
+   "wrong_answer_rate": {
+    "k": 286,
+    "n": 1000,
+    "rate": 0.286,
+    "lo": 0.2589,
+    "hi": 0.3148
+   }
+  },
+  "verifier_no_repair": {
+   "n": 1000,
+   "answered": 271,
+   "coverage": 0.271,
+   "answered_correct": 138,
+   "answered_wrong": 133,
+   "accuracy_when_answered": {
+    "k": 138,
+    "n": 271,
+    "rate": 0.5092,
+    "lo": 0.45,
+    "hi": 0.5682
+   },
+   "wrong_answer_rate": {
+    "k": 133,
+    "n": 1000,
+    "rate": 0.133,
+    "lo": 0.1134,
+    "hi": 0.1555
+   }
+  },
+  "verified_em": 0.29,
+  "verified_em_no_repair": 0.138,
+  "repaired_answers": 305,
+  "verifier_changes": {
+   "gained": 4,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 4,
+   "lost": 14
+  }
+ },
+ "rl_v3_unseen_dev_overlap": {
+  "lookup_questions": 1000,
+  "correct_lookup_answers": 395,
+  "correct_answer_by_other_op": 1,
+  "cited_gold": 170,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 225,
+  "loose": {
+   "k": 225,
+   "n": 395,
+   "rate": 0.5696,
+   "lo": 0.5204,
+   "hi": 0.6175
+  },
+  "strict": {
+   "k": 225,
+   "n": 395,
+   "rate": 0.5696,
+   "lo": 0.5204,
+   "hi": 0.6175
+  },
+  "strict_where": {
+   "same_column": 3,
+   "same_row": 222
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 205,
+   "answered_without_repair": 0,
+   "withheld": 20
+  },
+  "raw": {
+   "n": 1000,
+   "answered": 842,
+   "coverage": 0.842,
+   "answered_correct": 396,
+   "answered_wrong": 446,
+   "accuracy_when_answered": {
+    "k": 396,
+    "n": 842,
+    "rate": 0.4703,
+    "lo": 0.4368,
+    "hi": 0.5041
+   },
+   "wrong_answer_rate": {
+    "k": 446,
+    "n": 1000,
+    "rate": 0.446,
+    "lo": 0.4155,
+    "hi": 0.477
+   }
+  },
+  "verifier": {
+   "n": 1000,
+   "answered": 699,
+   "coverage": 0.699,
+   "answered_correct": 378,
+   "answered_wrong": 321,
+   "accuracy_when_answered": {
+    "k": 378,
+    "n": 699,
+    "rate": 0.5408,
+    "lo": 0.5037,
+    "hi": 0.5774
+   },
+   "wrong_answer_rate": {
+    "k": 321,
+    "n": 1000,
+    "rate": 0.321,
+    "lo": 0.2928,
+    "hi": 0.3506
+   }
+  },
+  "verifier_no_repair": {
+   "n": 1000,
+   "answered": 298,
+   "coverage": 0.298,
+   "answered_correct": 172,
+   "answered_wrong": 126,
+   "accuracy_when_answered": {
+    "k": 172,
+    "n": 298,
+    "rate": 0.5772,
+    "lo": 0.5205,
+    "hi": 0.6319
+   },
+   "wrong_answer_rate": {
+    "k": 126,
+    "n": 1000,
+    "rate": 0.126,
+    "lo": 0.1069,
+    "hi": 0.148
+   }
+  },
+  "verified_em": 0.378,
+  "verified_em_no_repair": 0.172,
+  "repaired_answers": 401,
+  "verifier_changes": {
+   "gained": 3,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 3,
+   "lost": 21
+  }
+ },
  "sft_chem2_chem_custom": {
   "lookup_questions": 13,
   "correct_lookup_answers": 3,
@@ -5800,6 +7828,110 @@
     "lo": 0.2041,
     "hi": 0.5169
    }
+  }
+ },
+ "sft_chem2_chem_papers": {
+  "lookup_questions": 33,
+  "correct_lookup_answers": 7,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 3,
+  "same_value_elsewhere": 1,
+  "no_answer_in_cell": 3,
+  "loose": {
+   "k": 4,
+   "n": 7,
+   "rate": 0.5714,
+   "lo": 0.2505,
+   "hi": 0.8418
+  },
+  "strict": {
+   "k": 3,
+   "n": 7,
+   "rate": 0.4286,
+   "lo": 0.1582,
+   "hi": 0.7495
+  },
+  "strict_where": {
+   "outside_table": 1,
+   "same_row": 2
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 1,
+   "answered_without_repair": 0,
+   "withheld": 2
+  },
+  "raw": {
+   "n": 62,
+   "answered": 54,
+   "coverage": 0.871,
+   "answered_correct": 7,
+   "answered_wrong": 47,
+   "accuracy_when_answered": {
+    "k": 7,
+    "n": 54,
+    "rate": 0.1296,
+    "lo": 0.0642,
+    "hi": 0.2442
+   },
+   "wrong_answer_rate": {
+    "k": 47,
+    "n": 62,
+    "rate": 0.7581,
+    "lo": 0.6385,
+    "hi": 0.8475
+   }
+  },
+  "verifier": {
+   "n": 62,
+   "answered": 25,
+   "coverage": 0.4032,
+   "answered_correct": 5,
+   "answered_wrong": 20,
+   "accuracy_when_answered": {
+    "k": 5,
+    "n": 25,
+    "rate": 0.2,
+    "lo": 0.0886,
+    "hi": 0.3913
+   },
+   "wrong_answer_rate": {
+    "k": 20,
+    "n": 62,
+    "rate": 0.3226,
+    "lo": 0.2195,
+    "hi": 0.4463
+   }
+  },
+  "verifier_no_repair": {
+   "n": 62,
+   "answered": 17,
+   "coverage": 0.2742,
+   "answered_correct": 4,
+   "answered_wrong": 13,
+   "accuracy_when_answered": {
+    "k": 4,
+    "n": 17,
+    "rate": 0.2353,
+    "lo": 0.0956,
+    "hi": 0.4726
+   },
+   "wrong_answer_rate": {
+    "k": 13,
+    "n": 62,
+    "rate": 0.2097,
+    "lo": 0.1268,
+    "hi": 0.3264
+   }
+  },
+  "verified_em": 0.1935,
+  "verified_em_no_repair": 0.1774,
+  "repaired_answers": 8,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 2
   }
  },
  "sft_chem2_chem_syndev": {
@@ -8869,6 +11001,378 @@
     "rate": 0.3748,
     "lo": 0.3397,
     "hi": 0.4113
+   }
+  }
+ },
+ "tools_1p2b_ko_custom": {
+  "lookup_questions": 13,
+  "correct_lookup_answers": 0,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 0,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 0,
+  "loose": {
+   "k": 0,
+   "n": 0,
+   "rate": null,
+   "lo": null,
+   "hi": null
+  },
+  "strict": {
+   "k": 0,
+   "n": 0,
+   "rate": null,
+   "lo": null,
+   "hi": null
+  },
+  "strict_where": {},
+  "verifier_on_strict": {
+   "repaired_and_answered": 0,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 30,
+   "answered": 3,
+   "coverage": 0.1,
+   "answered_correct": 0,
+   "answered_wrong": 3,
+   "accuracy_when_answered": {
+    "k": 0,
+    "n": 3,
+    "rate": 0.0,
+    "lo": 0.0,
+    "hi": 0.5615
+   },
+   "wrong_answer_rate": {
+    "k": 3,
+    "n": 30,
+    "rate": 0.1,
+    "lo": 0.0346,
+    "hi": 0.2562
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 1,
+   "coverage": 0.0333,
+   "answered_correct": 0,
+   "answered_wrong": 1,
+   "accuracy_when_answered": {
+    "k": 0,
+    "n": 1,
+    "rate": 0.0,
+    "lo": 0.0,
+    "hi": 0.7935
+   },
+   "wrong_answer_rate": {
+    "k": 1,
+    "n": 30,
+    "rate": 0.0333,
+    "lo": 0.0059,
+    "hi": 0.1667
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 1,
+   "coverage": 0.0333,
+   "answered_correct": 0,
+   "answered_wrong": 1,
+   "accuracy_when_answered": {
+    "k": 0,
+    "n": 1,
+    "rate": 0.0,
+    "lo": 0.0,
+    "hi": 0.7935
+   },
+   "wrong_answer_rate": {
+    "k": 1,
+    "n": 30,
+    "rate": 0.0333,
+    "lo": 0.0059,
+    "hi": 0.1667
+   }
+  },
+  "verified_em": 0.1667,
+  "verified_em_no_repair": 0.1667,
+  "repaired_answers": 0,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 0
+  },
+  "verifier_subject_check": {
+   "n": 30,
+   "answered": 1,
+   "coverage": 0.0333,
+   "answered_correct": 0,
+   "answered_wrong": 1,
+   "accuracy_when_answered": {
+    "k": 0,
+    "n": 1,
+    "rate": 0.0,
+    "lo": 0.0,
+    "hi": 0.7935
+   },
+   "wrong_answer_rate": {
+    "k": 1,
+    "n": 30,
+    "rate": 0.0333,
+    "lo": 0.0059,
+    "hi": 0.1667
+   }
+  }
+ },
+ "tools_1p2b_ko_test": {
+  "lookup_questions": 539,
+  "correct_lookup_answers": 61,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 50,
+  "same_value_elsewhere": 3,
+  "no_answer_in_cell": 8,
+  "loose": {
+   "k": 11,
+   "n": 61,
+   "rate": 0.1803,
+   "lo": 0.1038,
+   "hi": 0.2947
+  },
+  "strict": {
+   "k": 8,
+   "n": 61,
+   "rate": 0.1311,
+   "lo": 0.068,
+   "hi": 0.238
+  },
+  "strict_where": {
+   "same_row": 3,
+   "several_cells": 5
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 3,
+   "answered_without_repair": 0,
+   "withheld": 5
+  },
+  "raw": {
+   "n": 699,
+   "answered": 283,
+   "coverage": 0.4049,
+   "answered_correct": 63,
+   "answered_wrong": 220,
+   "accuracy_when_answered": {
+    "k": 63,
+    "n": 283,
+    "rate": 0.2226,
+    "lo": 0.178,
+    "hi": 0.2746
+   },
+   "wrong_answer_rate": {
+    "k": 220,
+    "n": 699,
+    "rate": 0.3147,
+    "lo": 0.2814,
+    "hi": 0.3501
+   }
+  },
+  "verifier": {
+   "n": 699,
+   "answered": 182,
+   "coverage": 0.2604,
+   "answered_correct": 61,
+   "answered_wrong": 121,
+   "accuracy_when_answered": {
+    "k": 61,
+    "n": 182,
+    "rate": 0.3352,
+    "lo": 0.2706,
+    "hi": 0.4065
+   },
+   "wrong_answer_rate": {
+    "k": 121,
+    "n": 699,
+    "rate": 0.1731,
+    "lo": 0.1469,
+    "hi": 0.2029
+   }
+  },
+  "verifier_no_repair": {
+   "n": 699,
+   "answered": 177,
+   "coverage": 0.2532,
+   "answered_correct": 58,
+   "answered_wrong": 119,
+   "accuracy_when_answered": {
+    "k": 58,
+    "n": 177,
+    "rate": 0.3277,
+    "lo": 0.2628,
+    "hi": 0.3999
+   },
+   "wrong_answer_rate": {
+    "k": 119,
+    "n": 699,
+    "rate": 0.1702,
+    "lo": 0.1442,
+    "hi": 0.1999
+   }
+  },
+  "verified_em": 0.1459,
+  "verified_em_no_repair": 0.1416,
+  "repaired_answers": 5,
+  "verifier_changes": {
+   "gained": 3,
+   "gained_calculation": 3,
+   "gained_calculation_with_gold_cells": 3,
+   "gained_lookup": 0,
+   "lost": 5
+  },
+  "verifier_subject_check": {
+   "n": 699,
+   "answered": 153,
+   "coverage": 0.2189,
+   "answered_correct": 58,
+   "answered_wrong": 95,
+   "accuracy_when_answered": {
+    "k": 58,
+    "n": 153,
+    "rate": 0.3791,
+    "lo": 0.3061,
+    "hi": 0.458
+   },
+   "wrong_answer_rate": {
+    "k": 95,
+    "n": 699,
+    "rate": 0.1359,
+    "lo": 0.1125,
+    "hi": 0.1633
+   }
+  }
+ },
+ "tools_1p2b_unseen_dev500": {
+  "lookup_questions": 500,
+  "correct_lookup_answers": 60,
+  "correct_answer_by_other_op": 2,
+  "cited_gold": 53,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 7,
+  "loose": {
+   "k": 7,
+   "n": 60,
+   "rate": 0.1167,
+   "lo": 0.0577,
+   "hi": 0.2218
+  },
+  "strict": {
+   "k": 7,
+   "n": 60,
+   "rate": 0.1167,
+   "lo": 0.0577,
+   "hi": 0.2218
+  },
+  "strict_where": {
+   "same_row": 5,
+   "several_cells": 2
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 5,
+   "answered_without_repair": 0,
+   "withheld": 2
+  },
+  "raw": {
+   "n": 500,
+   "answered": 183,
+   "coverage": 0.366,
+   "answered_correct": 62,
+   "answered_wrong": 121,
+   "accuracy_when_answered": {
+    "k": 62,
+    "n": 183,
+    "rate": 0.3388,
+    "lo": 0.2742,
+    "hi": 0.4101
+   },
+   "wrong_answer_rate": {
+    "k": 121,
+    "n": 500,
+    "rate": 0.242,
+    "lo": 0.2065,
+    "hi": 0.2814
+   }
+  },
+  "verifier": {
+   "n": 500,
+   "answered": 139,
+   "coverage": 0.278,
+   "answered_correct": 60,
+   "answered_wrong": 79,
+   "accuracy_when_answered": {
+    "k": 60,
+    "n": 139,
+    "rate": 0.4317,
+    "lo": 0.3522,
+    "hi": 0.5147
+   },
+   "wrong_answer_rate": {
+    "k": 79,
+    "n": 500,
+    "rate": 0.158,
+    "lo": 0.1287,
+    "hi": 0.1926
+   }
+  },
+  "verifier_no_repair": {
+   "n": 500,
+   "answered": 131,
+   "coverage": 0.262,
+   "answered_correct": 55,
+   "answered_wrong": 76,
+   "accuracy_when_answered": {
+    "k": 55,
+    "n": 131,
+    "rate": 0.4198,
+    "lo": 0.3388,
+    "hi": 0.5055
+   },
+   "wrong_answer_rate": {
+    "k": 76,
+    "n": 500,
+    "rate": 0.152,
+    "lo": 0.1232,
+    "hi": 0.1861
+   }
+  },
+  "verified_em": 0.12,
+  "verified_em_no_repair": 0.11,
+  "repaired_answers": 8,
+  "verifier_changes": {
+   "gained": 1,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 1,
+   "lost": 3
+  },
+  "verifier_subject_check": {
+   "n": 500,
+   "answered": 117,
+   "coverage": 0.234,
+   "answered_correct": 56,
+   "answered_wrong": 61,
+   "accuracy_when_answered": {
+    "k": 56,
+    "n": 117,
+    "rate": 0.4786,
+    "lo": 0.3902,
+    "hi": 0.5684
+   },
+   "wrong_answer_rate": {
+    "k": 61,
+    "n": 500,
+    "rate": 0.122,
+    "lo": 0.0962,
+    "hi": 0.1536
    }
   }
  }

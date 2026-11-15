@@ -103,9 +103,49 @@
    "questions_that_differ": 0,
    "verified_em_with_repair": 0.8712,
    "max_in": 672
+  },
+  "exaone_rlstart2_vllm_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 386,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.2632,
+   "verified_em_replayed": 0.2632,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.5522,
+   "max_in": 672
+  },
+  "exaone_grpo2_vllm_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 218,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.4192,
+   "verified_em_replayed": 0.4192,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.5937,
+   "max_in": 672
+  },
+  "ref_1p2b_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 190,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.1144,
+   "verified_em_replayed": 0.1144,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.2704,
+   "max_in": 672
+  },
+  "ref_7p8b_awq_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 142,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.3548,
+   "verified_em_replayed": 0.3548,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.4979,
+   "max_in": 672
   }
  },
- "runs_checked": 10,
- "questions_checked": 6990,
+ "runs_checked": 14,
+ "questions_checked": 9786,
  "questions_that_differ": 0
 }

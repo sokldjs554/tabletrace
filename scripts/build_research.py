@@ -205,7 +205,9 @@ def supplement_sections() -> list[dict]:
     rc = load(EXP / "eval" / "risk_coverage.json")
     if rc:
         rows = []
-        for label, run in [("mT5-small 최종", "rl_v3_conf_ko_test")] + [(k, k) for k in rc["runs"] if k != "rl_v3_conf_ko_test"]:
+        names = {"rl_v3_conf_ko_test": "mT5-small 최종", "ref_1p2b_ko_test": "EXAONE 1.2B, 튜닝 없음", "ref_7p8b_awq_ko_test": "EXAONE 7.8B(AWQ), 튜닝 없음",
+                 "exaone_rlstart2_vllm_ko_test": "EXAONE 1.2B, 300문항 튜닝", "exaone_grpo2_vllm_ko_test": "그 모델에 강화학습"}
+        for label, run in [(names.get(k, k), k) for k in names if k in rc["runs"]] + [(k, k) for k in rc["runs"] if k not in names]:
             r = rc["runs"].get(run)
             if not r:
                 continue
@@ -217,7 +219,9 @@ def supplement_sections() -> list[dict]:
         out.append({"title": "확신도 문턱 — 위험·응답률 곡선 (한국어 test 699문항)", "status": "done",
                     "description": "모델이 생성한 토큰의 로그 확률을 확신도로 써서, 확신도가 문턱 이상일 때만 답하게 했을 때의 위험(틀린 답 ÷ 내보낸 답)이다. 답 없는 질문에 답하면 틀린 것으로 센다.",
                     "columns": ["모델", "조건", "문턱 없음: 응답률", "문턱 없음: 위험", "응답률 10%에서 위험", "30%", "50%", "70%", "AUROC"], "rows": rows,
-                    "notes": ["작은 모델에서는 확신도가 약한 신호다. 가장 확신하는 답만 내보내도 위험이 크게 줄지 않는다.", "EXAONE은 GPU 평가에서 로그 확률을 저장해야 그릴 수 있다."],
+                    "notes": ["mT5-small에서는 확신도가 약한 신호다. 가장 확신하는 답만 내보내도 위험이 크게 줄지 않는다.",
+                              "EXAONE의 네 줄은 3차 GPU 실행(2026-11-15)의 평가가 저장한 로그 확률로 그렸다. 네 모델 모두에서 검증기 통과분의 위험이 모델만의 위험보다 낮고, 응답률을 10%로 낮추면 위험이 더 내려간다.",
+                              "전체 데이터로 튜닝한 EXAONE의 곡선은 없다. 그 평가는 로그 확률을 저장하지 않았다."],
                     "artifact": "experiments/eval/risk_coverage.json (scripts/risk_coverage.py)"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     if g2:
@@ -247,7 +251,7 @@ def supplement_sections() -> list[dict]:
                               f"학습이 길어질수록 답이 나가지 않은 문항이 {gd['withheld_first']}개에서 {gd['withheld_last']}개로 늘었다.",
                               f"verified EM의 차이는 {g2['derived']['grpo_vs_start']['correct_delta']}문항이다(독립 표본 근사 p {g2['derived']['grpo_vs_start']['unpaired_p']}).",
                               "이 실행 뒤에 학습 스크립트의 결함을 찾았다. 긴 프롬프트의 앞부분이 잘려 들어갔고(학습 프롬프트의 12.2%, 개발셋 64문항 중 16문항), "
-                              "미세조정에서는 학습 예제의 15.0%에서 정답이 잘렸다. 이 표는 그 상태로 잰 값이다. 고친 설정의 두 번째 실험은 준비만 되어 있다."],
+                              "미세조정에서는 학습 예제의 15.0%에서 정답이 잘렸다. 이 표는 그 상태로 잰 값이다. 고친 설정으로 다시 한 두 번째 실험은 아래 카드에 있다."],
                     "artifact": src})
         full = load(EXP / "eval" / "exaone_full_vllm_ko_test" / "metrics.json")
         rows = []
@@ -262,7 +266,7 @@ def supplement_sections() -> list[dict]:
                     "columns": ["모델", "verified EM (주어 검사 없음)", "(주어 검사 포함)", "근거 복구 비율", "문항당 시간(ms)"], "rows": rows,
                     "notes": ["튜닝하지 않은 32B는 튜닝한 1.2B보다 낮다. 큰 모델도 답은 맞고 근거 셀이 틀리는 일이 있다.",
                               "같은 32B라도 표를 보여 주고 프로그램 한 줄을 쓰게 하는 쪽이 도구 호출보다 높다.",
-                              "튜닝하지 않은 7.8B의 test 평가는 도구 오류로 중단됐고, 1.2B에 예시만 준 기준선은 출력에 남지 않았다."],
+                              "튜닝하지 않은 7.8B의 test 평가는 도구 오류로 중단됐고, 1.2B에 예시만 준 기준선은 출력에 남지 않았다. 두 값은 다음 실행에서 채웠다(아래 3차 GPU 실행 카드)."],
                     "artifact": src})
         rows = []
         for label, name, which in (("큰 표 3,072문항: 앞에서부터 (672토큰)", "exaone_pool7000_first672_vllm_unseen_dev", "v1"),
@@ -283,9 +287,85 @@ def supplement_sections() -> list[dict]:
                     "notes": ["행 선별은 EXAONE에서도 통한다. 화학 논문 표에서 EXAONE은 휴리스틱(43.5%)을 넘었다.",
                               "열 번호 형식이 근거 복구를 없애는 효과는 시드 셋에서 같다."],
                     "artifact": src})
+    out.extend(gpu3_cards())
     out.append({"title": "재지 못한 것", "status": "prep",
-                "description": "풀 전부(약 3.4만 문항) 학습, 큰 모델의 튜닝, 도구 호출 형식으로 튜닝한 모델, 튜닝 모델의 4비트 서빙(bitsandbytes는 그 vLLM 버전에 없는 방식이었다), "
-                               "튜닝하지 않은 7.8B의 test 평가. 2차 GPU 실험은 결과 파일이 남지 않아 문항별 분석(대응 검정, 확신도 곡선)이 없다."})
+                "description": "풀 전부(약 3.4만 문항) 학습, 큰 모델의 튜닝, 도구 호출 형식으로 튜닝한 모델, 튜닝 모델의 4비트 서빙(bitsandbytes는 그 vLLM 버전에 없는 방식이었다). "
+                               "두 번째 강화학습의 대조군과 반복 실행, 길이 결함을 고친 설정의 전체 데이터 미세조정, 전체 데이터 모델의 확신도 곡선. "
+                               "2차 GPU 실험은 결과 파일이 남지 않아 그 실험들의 문항별 분석이 없다."})
+    return out
+
+
+def gpu3_cards() -> list[dict]:
+    """Third GPU session (2026-11-15): result files with per-question predictions, re-verified with scripts/replay_check.py."""
+    a = load(EXP / "eval" / "rl2_analysis.json")
+    pt = load(EXP / "eval" / "paired_tests.json")
+    rp = load(EXP / "eval" / "replay_check_gpu3.json")
+    nr = load(EXP / "eval" / "no_repair_check.json")
+    if not (a and pt and rp and nr):
+        return []
+
+    def m(run: str) -> dict:
+        return load(EXP / "eval" / run / "metrics.json")["metrics"]
+
+    def pair(name: str) -> str:
+        v = pt[name]
+        return f"{v['candidate_better']} 대 {v['reference_better']}, p {v['p_display']}"
+
+    src = (f"experiments/eval/ (평가 {rp['replays']}건의 지표와 문항별 예측). 소유자가 2026-11-15에 Kaggle T4 두 장에서 실행. 저장된 모델 출력 {rp['questions_checked']:,}문항을 "
+           f"이 저장소의 검증기로 다시 검증했고 판정이 다른 문항은 {rp['questions_that_differ']}개다(scripts/replay_check.py)")
+    st, rl = a["start"], a["rl"]
+    s1, r1, fp, tr = m(st), m(rl), a["first_pass"], a["training"]
+    o_s, o_r = fp["outcomes"]["start"], fp["outcomes"]["rl"]
+    wrong = fp["sign_tests"]["wrong_all"]
+    cited = a["raw"]["sign_test_cited_gold_cell_lookup"]
+
+    def three(o: dict) -> str:
+        return f"{o['correct']} / {o['wrong']} / {o['withheld']}"
+
+    rows = [
+        ["verified EM (주어 검사 없음)", pct(s1["verified_em"]), pct(r1["verified_em"]), pair("grpo2_vs_rlstart2_ko_test")],
+        ["verified EM (주어 검사 포함)", pct(m(st + "_ec")["verified_em"]), pct(m(rl + "_ec")["verified_em"]), pair("grpo2_vs_rlstart2_ko_test_ec")],
+        ["모델이 인용한 셀이 정답 셀과 같은 비율", pct(s1["evidence_cells_exact_raw"]), pct(r1["evidence_cells_exact_raw"]), f"조회 문항 {cited['only_rl']} 대 {cited['only_start']}, p {cited['p_display']}"],
+        ["검증기가 근거 셀을 고쳐서 내보낸 비율", pct(s1["evidence_repaired_rate"]), pct(r1["evidence_repaired_rate"]), ""],
+        ["근거 복구를 끈 verified EM", pct(nr["runs"][st]["verified_em_replayed"]), pct(nr["runs"][rl]["verified_em_replayed"]), ""],
+        ["틀린 답이 나간 문항", o_s["all"]["wrong"], o_r["all"]["wrong"], f"{wrong['only_rl']} 대 {wrong['only_start']}, p {wrong['p_display']}"],
+        [f"조회 {o_s['lookup']['n']}문항: 정답 / 틀린 답 / 안 나감", three(o_s["lookup"]), three(o_r["lookup"]), ""],
+        [f"계산 {o_s['calc']['n']}문항: 정답 / 틀린 답 / 안 나감", three(o_s["calc"]), three(o_r["calc"]), ""],
+        [f"답 없는 질문 {o_s['unanswerable']['n']}개 가운데 알아본 수", o_s["unanswerable"]["correct"], o_r["unanswerable"]["correct"], ""],
+        ["수작업 30문항 verified EM (주어 검사 포함)", pct(m("exaone_rlstart2_vllm_ko_custom_ec")["verified_em"]), pct(m("exaone_grpo2_vllm_ko_custom_ec")["verified_em"]), pair("grpo2_vs_rlstart2_ko_custom_ec")],
+    ]
+    full = m("exaone_full_vllm_ko_test")
+    out = [{"title": "EXAONE 강화학습, 두 번째 실험 — 결함을 고친 뒤 (3차 GPU 실행)", "status": "done",
+            "description": f"첫 실험과 같은 보상과 손실(소유자 작성)로 {tr['steps']}걸음. 달라진 것은 넷이다. 프롬프트가 잘리지 않는다. 시작 모델(300문항)을 정답이 잘리지 않는 길이로 다시 학습했다. "
+                           f"배치를 학습 문항 전체에서 고르게 뽑는다. 개발 문항을 무작위 {tr['dev_first']['n']}개로 늘렸다. 남긴 모델은 개발셋 보상이 가장 높았던 {tr['kept_step']}걸음째다. 한국어 test 699문항.",
+            "columns": ["지표", "시작 모델 (300문항 SFT)", f"강화학습 뒤 ({tr['kept_step']}걸음 모델)", "같은 문항 대응 검정 (강화학습 모델만 대 시작 모델만)"], "rows": rows,
+            "notes": ["근거 셀 오류가 줄었다. 보상은 정답 셀 표시를 쓰지 않는다. 복구 없이 통과한 정답에 1.0점, 검증기가 근거를 고쳐야 했던 정답에 0.3점을 주는 차이만으로 모델이 답이 든 셀을 인용하는 쪽으로 움직였다.",
+                      "계산 문항은 풀게 된 것이 아니다. 두 모델 모두 계산 프로그램을 한 번도 쓰지 않았다. 시작 모델은 셀 값 하나를 답으로 내서 틀린 답이 나갔고, 강화학습 뒤에는 스스로 계산한 수를 답으로 써서 검증기가 내보내지 않는다. 보류가 늘어난 것은 거의 전부 여기서 왔다.",
+                      f"개발셋 {tr['dev_first']['n']}문항의 평균 보상은 시작 {tr['dev_first']['mean_reward']} → {tr['kept_step']}걸음 {tr['dev_kept']['mean_reward']}(최고) → {tr['steps']}걸음 {tr['dev_last']['mean_reward']}. 문법 오류는 모든 점검에서 {tr['dev_first']['unparsable']}개다(첫 실험에서는 매번 16개).",
+                      f"한계. 한 번 돌렸고 시드가 하나다. 대조군이 없어 넷 가운데 무엇이 효과를 냈는지 모른다. 같은 학습 풀 전체로 미세조정한 모델({pct(full['verified_em'])})이 훨씬 높고 학습도 빠르다"
+                      f"({a['cost']['sft_full_data_minutes']}분 대 {a['cost']['rl_200_steps_minutes']}분). 수작업 30문항에서는 차이가 유의하지 않다.",
+                      "역할. 보상 함수와 GRPO 손실의 구현, 두 번의 GPU 실행은 소유자가 했다. 첫 실험의 기록에서 결함을 찾아 학습 스크립트를 고친 것과 결과 분석은 AI 도구가 했다."],
+            "artifact": src + ". 분석: experiments/eval/rl2_analysis.json (scripts/rl2_analysis.py), paired_tests.json, no_repair_check.json"}]
+    g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
+    big = g2["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"] if g2 else None
+    rows = []
+    for label, run in (("EXAONE 4.0 1.2B, 튜닝 없음, 예시 6개", "ref_1p2b_ko_test"), ("EXAONE 3.5 7.8B AWQ, 튜닝 없음, 예시 6개", "ref_7p8b_awq_ko_test")):
+        x = m(run)
+        rows.append([label, pct(x["verified_em"]), pct(m(run + "_ec")["verified_em"]), pct(x["evidence_cells_exact_raw"]), pct(x["evidence_repaired_rate"]), round(x["mean_ms_per_example"])])
+    if big:
+        rows.append(["EXAONE 4.0 32B AWQ, 튜닝 없음, 예시 6개 (지난 실행)", pct(big["verified_em"]), pct(g2["evals"]["ref_32b_awq_ko_test"]["ec"]["metrics"]["verified_em"]),
+                     pct(big["evidence_cells_exact_raw"]), pct(big["evidence_repaired_rate"]), round(big["mean_ms_per_example"])])
+    x = m("tools_1p2b_ko_test")
+    rows.append(["EXAONE 4.0 1.2B, 튜닝 없음, 도구 호출", pct(x["verified_em"]), pct(m("tools_1p2b_ko_test_ec")["verified_em"]), pct(x["evidence_cells_exact_raw"]), pct(x["evidence_repaired_rate"]), round(x["mean_ms_per_example"])])
+    rows.append(["EXAONE 4.0 1.2B, 3,587문항으로 튜닝 (1번 노트북)", pct(full["verified_em"]), pct(m("exaone_full_vllm_ko_test_ec")["verified_em"]), pct(full["evidence_cells_exact_raw"]), pct(full["evidence_repaired_rate"]), round(full["mean_ms_per_example"])])
+    out.append({"title": "튜닝하지 않은 EXAONE, 크기별. 그리고 도구 호출과 프로그램 제안 (3차 GPU 실행)", "status": "done",
+                "description": "첫 실행에서 빠졌던 두 값(예시만 준 1.2B, 7.8B의 test)을 채웠다. 같은 프롬프트, 같은 검증기, 한국어 test 699문항.",
+                "columns": ["모델", "verified EM (주어 검사 없음)", "(주어 검사 포함)", "인용 셀 정확", "근거 복구 비율", "문항당 시간(ms)"], "rows": rows,
+                "notes": [f"튜닝 없이는 모델이 클수록 높지만 셋 다 튜닝한 1.2B보다 낮다. 7.8B 대 1.2B는 같은 문항 대응으로 {pair('ref_7p8b_vs_ref_1p2b_ko_test')}.",
+                          "크기만 바꾼 비교가 아니다. 7.8B는 3.5 세대이고, 7.8B와 32B는 4비트 AWQ이며, 32B는 다른 세션의 값이라 대응 검정을 할 수 없다.",
+                          "인용 셀을 정확히 짚는 것은 크기보다 학습에 달려 있었다.",
+                          f"같은 1.2B에서 도구를 고르게 하는 쪽이 프로그램을 한 번 제안하게 하는 쪽보다 낮다(도구 쪽만 맞힘 대 프로그램 쪽만 맞힘: {pair('tools_vs_program_1p2b_ko_test')})."],
+                "artifact": src})
     return out
 
 

@@ -1,0 +1,69 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "replay of experiments/eval/ref_7.8b_awq_ko_test",
+  "data": [
+   "data/ko/test.jsonl",
+   "data/ko/synthetic_test.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 699,
+  "wall_s": 3.7,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "evidence_repair": true,
+  "entity_check": true,
+  "column_check": false,
+  "replay_from": "experiments/eval/ref_7.8b_awq_ko_test",
+  "finished": "2026-11-15T07:17:14",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 699,
+  "n_answerable": 649,
+  "n_gold_abstain": 50,
+  "n_calc": 110,
+  "n_lookup": 539,
+  "verified_em": 0.4821,
+  "answer_em_answerable": 0.4576,
+  "raw_answer_em_answerable": 0.4992,
+  "evidence_cells_exact": 0.4561,
+  "evidence_cells_exact_raw": 0.3267,
+  "evidence_repaired_rate": 0.208,
+  "evidence_cells_overlap": 0.4792,
+  "op_acc": 0.8054,
+  "lookup_em": 0.4972,
+  "calc_em": 0.2636,
+  "calc_result_correct": 0.2455,
+  "unit_error_rate": 0.1552,
+  "abstain_recall": 0.8,
+  "false_abstain_rate": 0.4206,
+  "abstain_precision": 0.1278,
+  "parse_fail_rate": 0.0458,
+  "verifier_corrections": 0.359,
+  "truncated_gold_rate": 0.0343,
+  "verified_em_untruncated": 0.4978,
+  "mean_ms_per_example": 10218.5,
+  "by_source": {
+   "korwikitq": {
+    "n": 539,
+    "verified_em": 0.4972
+   },
+   "synthetic": {
+    "n": 160,
+    "verified_em": 0.4313
+   }
+  },
+  "gold_subject_fail_rate": 0.0431,
+  "entity_check": true
+ }
+}

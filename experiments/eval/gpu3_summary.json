@@ -1,0 +1,19 @@
+{
+ "ref_7p8b_awq_ko_test": {
+  "questions": 699,
+  "answers_over_200_chars": 16,
+  "of_those_withheld": 14,
+  "guard_triggered": 0
+ },
+ "ms_per_question_ratio_7p8b_to_tuned_1p2b": 4.1,
+ "untuned_verified_em_by_size": {
+  "exaone_4_0_1p2b": 0.2704,
+  "exaone_3_5_7p8b_awq": 0.4979,
+  "exaone_4_0_32b_awq_previous_session": 0.7725,
+  "exaone_4_0_1p2b_tuned_on_3587": 0.8426
+ },
+ "tools_same_setting_two_sessions": {
+  "previous_session": 0.1445,
+  "this_session": 0.1459
+ }
+}

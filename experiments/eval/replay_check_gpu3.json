@@ -1,0 +1,185 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "max_in": 672,
+ "runs": {
+  "ref_1p2b_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.2704,
+    "verified_em_replayed": 0.2704
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.2704,
+    "verified_em_replayed": 0.2704
+   }
+  },
+  "ref_1p2b_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.2667,
+    "verified_em_replayed": 0.2667
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.3,
+    "verified_em_replayed": 0.3
+   }
+  },
+  "ref_7p8b_awq_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4979,
+    "verified_em_replayed": 0.4979
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4821,
+    "verified_em_replayed": 0.4821
+   }
+  },
+  "ref_7p8b_awq_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5,
+    "verified_em_replayed": 0.5
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5,
+    "verified_em_replayed": 0.5
+   }
+  },
+  "tools_1p2b_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.1459,
+    "verified_em_replayed": 0.1459
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.1416,
+    "verified_em_replayed": 0.1416
+   }
+  },
+  "tools_1p2b_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.1667,
+    "verified_em_replayed": 0.1667
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.1667,
+    "verified_em_replayed": 0.1667
+   }
+  },
+  "tools_1p2b_unseen_dev500": {
+   "first_pass": {
+    "questions": 500,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.12,
+    "verified_em_replayed": 0.12
+   },
+   "subject_check": {
+    "questions": 500,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.112,
+    "verified_em_replayed": 0.112
+   }
+  },
+  "exaone_rlstart2_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5522,
+    "verified_em_replayed": 0.5522
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5436,
+    "verified_em_replayed": 0.5436
+   }
+  },
+  "exaone_rlstart2_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.3,
+    "verified_em_replayed": 0.3
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.3333,
+    "verified_em_replayed": 0.3333
+   }
+  },
+  "exaone_grpo2_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5937,
+    "verified_em_replayed": 0.5937
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5837,
+    "verified_em_replayed": 0.5837
+   }
+  },
+  "exaone_grpo2_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4333,
+    "verified_em_replayed": 0.4333
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4667,
+    "verified_em_replayed": 0.4667
+   }
+  }
+ },
+ "replays": 22,
+ "questions_checked": 8290,
+ "questions_that_differ": 0
+}

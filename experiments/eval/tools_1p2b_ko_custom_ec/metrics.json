@@ -1,0 +1,97 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "replay of experiments/eval/tools_1.2b_ko_custom",
+  "data": [
+   "data/ko/custom_eval.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 30,
+  "wall_s": 2.6,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "evidence_repair": true,
+  "entity_check": true,
+  "column_check": false,
+  "replay_from": "experiments/eval/tools_1.2b_ko_custom",
+  "finished": "2026-11-15T07:32:51",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": false,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": true
+ },
+ "metrics": {
+  "n": 30,
+  "n_answerable": 25,
+  "n_gold_abstain": 5,
+  "n_calc": 12,
+  "n_lookup": 13,
+  "verified_em": 0.1667,
+  "answer_em_answerable": 0.0,
+  "raw_answer_em_answerable": 0.0,
+  "evidence_cells_exact": 0.0,
+  "evidence_cells_exact_raw": 0.04,
+  "evidence_repaired_rate": 0.0,
+  "evidence_cells_overlap": 0.04,
+  "op_acc": 0.2667,
+  "lookup_em": 0.0,
+  "calc_em": 0.0,
+  "calc_result_correct": 0.0,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 1.0,
+  "false_abstain_rate": 0.96,
+  "abstain_precision": 0.1724,
+  "parse_fail_rate": 0.0667,
+  "verifier_corrections": 0.12,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.1667,
+  "mean_ms_per_example": 2264.5,
+  "by_source": {
+   "custom": {
+    "n": 30,
+    "verified_em": 0.1667
+   }
+  },
+  "by_category": {
+   "abstain": {
+    "n": 5,
+    "verified_em": 1.0
+   },
+   "calc": {
+    "n": 6,
+    "verified_em": 0.0
+   },
+   "cell": {
+    "n": 9,
+    "verified_em": 0.0
+   },
+   "text_table": {
+    "n": 5,
+    "verified_em": 0.0
+   },
+   "unit_period": {
+    "n": 5,
+    "verified_em": 0.0
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": true,
+  "tool_calling": {
+   "model_calls_mean": 2.63,
+   "tool_calls_mean": 2.63,
+   "tool_errors": 1,
+   "finished_by": {
+    "abstain": 25,
+    "invalid_submit": 1,
+    "max_steps": 1,
+    "submit": 3
+   }
+  }
+ }
+}

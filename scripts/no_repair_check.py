@@ -31,6 +31,9 @@ RUNS = [
     ("exaone_vllm_ko_test_run1", "engine", "exaone", 672), ("exaone_vllm_ko_test_run2", "engine", "exaone", 672), ("exaone_vllm_ko_test", "engine", "exaone", 672),
     ("exaone_colid_vllm_ko_test", "engine", "exaone", 800),
     ("exaone_full_vllm_ko_test", "engine", "exaone", 672), ("exaone_full_vllm_ko_test_run2", "engine", "exaone", 672),
+    # third GPU session: start model and model after the second RL experiment, and the two untuned sizes
+    ("exaone_rlstart2_vllm_ko_test", "engine", "exaone", 672), ("exaone_grpo2_vllm_ko_test", "engine", "exaone", 672),
+    ("ref_1p2b_ko_test", "engine", "exaone", 672), ("ref_7p8b_awq_ko_test", "engine", "exaone", 672),
 ]
 
 

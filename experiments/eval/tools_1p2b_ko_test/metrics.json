@@ -1,0 +1,81 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "engine:planner+tools",
+  "data": [
+   "data/ko/test.jsonl",
+   "data/ko/synthetic_test.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 699,
+  "wall_s": 442.0,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "evidence_repair": true,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-15T07:31:52",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": false,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": true
+ },
+ "metrics": {
+  "n": 699,
+  "n_answerable": 649,
+  "n_gold_abstain": 50,
+  "n_calc": 110,
+  "n_lookup": 539,
+  "verified_em": 0.1459,
+  "answer_em_answerable": 0.094,
+  "raw_answer_em_answerable": 0.0971,
+  "evidence_cells_exact": 0.0909,
+  "evidence_cells_exact_raw": 0.1032,
+  "evidence_repaired_rate": 0.0077,
+  "evidence_cells_overlap": 0.0986,
+  "op_acc": 0.3834,
+  "lookup_em": 0.1039,
+  "calc_em": 0.0455,
+  "calc_result_correct": 0.0455,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 0.82,
+  "false_abstain_rate": 0.7334,
+  "abstain_precision": 0.0793,
+  "parse_fail_rate": 0.0572,
+  "verifier_corrections": 0.1602,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.1459,
+  "mean_ms_per_example": 2501.1,
+  "by_source": {
+   "korwikitq": {
+    "n": 539,
+    "verified_em": 0.1039
+   },
+   "synthetic": {
+    "n": 160,
+    "verified_em": 0.2875
+   }
+  },
+  "gold_subject_fail_rate": 0.0431,
+  "entity_check": false,
+  "tool_calling": {
+   "model_calls_mean": 2.98,
+   "tool_calls_mean": 3.0,
+   "tool_errors": 106,
+   "finished_by": {
+    "abstain": 376,
+    "invalid_submit": 5,
+    "max_steps": 33,
+    "no_tool_call": 2,
+    "submit": 283
+   }
+  }
+ }
+}
