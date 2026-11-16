@@ -27,7 +27,8 @@ EVAL = ROOT / "experiments" / "eval"
 KO = ROOT / "data" / "ko"
 CPU_PLANNERS = {"heuristic": "heuristic", "mt5_small_final": "rl_v3"}          # label -> run prefix
 # EXAONE needs a GPU: the owner ran these on Kaggle (notebook 2, section L). The full-data model was trained in that session
-GPU_PLANNERS = {"exaone_full_data": "exaone_full4_vllm", "exaone_1p2b_untuned": "ref_1p2b", "exaone_7p8b_untuned": "ref_7p8b_awq"}
+GPU_PLANNERS = {"exaone_full_data": "exaone_full4_vllm", "exaone_1p2b_untuned": "ref_1p2b", "exaone_7p8b_untuned": "ref_7p8b_awq",
+                "exaone_full_data_owner_loop": "exaone_ownloop_vllm"}       # the last one: section M, trained with the owner-written loop
 
 
 def load(p: Path) -> list[dict]:

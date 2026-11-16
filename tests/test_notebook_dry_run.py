@@ -9,6 +9,7 @@
 """
 import collections
 import glob
+import itertools
 import json
 import os
 import re
@@ -79,10 +80,11 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                owner = ("full4", "_ko_owner")           # section L (2026-11-16): the last results that came in
+                loop = ("ownloop",)                      # section M (2026-11-16, Colab): the last results that came in
+                owner = ("full4", "_ko_owner", *loop)    # section L (2026-11-16)
                 later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3", *owner), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3", *owner),
                          "before the full-data rerun": ("full2", "full3", "grpo3", *owner), "before RL on the full-data model": ("full3", "grpo3", *owner),
-                         "before EXAONE on the owner's questions": owner}.get(cloned_results, ())
+                         "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -648,7 +650,7 @@ def test_owner_loop_section_trains_the_full_data_model_with_the_owner_written_lo
     """Every stored EXAONE fine-tuning ran with the loop built into the script. Section M trains the full-data model
     once with the loop the owner wrote: the same command as the other full-data trainings plus `--loop owner`, and the
     same three evaluations as section L."""
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    run = DryRun(tmp_path, monkeypatch, cloned_results="before the owner-loop run")
     counts = run.run_all(only=OWNLOOP_CELL)
     assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 6
     train = next(c for k, c in run.calls if k == "train")
@@ -667,6 +669,24 @@ def test_owner_loop_section_trains_the_full_data_model_with_the_owner_written_lo
     src = next(src for _, src in run.sections if OWNLOOP_CELL in src)
     script = (ROOT / "scripts/train/exaone_lora_sft.py").read_text(encoding="utf-8")
     assert '"owner" not in str(t.get("loop"))' in src and "tabletrace.training.lm_loop (owner-written)" in script
+
+
+def test_the_recorded_owner_loop_run_matches_what_the_notebook_does_and_the_section_is_now_finished(tmp_path, monkeypatch):
+    """Section M was run on 2026-11-16 on Colab with one T4. The stored training record names the owner's loop, carries a
+    learning rate for every step (only that loop records it) and differs from the built-in run of the same command in
+    the loop and the output path only. With the results in the repository the section starts nothing."""
+    own = json.loads((ROOT / "experiments/exaone_lora_ownloop/train_info.json").read_text())
+    builtin = json.loads((ROOT / "experiments/exaone_lora_full4/train_info.json").read_text())
+    assert own["loop"] == "tabletrace.training.lm_loop (owner-written)" and builtin["loop"] == "builtin"
+    assert {k for k in set(own["args"]) | set(builtin["args"]) if own["args"].get(k) != builtin["args"].get(k)} == {"loop", "out"}
+    assert (own["n_examples"], own["steps"], own["targets_missing"], own["targets_cut_short"]) == (builtin["n_examples"], builtin["steps"], 0, 0)
+    lrs = [x["lr"] for x in own["loss_log"]]
+    assert len(lrs) == own["steps"] and lrs[0] == own["args"]["lr"] and all(a > b for a, b in itertools.pairwise(lrs)) and lrs[-1] < lrs[0] / 100
+    assert not any("lr" in x for x in builtin["loss_log"])
+    info = json.loads((ROOT / "experiments/run_info_2_ownloop.json").read_text())
+    assert info["platform"] == "colab" and info["gpus"] == ["Tesla T4"]
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    assert run.run_all(only=OWNLOOP_CELL) == collections.Counter()
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

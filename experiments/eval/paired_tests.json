@@ -935,6 +935,78 @@
   "p_two_sided": 0.38173279479333766,
   "p_display": "0.382"
  },
+ "ownloop_vs_full4_ko_test": {
+  "reference": "exaone_full4_vllm_ko_test",
+  "candidate": "exaone_ownloop_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 26,
+  "reference_better": 23,
+  "p_two_sided": 0.7754496546815659,
+  "p_display": "0.775"
+ },
+ "ownloop_vs_full4_ko_test_ec": {
+  "reference": "exaone_full4_vllm_ko_test_ec",
+  "candidate": "exaone_ownloop_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 27,
+  "reference_better": 23,
+  "p_two_sided": 0.6718110337653656,
+  "p_display": "0.672"
+ },
+ "ownloop_vs_full3_ko_test": {
+  "reference": "exaone_full3_vllm_ko_test",
+  "candidate": "exaone_ownloop_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 25,
+  "reference_better": 25,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "ownloop_vs_full2_ko_test": {
+  "reference": "exaone_full2_vllm_ko_test",
+  "candidate": "exaone_ownloop_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 23,
+  "reference_better": 26,
+  "p_two_sided": 0.7754496546815659,
+  "p_display": "0.775"
+ },
+ "ownloop_vs_full_run1_ko_test": {
+  "reference": "exaone_full_vllm_ko_test",
+  "candidate": "exaone_ownloop_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 36,
+  "reference_better": 24,
+  "p_two_sided": 0.1550019040032606,
+  "p_display": "0.155"
+ },
+ "ownloop_vs_full_run2_ko_test": {
+  "reference": "exaone_full_vllm_ko_test_run2",
+  "candidate": "exaone_ownloop_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 20,
+  "reference_better": 28,
+  "p_two_sided": 0.31232680747326924,
+  "p_display": "0.312"
+ },
+ "ownloop_vs_full4_ko_owner": {
+  "reference": "exaone_full4_vllm_ko_owner",
+  "candidate": "exaone_ownloop_vllm_ko_owner",
+  "n": 30,
+  "candidate_better": 1,
+  "reference_better": 1,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "ownloop_vs_full4_ko_custom": {
+  "reference": "exaone_full4_vllm_ko_custom",
+  "candidate": "exaone_ownloop_vllm_ko_custom",
+  "n": 30,
+  "candidate_better": 2,
+  "reference_better": 0,
+  "p_two_sided": 0.5,
+  "p_display": "0.500"
+ },
  "ref_7p8b_vs_ref_1p2b_ko_test": {
   "reference": "ref_1p2b_ko_test",
   "candidate": "ref_7p8b_awq_ko_test",

@@ -40,6 +40,7 @@ RUNS = [
     ("exaone_full2_vllm_ko_test", "engine", "exaone", 672), ("exaone_full2old_vllm_ko_test", "engine", "exaone", 672),      # full data: fixed cap, old cap
     ("exaone_full3_vllm_ko_test", "engine", "exaone", 672), ("exaone_grpo3_vllm_ko_test", "engine", "exaone", 672),         # RL from a full-data model: before, after
     ("exaone_full4_vllm_ko_test", "engine", "exaone", 672),           # the full-data model that was measured on the owner's questions
+    ("exaone_ownloop_vllm_ko_test", "engine", "exaone", 672),         # the full-data model trained with the loop the owner wrote
 ]
 
 

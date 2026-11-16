@@ -56,3 +56,10 @@
   - 묶음의 `run_info_2.json`은 `run_info_2_owner.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_owner.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
   - `scripts/replay_check.py --session owner`로 다시 검증했다. 10회, 1,638문항에서 판정이 다른 문항은 0개다(`replay_check_owner.json`).
   - 분석은 `scripts/owner_eval_analysis.py`가 한다(`owner_eval_analysis.json`의 `gpu_planners`).
+- **2번 노트북, 2026-11-16 (Colab Tesla T4 ×1, 커밋 `7618400`, `experiments/run_info_2_ownloop.json`)**: M절. 소유자가 직접 쓴 학습 루프(`src/tabletrace/training/lm_loop.py`, `--loop owner`)로 한 전체 데이터 미세조정. 새 파일은 평가 6건 `exaone_ownloop_vllm_ko_{test,custom,owner}`와 각각의 `_ec`, 학습 기록 `experiments/exaone_lora_ownloop/train_info.json`(`"loop": "tabletrace.training.lm_loop (owner-written)"`, 3,587문항, 224걸음, 정답이 잘린 예제 0)이다. 나머지 146개 파일은 저장소의 것과 같았다.
+  - 학습 명령에서 `exaone_full4`와 다른 것은 `--loop`와 `--out`뿐이다. 두 루프는 같은 절차가 아니다. 소유자의 루프는 학습률을 선형으로 줄이고(학습 기록에 걸음마다의 학습률이 있다) 들어 있는 루프는 일정하게 둔다.
+  - Kaggle의 주간 GPU 할당량이 다 차서 Colab에서 돌렸다. 2번 노트북의 첫 Colab 실행이다. GPU는 한 장이다.
+  - 묶음은 두 길로 왔다. 소유자가 대화에 올렸고, 노트북이 `gpu-results-2` 가지에도 올렸다(커밋 `f213fed`). 두 파일의 SHA-256이 같다(`3bbd9c62…`).
+  - 묶음의 `run_info_2.json`은 `run_info_2_ownloop.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_ownloop.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
+  - `scripts/replay_check.py --session ownloop`으로 다시 검증했다. 6회, 1,518문항에서 판정이 다른 문항은 0개다(`replay_check_ownloop.json`).
+  - 분석은 `scripts/owner_loop_analysis.py`가 한다(`owner_loop_analysis.json`).

@@ -137,6 +137,15 @@ PAIRS = [
     ("full4_vs_full2_ko_test", "exaone_full2_vllm_ko_test", "exaone_full4_vllm_ko_test"),
     ("full4_vs_full_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_full4_vllm_ko_test"),
     ("full4_vs_full_run1_ko_test_ec", "exaone_full_vllm_ko_test_ec", "exaone_full4_vllm_ko_test_ec"),
+    # the full-data model trained with the loop the owner wrote (linear learning-rate decay) against the trainings with the built-in loop
+    ("ownloop_vs_full4_ko_test", "exaone_full4_vllm_ko_test", "exaone_ownloop_vllm_ko_test"),           # same command apart from --loop; another session and platform
+    ("ownloop_vs_full4_ko_test_ec", "exaone_full4_vllm_ko_test_ec", "exaone_ownloop_vllm_ko_test_ec"),
+    ("ownloop_vs_full3_ko_test", "exaone_full3_vllm_ko_test", "exaone_ownloop_vllm_ko_test"),
+    ("ownloop_vs_full2_ko_test", "exaone_full2_vllm_ko_test", "exaone_ownloop_vllm_ko_test"),
+    ("ownloop_vs_full_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_ownloop_vllm_ko_test"),
+    ("ownloop_vs_full_run2_ko_test", "exaone_full_vllm_ko_test_run2", "exaone_ownloop_vllm_ko_test"),
+    ("ownloop_vs_full4_ko_owner", "exaone_full4_vllm_ko_owner", "exaone_ownloop_vllm_ko_owner"),
+    ("ownloop_vs_full4_ko_custom", "exaone_full4_vllm_ko_custom", "exaone_ownloop_vllm_ko_custom"),
     # untuned EXAONE of two sizes, same prompt and verifier
     ("ref_7p8b_vs_ref_1p2b_ko_test", "ref_1p2b_ko_test", "ref_7p8b_awq_ko_test"),
     ("ref_7p8b_vs_ref_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "ref_7p8b_awq_ko_test_ec"),

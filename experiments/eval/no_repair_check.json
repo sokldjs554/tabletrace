@@ -223,9 +223,19 @@
    "questions_that_differ": 0,
    "verified_em_with_repair": 0.8555,
    "max_in": 672
+  },
+  "exaone_ownloop_vllm_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 3,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.8584,
+   "verified_em_replayed": 0.8584,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.8598,
+   "max_in": 672
   }
  },
- "runs_checked": 22,
- "questions_checked": 15378,
+ "runs_checked": 23,
+ "questions_checked": 16077,
  "questions_that_differ": 0
 }

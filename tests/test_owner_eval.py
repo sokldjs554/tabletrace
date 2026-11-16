@@ -211,23 +211,41 @@ def test_the_exaone_results_on_the_owner_questions_follow_from_the_stored_predic
     assert min(ems) <= new <= max(ems)
 
 
-def test_the_documents_do_not_say_the_owner_written_loop_trained_a_stored_model():
-    """The owner wrote three training files. Reward and GRPO loss were used in the RL runs; the fine-tuning loop was
-    not: every stored EXAONE fine-tuning ran with the loop built into the script. Until a stored training record names
-    the owner's loop (the script writes "tabletrace.training.lm_loop (owner-written)"), the documents have to say so."""
-    infos = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_lora_*/train_info.json"))]
-    assert len(infos) >= 8
+def test_the_documents_say_exactly_which_trainings_used_the_owner_written_loop():
+    """The owner wrote three training files. Reward and GRPO loss were used in the RL runs. The fine-tuning loop trained
+    one stored model (2026-11-16, section M of notebook 2); every other stored EXAONE fine-tuning ran with the loop built
+    into the script. The documents may say "fine-tuned with the loop I wrote" for that one run and must not stretch it
+    to the others, nor call the two loops equal."""
+    infos = {p.parent.name: json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_lora_*/train_info.json"))}
+    owner_runs = sorted(k for k, t in infos.items() if "owner" in str(t.get("loop")))
+    assert owner_runs == ["exaone_lora_ownloop"]                                        # exactly one, and the documents count it as one
+    assert all(t.get("loop") in (None, "builtin") for k, t in infos.items() if k not in owner_runs)
+    assert infos["exaone_lora_full"].get("loop") in (None, "builtin")                    # the headline model was trained with the built-in loop
     rl = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_grpo*/train_info.json"))]
-    assert rl and all("owner-written" in t["reward"] for t in rl)                     # the reward and loss were used
-    if any("owner" in str(t.get("loop")) for t in infos):
-        pytest.skip("a stored training used the owner's loop: the statement no longer applies")
-    assert all(t.get("loop") in (None, "builtin") for t in infos)
+    assert rl and all("owner-written" in t["reward"] for t in rl)                        # the reward and loss were used
+    d = json.loads((EVAL / "owner_loop_analysis.json").read_text(encoding="utf-8"))
+    t = d["test"]
+    assert d["training"]["args_that_differ"] == ["loop", "out"] and d["training"]["owner_loop"]["lr_falls_at_every_step"] is True
+    assert d["training"]["owner_loop"]["steps_with_a_loss_that_is_not_finite"] == 0
+    assert d["training"]["owner_loop"]["loss_last_20_steps"] < d["training"]["owner_loop"]["loss_first_20_steps"] / 5
+    a, b = predictions("exaone_ownloop_vllm_ko_test"), predictions("exaone_full4_vllm_ko_test")          # recomputed from the predictions
+    same = t["paired_with_each_built_in_run"]["fixed_cap_run3"]
+    assert same["only_owner_loop"] == sum(a[q]["verified_correct"] and not b[q]["verified_correct"] for q in a)
+    assert same["only_built_in"] == sum(b[q]["verified_correct"] and not a[q]["verified_correct"] for q in a)
+    assert t["owner_loop_inside_the_range_of_the_built_in_runs"] is True and t["smallest_p"] > 0.05       # "inside the range", "no significant difference"
     report = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
-    assert "소유자가 쓴 학습 루프는 GPU 학습에 쓰인 적이 없다" in report[report.index("## 26. "):]
+    sec = report[report.index("## 27. 소유자가 쓴 학습 루프로"):]
+    for needle in ("한 번의 실행이다", "두 루프가 같다는 시험이 아니다", "그 루프를 불러 쓰는 학습 스크립트도 AI 도구가 썼다", '"모든 미세조정을 직접 쓴 루프로 했다"는 틀린 말이다'):
+        assert needle in sec, needle
     handoff = (ROOT / "docs" / "HANDOFF.md").read_text(encoding="utf-8")
-    assert "학습 루프는 GPU 학습에 쓰인 적이 없다" in handoff and '"직접 쓴 학습 루프로 EXAONE을 미세조정했다"고 쓰지 않는다' in handoff
-    assert "학습 루프(`lm_loop.py`)는 GPU 학습에 쓰인 적이 없습니다" in (ROOT / "README.md").read_text(encoding="utf-8")
-    assert "GPU 학습에는 쓰이지 않았다" in (ROOT / "docs" / "ONE_PAGE.md").read_text(encoding="utf-8")
-    d = json.loads((EVAL / "owner_eval_analysis.json").read_text(encoding="utf-8"))["calc_wording"]
-    assert d["ko_owner"]["wording_names_the_right_operation"] < d["ko_ai_written"]["wording_names_the_right_operation"]
-    assert d["chem_textbook_ai_written"]["heuristic_right"] < d["chem_textbook_ai_written"]["wording_names_the_right_operation"]      # wording alone did not make the baseline right there
+    sec = handoff[handoff.index("### 9.1g"):handoff.index("### 9.2 ")]
+    for needle in ('"모든 미세조정을 직접 쓴 루프로 했다"', '"학습 스크립트를 직접 짰다"', "두 루프가 같다는 시험이 아니다", "한 번의 실행이다"):
+        assert needle in sec, needle
+    assert "GPU 학습에 쓰인 적이 없다**: 저장된" not in handoff                            # the statement from before the run is gone
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    sec = readme[readme.index("### 9.13 소유자가 쓴 학습 루프로"):readme.index("## 10. 추론 최적화")]
+    assert "한 번의 실행입니다" in sec and "두 루프는 같은 절차가 아닙니다" in sec and "들어 있는 루프로 학습됐습니다" in sec
+    assert "GPU 학습에는 쓰이지 않았다" not in (ROOT / "docs" / "ONE_PAGE.md").read_text(encoding="utf-8")
+    w = json.loads((EVAL / "owner_eval_analysis.json").read_text(encoding="utf-8"))["calc_wording"]
+    assert w["ko_owner"]["wording_names_the_right_operation"] < w["ko_ai_written"]["wording_names_the_right_operation"]
+    assert w["chem_textbook_ai_written"]["heuristic_right"] < w["chem_textbook_ai_written"]["wording_names_the_right_operation"]      # wording alone did not make the baseline right there
