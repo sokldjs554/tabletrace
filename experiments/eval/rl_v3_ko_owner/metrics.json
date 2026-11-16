@@ -1,0 +1,86 @@
+{
+ "meta": {
+  "planner": "neural",
+  "model": "model",
+  "data": [
+   "data/ko/owner_eval.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 30,
+  "wall_s": 64.6,
+  "hardware": "x86_64",
+  "label": null,
+  "table_format": "plain",
+  "row_select": "first",
+  "evidence_repair": true,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-16T07:26:27",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 30,
+  "n_answerable": 26,
+  "n_gold_abstain": 4,
+  "n_calc": 10,
+  "n_lookup": 16,
+  "verified_em": 0.2667,
+  "answer_em_answerable": 0.2308,
+  "raw_answer_em_answerable": 0.2308,
+  "evidence_cells_exact": 0.2308,
+  "evidence_cells_exact_raw": 0.2308,
+  "evidence_repaired_rate": 0.4615,
+  "evidence_cells_overlap": 0.2692,
+  "op_acc": 0.5667,
+  "lookup_em": 0.3125,
+  "calc_em": 0.1,
+  "calc_result_correct": 0.0,
+  "unit_error_rate": null,
+  "abstain_recall": 0.5,
+  "false_abstain_rate": 0.1538,
+  "abstain_precision": 0.3333,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.0769,
+  "truncated_gold_rate": 0.0667,
+  "verified_em_untruncated": 0.2857,
+  "mean_ms_per_example": 1589.7,
+  "by_source": {
+   "owner": {
+    "n": 30,
+    "verified_em": 0.2667
+   }
+  },
+  "by_category": {
+   "abstain": {
+    "n": 4,
+    "verified_em": 0.5
+   },
+   "calc": {
+    "n": 6,
+    "verified_em": 0.0
+   },
+   "cell": {
+    "n": 12,
+    "verified_em": 0.3333
+   },
+   "text_table": {
+    "n": 4,
+    "verified_em": 0.25
+   },
+   "unit_period": {
+    "n": 4,
+    "verified_em": 0.25
+   }
+  },
+  "gold_subject_fail_rate": 0.0385,
+  "entity_check": false
+ }
+}

@@ -69,6 +69,8 @@ class DryRun:
             (repo / d).mkdir(parents=True)
         for m in ("evidence_reward", "grpo"):
             (repo / "src/tabletrace/training" / f"{m}.py").write_text("")
+        (repo / "data/ko").mkdir(parents=True)
+        (repo / "data/ko/owner_eval.jsonl").write_text("")                 # the owner's questions are part of main since 2026-11-16 (section L reads them)
         bindir = root / "bin"
         bindir.mkdir()
         (bindir / "nvidia-smi").write_text("#!/bin/sh\necho 1000\necho 1000\n")
@@ -163,7 +165,7 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     repo, calls, packs, sections, run_all = run.repo, run.calls, run.packs, run.sections, run.run_all
 
     first = run_all()
-    assert first["train"] == 10 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I; RL in D and in J
+    assert first["train"] == 11 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I + the model of section L; RL in D and in J
     assert len(packs) >= len(sections) - 1                                   # every section ends by packing what exists so far
     assert Path.cwd() == repo                                                # pack() moves away for the download link and must come back
     names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
@@ -217,7 +219,7 @@ def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
     run = DryRun(tmp_path, monkeypatch, n_gpu=1)
     counts = run.run_all()
     commands = [c for _, c in run.calls]
-    assert counts["grpo"] == 2 and counts["train"] == 8                      # no ddp1 / ddp2
+    assert counts["grpo"] == 2 and counts["train"] == 9                      # no ddp1 / ddp2
     assert not any("torchrun" in c for c in commands) and not any("32b" in o.lower() for o in run.outputs())
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
@@ -247,7 +249,7 @@ def test_notebook_2_goes_on_when_a_server_dies_during_evaluation(tmp_path, monke
     counts = run.run_all()
     mine = [c for k, c in run.calls if k == "eval" and "ref_32b_awq" in re.search(r"--out (\S+)", c).group(1)]
     assert len(mine) == 1 and "--replay-from" not in mine[0]                 # no second set, no re-verification of a missing file
-    assert counts["grpo"] == 2 and counts["train"] == 10                     # the other sections still ran
+    assert counts["grpo"] == 2 and counts["train"] == 11                     # the other sections still ran
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
 
@@ -573,6 +575,50 @@ def test_the_recorded_rl_run_on_the_full_data_model_matches_what_the_notebook_do
     assert before < after <= info["finished"]                                   # start model evaluated first, RL model last, then the archive
     run = DryRun(tmp_path, monkeypatch, cloned_results=True)
     assert run.run_all(only=RL3_CELL) == collections.Counter()
+
+
+OWNER_CELL = "OWNER_SETS"       # the cell of section L
+
+
+def test_owner_questions_section_trains_a_full_data_model_in_a_new_session_and_evaluates_three_models(tmp_path, monkeypatch):
+    """Section L measures EXAONE on the 30 questions the owner wrote. A new session has no weights, so the full-data
+    model is trained again under the next unused name with the corrected length setting and evaluated on the test set,
+    the AI-written questions and the owner's questions. The two untuned models get the owner's questions only, with the
+    few-shot setting of section A. Stored results stay as they are."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    counts = run.run_all(only=OWNER_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 10
+    train = next(c for k, c in run.calls if k == "train")
+    assert "--limit 0 " in train and "--max-in 672" in train and "--max-len 960" in train and "--out experiments/exaone_lora_full4" in train
+    assert run.outputs() == sorted([f"experiments/eval/exaone_full4_vllm_ko_{s}{ec}" for s in ("test", "custom", "owner") for ec in ("", "_ec")]
+                                   + [f"experiments/eval/{m}_ko_owner{ec}" for m in ("ref_1p2b", "ref_7p8b_awq") for ec in ("", "_ec")] + ["experiments/exaone_lora_full4"])
+    owner = [c for k, c in run.calls if k == "eval" and "ko_owner" in c and "--replay-from" not in c]
+    assert len(owner) == 3 and all("--data data/ko/owner_eval.jsonl" in c and "--confidence" in c and "--no-entity-check" in c and "--max-in 672" in c for c in owner)
+    shots = [c for c in owner if "ref_" in c]
+    assert len(shots) == 2 and all("--few-shot data/ko/train.jsonl data/ko/synthetic_train.jsonl --shots-per-kind 2" in c for c in shots)
+    assert not any("--few-shot" in c for c in owner if "exaone_full4" in c)                          # the tuned model gets no examples
+    stored = (ROOT / "experiments/eval/ref_1p2b_ko_test/metrics.json").read_text()
+    assert (run.repo / "experiments/eval/ref_1p2b_ko_test/metrics.json").read_text() == stored      # earlier results untouched
+    assert not (run.repo / "experiments/exaone_lora_full4/merged").exists()                         # weights freed after evaluation
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any("exaone_full4_vllm_ko_owner_ec" in n for n in names) and any("ref_7p8b_awq_ko_owner" in n for n in names)
+    assert any(n.endswith("exaone_lora_full4/train_info.json") for n in names)
+
+    assert run.run_all(only=OWNER_CELL) == collections.Counter()                                    # run again: nothing left to do
+
+
+def test_owner_questions_section_uses_merged_weights_that_are_still_there_and_can_skip_the_larger_model(tmp_path, monkeypatch):
+    """If the merged weights of an evaluated full-data model are still in the working directory, that model is served
+    again and only the owner's questions are evaluated with it. `RUN_7P8B_OWNER = False` leaves the 7.8B model out."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    assert sum("RUN_7P8B_OWNER = True" in src for _, src in run.sections) == 1
+    run.sections = [(i, src.replace("RUN_7P8B_OWNER = True", "RUN_7P8B_OWNER = False")) for i, src in run.sections]
+    merged = run.repo / "experiments/exaone_lora_full3/merged"
+    merged.mkdir(parents=True)
+    (merged / "config.json").write_text("{}")
+    counts = run.run_all(only=OWNER_CELL)
+    assert counts["train"] == 0 and counts["eval"] == 4
+    assert run.outputs() == sorted([f"experiments/eval/{m}_ko_owner{ec}" for m in ("exaone_full3_vllm", "ref_1p2b") for ec in ("", "_ec")])
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

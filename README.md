@@ -40,6 +40,9 @@
   - **정답률에 검출되는 차이가 없습니다.** <!-- num:experiments/eval/exaone_full3_vllm_ko_test/metrics.json:metrics.verified_em:pct -->86.0<!-- /num -->%와 <!-- num:experiments/eval/exaone_grpo3_vllm_ko_test/metrics.json:metrics.verified_em:pct -->86.1<!-- /num -->%. 같은 <!-- num:experiments/eval/rl3_analysis.json:first_pass.outcomes.start.all.n -->699<!-- /num -->문항에서 한쪽만 맞힌 문항이 <!-- num:experiments/eval/paired_tests.json:grpo3_vs_full3_ko_test.candidate_better -->8<!-- /num --> 대 <!-- num:experiments/eval/paired_tests.json:grpo3_vs_full3_ko_test.reference_better -->7<!-- /num -->입니다(p <!-- num:experiments/eval/paired_tests.json:grpo3_vs_full3_ko_test.p_display -->1.000<!-- /num -->). 실행 전에 적어 둔 예상대로입니다.
   - **배울 신호가 드물었습니다.** 학습 중 표본의 <!-- num:experiments/eval/rl3_analysis.json:signal.from_full_data_model.samples_correct_rate:pct -->87.6<!-- /num -->%가 이미 정답이라, 200걸음 가운데 <!-- num:experiments/eval/rl3_analysis.json:signal.from_full_data_model.updates_applied -->127<!-- /num -->걸음만 가중치를 바꿨습니다. test 출력의 <!-- num:experiments/eval/rl3_analysis.json:outputs.same_raw_output_rate:pct -->93.3<!-- /num -->%가 강화학습 전후에 글자까지 같습니다.
   - **확신도는 나빠졌습니다(예상하지 않았던 것).** 확신도가 맞은 답과 틀린 답을 가르는 정도(AUROC)가 <!-- num:experiments/eval/rl3_analysis.json:confidence.sum_logprob.auroc.start -->0.757<!-- /num -->에서 <!-- num:experiments/eval/rl3_analysis.json:confidence.sum_logprob.auroc.rl -->0.69<!-- /num -->로 내려갔습니다. 한 번의 실행이고, 결과를 본 뒤에 찾은 것입니다.
+- **소유자가 쓴 평가 문항과 기존 문항 검수(2026-11-16).** AI 도구가 쓴 한국어 수작업 30문항을 소유자가 검수해 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->문항에서 문제를 찾았고, 시험 분할의 표로 새 문항 30개를 직접 썼습니다([§9.12](#912-소유자가-쓴-평가-문항과-기존-문항-검수)).
+  - 휴리스틱 기준선은 AI 도구가 쓴 30문항에서 <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.ai_written_first_pass.rate:pct -->50.0<!-- /num -->%, 소유자가 쓴 30문항에서 <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.owner_first_pass.rate:pct -->23.3<!-- /num -->%입니다. 계산 문항에서 갈립니다(<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.ai_written_first_pass.by_category.calc.correct -->5<!-- /num -->/6 대 <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.owner_first_pass.by_category.calc.correct -->0<!-- /num -->/6). AI 도구가 쓴 문항이 합성 데이터와 같은 낱말을 써서 기준선에 유리했습니다.
+  - EXAONE으로는 아직 재지 않았습니다(GPU가 필요하고 준비만 했습니다).
 
 문제 제기와 개별 기법은 이미 연구가 있습니다(TrustTable, RSAT, Reasoning-Table 등 12편을 원문으로 확인, [docs/REPORT.md §19.4](docs/REPORT.md)). 이 저장소가 보태는 것은 한국어 표에서의 위 측정입니다. 서비스·서빙·컨테이너 스택은 그 측정을 실제로 돌리는 데 쓴 도구입니다.
 
@@ -138,7 +141,7 @@ TableTrace는 이 문제를 **"모델은 제안하고, 도구가 실행·검증�
 | **arXiv 화학 논문 12편** | 영어 화학 논문 표 평가(표 20개, 62문항) | arxiv.org, 논문별 출처는 `data/chem_papers/SOURCES.md` | CC BY 4.0 (저자 표시, 변경 사항 표시) | HTML판에서 표 추출 |
 | KorWikiTQ 추가분 | 학습 풀(표 <!-- num:data/ko/pool_report.json:pool_tables:int -->6,111<!-- /num -->개, 질문 <!-- num:data/ko/pool_report.json:pool_questions_total:int -->29,907<!-- /num -->개), 큰 표 평가(공개 dev <!-- num:experiments/eval/large_tables.json:set.questions:int -->3,072<!-- /num -->문항) | 위와 같은 원본 | CC BY-SA 4.0 | `scripts/data/build_ko_pool.py`, `build_ko_unseen_dev.py` |
 | 합성 QA | 계산·보류 연산 학습 | 이 저장소 `scripts/data/synth_*.py` | — | 템플릿 생성 |
-| 수작업 평가 | 범주별 평가(ko 30, 화학 교과서 32, 화학 논문 62), 2턴 대화 681개(틀로 생성) | 이 저장소 `data/*/custom_eval.jsonl`, `data/ko/dialog_eval.jsonl` | — | AI 도구가 작성, 답은 표·계산기와 기계 대조. 여러 사람이 검수한 것이 아님 |
+| 수작업 평가 | 범주별 평가(ko 30, 화학 교과서 32, 화학 논문 62), 2턴 대화 681개(틀로 생성) | 이 저장소 `data/*/custom_eval.jsonl`, `data/ko/dialog_eval.jsonl` | — | AI 도구가 작성, 답은 표·계산기와 기계 대조. 여러 사람이 검수한 것이 아님. 한국어 30문항은 소유자가 검수했고(고쳐야 함 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->), 소유자가 직접 쓴 30문항이 따로 있음(`data/ko/owner_eval.jsonl`, [§9.12](#912-소유자가-쓴-평가-문항과-기존-문항-검수)) |
 | **mT5-small** (Google) | 기본 언어모델 | gs://t5-data/pretrained_models/mt5/small | Apache-2.0 | TF 체크포인트 → PyTorch 직접 변환 |
 
 KorWikiTabular(사전학습 코퍼스)와 EXAONE(모델)은 접근이 막혀 사용하지 못했습니다(§14, [docs/experiments/exaone.md](docs/experiments/exaone.md)). 조사·전처리·제외 기준·검수 방법은 [docs/research/datasets.md](docs/research/datasets.md).
@@ -769,6 +772,24 @@ mT5는 시드로 뽑은 1,000문항입니다. 같은 문항 짝 비교에서 행
 - 한계입니다. 한 번의 실행이고 시드를 바꾸지 않았습니다. 확신도 결과는 실행 전에 세운 가설이 아니라 결과를 본 뒤에 찾은 것입니다. 구간은 문항을 다시 뽑아 얻은 것이라 학습을 다시 했을 때의 흔들림은 담지 않습니다. 모델이 틀리는 프롬프트만 골라 학습하는 방식, 확신도를 보는 보상은 해 보지 않았습니다.
 - 이 프로젝트에서의 결론은 이렇습니다. 학습 풀 전체에 정답이 있으면 미세조정으로 충분했고, 그 위에 같은 보상의 강화학습을 더해 얻은 것이 없습니다. 강화학습의 효과는 약한 시작 모델에서만 보였습니다.
 
+### 9.12 소유자가 쓴 평가 문항과 기존 문항 검수
+
+한국어 수작업 30문항은 AI 도구가 썼습니다. 저장소 소유자가 2026-11-16에 두 가지를 했습니다(PR #7, 소유자 계정의 커밋). 기존 30문항을 한 문항씩 검수했고(`data/ko/custom_eval_review.jsonl`), 시험 분할의 표 <!-- num:experiments/eval/owner_eval_analysis.json:owner_set.tables -->15<!-- /num -->개를 보고 새 문항 <!-- num:experiments/eval/owner_eval_analysis.json:owner_set.questions -->30<!-- /num -->개를 직접 썼습니다(`data/ko/owner_eval.jsonl`). AI 도구는 표를 보여 주고 파일을 검사하는 도구와 검토 의견만 맡았고, 문항을 쓰거나 고치지 않았습니다. 자세한 표는 [docs/REPORT.md §25](docs/REPORT.md)에 있습니다.
+
+**검수 결과.** 문제없음 <!-- num:experiments/eval/owner_eval_analysis.json:review.ok -->26<!-- /num -->, 고쳐야 함 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->입니다. 지적된 네 문항(정답의 단위 표기 하나, 본문에 답 후보가 더 있는 것 하나, 표의 연도가 질문이 묻는 연도가 아닌 것 둘)은 표와 대조해 보니 모두 맞는 지적입니다. 문항은 고치지 않았습니다. 저장된 모델 출력이 그 문장에 대한 답이기 때문입니다. 대신 저장된 평가 <!-- num:experiments/eval/owner_eval_analysis.json:review.stored_runs -->60<!-- /num -->건을 그 네 문항 없이 다시 채점했습니다. verified EM이 많아야 <!-- num:experiments/eval/owner_eval_analysis.json:review.largest_rate_gain_without_flagged:pct -->4.6<!-- /num -->%p 움직이고, 두 평가의 순서가 뒤집히는 것은 <!-- num:experiments/eval/owner_eval_analysis.json:review.pairs_of_runs_ranked_strictly -->1,641<!-- /num -->쌍 가운데 <!-- num:experiments/eval/owner_eval_analysis.json:review.pairs_whose_order_reverses_without_flagged -->7<!-- /num -->쌍입니다.
+
+**새 문항에서의 결과**(CPU에서 돌릴 수 있는 두 플래너, 검증기 v1).
+
+| | 소유자가 쓴 30문항 | AI 도구가 쓴 30문항 | 계산 문항: 소유자 / AI 도구 |
+|---|---:|---:|---:|
+| 휴리스틱 기준선 | <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.owner_first_pass.rate:pct -->23.3<!-- /num -->% (<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.owner_first_pass.correct -->7<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.owner_first_pass.n -->30<!-- /num -->) | <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.ai_written_first_pass.rate:pct -->50.0<!-- /num -->% (<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.ai_written_first_pass.correct -->15<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.ai_written_first_pass.n -->30<!-- /num -->) | <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.owner_first_pass.by_category.calc.correct -->0<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.owner_first_pass.by_category.calc.n -->6<!-- /num --> / <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.ai_written_first_pass.by_category.calc.correct -->5<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.ai_written_first_pass.by_category.calc.n -->6<!-- /num --> |
+| mT5-small 최종 | <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.owner_first_pass.rate:pct -->26.7<!-- /num -->% (<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.owner_first_pass.correct -->8<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.owner_first_pass.n -->30<!-- /num -->) | <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.ai_written_first_pass.rate:pct -->13.3<!-- /num -->% (<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.ai_written_first_pass.correct -->4<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.ai_written_first_pass.n -->30<!-- /num -->) | <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.owner_first_pass.by_category.calc.correct -->0<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.owner_first_pass.by_category.calc.n -->6<!-- /num --> / <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.ai_written_first_pass.by_category.calc.correct -->0<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.mt5_small_final.ai_written_first_pass.by_category.calc.n -->6<!-- /num --> |
+
+- **휴리스틱은 AI 도구가 쓴 계산 문항을 <!-- num:experiments/eval/owner_eval_analysis.json:cpu_planners.heuristic.ai_written_first_pass.by_category.calc.correct -->5<!-- /num -->개 맞히고 소유자가 쓴 계산 문항은 하나도 못 맞혔습니다.** 휴리스틱은 "차이", "합계" 같은 정해 둔 낱말로 연산을 고릅니다. AI 도구가 쓴 문항은 합성 학습 데이터와 같은 낱말을 썼고, 소유자는 "메도보다 몇 개 많습니까"처럼 다른 말로 물었습니다. 합성 데이터의 틀이 기준선에 유리하다는 한계(§11)가 AI 도구가 쓴 수작업 문항에도 들어 있었던 것입니다.
+- 전체 점수의 차이는 30문항씩이라 구간이 겹칩니다. 순서를 말할 근거는 못 됩니다.
+- **EXAONE으로는 아직 재지 않았습니다.** 가중치가 GPU 세션과 함께 사라져서 다시 학습해야 합니다. 노트북 2의 L절로 준비해 두었고 돌리지 않았습니다.
+- 한계입니다. 새 문항은 한 사람이 썼고 다른 사람이 검수하지 않았습니다. 기존 test 문항과 같은 셀을 묻는 문항이 <!-- num:experiments/eval/owner_eval_analysis.json:owner_set.same_cells_as_an_existing_test_question.count -->4<!-- /num -->개 있고, 본문 문항 하나는 답 "4개"가 본문에 두 번 나와 답으로 가려지지 않습니다. 화학 문항은 AI 도구가 쓴 그대로입니다.
+
 ## 10. 추론 최적화·멀티 GPU 실험 결과
 
 ### 10.1 추론 최적화 (CPU 실측)
@@ -983,7 +1004,7 @@ EXAONE 행의 조건: ko test 699문항 전체를 vLLM 1장·동시 16요청으�
 - **검증기가 못 잡는 것**: 검증기는 답이 인용 셀(또는 복구로 찾은 셀)의 값과 같은지를 봅니다. 모델이 엉뚱한 행의 셀 값을 답으로 쓰면 통과합니다. 근거 복구는 답 텍스트가 표의 한 셀과 같기만 하면 근거를 그 셀로 고쳐 답하므로 오답도 함께 내보냅니다(§9.6). 복구는 끌 수 있습니다. 검증기의 `repair=False`(소유자 구현, PR #5)이고 서비스에서는 `TABLETRACE_EVIDENCE_REPAIR=0`입니다. 끄면 인용 셀에 답이 없는 조회를 보류합니다. 그래도 일관되게 틀린 답(틀린 행의 셀을 인용하고 그 값을 답으로 씀)은 잡지 못합니다.
 - **입력 예산 512 토큰**(행 선별을 켜면 줄어듭니다, §9.7): test의 <!-- num:experiments/eval/heuristic_ko_test/metrics.json:metrics.truncated_gold_rate:pct -->8.9<!-- /num -->%는 정답 행이 잘려 원리적으로 맞힐 수 없습니다. 긴 표·다중 표 질문은 다루지 않습니다.
 - **연산 범위**: 두 셀 간 차·합·평균·비율·증감률과 셀/문장 조회만 지원합니다. argmax, 조건 집계, 단위 환산(원↔억원, kPa↔atm)은 도구에 없습니다.
-- **합성 데이터**: 계산·보류 학습 예제는 템플릿이라 표현이 단조롭고, 기준선에 유리한 편향이 있습니다. 화학은 교과서 표가 중심이고, 논문 표는 평가용 62문항만 있습니다(§9.7). 특허는 없습니다. 수작업 평가는 한국어 30, 화학 교과서 32, 화학 논문 62문항이고 모두 AI 도구가 썼으며 여러 사람이 검수하지 않았습니다.
+- **합성 데이터**: 계산·보류 학습 예제는 템플릿이라 표현이 단조롭고, 기준선에 유리한 편향이 있습니다. 화학은 교과서 표가 중심이고, 논문 표는 평가용 62문항만 있습니다(§9.7). 특허는 없습니다. 소유자가 쓴 한국어 30문항이 따로 있지만 한 사람이 썼고 EXAONE으로는 아직 재지 않았습니다([§9.12](#912-소유자가-쓴-평가-문항과-기존-문항-검수)). AI 도구가 쓴 수작업 평가는 한국어 30, 화학 교과서 32, 화학 논문 62문항이고 모두 AI 도구가 썼으며 여러 사람이 검수하지 않았습니다.
 - **검색**: BM25만 사용합니다. 표 검색 hit@1은 한국어 <!-- num:experiments/eval/retrieval/metrics.json:ko_test_lookup.hit_at_1:pct -->80.0<!-- /num -->%, 화학 <!-- num:experiments/eval/retrieval/metrics.json:chem_custom.hit_at_1:pct -->65.6<!-- /num -->%라 문서를 지정하지 않으면 시작부터 틀리는 질문이 있습니다.
 - **강화학습**: 120 step·시드 1개의 예비 실험입니다. 보상이 검증기에 의존해 검증기의 허점이 곧 보상 허점이 됩니다(1차에서 실제로 한 번 발생해 고쳤습니다). RL v3의 이득은 본문 근거 없음 문항의 직접 보류에 한정되고 ko test 전체 점수는 그대로입니다.
 - **서빙·병렬**: vLLM 0.32.0과 SGLang 0.5.23은 모델 등록부에 T5/mT5가 없어 **이 프로젝트의 mT5 모델은 두 엔진으로 서빙할 수 없습니다**(`experiments/serving/engine_support.json`). 그래서 EXAONE-4.0-1.2B를 LoRA 튜닝해 vLLM과 SGLang으로 서빙·평가했습니다(§10.3, 소유자가 Kaggle T4에서 실행). SGLang은 T4를 지원하지 않아 fused 커널을 PyTorch 구현으로 바꾼 우회 모듈로 돌렸고, 점수는 vLLM과 같지만 속도는 느립니다. 멀티 GPU는 소유자가 Kaggle T4 2장에서 vLLM TP=2와 NCCL 2단계 파이프라인을 돌려 실측했습니다(§10.2, §10.3). 파이프라인은 처리량 이득이 없고, TP=2는 처리량을 약 1.6~2.2배 올렸습니다. int8 결과는 §10.1.
@@ -998,7 +1019,7 @@ python3.11+ -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"            # 휴리스틱 플래너 + API + 콘솔 (torch 없음)
 pip install -e ".[model]"          # + PyTorch/Transformers (모델 플래너)
 python scripts/check_data.py       # 데이터 무결성
-pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->315<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
+pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->321<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
 tabletrace serve                   # http://127.0.0.1:8000  (모델이 models/mt5-small-tabletrace 에 있으면 자동 사용)
 ```
 
@@ -1012,7 +1033,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 
 ## 13. 테스트·CI·배포
 
-- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 소유자가 쓴 학습 코드(보상, GRPO 손실, 학습 루프), 모델 로딩, gRPC, 대화·기억, 행 선별, 도구 호출 플래너(대본 모의 서버), 표 인코더, 두 번째 의견, CPU 엔진 서버, 노트북이 넘기는 옵션 검사. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->315<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->2<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내 문구를 확인하는 테스트로, 그 파일이 생긴 뒤에는 건너뜁니다. 소유자가 직접 쓴 학습 코드의 테스트 35개(`docs/rewrite/06_training_code.md`)는 통과에 들어 있습니다. 모델 가중치가 없으면 모델 테스트도 skip됩니다.
+- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 소유자가 쓴 학습 코드(보상, GRPO 손실, 학습 루프), 모델 로딩, gRPC, 대화·기억, 행 선별, 도구 호출 플래너(대본 모의 서버), 표 인코더, 두 번째 의견, CPU 엔진 서버, 노트북이 넘기는 옵션 검사. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->321<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내 문구를 확인하는 테스트로, 그 파일이 생긴 뒤에는 건너뜁니다. 소유자가 직접 쓴 학습 코드의 테스트 35개(`docs/rewrite/06_training_code.md`)는 통과에 들어 있습니다. 모델 가중치가 없으면 모델 테스트도 skip됩니다.
 - **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·대표 질문·결과·근거 강조·보류·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 정적 모드에서는 EXAONE 저장 결과에 모델 이름이 붙는지, 근거를 고친 답에서 모델이 인용한 셀과 근거 셀이 따로 표시되는지도 봅니다. 두 모드 모두 푸터가 본문과 겹치지 않는지 검사합니다. 최종 실행: 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
 - **Docker**: 이미지(786 MB)를 이 세션에서 빌드하고 컨테이너 smoke(health·release·corpora·ask·콘솔)를 통과했습니다(`experiments/docker/smoke.json`). Docker Hub·ECR이 429를 돌려 MCR 베이스 이미지로 빌드했습니다.
 - **CI**: `.github/workflows/ci.yml`(ruff, pytest, 데이터 무결성, **README·REPORT 표·수치 대조**, Docker 빌드·smoke)가 GitHub Actions에서 실행되어 **전부 통과**했습니다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/41213002277): `test` 작업과 `docker` 작업 모두 success, 커밋 `0f38f8d`). 그 뒤 커밋의 실행 결과는 저장소 Actions 탭에서 확인하세요.
@@ -1023,6 +1044,7 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 | 항목 | 상태 | 비고 |
 |---|---|---|
 | 한국어 표 QA 데이터 재분할·합성·수작업 평가 | 완료 | `data/ko/`, 공개 분할의 표 겹침 측정·제거 |
+| 소유자가 쓴 한국어 평가 30문항, 기존 30문항 검수 | **완료(소유자 작성, PR #7)**. EXAONE 평가는 준비만 함 | 검수 결과 문제없음 <!-- num:experiments/eval/owner_eval_analysis.json:review.ok -->26<!-- /num -->, 고쳐야 함 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->. 휴리스틱과 mT5-small로 평가(§9.12, docs/REPORT.md §25). EXAONE 평가는 노트북 2의 L절(미실행) |
 | 영어 화학 문서 코퍼스·합성·수작업 평가 | 완료 | `data/chem/` (논문이 아니라 교과서 표) |
 | mT5-small 변환(GCS TF → PyTorch) | 완료 | docs/dev/issues-log.md 1–4 |
 | 한국어 SFT 2단계 | 완료 | 튜닝 전후 개선, 기준선에는 미달(§9.1). 2차에서 본문 학습 결함을 고쳐 재학습(§9.5) |

@@ -107,3 +107,72 @@ def test_the_owner_files_in_the_repository_pass_the_check(docs):
         assert tool.check_owner(tool.load(tool.OWNER_FILE), docs) == []
     if tool.REVIEW_FILE.exists():
         assert tool.check_review(tool.load(tool.REVIEW_FILE)) == []
+
+
+EVAL = ROOT / "experiments" / "eval"
+
+
+def predictions(run: str) -> dict[str, dict]:
+    return {r["qid"]: r for r in map(json.loads, (EVAL / run / "predictions.jsonl").read_text(encoding="utf-8").splitlines())}
+
+
+def test_the_stored_analysis_is_what_the_script_produces_and_follows_from_the_files():
+    """The numbers the documents cite about the owner's questions and the review come from stored predictions and from
+    the owner's two files. Nothing in them may be typed by hand."""
+    import subprocess
+
+    stored = (EVAL / "owner_eval_analysis.json").read_text(encoding="utf-8")
+    r = subprocess.run([sys.executable, str(ROOT / "scripts" / "owner_eval_analysis.py")], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-2000:]
+    assert (EVAL / "owner_eval_analysis.json").read_text(encoding="utf-8") == stored
+    d = json.loads(stored)
+    review = tool.load(tool.REVIEW_FILE)
+    flagged = sorted(x["qid"] for x in review if x["verdict"] != "ok")
+    assert d["review"]["flagged"] == flagged and d["review"]["ok"] + d["review"]["fix"] + d["review"]["drop"] == 30 == d["review"]["questions"]
+    assert all(x["comment"].strip() for x in review if x["verdict"] != "ok")                          # every objection carries its reason
+    for run in ("heuristic_ko_custom", "rl_v3_ko_custom", "exaone_full_vllm_ko_custom"):               # recomputed from the predictions
+        p = predictions(run)
+        res = d["runs_on_the_ai_written_set"][run]
+        assert res["all"]["correct"] == sum(x["verified_correct"] for x in p.values())
+        assert res["without_flagged"] == {"n": 30 - len(flagged), "correct": sum(x["verified_correct"] for q, x in p.items() if q not in flagged),
+                                          "rate": round(sum(x["verified_correct"] for q, x in p.items() if q not in flagged) / (30 - len(flagged)), 4)}
+    owner = {q["qid"]: q for q in tool.load(tool.OWNER_FILE)}
+    for label, prefix in (("heuristic", "heuristic"), ("mt5_small_final", "rl_v3")):
+        p = predictions(f"{prefix}_ko_owner")
+        assert set(p) == set(owner)
+        res = d["cpu_planners"][label]["owner_first_pass"]
+        assert res["correct"] == sum(x["verified_correct"] for x in p.values()) and res["n"] == 30
+        calc = [q for q in owner if owner[q]["category"] == "calc"]
+        assert res["by_category"]["calc"] == {"n": len(calc), "correct": sum(p[q]["verified_correct"] for q in calc), "rate": round(sum(p[q]["verified_correct"] for q in calc) / len(calc), 4)}
+    assert d["owner_set"]["tables_also_used_by_the_ai_written_set"] == 0 and d["owner_set"]["questions"] == 30
+
+
+def test_the_owner_evaluations_were_made_like_the_earlier_ones():
+    """First pass without the subject check, then the same raw outputs verified again with it."""
+    for prefix in ("heuristic", "rl_v3"):
+        first = json.loads((EVAL / f"{prefix}_ko_owner" / "metrics.json").read_text(encoding="utf-8"))
+        again = json.loads((EVAL / f"{prefix}_ko_owner_ec" / "metrics.json").read_text(encoding="utf-8"))
+        assert first["meta"]["data"] == again["meta"]["data"] == ["data/ko/owner_eval.jsonl"] and first["metrics"]["n"] == again["metrics"]["n"] == 30
+        assert first["meta"]["entity_check"] is False and again["meta"]["entity_check"] is True
+        assert again["meta"]["replay_from"] == f"experiments/eval/{prefix}_ko_owner"
+        a, b = predictions(f"{prefix}_ko_owner"), predictions(f"{prefix}_ko_owner_ec")
+        assert all(a[q]["raw_output"] == b[q]["raw_output"] for q in a)
+
+
+def test_the_documents_say_who_wrote_the_questions_and_what_is_still_missing():
+    report = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
+    sec = report[report.index("## 25. 소유자가 쓴 평가 문항"):]
+    for needle in ("AI 도구는 문항을 쓰거나 고치지 않았다", "문항은 고치지 않고 그대로 둔다", "EXAONE으로는 아직 재지 않았다", "한 사람이 썼고 다른 사람이 검수하지 않았다",
+                   "기존 test 문항과 같은 셀을 묻는 문항이 있다", "구간이 겹친다"):
+        assert needle in sec, needle
+    handoff = (ROOT / "docs" / "HANDOFF.md").read_text(encoding="utf-8")
+    sec = handoff[handoff.index("### 9.1f"):handoff.index("### 9.2 ")]
+    for needle in ('"벤치마크를 구축했다"', '"여러 사람이 검수한 평가셋"', "아직 재지 않았다", "문항은 그대로 올라갔다"):
+        assert needle in sec, needle
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    sec = readme[readme.index("### 9.12 소유자가 쓴 평가 문항"):readme.index("## 10. 추론 최적화")]
+    assert "EXAONE으로는 아직 재지 않았습니다" in sec and "문항을 쓰거나 고치지 않았습니다" in sec
+    # nothing claims an EXAONE result on the owner's questions while no such run is stored
+    if not list(EVAL.glob("exaone_*_ko_owner")):
+        nb = (ROOT / "notebooks" / "gpu_experiments_2.ipynb").read_text(encoding="utf-8")
+        assert "OWNER_SETS" in nb and "아직 돌리지 않았다" in (ROOT / "docs" / "experiments" / "gpu-runbook.md").read_text(encoding="utf-8")

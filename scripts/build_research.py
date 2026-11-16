@@ -482,6 +482,28 @@ def gpu3_cards() -> list[dict]:
                               "확신도가 맞은 답과 틀린 답을 가르는 힘은 줄었다. 예상하지 않았던 것이고 결과를 본 뒤에 찾았다. 구간은 문항을 다시 뽑은 것이라 학습을 다시 했을 때의 흔들림은 담지 않는다.",
                               "한계. 한 번의 실행이고 시드를 바꾸지 않았다. 모델이 틀리는 프롬프트만 골라 학습하는 방식과 확신도를 보는 보상은 해 보지 않았다."],
                     "artifact": f"experiments/eval/rl3_analysis.json (scripts/rl3_analysis.py), experiments/exaone_grpo3/, experiments/exaone_lora_full3/train_info.json. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rp3['replays']}건을 다시 검증했고({rp3['questions_checked']:,}문항) 판정이 다른 문항은 {rp3['questions_that_differ']}개다"})
+    oe = load(EXP / "eval" / "owner_eval_analysis.json")
+    if oe:
+        rv, os_, cp = oe["review"], oe["owner_set"], oe["cpu_planners"]
+        cats = (("cell", "셀 조회"), ("calc", "계산"), ("unit_period", "단위·기간"), ("text_table", "본문"), ("abstain", "답 없음"))
+
+        def frac(x: dict) -> str:
+            return f"{x['correct']}/{x['n']}"
+
+        rows = [["전체 (verified EM)"] + [f"{pct(cp[k][s]['rate'])} ({frac(cp[k][s])})" for k in ("heuristic", "mt5_small_final") for s in ("owner_first_pass", "ai_written_first_pass")]]
+        rows += [[label] + [frac(cp[k][s]["by_category"][c]) for k in ("heuristic", "mt5_small_final") for s in ("owner_first_pass", "ai_written_first_pass")] for c, label in cats]
+        out.append({"title": "소유자가 쓴 평가 문항과 기존 수작업 문항의 검수 (2026-11-16)", "status": "done",
+                    "description": f"한국어 수작업 30문항은 AI 도구가 썼다. 저장소 소유자가 그 30문항을 검수했고(문제없음 {rv['ok']}, 고쳐야 함 {rv['fix']}), 시험 분할의 표 {os_['tables']}개를 보고 "
+                                   f"새 문항 {os_['questions']}개를 직접 썼다. AI 도구는 표를 보여 주고 파일을 검사하는 도구만 만들었고 문항을 쓰거나 고치지 않았다. 아래는 CPU에서 돌릴 수 있는 두 플래너의 결과다(검증기 v1).",
+                    "columns": ["", "휴리스틱: 소유자 문항", "휴리스틱: AI 도구 문항", "mT5-small: 소유자 문항", "mT5-small: AI 도구 문항"], "rows": rows,
+                    "notes": [f"휴리스틱은 AI 도구가 쓴 계산 문항을 {frac(cp['heuristic']['ai_written_first_pass']['by_category']['calc'])}, 소유자가 쓴 계산 문항을 {frac(cp['heuristic']['owner_first_pass']['by_category']['calc'])} 맞혔다. "
+                              "휴리스틱은 정해 둔 낱말로 연산을 고르는데, AI 도구가 쓴 문항은 합성 학습 데이터와 같은 낱말을 썼고 소유자는 다른 말로 물었다.",
+                              f"검수에서 지적된 {rv['fix']}문항은 표와 대조해 모두 맞는 지적이다. 문항은 고치지 않았다. 저장된 평가 {rv['stored_runs']}건을 그 문항 없이 다시 채점하면 "
+                              f"많아야 {100 * rv['largest_rate_gain_without_flagged']:.1f}%p 움직이고, 순서가 뒤집히는 쌍은 {rv['pairs_of_runs_ranked_strictly']:,} 가운데 {rv['pairs_whose_order_reverses_without_flagged']}이다.",
+                              "30문항씩이고 서로 다른 문항이라 전체 점수의 구간은 겹친다.",
+                              f"한계. EXAONE으로는 아직 재지 않았다(GPU가 필요하고 준비만 했다). 새 문항은 한 사람이 썼고 다른 사람이 검수하지 않았다. "
+                              f"기존 test 문항과 같은 셀을 묻는 문항이 {os_['same_cells_as_an_existing_test_question']['count']}개 있다. 화학 문항은 AI 도구가 쓴 그대로다."],
+                    "artifact": "data/ko/owner_eval.jsonl, data/ko/custom_eval_review.jsonl (소유자 작성, PR #7), experiments/eval/owner_eval_analysis.json (scripts/owner_eval_analysis.py), experiments/eval/*_ko_owner*/"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     big = g2["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"] if g2 else None
     rows = []

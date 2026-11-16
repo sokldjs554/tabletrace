@@ -28,7 +28,7 @@
 
 **T (학습 과제, 완료: 2026-11-12, PR #6)**: 학습 코드의 핵심 세 조각을 새 파일로 직접 쓴다. 강화학습 보상(`training/evidence_reward.py`), GRPO 이점·손실(`training/grpo.py`), 라벨 가리기·학습률 일정·학습 루프(`training/lm_loop.py`). 합쳐서 150줄 안팎이고 참고할 기존 파일이 없다. 명세는 `docs/rewrite/06_training_code.md`, 테스트는 `tests/test_owner_training_code.py`(35개, 파일이 생기기 전에는 건너뜀). 이 함수들을 불러 쓰는 스크립트(`scripts/train/exaone_grpo.py`, `scripts/train/exaone_lora_sft.py --loop owner`)는 이미 연결되어 있다. 5~9단계와 순서가 무관하다.
 
-**E (평가 문항 과제)**: 코드가 아니라 평가 문항이다. AI 도구가 쓴 한국어 수작업 30문항을 본인이 검수하고(`data/ko/custom_eval_review.jsonl`), 시험 표로 새 문항을 직접 쓴다(`data/ko/owner_eval.jsonl`). 안내는 `docs/rewrite/07_owner_eval_questions.md`, 도구는 `scripts/owner_eval_tool.py`(표를 보여 주고 파일을 검사할 뿐 질문은 쓰지 않는다), 검사는 `tests/test_owner_eval.py`와 `scripts/check_data.py`다. 끝나면 "평가 문항을 직접 썼다"가 그 파일에 한해 사실이 된다.
+**E (평가 문항 과제, 완료: 2026-11-16, PR #7)**: 코드가 아니라 평가 문항이다. AI 도구가 쓴 한국어 수작업 30문항을 본인이 검수하고(`data/ko/custom_eval_review.jsonl`), 시험 표로 새 문항을 직접 쓴다(`data/ko/owner_eval.jsonl`). 안내는 `docs/rewrite/07_owner_eval_questions.md`, 도구는 `scripts/owner_eval_tool.py`(표를 보여 주고 파일을 검사할 뿐 질문은 쓰지 않는다), 검사는 `tests/test_owner_eval.py`와 `scripts/check_data.py`다. 끝나면 "평가 문항을 직접 썼다"가 그 파일에 한해 사실이 된다.
 
 1~4단계(약 640줄)가 끝나면 "검증 파이프라인의 핵심을 직접 구현했다"가 사실이 된다. T는 2026-11-12에 끝났으므로 "강화학습 보상과 손실, 학습 루프를 직접 썼다"는 사실이다(그 세 파일에 한해서. 이를 불러 쓰는 스크립트는 AI 작성). 9단계까지 가면 서비스 계층도 포함된다. 그 밖의 학습·벤치 스크립트(`training/sft.py`, `training/rl_grpo.py`, `bench/`, `scripts/`)와 문서는 이 계획에 없고 AI 작성으로 남는다.
 

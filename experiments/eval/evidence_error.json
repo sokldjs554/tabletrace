@@ -6328,6 +6328,128 @@
    }
   }
  },
+ "heuristic_ko_owner": {
+  "lookup_questions": 16,
+  "correct_lookup_answers": 5,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 5,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 0,
+  "loose": {
+   "k": 0,
+   "n": 5,
+   "rate": 0.0,
+   "lo": 0.0,
+   "hi": 0.4345
+  },
+  "strict": {
+   "k": 0,
+   "n": 5,
+   "rate": 0.0,
+   "lo": 0.0,
+   "hi": 0.4345
+  },
+  "strict_where": {},
+  "verifier_on_strict": {
+   "repaired_and_answered": 0,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 30,
+   "answered": 17,
+   "coverage": 0.5667,
+   "answered_correct": 5,
+   "answered_wrong": 12,
+   "accuracy_when_answered": {
+    "k": 5,
+    "n": 17,
+    "rate": 0.2941,
+    "lo": 0.1328,
+    "hi": 0.5313
+   },
+   "wrong_answer_rate": {
+    "k": 12,
+    "n": 30,
+    "rate": 0.4,
+    "lo": 0.2459,
+    "hi": 0.5768
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 17,
+   "coverage": 0.5667,
+   "answered_correct": 5,
+   "answered_wrong": 12,
+   "accuracy_when_answered": {
+    "k": 5,
+    "n": 17,
+    "rate": 0.2941,
+    "lo": 0.1328,
+    "hi": 0.5313
+   },
+   "wrong_answer_rate": {
+    "k": 12,
+    "n": 30,
+    "rate": 0.4,
+    "lo": 0.2459,
+    "hi": 0.5768
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 17,
+   "coverage": 0.5667,
+   "answered_correct": 5,
+   "answered_wrong": 12,
+   "accuracy_when_answered": {
+    "k": 5,
+    "n": 17,
+    "rate": 0.2941,
+    "lo": 0.1328,
+    "hi": 0.5313
+   },
+   "wrong_answer_rate": {
+    "k": 12,
+    "n": 30,
+    "rate": 0.4,
+    "lo": 0.2459,
+    "hi": 0.5768
+   }
+  },
+  "verified_em": 0.2333,
+  "verified_em_no_repair": 0.2333,
+  "repaired_answers": 0,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 0
+  },
+  "verifier_subject_check": {
+   "n": 30,
+   "answered": 16,
+   "coverage": 0.5333,
+   "answered_correct": 5,
+   "answered_wrong": 11,
+   "accuracy_when_answered": {
+    "k": 5,
+    "n": 16,
+    "rate": 0.3125,
+    "lo": 0.1416,
+    "hi": 0.556
+   },
+   "wrong_answer_rate": {
+    "k": 11,
+    "n": 30,
+    "rate": 0.3667,
+    "lo": 0.2187,
+    "hi": 0.5449
+   }
+  }
+ },
  "heuristic_ko_test": {
   "lookup_questions": 539,
   "correct_lookup_answers": 141,
@@ -8902,6 +9024,130 @@
     "rate": 0.3429,
     "lo": 0.2863,
     "hi": 0.4043
+   }
+  }
+ },
+ "rl_v3_ko_owner": {
+  "lookup_questions": 16,
+  "correct_lookup_answers": 5,
+  "correct_answer_by_other_op": 0,
+  "cited_gold": 4,
+  "same_value_elsewhere": 0,
+  "no_answer_in_cell": 1,
+  "loose": {
+   "k": 1,
+   "n": 5,
+   "rate": 0.2,
+   "lo": 0.0362,
+   "hi": 0.6245
+  },
+  "strict": {
+   "k": 1,
+   "n": 5,
+   "rate": 0.2,
+   "lo": 0.0362,
+   "hi": 0.6245
+  },
+  "strict_where": {
+   "other_row_and_column": 1
+  },
+  "verifier_on_strict": {
+   "repaired_and_answered": 1,
+   "answered_without_repair": 0,
+   "withheld": 0
+  },
+  "raw": {
+   "n": 30,
+   "answered": 28,
+   "coverage": 0.9333,
+   "answered_correct": 6,
+   "answered_wrong": 22,
+   "accuracy_when_answered": {
+    "k": 6,
+    "n": 28,
+    "rate": 0.2143,
+    "lo": 0.1021,
+    "hi": 0.3954
+   },
+   "wrong_answer_rate": {
+    "k": 22,
+    "n": 30,
+    "rate": 0.7333,
+    "lo": 0.5555,
+    "hi": 0.8582
+   }
+  },
+  "verifier": {
+   "n": 30,
+   "answered": 24,
+   "coverage": 0.8,
+   "answered_correct": 6,
+   "answered_wrong": 18,
+   "accuracy_when_answered": {
+    "k": 6,
+    "n": 24,
+    "rate": 0.25,
+    "lo": 0.12,
+    "hi": 0.449
+   },
+   "wrong_answer_rate": {
+    "k": 18,
+    "n": 30,
+    "rate": 0.6,
+    "lo": 0.4232,
+    "hi": 0.7541
+   }
+  },
+  "verifier_no_repair": {
+   "n": 30,
+   "answered": 11,
+   "coverage": 0.3667,
+   "answered_correct": 5,
+   "answered_wrong": 6,
+   "accuracy_when_answered": {
+    "k": 5,
+    "n": 11,
+    "rate": 0.4545,
+    "lo": 0.2127,
+    "hi": 0.7199
+   },
+   "wrong_answer_rate": {
+    "k": 6,
+    "n": 30,
+    "rate": 0.2,
+    "lo": 0.0951,
+    "hi": 0.3731
+   }
+  },
+  "verified_em": 0.2667,
+  "verified_em_no_repair": 0.2667,
+  "repaired_answers": 13,
+  "verifier_changes": {
+   "gained": 0,
+   "gained_calculation": 0,
+   "gained_calculation_with_gold_cells": 0,
+   "gained_lookup": 0,
+   "lost": 0
+  },
+  "verifier_subject_check": {
+   "n": 30,
+   "answered": 22,
+   "coverage": 0.7333,
+   "answered_correct": 6,
+   "answered_wrong": 16,
+   "accuracy_when_answered": {
+    "k": 6,
+    "n": 22,
+    "rate": 0.2727,
+    "lo": 0.1315,
+    "hi": 0.4815
+   },
+   "wrong_answer_rate": {
+    "k": 16,
+    "n": 30,
+    "rate": 0.5333,
+    "lo": 0.3614,
+    "hi": 0.6977
    }
   }
  },
