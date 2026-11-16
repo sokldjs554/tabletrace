@@ -126,6 +126,17 @@ PAIRS = [
     ("full3_vs_full2_ko_test_ec", "exaone_full2_vllm_ko_test_ec", "exaone_full3_vllm_ko_test_ec"),
     ("full3_vs_full_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_full3_vllm_ko_test"),
     ("subject_check_on_grpo3_ko_test", "exaone_grpo3_vllm_ko_test", "exaone_grpo3_vllm_ko_test_ec"),
+    # the 30 questions the owner wrote (2026-11-16). full4 is a full-data model trained in that session (fixed cap); the untuned models get six examples
+    ("full4_vs_heuristic_ko_owner", "heuristic_ko_owner", "exaone_full4_vllm_ko_owner"),
+    ("full4_vs_rl_v3_ko_owner", "rl_v3_ko_owner", "exaone_full4_vllm_ko_owner"),
+    ("full4_vs_ref_1p2b_ko_owner", "ref_1p2b_ko_owner", "exaone_full4_vllm_ko_owner"),
+    ("full4_vs_ref_7p8b_ko_owner", "ref_7p8b_awq_ko_owner", "exaone_full4_vllm_ko_owner"),
+    ("ref_7p8b_vs_ref_1p2b_ko_owner", "ref_1p2b_ko_owner", "ref_7p8b_awq_ko_owner"),
+    ("subject_check_on_full4_ko_owner", "exaone_full4_vllm_ko_owner", "exaone_full4_vllm_ko_owner_ec"),
+    ("full4_vs_full3_ko_test", "exaone_full3_vllm_ko_test", "exaone_full4_vllm_ko_test"),               # the fixed cap trained three times: training-run variation
+    ("full4_vs_full2_ko_test", "exaone_full2_vllm_ko_test", "exaone_full4_vllm_ko_test"),
+    ("full4_vs_full_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_full4_vllm_ko_test"),
+    ("full4_vs_full_run1_ko_test_ec", "exaone_full_vllm_ko_test_ec", "exaone_full4_vllm_ko_test_ec"),
     # untuned EXAONE of two sizes, same prompt and verifier
     ("ref_7p8b_vs_ref_1p2b_ko_test", "ref_1p2b_ko_test", "ref_7p8b_awq_ko_test"),
     ("ref_7p8b_vs_ref_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "ref_7p8b_awq_ko_test_ec"),

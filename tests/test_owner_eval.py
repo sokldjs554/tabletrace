@@ -162,17 +162,50 @@ def test_the_owner_evaluations_were_made_like_the_earlier_ones():
 def test_the_documents_say_who_wrote_the_questions_and_what_is_still_missing():
     report = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
     sec = report[report.index("## 25. 소유자가 쓴 평가 문항"):]
-    for needle in ("AI 도구는 문항을 쓰거나 고치지 않았다", "문항은 고치지 않고 그대로 둔다", "EXAONE으로는 아직 재지 않았다", "한 사람이 썼고 다른 사람이 검수하지 않았다",
-                   "기존 test 문항과 같은 셀을 묻는 문항이 있다", "구간이 겹친다"):
+    for needle in ("AI 도구는 문항을 쓰거나 고치지 않았다", "문항은 고치지 않고 그대로 둔다", "EXAONE은 전체 데이터 모델 하나와 튜닝하지 않은 두 크기만 쟀다", "한 사람이 썼고 다른 사람이 검수하지 않았다",
+                   "기존 test 문항과 같은 셀을 묻는 문항이 있다", "구간이 겹친다", "그 가운데 한 문항은 계산기가 답을 냈다", "검증기는 그 셀이 질문이 묻는 것인지는 보지 않는다",
+                   "세트의 난이도를 견줄 근거는 아니다"):
         assert needle in sec, needle
     handoff = (ROOT / "docs" / "HANDOFF.md").read_text(encoding="utf-8")
     sec = handoff[handoff.index("### 9.1f"):handoff.index("### 9.2 ")]
-    for needle in ('"벤치마크를 구축했다"', '"여러 사람이 검수한 평가셋"', "아직 재지 않았다", "문항은 그대로 올라갔다"):
+    for needle in ('"벤치마크를 구축했다"', '"여러 사람이 검수한 평가셋"', '"직접 쓴 문항에서 80%이므로 실제 표에서도 80%다"', "이 약점을 숨기지 않는다", "문항은 그대로 올라갔다"):
         assert needle in sec, needle
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sec = readme[readme.index("### 9.12 소유자가 쓴 평가 문항"):readme.index("## 10. 추론 최적화")]
-    assert "EXAONE으로는 아직 재지 않았습니다" in sec and "문항을 쓰거나 고치지 않았습니다" in sec
+    assert "평가한 전체 데이터 모델은 하나입니다" in sec and "문항을 쓰거나 고치지 않았습니다" in sec and "검증기는 그 셀이 질문이 묻는 것인지는 보지 않습니다" in sec
     # nothing claims an EXAONE result on the owner's questions while no such run is stored
     if not list(EVAL.glob("exaone_*_ko_owner")):
         nb = (ROOT / "notebooks" / "gpu_experiments_2.ipynb").read_text(encoding="utf-8")
         assert "OWNER_SETS" in nb and "아직 돌리지 않았다" in (ROOT / "docs" / "experiments" / "gpu-runbook.md").read_text(encoding="utf-8")
+
+
+
+def test_the_exaone_results_on_the_owner_questions_follow_from_the_stored_predictions():
+    """The owner ran EXAONE on the 30 questions on Kaggle. What the documents say about it (the score, the calculation
+    questions, the question the calculator answered, the unanswerable questions that got an answer) is recomputed here
+    from the stored outputs."""
+    d = json.loads((EVAL / "owner_eval_analysis.json").read_text(encoding="utf-8"))["gpu_planners"]
+    owner = {q["qid"]: q for q in tool.load(tool.OWNER_FILE)}
+    p = predictions("exaone_full4_vllm_ko_owner")
+    res = d["exaone_full_data"]
+    assert set(p) == set(owner) and res["owner_first_pass"]["correct"] == sum(x["verified_correct"] for x in p.values())
+    calc = [q for q in owner if owner[q]["category"] == "calc"]
+    assert all(p[q]["verified_correct"] and p[q]["pred_op"] == owner[q]["op"] and p[q]["pred_cells"] == [f"r{i}c{j}" for i, j in owner[q]["gold_cells"]] for q in calc)      # right operation, right cells
+    wrong_number = [q for q in calc if not p[q]["raw_correct"]]
+    assert wrong_number == ["ko_owner_17"] and "189.55" in p["ko_owner_17"]["raw_output"] and p["ko_owner_17"]["pred_answer"] == owner["ko_owner_17"]["answer"]
+    assert res["owner_calc_questions"]["right_only_because_the_calculator_recomputed"] == len(wrong_number)
+    unans = [q for q in owner if owner[q]["category"] == "abstain"]
+    sent = [q for q in unans if p[q]["pred_status"] == "answered"]
+    assert res["owner_unanswerable_questions"] == {"n": len(unans), "withheld": len(unans) - len(sent), "answer_sent": len(sent)} and len(sent) == 2
+    assert all(not p[q]["verified_correct"] for q in owner if owner[q]["category"] == "text_table")                 # trained without text examples
+    h = predictions("heuristic_ko_owner")
+    pt = json.loads((EVAL / "paired_tests.json").read_text(encoding="utf-8"))["full4_vs_heuristic_ko_owner"]
+    assert pt["candidate_better"] == sum(p[q]["verified_correct"] and not h[q]["verified_correct"] for q in owner)
+    assert pt["reference_better"] == sum(h[q]["verified_correct"] and not p[q]["verified_correct"] for q in owner) == 0
+    big = json.loads((EVAL / "paired_tests.json").read_text(encoding="utf-8"))["full4_vs_ref_7p8b_ko_owner"]
+    assert big["p_two_sided"] > 0.05                                                # the documents must not call this difference significant
+    # the full-data model of that session sits inside the range of the earlier trainings
+    ems = [json.loads((EVAL / r / "metrics.json").read_text(encoding="utf-8"))["metrics"]["verified_em"]
+           for r in ("exaone_full_vllm_ko_test", "exaone_full_vllm_ko_test_run2", "exaone_full2old_vllm_ko_test", "exaone_full2_vllm_ko_test", "exaone_full3_vllm_ko_test")]
+    new = json.loads((EVAL / "exaone_full4_vllm_ko_test" / "metrics.json").read_text(encoding="utf-8"))["metrics"]["verified_em"]
+    assert min(ems) <= new <= max(ems)

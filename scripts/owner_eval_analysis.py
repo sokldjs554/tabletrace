@@ -24,6 +24,8 @@ from evidence_error import wilson  # noqa: E402
 EVAL = ROOT / "experiments" / "eval"
 KO = ROOT / "data" / "ko"
 CPU_PLANNERS = {"heuristic": "heuristic", "mt5_small_final": "rl_v3"}          # label -> run prefix
+# EXAONE needs a GPU: the owner ran these on Kaggle (notebook 2, section L). The full-data model was trained in that session
+GPU_PLANNERS = {"exaone_full_data": "exaone_full4_vllm", "exaone_1p2b_untuned": "ref_1p2b", "exaone_7p8b_untuned": "ref_7p8b_awq"}
 
 
 def load(p: Path) -> list[dict]:
@@ -88,8 +90,9 @@ def main() -> None:
                  "same_cells_as_an_existing_test_question": {"count": len(same_cells), "pairs": same_cells},
                  "text_answer_occurs_more_than_once_in_the_passage": repeated_text}
 
-    planners = {}
-    for label, prefix in CPU_PLANNERS.items():
+    fresh = [q for q in ocat if q not in same_cells]             # the owner's questions that do not ask the cells of an existing test question
+
+    def planner(prefix: str) -> dict:
         res = {}
         for name, qcat, suffix in (("owner", ocat, "ko_owner"), ("ai_written", cat, "ko_custom")):
             for setting, ec in (("first_pass", ""), ("subject_check", "_ec")):
@@ -98,18 +101,27 @@ def main() -> None:
                 res[f"{name}_{setting}"] = {**s, "ci95": {k: wilson(s["correct"], s["n"])[k] for k in ("lo", "hi")},
                                             "by_category": {c: score(v, [q for q in qcat if qcat[q] == c]) for c in sorted(set(qcat.values()))}}
         res["ai_written_first_pass_without_flagged"] = score(verdicts(f"{prefix}_ko_custom"), kept)
+        res["owner_first_pass_without_repeated_cells"] = score(verdicts(f"{prefix}_ko_owner"), fresh)
         for name, qcat, suffix in (("owner", ocat, "ko_owner"), ("ai_written", cat, "ko_custom")):       # which operation the planner wrote for the calculation questions
-            ops = [r.get("pred_op") for r in load(EVAL / f"{prefix}_{suffix}" / "predictions.jsonl") if qcat[r["qid"]] == "calc"]
+            rows = [r for r in load(EVAL / f"{prefix}_{suffix}" / "predictions.jsonl") if qcat[r["qid"]] == "calc"]
+            ops = [r.get("pred_op") for r in rows]
             res[f"{name}_calc_questions"] = {"n": len(ops), "given_a_calculation": sum(o in ("diff", "sum", "avg", "ratio", "pct_change") for o in ops),
-                                             "given_a_lookup": sum(o == "lookup" for o in ops), "withheld_or_unparsable": sum(o in (None, "abstain") for o in ops)}
-        planners[label] = res
+                                             "given_a_lookup": sum(o == "lookup" for o in ops), "withheld_or_unparsable": sum(o in (None, "abstain") for o in ops),
+                                             # the model's own number was wrong, the operation and cells were right, and the calculator gave the answer
+                                             "right_only_because_the_calculator_recomputed": sum(bool(r["verified_correct"]) and not r.get("raw_correct") for r in rows)}
+        unans = [r for r in load(EVAL / f"{prefix}_ko_owner" / "predictions.jsonl") if ocat[r["qid"]] == "abstain"]
+        res["owner_unanswerable_questions"] = {"n": len(unans), "withheld": sum(r["pred_status"] != "answered" for r in unans), "answer_sent": sum(r["pred_status"] == "answered" for r in unans)}
+        return res
 
-    out = {"review": review_out, "runs_on_the_ai_written_set": runs, "owner_set": owner_out, "cpu_planners": planners}
+    planners = {label: planner(prefix) for label, prefix in CPU_PLANNERS.items()}
+    gpu = {label: planner(prefix) for label, prefix in GPU_PLANNERS.items() if (EVAL / f"{prefix}_ko_owner_ec" / "predictions.jsonl").exists()}
+
+    out = {"review": review_out, "runs_on_the_ai_written_set": runs, "owner_set": owner_out, "cpu_planners": planners, "gpu_planners": gpu}
     dest = EVAL / "owner_eval_analysis.json"
     dest.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print("review:", {k: v for k, v in review_out.items() if k != "flagged"}, review_out["flagged"])
     print("owner set:", owner_out)
-    for label, res in planners.items():
+    for label, res in {**planners, **gpu}.items():
         print(label, {k: (v["correct"], v["n"]) for k, v in res.items() if "correct" in v}, {k: v for k, v in res.items() if k.endswith("calc_questions")})
         print("   owner by category:", {c: (s["correct"], s["n"]) for c, s in res["owner_first_pass"]["by_category"].items()},
               "| ai-written:", {c: (s["correct"], s["n"]) for c, s in res["ai_written_first_pass"]["by_category"].items()})

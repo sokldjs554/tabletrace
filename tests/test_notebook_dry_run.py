@@ -79,8 +79,10 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3"), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3"),
-                         "before the full-data rerun": ("full2", "full3", "grpo3"), "before RL on the full-data model": ("full3", "grpo3")}.get(cloned_results, ())
+                owner = ("full4", "_ko_owner")           # section L (2026-11-16): the last results that came in
+                later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3", *owner), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3", *owner),
+                         "before the full-data rerun": ("full2", "full3", "grpo3", *owner), "before RL on the full-data model": ("full3", "grpo3", *owner),
+                         "before EXAONE on the owner's questions": owner}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -578,6 +580,7 @@ def test_the_recorded_rl_run_on_the_full_data_model_matches_what_the_notebook_do
 
 
 OWNER_CELL = "OWNER_SETS"       # the cell of section L
+BEFORE_OWNER = "before EXAONE on the owner's questions"
 
 
 def test_owner_questions_section_trains_a_full_data_model_in_a_new_session_and_evaluates_three_models(tmp_path, monkeypatch):
@@ -585,7 +588,7 @@ def test_owner_questions_section_trains_a_full_data_model_in_a_new_session_and_e
     model is trained again under the next unused name with the corrected length setting and evaluated on the test set,
     the AI-written questions and the owner's questions. The two untuned models get the owner's questions only, with the
     few-shot setting of section A. Stored results stay as they are."""
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_OWNER)
     counts = run.run_all(only=OWNER_CELL)
     assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 10
     train = next(c for k, c in run.calls if k == "train")
@@ -610,7 +613,7 @@ def test_owner_questions_section_trains_a_full_data_model_in_a_new_session_and_e
 def test_owner_questions_section_uses_merged_weights_that_are_still_there_and_can_skip_the_larger_model(tmp_path, monkeypatch):
     """If the merged weights of an evaluated full-data model are still in the working directory, that model is served
     again and only the owner's questions are evaluated with it. `RUN_7P8B_OWNER = False` leaves the 7.8B model out."""
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_OWNER)
     assert sum("RUN_7P8B_OWNER = True" in src for _, src in run.sections) == 1
     run.sections = [(i, src.replace("RUN_7P8B_OWNER = True", "RUN_7P8B_OWNER = False")) for i, src in run.sections]
     merged = run.repo / "experiments/exaone_lora_full3/merged"
@@ -619,6 +622,23 @@ def test_owner_questions_section_uses_merged_weights_that_are_still_there_and_ca
     counts = run.run_all(only=OWNER_CELL)
     assert counts["train"] == 0 and counts["eval"] == 4
     assert run.outputs() == sorted([f"experiments/eval/{m}_ko_owner{ec}" for m in ("exaone_full3_vllm", "ref_1p2b") for ec in ("", "_ec")])
+
+
+def test_the_recorded_owner_question_run_matches_what_the_notebook_does_and_the_section_is_now_finished(tmp_path, monkeypatch):
+    """Section L was run on 2026-11-16 in a new session: a full-data model was trained under the next unused name with
+    the corrected length setting, and the untuned models got the few-shot setting of section A. With the results in the
+    repository the section starts nothing."""
+    info = json.loads((ROOT / "experiments/exaone_lora_full4/train_info.json").read_text())
+    earlier = json.loads((ROOT / "experiments/exaone_lora_full3/train_info.json").read_text())
+    assert (info["args"]["max_in"], info["args"]["max_len"], info["targets_missing"], info["targets_cut_short"], info["n_examples"]) == (672, 960, 0, 0, 3587)
+    assert {k for k in set(info["args"]) | set(earlier["args"]) if info["args"].get(k) != earlier["args"].get(k)} == {"out"}
+    for name, shots in (("exaone_full4_vllm", None), ("ref_1p2b", ["data/ko/train.jsonl", "data/ko/synthetic_train.jsonl"]), ("ref_7p8b_awq", ["data/ko/train.jsonl", "data/ko/synthetic_train.jsonl"])):
+        meta = json.loads((ROOT / f"experiments/eval/{name}_ko_owner/metrics.json").read_text())["meta"]
+        assert meta["data"] == ["data/ko/owner_eval.jsonl"] and meta["few_shot"] == shots and meta["entity_check"] is False and meta["confidence"] is True
+        again = json.loads((ROOT / f"experiments/eval/{name}_ko_owner_ec/metrics.json").read_text())["meta"]
+        assert again["entity_check"] is True and again["replay_from"] == f"experiments/eval/{name}_ko_owner"
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    assert run.run_all(only=OWNER_CELL) == collections.Counter()
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

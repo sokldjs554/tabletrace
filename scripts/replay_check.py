@@ -9,6 +9,7 @@ repository. If the outcome of any question differs, the stored numbers do not be
   python scripts/replay_check.py --session repeat --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B     # -> experiments/eval/replay_check_repeat.json
   python scripts/replay_check.py --session full2 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B      # -> experiments/eval/replay_check_full2.json
   python scripts/replay_check.py --session rl3 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B        # -> experiments/eval/replay_check_rl3.json
+  python scripts/replay_check.py --session owner --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B      # -> experiments/eval/replay_check_owner.json
 """
 from __future__ import annotations
 
@@ -38,6 +39,9 @@ SESSIONS = {                   # all were evaluated with an input budget of 672 
     ],
     "rl3": [                   # RL started from a full-data model: that model, trained again in the session, and the model after RL (2026-11-16)
         "exaone_full3_vllm_ko_test", "exaone_full3_vllm_ko_custom", "exaone_grpo3_vllm_ko_test", "exaone_grpo3_vllm_ko_custom",
+    ],
+    "owner": [                 # EXAONE on the 30 questions the owner wrote: a full-data model trained in the session, and the two untuned sizes (2026-11-16)
+        "exaone_full4_vllm_ko_test", "exaone_full4_vllm_ko_custom", "exaone_full4_vllm_ko_owner", "ref_1p2b_ko_owner", "ref_7p8b_awq_ko_owner",
     ],
 }
 FIELDS = ("pred_status", "pred_answer", "pred_cells", "verified_correct", "evidence_repaired")

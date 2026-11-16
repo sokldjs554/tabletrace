@@ -213,9 +213,19 @@
    "questions_that_differ": 0,
    "verified_em_with_repair": 0.8612,
    "max_in": 672
+  },
+  "exaone_full4_vllm_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 16,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.8512,
+   "verified_em_replayed": 0.8512,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.8555,
+   "max_in": 672
   }
  },
- "runs_checked": 21,
- "questions_checked": 14679,
+ "runs_checked": 22,
+ "questions_checked": 15378,
  "questions_that_differ": 0
 }

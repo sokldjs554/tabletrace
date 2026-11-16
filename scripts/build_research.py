@@ -210,7 +210,8 @@ def supplement_sections() -> list[dict]:
                  "exaone_rlstart2b_vllm_ko_test": "EXAONE 1.2B, 300문항 튜닝 (다시 학습)", "exaone_grpo2b_vllm_ko_test": "그 모델에 강화학습, 대조군",
                  "exaone_grpo2c_vllm_ko_test": "그 모델에 강화학습, 반복 실행",
                  "exaone_full2_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (길이 결함을 고친 설정)", "exaone_full2old_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (예전 설정)",
-                 "exaone_full3_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (고친 설정, 다시 학습)", "exaone_grpo3_vllm_ko_test": "그 모델에 강화학습"}
+                 "exaone_full3_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (고친 설정, 다시 학습)", "exaone_grpo3_vllm_ko_test": "그 모델에 강화학습",
+                 "exaone_full4_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (고친 설정, 세 번째 학습)"}
         for label, run in [(names.get(k, k), k) for k in names if k in rc["runs"]] + [(k, k) for k in rc["runs"] if k not in names]:
             r = rc["runs"].get(run)
             if not r:
@@ -501,9 +502,36 @@ def gpu3_cards() -> list[dict]:
                               f"검수에서 지적된 {rv['fix']}문항은 표와 대조해 모두 맞는 지적이다. 문항은 고치지 않았다. 저장된 평가 {rv['stored_runs']}건을 그 문항 없이 다시 채점하면 "
                               f"많아야 {100 * rv['largest_rate_gain_without_flagged']:.1f}%p 움직이고, 순서가 뒤집히는 쌍은 {rv['pairs_of_runs_ranked_strictly']:,} 가운데 {rv['pairs_whose_order_reverses_without_flagged']}이다.",
                               "30문항씩이고 서로 다른 문항이라 전체 점수의 구간은 겹친다.",
-                              f"한계. EXAONE으로는 아직 재지 않았다(GPU가 필요하고 준비만 했다). 새 문항은 한 사람이 썼고 다른 사람이 검수하지 않았다. "
-                              f"기존 test 문항과 같은 셀을 묻는 문항이 {os_['same_cells_as_an_existing_test_question']['count']}개 있다. 화학 문항은 AI 도구가 쓴 그대로다."],
+                              f"한계. 새 문항은 한 사람이 썼고 다른 사람이 검수하지 않았다. "
+                              f"기존 test 문항과 같은 셀을 묻는 문항이 {os_['same_cells_as_an_existing_test_question']['count']}개 있다. 화학 문항은 AI 도구가 쓴 그대로다. EXAONE의 결과는 다음 항목에 있다."],
                     "artifact": "data/ko/owner_eval.jsonl, data/ko/custom_eval_review.jsonl (소유자 작성, PR #7), experiments/eval/owner_eval_analysis.json (scripts/owner_eval_analysis.py), experiments/eval/*_ko_owner*/"})
+    rpo = load(EXP / "eval" / "replay_check_owner.json")
+    if oe and oe.get("gpu_planners") and rpo:
+        gp, cp = oe["gpu_planners"], oe["cpu_planners"]
+        cats = ("cell", "calc", "unit_period", "text_table", "abstain")
+
+        def line(label: str, res: dict) -> list:
+            x = res["owner_first_pass"]
+            return [label, f"{pct(x['rate'])} ({x['correct']}/{x['n']})"] + [f"{x['by_category'][c]['correct']}/{x['by_category'][c]['n']}" for c in cats]
+
+        rows = [line("EXAONE 1.2B, 전체 데이터 튜닝", gp["exaone_full_data"]), line("EXAONE 7.8B(AWQ), 튜닝 없음, 예시 6개", gp["exaone_7p8b_untuned"]),
+                line("EXAONE 1.2B, 튜닝 없음, 예시 6개", gp["exaone_1p2b_untuned"]), line("mT5-small 최종", cp["mt5_small_final"]), line("휴리스틱 기준선", cp["heuristic"])]
+        own = gp["exaone_full_data"]
+        out.append({"title": "소유자가 쓴 30문항에서의 EXAONE (2026-11-16)", "status": "done",
+                    "description": "소유자가 직접 쓴 평가 30문항으로 EXAONE을 평가했다. 전체 데이터 모델은 그 세션에서 고친 설정으로 다시 학습한 것이고(여섯 번째 학습), "
+                                   "튜닝하지 않은 두 모델은 예시 6개를 받는다. 검증기 v1.",
+                    "columns": ["플래너", "verified EM", "셀 조회", "계산", "단위·기간", "본문", "답 없음"], "rows": rows,
+                    "notes": [f"전체 데이터 EXAONE은 같은 30문항에서 휴리스틱과 {pt['full4_vs_heuristic_ko_owner']['candidate_better']} 대 {pt['full4_vs_heuristic_ko_owner']['reference_better']}"
+                              f"(p {pt['full4_vs_heuristic_ko_owner']['p_display']}), 튜닝하지 않은 1.2B와 {pt['full4_vs_ref_1p2b_ko_owner']['candidate_better']} 대 {pt['full4_vs_ref_1p2b_ko_owner']['reference_better']}"
+                              f"(p {pt['full4_vs_ref_1p2b_ko_owner']['p_display']})이다. 튜닝하지 않은 7.8B와의 차이는 유의하지 않다(p {pt['full4_vs_ref_7p8b_ko_owner']['p_display']}).",
+                              "계산 6문항을 모두 맞혔다. 휴리스틱이 하나도 못 맞힌 문항들이고, 합성 학습 데이터의 틀과 다른 말로 물은 문항들이다. "
+                              f"그 가운데 {own['owner_calc_questions']['right_only_because_the_calculator_recomputed']}문항은 모델이 쓴 숫자가 틀렸고 연산과 셀이 맞아서 계산기가 답을 냈다.",
+                              f"틀린 것은 본문 문항(본문 예제 없이 학습했다)과 답 없는 질문이다. 답 없는 질문 {own['owner_unanswerable_questions']['n']}개 가운데 "
+                              f"{own['owner_unanswerable_questions']['answer_sent']}개에는 표의 다른 셀을 답으로 내보냈고 검증기를 통과했다. 검증기는 그 셀이 질문이 묻는 것인지는 보지 않는다.",
+                              f"같은 모델이 AI 도구가 쓴 30문항에서는 {pct(own['ai_written_first_pass']['rate'])}다. 그 세트에 이 모델이 못 푸는 본문 문항과 답 없는 질문이 더 많아서이고, 난이도를 견줄 근거는 아니다.",
+                              "한계. 30문항이고 한 사람이 썼다. 평가한 전체 데이터 모델은 하나다. 가중치가 남아 있지 않은 다른 모델들은 이 문항으로 재지 못했다."],
+                    "artifact": f"experiments/eval/*_ko_owner*/, experiments/eval/owner_eval_analysis.json, experiments/exaone_lora_full4/train_info.json. 소유자가 Kaggle T4 두 장에서 실행. "
+                                f"평가 {rpo['replays']}건을 다시 검증했고({rpo['questions_checked']:,}문항) 판정이 다른 문항은 {rpo['questions_that_differ']}개다"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     big = g2["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"] if g2 else None
     rows = []

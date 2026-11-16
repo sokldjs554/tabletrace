@@ -49,3 +49,10 @@
   - 묶음의 `run_info_2.json`은 `run_info_2_rl3.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_rl3.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
   - `scripts/replay_check.py --session rl3`으로 다시 검증했다. 8회, 2,916문항에서 판정이 다른 문항은 0개다(`replay_check_rl3.json`).
   - 문항 단위 분석과 확신도 비교는 `scripts/rl3_analysis.py`가 한다(`rl3_analysis.json`).
+- **2번 노트북, 2026-11-16 (Kaggle Tesla T4 ×2, 커밋 `79a6ce6`, `experiments/run_info_2_owner.json`)**: L절. 소유자가 쓴 평가 30문항(`data/ko/owner_eval.jsonl`)으로 EXAONE을 평가했다. 새 파일은 평가 10건 `exaone_full4_vllm_ko_{test,custom,owner}`, `ref_1p2b_ko_owner`, `ref_7p8b_awq_ko_owner`와 각각의 `_ec`, 학습 기록 `experiments/exaone_lora_full4/train_info.json`(`--max-in 672 --max-len 960`, 3,587문항, 224걸음, 정답이 잘린 예제 0), 서버 로그 두 개(`run_logs/vllm_ref_1p2b_owner.log`, `vllm_ref_7p8b_awq_owner.log`)다. 나머지 122개 파일은 저장소의 것과 같았다.
+  - 그 세션에는 전체 데이터 모델의 병합 가중치가 없었다. 노트북이 고친 설정으로 다시 학습해 `exaone_full4`로 평가했다(여섯 번째 전체 데이터 학습).
+  - 튜닝하지 않은 두 모델은 A절과 같은 설정이다(`--few-shot data/ko/train.jsonl data/ko/synthetic_train.jsonl --shots-per-kind 2`). 같은 이름의 지난 평가(`ref_1p2b_ko_{test,custom}`, `ref_7p8b_awq_ko_{test,custom}`, 2026-11-15)는 다른 세션의 것이고 그대로 두었다.
+  - 묶음은 두 길로 왔다. 소유자가 대화에 올렸고, 노트북이 `gpu-results-2` 가지에도 올렸다(커밋 `d601f63`). 두 파일의 SHA-256이 같다(`ca8356e4…`).
+  - 묶음의 `run_info_2.json`은 `run_info_2_owner.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_owner.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
+  - `scripts/replay_check.py --session owner`로 다시 검증했다. 10회, 1,638문항에서 판정이 다른 문항은 0개다(`replay_check_owner.json`).
+  - 분석은 `scripts/owner_eval_analysis.py`가 한다(`owner_eval_analysis.json`의 `gpu_planners`).

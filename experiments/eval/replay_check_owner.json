@@ -1,0 +1,89 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "max_in": 672,
+ "runs": {
+  "exaone_full4_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8555,
+    "verified_em_replayed": 0.8555
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8269,
+    "verified_em_replayed": 0.8269
+   }
+  },
+  "exaone_full4_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6,
+    "verified_em_replayed": 0.6
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6333,
+    "verified_em_replayed": 0.6333
+   }
+  },
+  "exaone_full4_vllm_ko_owner": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8,
+    "verified_em_replayed": 0.8
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7667,
+    "verified_em_replayed": 0.7667
+   }
+  },
+  "ref_1p2b_ko_owner": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4333,
+    "verified_em_replayed": 0.4333
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4,
+    "verified_em_replayed": 0.4
+   }
+  },
+  "ref_7p8b_awq_ko_owner": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6667,
+    "verified_em_replayed": 0.6667
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6667,
+    "verified_em_replayed": 0.6667
+   }
+  }
+ },
+ "replays": 10,
+ "questions_checked": 1638,
+ "questions_that_differ": 0
+}
