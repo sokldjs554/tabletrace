@@ -773,6 +773,78 @@
   "p_two_sided": 0.11116111910399348,
   "p_display": "0.111"
  },
+ "grpo3_vs_full3_ko_test": {
+  "reference": "exaone_full3_vllm_ko_test",
+  "candidate": "exaone_grpo3_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 8,
+  "reference_better": 7,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "grpo3_vs_full3_ko_test_ec": {
+  "reference": "exaone_full3_vllm_ko_test_ec",
+  "candidate": "exaone_grpo3_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 8,
+  "reference_better": 7,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "grpo3_vs_full3_ko_custom": {
+  "reference": "exaone_full3_vllm_ko_custom",
+  "candidate": "exaone_grpo3_vllm_ko_custom",
+  "n": 30,
+  "candidate_better": 1,
+  "reference_better": 0,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "grpo3_vs_full3_ko_custom_ec": {
+  "reference": "exaone_full3_vllm_ko_custom_ec",
+  "candidate": "exaone_grpo3_vllm_ko_custom_ec",
+  "n": 30,
+  "candidate_better": 0,
+  "reference_better": 0,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "full3_vs_full2_ko_test": {
+  "reference": "exaone_full2_vllm_ko_test",
+  "candidate": "exaone_full3_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 23,
+  "reference_better": 26,
+  "p_two_sided": 0.7754496546815659,
+  "p_display": "0.775"
+ },
+ "full3_vs_full2_ko_test_ec": {
+  "reference": "exaone_full2_vllm_ko_test_ec",
+  "candidate": "exaone_full3_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 24,
+  "reference_better": 26,
+  "p_two_sided": 0.887724827340783,
+  "p_display": "0.888"
+ },
+ "full3_vs_full_run1_ko_test": {
+  "reference": "exaone_full_vllm_ko_test",
+  "candidate": "exaone_full3_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 32,
+  "reference_better": 20,
+  "p_two_sided": 0.12634707581392135,
+  "p_display": "0.126"
+ },
+ "subject_check_on_grpo3_ko_test": {
+  "reference": "exaone_grpo3_vllm_ko_test",
+  "candidate": "exaone_grpo3_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 0,
+  "reference_better": 20,
+  "p_two_sided": 1.9073486328125e-06,
+  "p_display": "<0.001"
+ },
  "ref_7p8b_vs_ref_1p2b_ko_test": {
   "reference": "ref_1p2b_ko_test",
   "candidate": "ref_7p8b_awq_ko_test",

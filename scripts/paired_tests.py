@@ -117,6 +117,15 @@ PAIRS = [
     ("full2_vs_full_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_full2_vllm_ko_test"),
     ("full2_vs_full_run2_ko_test", "exaone_full_vllm_ko_test_run2", "exaone_full2_vllm_ko_test"),
     ("full2_vs_full_run1_ko_test_ec", "exaone_full_vllm_ko_test_ec", "exaone_full2_vllm_ko_test_ec"),
+    # RL started from a full-data model (2026-11-16). full3 is that model, trained in the session with the fixed cap; grpo3 is the model after RL
+    ("grpo3_vs_full3_ko_test", "exaone_full3_vllm_ko_test", "exaone_grpo3_vllm_ko_test"),
+    ("grpo3_vs_full3_ko_test_ec", "exaone_full3_vllm_ko_test_ec", "exaone_grpo3_vllm_ko_test_ec"),
+    ("grpo3_vs_full3_ko_custom", "exaone_full3_vllm_ko_custom", "exaone_grpo3_vllm_ko_custom"),
+    ("grpo3_vs_full3_ko_custom_ec", "exaone_full3_vllm_ko_custom_ec", "exaone_grpo3_vllm_ko_custom_ec"),
+    ("full3_vs_full2_ko_test", "exaone_full2_vllm_ko_test", "exaone_full3_vllm_ko_test"),               # the fixed cap trained twice: training-run variation
+    ("full3_vs_full2_ko_test_ec", "exaone_full2_vllm_ko_test_ec", "exaone_full3_vllm_ko_test_ec"),
+    ("full3_vs_full_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_full3_vllm_ko_test"),
+    ("subject_check_on_grpo3_ko_test", "exaone_grpo3_vllm_ko_test", "exaone_grpo3_vllm_ko_test_ec"),
     # untuned EXAONE of two sizes, same prompt and verifier
     ("ref_7p8b_vs_ref_1p2b_ko_test", "ref_1p2b_ko_test", "ref_7p8b_awq_ko_test"),
     ("ref_7p8b_vs_ref_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "ref_7p8b_awq_ko_test_ec"),

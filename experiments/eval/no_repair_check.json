@@ -193,9 +193,29 @@
    "questions_that_differ": 0,
    "verified_em_with_repair": 0.8698,
    "max_in": 672
+  },
+  "exaone_full3_vllm_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 11,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.8526,
+   "verified_em_replayed": 0.8526,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.8598,
+   "max_in": 672
+  },
+  "exaone_grpo3_vllm_ko_test": {
+   "questions": 699,
+   "repaired_in_original": 8,
+   "repaired_in_replay": 0,
+   "verified_em_counterfactual": 0.8555,
+   "verified_em_replayed": 0.8555,
+   "questions_that_differ": 0,
+   "verified_em_with_repair": 0.8612,
+   "max_in": 672
   }
  },
- "runs_checked": 19,
- "questions_checked": 13281,
+ "runs_checked": 21,
+ "questions_checked": 14679,
  "questions_that_differ": 0
 }

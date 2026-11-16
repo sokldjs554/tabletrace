@@ -1,0 +1,10 @@
+{
+ "notebook": "gpu_experiments_2",
+ "platform": "kaggle",
+ "gpus": [
+  "Tesla T4",
+  "Tesla T4"
+ ],
+ "commit": "f2402be",
+ "finished": "2026-11-16T05:56:09"
+}

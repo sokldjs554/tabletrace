@@ -8,6 +8,7 @@ repository. If the outcome of any question differs, the stored numbers do not be
   python scripts/replay_check.py --session control --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B    # -> experiments/eval/replay_check_control.json
   python scripts/replay_check.py --session repeat --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B     # -> experiments/eval/replay_check_repeat.json
   python scripts/replay_check.py --session full2 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B      # -> experiments/eval/replay_check_full2.json
+  python scripts/replay_check.py --session rl3 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B        # -> experiments/eval/replay_check_rl3.json
 """
 from __future__ import annotations
 
@@ -34,6 +35,9 @@ SESSIONS = {                   # all were evaluated with an input budget of 672 
     ],
     "full2": [                 # full-data fine-tuning with whole targets, and the old cap once more in the same session (2026-11-16)
         "exaone_full2_vllm_ko_test", "exaone_full2_vllm_ko_custom", "exaone_full2old_vllm_ko_test", "exaone_full2old_vllm_ko_custom",
+    ],
+    "rl3": [                   # RL started from a full-data model: that model, trained again in the session, and the model after RL (2026-11-16)
+        "exaone_full3_vllm_ko_test", "exaone_full3_vllm_ko_custom", "exaone_grpo3_vllm_ko_test", "exaone_grpo3_vllm_ko_custom",
     ],
 }
 FIELDS = ("pred_status", "pred_answer", "pred_cells", "verified_correct", "evidence_repaired")

@@ -555,6 +555,26 @@ def test_rl_on_the_full_data_model_trains_its_own_start_model_when_the_weights_a
     assert any("exaone_full3_vllm_ko_test_ec" in n for n in names) and any(n.endswith("exaone_lora_full3/train_info.json") for n in names)
 
 
+def test_the_recorded_rl_run_on_the_full_data_model_matches_what_the_notebook_does_and_the_section_is_now_finished(tmp_path, monkeypatch):
+    """Section J was run on 2026-11-16 in a new session: the notebook trained a start model under the next unused name
+    (`exaone_full3`) with the corrected length setting and started RL from it. The stored records carry those options,
+    and with the results in the repository the section starts nothing."""
+    start = json.loads((ROOT / "experiments/exaone_lora_full3/train_info.json").read_text())
+    earlier = json.loads((ROOT / "experiments/exaone_lora_full2/train_info.json").read_text())
+    assert (start["args"]["max_in"], start["args"]["max_len"], start["targets_missing"], start["targets_cut_short"], start["n_examples"]) == (672, 960, 0, 0, 3587)
+    assert {k for k in set(start["args"]) | set(earlier["args"]) if start["args"].get(k) != earlier["args"].get(k)} == {"out"}
+    rl = json.loads((ROOT / "experiments/exaone_grpo3/train_info.json").read_text())["args"]
+    main = json.loads((ROOT / "experiments/exaone_grpo2/train_info.json").read_text())["args"]
+    assert rl["adapter"] == "experiments/exaone_lora_full3" and rl["out"] == "experiments/exaone_grpo3"
+    assert {k for k in set(rl) | set(main) if rl.get(k) != main.get(k)} == {"adapter", "out"}
+    info = json.loads((ROOT / "experiments/run_info_2_rl3.json").read_text())
+    before = json.loads((ROOT / "experiments/eval/exaone_full3_vllm_ko_test/metrics.json").read_text())["meta"]["finished"]
+    after = json.loads((ROOT / "experiments/eval/exaone_grpo3_vllm_ko_custom_ec/metrics.json").read_text())["meta"]["finished"]
+    assert before < after <= info["finished"]                                   # start model evaluated first, RL model last, then the archive
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    assert run.run_all(only=RL3_CELL) == collections.Counter()
+
+
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):
     """Results of an earlier session lie untracked in the working directory; the same paths are tracked in the newer
     main. `git pull` stops there, and the notebook used to go on with the old code without saying so."""

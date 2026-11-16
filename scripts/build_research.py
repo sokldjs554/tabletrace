@@ -209,7 +209,8 @@ def supplement_sections() -> list[dict]:
                  "exaone_rlstart2_vllm_ko_test": "EXAONE 1.2B, 300문항 튜닝", "exaone_grpo2_vllm_ko_test": "그 모델에 강화학습",
                  "exaone_rlstart2b_vllm_ko_test": "EXAONE 1.2B, 300문항 튜닝 (다시 학습)", "exaone_grpo2b_vllm_ko_test": "그 모델에 강화학습, 대조군",
                  "exaone_grpo2c_vllm_ko_test": "그 모델에 강화학습, 반복 실행",
-                 "exaone_full2_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (길이 결함을 고친 설정)", "exaone_full2old_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (예전 설정)"}
+                 "exaone_full2_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (길이 결함을 고친 설정)", "exaone_full2old_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (예전 설정)",
+                 "exaone_full3_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (고친 설정, 다시 학습)", "exaone_grpo3_vllm_ko_test": "그 모델에 강화학습"}
         for label, run in [(names.get(k, k), k) for k in names if k in rc["runs"]] + [(k, k) for k in rc["runs"] if k not in names]:
             r = rc["runs"].get(run)
             if not r:
@@ -450,6 +451,37 @@ def gpu3_cards() -> list[dict]:
                               "대표 수치로 쓰는 1회째 값은 결함 때문에 낮았던 것이 아니라 네 번 가운데 가장 낮게 나온 실행이다. 높은 값을 골라 쓰지 않으려고 그대로 둔다.",
                               "한계. 한 쌍이다. 학습 실행 간 흔들림보다 작은 효과는 가를 수 없다. 10,587문항 모델, 열 번호 형식 모델, 화학 모델은 예전 설정으로 학습한 그대로다."],
                     "artifact": f"experiments/eval/length_fix_analysis.json (scripts/length_fix_analysis.py), experiments/exaone_lora_full2*/train_info.json. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rpf['replays']}건을 다시 검증했고({rpf['questions_checked']:,}문항) 판정이 다른 문항은 {rpf['questions_that_differ']}개다"})
+    r3 = load(EXP / "eval" / "rl3_analysis.json")
+    rp3 = load(EXP / "eval" / "replay_check_rl3.json")
+    if r3 and rp3:
+        fp, sig, sig2, conf, tr3 = r3["first_pass"], r3["signal"]["from_full_data_model"], r3["signal"]["second_experiment"], r3["confidence"]["sum_logprob"], r3["training"]
+        st, rl = fp["outcomes"]["start"], fp["outcomes"]["rl"]
+        va = fp["sign_tests"]["correct_all"]
+        rows = [
+            ["verified EM (주어 검사 없음)", pct(m("exaone_full3_vllm_ko_test")["verified_em"]), pct(m("exaone_grpo3_vllm_ko_test")["verified_em"]), f"{va['only_rl']} 대 {va['only_start']} (p {va['p_display']})"],
+            ["verified EM (주어 검사 포함)", pct(m("exaone_full3_vllm_ko_test_ec")["verified_em"]), pct(m("exaone_grpo3_vllm_ko_test_ec")["verified_em"]),
+             f"{r3['subject_check']['sign_tests']['correct_all']['only_rl']} 대 {r3['subject_check']['sign_tests']['correct_all']['only_start']} (p {r3['subject_check']['sign_tests']['correct_all']['p_display']})"],
+            [f"조회 {st['lookup']['n']}문항 정답", st["lookup"]["correct"], rl["lookup"]["correct"], f"{fp['sign_tests']['correct_lookup']['only_rl']} 대 {fp['sign_tests']['correct_lookup']['only_start']} (p {fp['sign_tests']['correct_lookup']['p_display']})"],
+            [f"계산 {st['calc']['n']}문항 정답", st["calc"]["correct"], rl["calc"]["correct"], ""],
+            [f"답 없는 {st['unanswerable']['n']}문항에서 보류", st["unanswerable"]["correct"], rl["unanswerable"]["correct"],
+             f"{r3['unanswerable_first_pass']['only_rl']} 대 {r3['unanswerable_first_pass']['only_start']} (p {r3['unanswerable_first_pass']['p_display']})"],
+            ["확신도의 AUROC (검증기 통과분)", f"{conf['auroc']['start']:.3f}", f"{conf['auroc']['rl']:.3f}", f"차이의 95% 구간 {conf['auroc']['ci95_lo']:.3f} ~ {conf['auroc']['ci95_hi']:.3f}"],
+            ["위험 5% 이하로 답할 수 있는 최대 응답률", pct(conf["coverage_at_risk_5"]["start"]), pct(conf["coverage_at_risk_5"]["rl"]),
+             f"차이의 95% 구간 {100 * conf['coverage_at_risk_5']['ci95_lo']:.1f} ~ {100 * conf['coverage_at_risk_5']['ci95_hi']:.1f}%p"],
+        ]
+        out.append({"title": "전체 데이터 모델에서 시작한 강화학습 — 정답률은 그대로이고 확신도는 나빠졌다 (2026-11-16)", "status": "done",
+                    "description": "300문항 모델이 아니라 전체 데이터로 미세조정한 모델에 같은 강화학습을 더했다. 시작 모델은 그 세션에서 고친 설정으로 다시 학습했고, "
+                                   "강화학습의 옵션은 두 번째 실험과 시작 모델만 다르다. 실행 전에 \"효과가 없을 가능성이 크다\"고 적어 두었다. 한국어 test 699문항.",
+                    "columns": ["지표", "시작 모델 (전체 데이터 미세조정)", "강화학습 뒤", "같은 문항에서 한쪽만"], "rows": rows,
+                    "notes": [f"정답률에 검출되는 차이가 없다. 같은 문항에서 강화학습 뒤만 맞힌 문항 {va['only_rl']}, 시작 모델만 맞힌 문항 {va['only_start']}.",
+                              f"배울 신호가 드물었다. 학습 중 표본의 {pct(sig['samples_correct_rate'])}가 이미 정답이었고, 표본 8개의 점수가 모두 같은 프롬프트가 {pct(sig['groups_with_equal_rewards'])}였다"
+                              f"(두 번째 실험은 {pct(sig2['groups_with_equal_rewards'])}). 200걸음 가운데 {sig['updates_applied']}걸음만 가중치를 바꿨다.",
+                              f"모델의 출력이 거의 바뀌지 않았다. {r3['outputs']['questions']}문항 가운데 {r3['outputs']['same_raw_output']}문항에서 강화학습 전후의 출력이 글자까지 같다. "
+                              f"같은 설정으로 미세조정을 한 번 더 하면 {pct(r3['retraining']['outputs']['same_raw_output_rate'])}만 같다.",
+                              f"개발 {tr3['dev_first']['n']}문항에서는 정답이 {tr3['dev_first']['correct']}개에서 {tr3['dev_kept']['correct']}개로 늘었지만 test에는 나타나지 않았다. 저장할 걸음을 그 개발셋으로 골랐다.",
+                              "확신도가 맞은 답과 틀린 답을 가르는 힘은 줄었다. 예상하지 않았던 것이고 결과를 본 뒤에 찾았다. 구간은 문항을 다시 뽑은 것이라 학습을 다시 했을 때의 흔들림은 담지 않는다.",
+                              "한계. 한 번의 실행이고 시드를 바꾸지 않았다. 모델이 틀리는 프롬프트만 골라 학습하는 방식과 확신도를 보는 보상은 해 보지 않았다."],
+                    "artifact": f"experiments/eval/rl3_analysis.json (scripts/rl3_analysis.py), experiments/exaone_grpo3/, experiments/exaone_lora_full3/train_info.json. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rp3['replays']}건을 다시 검증했고({rp3['questions_checked']:,}문항) 판정이 다른 문항은 {rp3['questions_that_differ']}개다"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     big = g2["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"] if g2 else None
     rows = []
