@@ -77,8 +77,8 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2"), "before the repeat run": ("grpo2c", "full2"),
-                         "before the full-data rerun": ("full2",)}.get(cloned_results, ())
+                later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3"), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3"),
+                         "before the full-data rerun": ("full2", "full3", "grpo3"), "before RL on the full-data model": ("full3", "grpo3")}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -163,7 +163,7 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     repo, calls, packs, sections, run_all = run.repo, run.calls, run.packs, run.sections, run.run_all
 
     first = run_all()
-    assert first["train"] == 10 and first["grpo"] == 1 and first["eval"] >= 50               # 8 + the two full-data runs of section I
+    assert first["train"] == 10 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I; RL in D and in J
     assert len(packs) >= len(sections) - 1                                   # every section ends by packing what exists so far
     assert Path.cwd() == repo                                                # pack() moves away for the download link and must come back
     names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
@@ -172,7 +172,8 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     kept = sorted(q.parent.name for q in (repo / "experiments").glob("*/merged"))
     assert kept == ["exaone_lora_pool7000", "exaone_lora_rlstart2"]          # the two that later sections serve again
     rl = [c for k, c in calls if k == "grpo"]
-    assert len(rl) == 1 and all(x in rl[0] for x in ("--sampling natural", "--dev-sample random", "--max-in 672", "--max-len 960", "--chunk 1"))
+    assert len(rl) == 2 and all(x in c for c in rl for x in ("--sampling natural", "--dev-sample random", "--max-in 672", "--max-len 960", "--chunk 1"))
+    assert "--adapter experiments/exaone_lora_rlstart2 " in rl[0] and "--adapter experiments/exaone_lora_full2 " in rl[1]      # section D, then section J
     start = [c for k, c in calls if k == "train" and "exaone_lora_rlstart2" in c]
     assert len(start) == 1 and "--max-in 672" in start[0] and "--max-len 960" in start[0]      # whole prompts and whole targets (issue 66)
     ddp = [c for k, c in calls if k == "train" and "exaone_lora_ddp" in c]
@@ -216,7 +217,7 @@ def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
     run = DryRun(tmp_path, monkeypatch, n_gpu=1)
     counts = run.run_all()
     commands = [c for _, c in run.calls]
-    assert counts["grpo"] == 1 and counts["train"] == 8                      # no ddp1 / ddp2
+    assert counts["grpo"] == 2 and counts["train"] == 8                      # no ddp1 / ddp2
     assert not any("torchrun" in c for c in commands) and not any("32b" in o.lower() for o in run.outputs())
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
@@ -246,7 +247,7 @@ def test_notebook_2_goes_on_when_a_server_dies_during_evaluation(tmp_path, monke
     counts = run.run_all()
     mine = [c for k, c in run.calls if k == "eval" and "ref_32b_awq" in re.search(r"--out (\S+)", c).group(1)]
     assert len(mine) == 1 and "--replay-from" not in mine[0]                 # no second set, no re-verification of a missing file
-    assert counts["grpo"] == 1 and counts["train"] == 10                     # the other sections still ran
+    assert counts["grpo"] == 2 and counts["train"] == 10                     # the other sections still ran
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
 
@@ -299,7 +300,7 @@ def test_a_failed_push_is_reported_without_stopping_or_leaking_the_token(tmp_pat
     run.ns["RESTORE"] = False
     counts = run.run_all()
     printed = capsys.readouterr().out
-    assert counts["grpo"] == 1 and (tmp_path / "gpu_results_2.tgz").exists()
+    assert counts["grpo"] == 2 and (tmp_path / "gpu_results_2.tgz").exists()
     assert "GitHub에 올리지 못했습니다" in printed and "dummy-token" not in printed
 
 
@@ -309,7 +310,7 @@ def test_notebook_2_reinforcement_learning_control_run_differs_only_in_sampling(
     run = DryRun(tmp_path, monkeypatch, control=True)
     counts = run.run_all()
     rl = [c for k, c in run.calls if k == "grpo"]
-    assert counts["grpo"] == 2 and "--sampling natural" in rl[0] and "--sampling balanced" in rl[1]
+    assert counts["grpo"] == 3 and "--sampling natural" in rl[0] and "--sampling balanced" in rl[1]      # the third is section J
     strip = lambda c: re.sub(r"--sampling \w+|--out \S+", "", c)                                  # noqa: E731
     assert strip(rl[0]) == strip(rl[1])
     assert any("exaone_grpo2b_vllm_ko_test" in o for o in run.outputs())
@@ -319,6 +320,7 @@ RL_CELLS = "RL_RUNS"            # the two cells of section D
 BEFORE = "before the control run"
 BEFORE_REPEAT = "before the repeat run"
 BEFORE_FULL2 = "before the full-data rerun"
+BEFORE_RL3 = "before RL on the full-data model"
 
 
 def test_control_run_in_a_new_session_trains_and_evaluates_its_own_start_model(tmp_path, monkeypatch):
@@ -503,6 +505,54 @@ def test_full_data_section_can_run_the_corrected_setting_alone(tmp_path, monkeyp
     counts = run.run_all(only=FULL_CELL)
     assert counts["train"] == 1 and counts["eval"] == 4
     assert "--max-in 672" in next(c for k, c in run.calls if k == "train") and not any("full2old" in o for o in run.outputs())
+
+
+RL3_CELL = "RL3_DIR"            # the cell of section J
+
+
+def test_rl_on_the_full_data_model_starts_from_the_stored_adapter_when_it_is_still_there(tmp_path, monkeypatch):
+    """Section J asks what the same RL adds to a model already fine-tuned on the full data. Section I freed the merged
+    weights of that model and kept its adapter; when the working directory is still there, RL starts from it and no
+    start model is trained or evaluated again. The RL command is the one of the main experiment apart from the start
+    model."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_RL3)
+    start = run.repo / "experiments/exaone_lora_full2"
+    (start / "adapter_config.json").write_text("{}")                          # what section I leaves behind: the adapter, not merged/
+    counts = run.run_all(only=RL3_CELL)
+    assert counts["train"] == 0 and counts["grpo"] == 1 and counts["eval"] == 4
+    rl = next(c for k, c in run.calls if k == "grpo")
+    assert "--adapter experiments/exaone_lora_full2 " in rl and "--out experiments/exaone_grpo3" in rl
+    main = json.loads((ROOT / "experiments/exaone_grpo2/train_info.json").read_text())["args"]
+    for flag, key in (("--steps", "steps"), ("--prompts", "prompts"), ("--group", "group"), ("--chunk", "chunk"), ("--max-in", "max_in"), ("--max-len", "max_len"),
+                      ("--sampling", "sampling"), ("--dev-sample", "dev_sample"), ("--dev-n", "dev_n"), ("--eval-every", "eval_every")):
+        assert re.search(rf"{flag} (\S+)", rl).group(1) == str(main[key]), flag            # same settings as the stored main experiment
+    assert float(re.search(r"--lr (\S+)", rl).group(1)) == main["lr"]
+    assert run.outputs() == [f"experiments/eval/exaone_grpo3_vllm_ko_{s}{ec}" for s in ("custom", "test") for ec in ("", "_ec")] + ["experiments/exaone_grpo3"]
+    stored = (ROOT / "experiments/eval/exaone_full2_vllm_ko_test_ec/metrics.json").read_text()
+    assert (run.repo / "experiments/eval/exaone_full2_vllm_ko_test_ec/metrics.json").read_text() == stored
+    assert not (run.repo / "experiments/exaone_grpo3/merged").exists()                      # weights freed after evaluation
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any(n.endswith("exaone_grpo3/train_log.jsonl") for n in names) and any("exaone_grpo3_vllm_ko_test_ec" in n for n in names)
+
+    assert run.run_all(only=RL3_CELL) == collections.Counter()                              # run again: nothing left to do
+
+
+def test_rl_on_the_full_data_model_trains_its_own_start_model_when_the_weights_are_gone(tmp_path, monkeypatch):
+    """A new session has the evaluation of the full-data model but not its weights. It trains one with the corrected
+    length setting under the next unused name, evaluates it, and starts RL from it; the stored evaluation stays."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_RL3)
+    counts = run.run_all(only=RL3_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8
+    start = next(c for k, c in run.calls if k == "train")
+    assert "--limit 0 " in start and "--max-in 672" in start and "--max-len 960" in start and "--out experiments/exaone_lora_full3" in start
+    assert "--adapter experiments/exaone_lora_full3 " in next(c for k, c in run.calls if k == "grpo")
+    assert [k for k, _ in run.calls if k in ("train", "grpo")] == ["train", "grpo"]
+    assert run.outputs() == [f"experiments/eval/{name}_vllm_ko_{s}{ec}" for name in ("exaone_full3", "exaone_grpo3") for s in ("custom", "test") for ec in ("", "_ec")] + [
+        "experiments/exaone_grpo3", "experiments/exaone_lora_full3"]
+    stored = (ROOT / "experiments/eval/exaone_full2_vllm_ko_test/metrics.json").read_text()
+    assert (run.repo / "experiments/eval/exaone_full2_vllm_ko_test/metrics.json").read_text() == stored
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any("exaone_full3_vllm_ko_test_ec" in n for n in names) and any(n.endswith("exaone_lora_full3/train_info.json") for n in names)
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

@@ -68,6 +68,9 @@ def main() -> int:
     for s in ("train", "dev", "test"):
         check_records(load(ROOT / f"data/ko/synthetic_{s}.jsonl"), ko_docs, f"ko/synthetic_{s}", verify_gold=True)
     check_records(load(ROOT / "data/ko/custom_eval.jsonl"), ko_docs, "ko/custom", verify_gold=True)
+    owner = ROOT / "data/ko/owner_eval.jsonl"                    # questions written by the repository owner (docs/rewrite/07_owner_eval_questions.md)
+    if owner.exists():
+        check_records(load(owner), ko_docs, "ko/owner", verify_gold=True)
     tabs = {s: {r["table_id"] for r in recs} for s, recs in ko.items()}
     for a in tabs:
         for b in tabs:
