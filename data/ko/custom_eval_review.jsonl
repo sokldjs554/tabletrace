@@ -1,0 +1,30 @@
+{"qid": "ko_custom_01", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_02", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_03", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_04", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_05", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_06", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_07", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_08", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_09", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_10", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_11", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_12", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_13", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_14", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_15", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_16", "verdict": "fix", "comment": "질문은 시청률 차이를 %p로 묻지만 정답과 단위가 %로 표기되어 있습니다. 11.5%와 7.2%의 차이는 4.3%p입니다. "}
+{"qid": "ko_custom_17", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_18", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_19", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_20", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_21", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_22", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_23", "verdict": "fix", "comment": "본문은 허정의 대통령 권한대행 경력도 서술합니다. 최규하를 유일한 답으로 하려면 국무총리 자격으로 최초로 행사했다는 범위를 명확히 해야 합니다. "}
+{"qid": "ko_custom_24", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_25", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_26", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_27", "verdict": "ok", "comment": ""}
+{"qid": "ko_custom_28", "verdict": "fix", "comment": "표는 뮤직비디오 목록으로 연도와 앨범명을 제시하지만, 연도가 앨범 발매 연도라는 근거가 없습니다. 뮤직비디오 기준으로 질문을 명확히 해야 함 "}
+{"qid": "ko_custom_29", "verdict": "fix", "comment": "표의 연도는 뮤직비디오 목록에 속하며 앨범 발매 연도라고 확인되지 않습니다. 이 표에 2017년 행이 없는 것만으로 해당 연도에 발매된 앨범이 없다고 판단할 수 없음 "}
+{"qid": "ko_custom_30", "verdict": "ok", "comment": ""}
