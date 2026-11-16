@@ -209,3 +209,25 @@ def test_the_exaone_results_on_the_owner_questions_follow_from_the_stored_predic
            for r in ("exaone_full_vllm_ko_test", "exaone_full_vllm_ko_test_run2", "exaone_full2old_vllm_ko_test", "exaone_full2_vllm_ko_test", "exaone_full3_vllm_ko_test")]
     new = json.loads((EVAL / "exaone_full4_vllm_ko_test" / "metrics.json").read_text(encoding="utf-8"))["metrics"]["verified_em"]
     assert min(ems) <= new <= max(ems)
+
+
+def test_the_documents_do_not_say_the_owner_written_loop_trained_a_stored_model():
+    """The owner wrote three training files. Reward and GRPO loss were used in the RL runs; the fine-tuning loop was
+    not: every stored EXAONE fine-tuning ran with the loop built into the script. Until a stored training record says
+    `"loop": "owner"`, the documents have to say so."""
+    infos = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_lora_*/train_info.json"))]
+    assert len(infos) >= 8
+    rl = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_grpo*/train_info.json"))]
+    assert rl and all("owner-written" in t["reward"] for t in rl)                     # the reward and loss were used
+    if any(t.get("loop") == "owner" for t in infos):
+        pytest.skip("a stored training used the owner's loop: the statement no longer applies")
+    assert all(t.get("loop") in (None, "builtin") for t in infos)
+    report = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
+    assert "소유자가 쓴 학습 루프는 GPU 학습에 쓰인 적이 없다" in report[report.index("## 26. "):]
+    handoff = (ROOT / "docs" / "HANDOFF.md").read_text(encoding="utf-8")
+    assert "학습 루프는 GPU 학습에 쓰인 적이 없다" in handoff and '"직접 쓴 학습 루프로 EXAONE을 미세조정했다"고 쓰지 않는다' in handoff
+    assert "학습 루프(`lm_loop.py`)는 GPU 학습에 쓰인 적이 없습니다" in (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "GPU 학습에는 쓰이지 않았다" in (ROOT / "docs" / "ONE_PAGE.md").read_text(encoding="utf-8")
+    d = json.loads((EVAL / "owner_eval_analysis.json").read_text(encoding="utf-8"))["calc_wording"]
+    assert d["ko_owner"]["wording_names_the_right_operation"] < d["ko_ai_written"]["wording_names_the_right_operation"]
+    assert d["chem_textbook_ai_written"]["heuristic_right"] < d["chem_textbook_ai_written"]["wording_names_the_right_operation"]      # wording alone did not make the baseline right there

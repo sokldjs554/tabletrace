@@ -19,7 +19,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(ROOT / "src"))
 from evidence_error import wilson  # noqa: E402
+from tabletrace.agent.heuristic import _calc_intent  # noqa: E402
 
 EVAL = ROOT / "experiments" / "eval"
 KO = ROOT / "data" / "ko"
@@ -116,7 +118,19 @@ def main() -> None:
     planners = {label: planner(prefix) for label, prefix in CPU_PLANNERS.items()}
     gpu = {label: planner(prefix) for label, prefix in GPU_PLANNERS.items() if (EVAL / f"{prefix}_ko_owner_ec" / "predictions.jsonl").exists()}
 
-    out = {"review": review_out, "runs_on_the_ai_written_set": runs, "owner_set": owner_out, "cpu_planners": planners, "gpu_planners": gpu}
+    # Do the calculation questions of each question set use the words the heuristic baseline picks its operation by?
+    # (The AI tool wrote the baseline, the synthetic templates and every hand-made set except the owner's.)
+    calc_ops = ("diff", "sum", "avg", "ratio", "pct_change")
+    wording = {}
+    for name, path, run in (("ko_ai_written", KO / "custom_eval.jsonl", "heuristic_ko_custom"), ("ko_owner", KO / "owner_eval.jsonl", "heuristic_ko_owner"),
+                            ("ko_synthetic_test", KO / "synthetic_test.jsonl", "heuristic_ko_test"),
+                            ("chem_textbook_ai_written", ROOT / "data/chem/custom_eval.jsonl", "heuristic_chem_custom"),
+                            ("chem_papers_ai_written", ROOT / "data/chem_papers/custom_eval.jsonl", "heuristic_chem_papers")):
+        qs = [q for q in load(path) if q["op"] in calc_ops]
+        v = verdicts(run)
+        wording[name] = {"calc_questions": len(qs), "wording_names_the_right_operation": sum(_calc_intent(q["question"]) == q["op"] for q in qs),
+                         "heuristic_right": sum(v[q["qid"]] for q in qs)}
+    out = {"review": review_out, "runs_on_the_ai_written_set": runs, "owner_set": owner_out, "cpu_planners": planners, "gpu_planners": gpu, "calc_wording": wording}
     dest = EVAL / "owner_eval_analysis.json"
     dest.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print("review:", {k: v for k, v in review_out.items() if k != "flagged"}, review_out["flagged"])
@@ -125,6 +139,7 @@ def main() -> None:
         print(label, {k: (v["correct"], v["n"]) for k, v in res.items() if "correct" in v}, {k: v for k, v in res.items() if k.endswith("calc_questions")})
         print("   owner by category:", {c: (s["correct"], s["n"]) for c, s in res["owner_first_pass"]["by_category"].items()},
               "| ai-written:", {c: (s["correct"], s["n"]) for c, s in res["ai_written_first_pass"]["by_category"].items()})
+    print("calc wording:", wording)
     print("->", dest.relative_to(ROOT))
 
 

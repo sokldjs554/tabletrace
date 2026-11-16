@@ -2045,5 +2045,32 @@
     "answer_sent": 0
    }
   }
+ },
+ "calc_wording": {
+  "ko_ai_written": {
+   "calc_questions": 6,
+   "wording_names_the_right_operation": 5,
+   "heuristic_right": 5
+  },
+  "ko_owner": {
+   "calc_questions": 6,
+   "wording_names_the_right_operation": 2,
+   "heuristic_right": 0
+  },
+  "ko_synthetic_test": {
+   "calc_questions": 110,
+   "wording_names_the_right_operation": 97,
+   "heuristic_right": 65
+  },
+  "chem_textbook_ai_written": {
+   "calc_questions": 7,
+   "wording_names_the_right_operation": 7,
+   "heuristic_right": 2
+  },
+  "chem_papers_ai_written": {
+   "calc_questions": 19,
+   "wording_names_the_right_operation": 12,
+   "heuristic_right": 4
+  }
  }
 }

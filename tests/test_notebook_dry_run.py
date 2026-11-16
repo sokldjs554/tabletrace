@@ -67,7 +67,7 @@ class DryRun:
         self.repo = repo = root / "tabletrace"
         for d in ("experiments/eval", "experiments/bench", "src/tabletrace/training"):
             (repo / d).mkdir(parents=True)
-        for m in ("evidence_reward", "grpo"):
+        for m in ("evidence_reward", "grpo", "lm_loop"):
             (repo / "src/tabletrace/training" / f"{m}.py").write_text("")
         (repo / "data/ko").mkdir(parents=True)
         (repo / "data/ko/owner_eval.jsonl").write_text("")                 # the owner's questions are part of main since 2026-11-16 (section L reads them)
@@ -167,7 +167,7 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     repo, calls, packs, sections, run_all = run.repo, run.calls, run.packs, run.sections, run.run_all
 
     first = run_all()
-    assert first["train"] == 11 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I + the model of section L; RL in D and in J
+    assert first["train"] == 12 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I + the models of sections L and M; RL in D and in J
     assert len(packs) >= len(sections) - 1                                   # every section ends by packing what exists so far
     assert Path.cwd() == repo                                                # pack() moves away for the download link and must come back
     names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
@@ -221,7 +221,7 @@ def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
     run = DryRun(tmp_path, monkeypatch, n_gpu=1)
     counts = run.run_all()
     commands = [c for _, c in run.calls]
-    assert counts["grpo"] == 2 and counts["train"] == 9                      # no ddp1 / ddp2
+    assert counts["grpo"] == 2 and counts["train"] == 10                     # no ddp1 / ddp2
     assert not any("torchrun" in c for c in commands) and not any("32b" in o.lower() for o in run.outputs())
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
@@ -251,7 +251,7 @@ def test_notebook_2_goes_on_when_a_server_dies_during_evaluation(tmp_path, monke
     counts = run.run_all()
     mine = [c for k, c in run.calls if k == "eval" and "ref_32b_awq" in re.search(r"--out (\S+)", c).group(1)]
     assert len(mine) == 1 and "--replay-from" not in mine[0]                 # no second set, no re-verification of a missing file
-    assert counts["grpo"] == 2 and counts["train"] == 11                     # the other sections still ran
+    assert counts["grpo"] == 2 and counts["train"] == 12                     # the other sections still ran
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
 
@@ -639,6 +639,30 @@ def test_the_recorded_owner_question_run_matches_what_the_notebook_does_and_the_
         assert again["entity_check"] is True and again["replay_from"] == f"experiments/eval/{name}_ko_owner"
     run = DryRun(tmp_path, monkeypatch, cloned_results=True)
     assert run.run_all(only=OWNER_CELL) == collections.Counter()
+
+
+OWNLOOP_CELL = "OWNLOOP_DIR"    # the cell of section M
+
+
+def test_owner_loop_section_trains_the_full_data_model_with_the_owner_written_loop(tmp_path, monkeypatch):
+    """Every stored EXAONE fine-tuning ran with the loop built into the script. Section M trains the full-data model
+    once with the loop the owner wrote: the same command as the other full-data trainings plus `--loop owner`, and the
+    same three evaluations as section L."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    counts = run.run_all(only=OWNLOOP_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 6
+    train = next(c for k, c in run.calls if k == "train")
+    assert "--loop owner" in train.split("--limit")[1] and "--limit 0 " in train and "--max-in 672" in train and "--max-len 960" in train
+    assert "--out experiments/exaone_lora_ownloop" in train and "--merge" in train.split()
+    stored = json.loads((ROOT / "experiments/exaone_lora_full4/train_info.json").read_text())["args"]         # the built-in loop, same data and lengths
+    for flag, key in (("--epochs", "epochs"), ("--bs", "bs"), ("--grad-accum", "grad_accum"), ("--max-len", "max_len"), ("--max-in", "max_in"), ("--seed", "seed"), ("--limit", "limit")):
+        assert float(re.search(rf"{flag} (\S+)", train).group(1)) == float(stored[key]), flag
+    assert stored["loop"] == "builtin"
+    assert run.outputs() == sorted([f"experiments/eval/exaone_ownloop_vllm_ko_{s}{ec}" for s in ("test", "custom", "owner") for ec in ("", "_ec")] + ["experiments/exaone_lora_ownloop"])
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any("exaone_ownloop_vllm_ko_owner_ec" in n for n in names) and any(n.endswith("exaone_lora_ownloop/train_info.json") for n in names)
+    assert not (run.repo / "experiments/exaone_lora_ownloop/merged").exists()
+    assert run.run_all(only=OWNLOOP_CELL) == collections.Counter()                                           # run again: nothing left to do
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):
