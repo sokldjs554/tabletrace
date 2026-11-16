@@ -663,6 +663,10 @@ def test_owner_loop_section_trains_the_full_data_model_with_the_owner_written_lo
     assert any("exaone_ownloop_vllm_ko_owner_ec" in n for n in names) and any(n.endswith("exaone_lora_ownloop/train_info.json") for n in names)
     assert not (run.repo / "experiments/exaone_lora_ownloop/merged").exists()
     assert run.run_all(only=OWNLOOP_CELL) == collections.Counter()                                           # run again: nothing left to do
+    # the notebook recognises the owner's loop by the text the training script records for it
+    src = next(src for _, src in run.sections if OWNLOOP_CELL in src)
+    script = (ROOT / "scripts/train/exaone_lora_sft.py").read_text(encoding="utf-8")
+    assert '"owner" not in str(t.get("loop"))' in src and "tabletrace.training.lm_loop (owner-written)" in script
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

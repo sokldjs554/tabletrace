@@ -213,13 +213,13 @@ def test_the_exaone_results_on_the_owner_questions_follow_from_the_stored_predic
 
 def test_the_documents_do_not_say_the_owner_written_loop_trained_a_stored_model():
     """The owner wrote three training files. Reward and GRPO loss were used in the RL runs; the fine-tuning loop was
-    not: every stored EXAONE fine-tuning ran with the loop built into the script. Until a stored training record says
-    `"loop": "owner"`, the documents have to say so."""
+    not: every stored EXAONE fine-tuning ran with the loop built into the script. Until a stored training record names
+    the owner's loop (the script writes "tabletrace.training.lm_loop (owner-written)"), the documents have to say so."""
     infos = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_lora_*/train_info.json"))]
     assert len(infos) >= 8
     rl = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_grpo*/train_info.json"))]
     assert rl and all("owner-written" in t["reward"] for t in rl)                     # the reward and loss were used
-    if any(t.get("loop") == "owner" for t in infos):
+    if any("owner" in str(t.get("loop")) for t in infos):
         pytest.skip("a stored training used the owner's loop: the statement no longer applies")
     assert all(t.get("loop") in (None, "builtin") for t in infos)
     report = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
