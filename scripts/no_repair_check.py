@@ -37,6 +37,7 @@ RUNS = [
     # control run of the second RL experiment and its own start model
     ("exaone_rlstart2b_vllm_ko_test", "engine", "exaone", 672), ("exaone_grpo2b_vllm_ko_test", "engine", "exaone", 672),
     ("exaone_grpo2c_vllm_ko_test", "engine", "exaone", 672),          # the main experiment once more, from the control's start model
+    ("exaone_full2_vllm_ko_test", "engine", "exaone", 672), ("exaone_full2old_vllm_ko_test", "engine", "exaone", 672),      # full data: fixed cap, old cap
 ]
 
 

@@ -106,6 +106,17 @@ PAIRS = [
     ("grpo2c_vs_grpo2b_ko_test", "exaone_grpo2b_vllm_ko_test", "exaone_grpo2c_vllm_ko_test"),                     # natural against balanced, same start model
     ("grpo2c_vs_grpo2b_ko_test_ec", "exaone_grpo2b_vllm_ko_test_ec", "exaone_grpo2c_vllm_ko_test_ec"),
     ("grpo2c_vs_grpo2_ko_test", "exaone_grpo2_vllm_ko_test", "exaone_grpo2c_vllm_ko_test"),                       # the two runs of the main experiment (different start models)
+    # full-data fine-tuning with the length cap fixed (no target cut, issue 66) against the old cap, trained in the same session (2026-11-16)
+    ("full2_vs_full2old_ko_test", "exaone_full2old_vllm_ko_test", "exaone_full2_vllm_ko_test"),
+    ("full2_vs_full2old_ko_test_ec", "exaone_full2old_vllm_ko_test_ec", "exaone_full2_vllm_ko_test_ec"),
+    ("full2_vs_full2old_ko_custom", "exaone_full2old_vllm_ko_custom", "exaone_full2_vllm_ko_custom"),
+    ("full2_vs_full2old_ko_custom_ec", "exaone_full2old_vllm_ko_custom_ec", "exaone_full2_vllm_ko_custom_ec"),
+    # the old cap trained three times (two earlier sessions and this one): how much a training run moves by itself
+    ("full2old_vs_full_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_full2old_vllm_ko_test"),
+    ("full2old_vs_full_run2_ko_test", "exaone_full_vllm_ko_test_run2", "exaone_full2old_vllm_ko_test"),
+    ("full2_vs_full_run1_ko_test", "exaone_full_vllm_ko_test", "exaone_full2_vllm_ko_test"),
+    ("full2_vs_full_run2_ko_test", "exaone_full_vllm_ko_test_run2", "exaone_full2_vllm_ko_test"),
+    ("full2_vs_full_run1_ko_test_ec", "exaone_full_vllm_ko_test_ec", "exaone_full2_vllm_ko_test_ec"),
     # untuned EXAONE of two sizes, same prompt and verifier
     ("ref_7p8b_vs_ref_1p2b_ko_test", "ref_1p2b_ko_test", "ref_7p8b_awq_ko_test"),
     ("ref_7p8b_vs_ref_1p2b_ko_test_ec", "ref_1p2b_ko_test_ec", "ref_7p8b_awq_ko_test_ec"),

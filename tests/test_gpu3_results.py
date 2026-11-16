@@ -31,7 +31,7 @@ def test_run_names_hold_no_dots():
 
 
 @pytest.mark.parametrize("script, out", [("rl2_analysis.py", "rl2_analysis.json"), ("rl2_analysis.py", "rl2_control_analysis.json"), ("rl2_analysis.py", "rl2_repeat_analysis.json"),
-                                         ("gpu3_summary.py", "gpu3_summary.json")])
+                                         ("gpu3_summary.py", "gpu3_summary.json"), ("length_fix_analysis.py", "length_fix_analysis.json")])
 def test_derived_files_are_reproduced_from_the_predictions(script, out):
     stored = (EVAL / out).read_text(encoding="utf-8")
     r = subprocess.run([sys.executable, str(ROOT / "scripts" / script)], cwd=ROOT, capture_output=True, text=True)
@@ -71,7 +71,7 @@ def test_analysis_says_what_did_not_improve():
     assert all(v["unparsable"] == 0 for v in t["dev"].values())
 
 
-@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8), ("repeat", 4)])
+@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8), ("repeat", 4), ("full2", 8)])
 def test_replay_record_covers_every_run_of_the_session(session, replays):
     d = json.loads((EVAL / f"replay_check_{session}.json").read_text(encoding="utf-8"))
     assert d["replays"] == 2 * len(d["runs"]) == replays and d["questions_that_differ"] == 0
@@ -164,3 +164,36 @@ def test_repeat_run_reproduces_the_main_experiment_and_separates_from_the_contro
     sec = report[report.index("### 22.8 본 실험의 반복"):]
     for needle in ("본 실험은 두 번, 대조군은 한 번이다", "강화학습의 시드는 같았다", "여전히 대조군과 유의하게 다르지 않다", "계산과 보류는 이번에도 배우지 못했다"):
         assert needle in sec, needle
+
+
+def test_fixing_the_length_cap_made_no_detectable_difference_and_the_documents_say_so():
+    """The full-data model was trained again with the cap that cuts no target and, in the same session, with the old
+    cap. The documents must report what the predictions show: no detectable difference, none on the long questions
+    either, a spread between trainings that is larger than the difference, and the headline number left at the lowest
+    of the four trainings."""
+    d = json.loads((EVAL / "length_fix_analysis.json").read_text(encoding="utf-8"))
+    fp = d["first_pass"]
+    fixed, old = rows("exaone_full2_vllm_ko_test"), rows("exaone_full2old_vllm_ko_test")
+    v = fp["fixed_vs_old_same_session"]["all"]["verified_correct"]
+    assert v["only_first"] == sum(fixed[q]["verified_correct"] and not old[q]["verified_correct"] for q in fixed)      # recomputed from the predictions
+    assert v["only_second"] == sum(old[q]["verified_correct"] and not fixed[q]["verified_correct"] for q in fixed)
+    assert v["p_two_sided"] > 0.05 and v["ci95_low"] < 0 < v["ci95_high"]
+    long = fp["fixed_vs_old_same_session"]["over_old_cap"]["verified_correct"]
+    assert long["p_two_sided"] > 0.05 and d["test_questions"]["over_old_cap"] + d["test_questions"]["fits_old_cap"] == d["test_questions"]["all"] == 699
+    lengths = json.loads((EVAL / "ko_test_prompt_lengths.json").read_text(encoding="utf-8"))["questions"]
+    assert set(lengths) == set(fixed) and d["test_questions"]["over_old_cap"] == sum(x["prompt_tokens"] + x["target_tokens"] > 768 for x in lengths.values())
+    three = fp["old_cap_trained_three_times"]
+    assert three["verified_em_spread"] > abs(v["difference"]) and fp["fixed_inside_the_spread_of_the_old_cap"]
+    t = d["training"]
+    assert (t["fixed"]["targets_missing"], t["fixed"]["targets_cut_short"]) == (0, 0) and t["old_same_session"]["targets_cut_share"] == 0.15
+    assert t["args_that_differ_between_fixed_and_old_same_session"] == ["max_in", "max_len", "out"]
+    # the headline stays the first training, the lowest of the four
+    ems = [fp["verified_em"][k]["all"]["rate"] for k in ("old_run1", "old_run2", "old_same_session", "fixed")]
+    assert min(ems) == fp["verified_em"]["old_run1"]["all"]["rate"]
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "대표 수치로는 가장 낮은 1회째 값을 그대로 씁니다" in readme
+    report = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
+    sec = report[report.index("## 23. 길이 결함을 고친 설정으로"):]
+    for needle in ("그 예상은 틀렸다", "한 쌍이다", "가장 높은 값을 골라 쓰지 않으려는 것이다", "예전 설정으로 학습한 그대로다"):
+        assert needle in sec, needle
+

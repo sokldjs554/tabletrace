@@ -206,7 +206,10 @@ def supplement_sections() -> list[dict]:
     if rc:
         rows = []
         names = {"rl_v3_conf_ko_test": "mT5-small 최종", "ref_1p2b_ko_test": "EXAONE 1.2B, 튜닝 없음", "ref_7p8b_awq_ko_test": "EXAONE 7.8B(AWQ), 튜닝 없음",
-                 "exaone_rlstart2_vllm_ko_test": "EXAONE 1.2B, 300문항 튜닝", "exaone_grpo2_vllm_ko_test": "그 모델에 강화학습"}
+                 "exaone_rlstart2_vllm_ko_test": "EXAONE 1.2B, 300문항 튜닝", "exaone_grpo2_vllm_ko_test": "그 모델에 강화학습",
+                 "exaone_rlstart2b_vllm_ko_test": "EXAONE 1.2B, 300문항 튜닝 (다시 학습)", "exaone_grpo2b_vllm_ko_test": "그 모델에 강화학습, 대조군",
+                 "exaone_grpo2c_vllm_ko_test": "그 모델에 강화학습, 반복 실행",
+                 "exaone_full2_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (길이 결함을 고친 설정)", "exaone_full2old_vllm_ko_test": "EXAONE 1.2B, 전체 데이터 튜닝 (예전 설정)"}
         for label, run in [(names.get(k, k), k) for k in names if k in rc["runs"]] + [(k, k) for k in rc["runs"] if k not in names]:
             r = rc["runs"].get(run)
             if not r:
@@ -221,7 +224,7 @@ def supplement_sections() -> list[dict]:
                     "columns": ["모델", "조건", "문턱 없음: 응답률", "문턱 없음: 위험", "응답률 10%에서 위험", "30%", "50%", "70%", "AUROC"], "rows": rows,
                     "notes": ["mT5-small에서는 확신도가 약한 신호다. 가장 확신하는 답만 내보내도 위험이 크게 줄지 않는다.",
                               "EXAONE의 네 줄은 3차 GPU 실행(2026-11-15)의 평가가 저장한 로그 확률로 그렸다. 네 모델 모두에서 검증기 통과분의 위험이 모델만의 위험보다 낮고, 응답률을 10%로 낮추면 위험이 더 내려간다.",
-                              "전체 데이터로 튜닝한 EXAONE의 곡선은 없다. 그 평가는 로그 확률을 저장하지 않았다."],
+                              "전체 데이터로 튜닝한 EXAONE의 곡선은 2026-11-16의 재학습에서 얻었다. 가장 좋은 모델에서도 검증기만으로는 위험이 12% 안팎이고, 확신도 문턱을 함께 쓰면 응답률을 줄이는 만큼 위험이 내려간다."],
                     "artifact": "experiments/eval/risk_coverage.json (scripts/risk_coverage.py)"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     if g2:
@@ -290,7 +293,7 @@ def supplement_sections() -> list[dict]:
     out.extend(gpu3_cards())
     out.append({"title": "재지 못한 것", "status": "prep",
                 "description": "풀 전부(약 3.4만 문항) 학습, 큰 모델의 튜닝, 도구 호출 형식으로 튜닝한 모델, 튜닝 모델의 4비트 서빙(bitsandbytes는 그 vLLM 버전에 없는 방식이었다). "
-                               "강화학습의 시드를 바꾼 실행(본 실험은 시작 모델을 달리해 두 번, 대조군은 한 번 돌렸다), 프롬프트 수정만의 효과, 길이 결함을 고친 설정의 전체 데이터 미세조정, 전체 데이터 모델의 확신도 곡선. "
+                               "강화학습의 시드를 바꾼 실행(본 실험은 시작 모델을 달리해 두 번, 대조군은 한 번 돌렸다), 프롬프트 수정만의 효과, 길이 결함을 고친 설정으로 10,587문항·열 번호·화학 모델을 다시 학습하는 것. "
                                "2차 GPU 실험은 결과 파일이 남지 않아 그 실험들의 문항별 분석이 없다."})
     return out
 
@@ -419,6 +422,34 @@ def gpu3_cards() -> list[dict]:
                               "verified EM은 대조군과 여전히 유의하게 다르지 않다. 계산과 보류는 이번에도 배우지 못했다.",
                               "남은 한계. 본 실험은 두 번, 대조군은 한 번이다. 두 번의 본 실험은 시작 모델이 달랐고 강화학습의 시드는 같았다."],
                     "artifact": f"experiments/eval/rl2_repeat_analysis.json (scripts/rl2_analysis.py), experiments/exaone_grpo2c/. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rpr['replays']}건을 다시 검증했고({rpr['questions_checked']:,}문항) 판정이 다른 문항은 {rpr['questions_that_differ']}개다"})
+    lf = load(EXP / "eval" / "length_fix_analysis.json")
+    rpf = load(EXP / "eval" / "replay_check_full2.json")
+    if lf and rpf:
+        fp, sc, tr_ = lf["first_pass"], lf["subject_check"], lf["training"]
+        order = (("fixed", "고친 설정"), ("old_same_session", "예전 설정, 같은 세션"), ("old_run1", "예전 설정, 1회째"), ("old_run2", "예전 설정, 2회째"))
+        nq = lf["test_questions"]
+        rows = [
+            ["verified EM (주어 검사 없음)"] + [pct(fp["verified_em"][k]["all"]["rate"]) for k, _ in order],
+            ["verified EM (주어 검사 포함)"] + [pct(sc["verified_em"][k]["all"]["rate"]) for k, _ in order],
+            [f"표가 짧은 {nq['fits_old_cap']}문항"] + [pct(fp["verified_em"][k]["fits_old_cap"]["rate"]) for k, _ in order],
+            [f"표가 긴 {nq['over_old_cap']}문항 (정답이 잘리던 길이)"] + [pct(fp["verified_em"][k]["over_old_cap"]["rate"]) for k, _ in order],
+            ["틀린 답이 나간 문항"] + [fp["wrong_answers"][k]["all"]["k"] for k, _ in order],
+            [f"조회 {lf['evidence']['lookup_questions']['all']}문항에서 인용한 셀이 정답 셀인 문항"] + [lf["evidence"]["cited_gold_cell"][k]["all"]["k"] for k, _ in order],
+            ["학습에서 정답이 통째로 / 일부 잘린 예제", f"{tr_['fixed']['targets_missing']} / {tr_['fixed']['targets_cut_short']}",
+             f"{tr_['old_same_session']['targets_missing']} / {tr_['old_same_session']['targets_cut_short']}", "기록하지 않음 (같은 설정)", "기록하지 않음 (같은 설정)"],
+        ]
+        va, vl = fp["fixed_vs_old_same_session"]["all"]["verified_correct"], fp["fixed_vs_old_same_session"]["over_old_cap"]["verified_correct"]
+        three = fp["old_cap_trained_three_times"]
+        out.append({"title": "길이 결함을 고친 설정으로 전체 데이터를 다시 학습 — 검출되는 차이가 없다 (2026-11-16)", "status": "done",
+                    "description": f"그때까지의 EXAONE 미세조정은 프롬프트와 정답을 합쳐 768토큰을 넘는 학습 예제의 정답을 잘랐다(한국어 학습 예제의 {pct(tr_['old_same_session']['targets_cut_share'])}). "
+                                   "고친 설정과 예전 설정으로 전체 데이터 모델을 같은 세션에서 한 번씩 다시 학습했다. 두 학습 명령에서 다른 것은 길이 옵션뿐이다. 한국어 test 699문항.",
+                    "columns": ["지표"] + [label for _, label in order], "rows": rows,
+                    "notes": [f"같은 세션의 짝에서 고친 쪽만 맞힌 문항 {va['only_first']}, 예전 쪽만 맞힌 문항 {va['only_second']}(p {va['p_display']}). 차이 {100 * va['difference']:.1f}%p, 95% 구간 {100 * va['ci95_low']:.1f} ~ {100 * va['ci95_high']:.1f}%p.",
+                              f"잘림이 해쳤다면 표가 긴 문항에서 차이가 나야 한다. 거기서도 없다({vl['only_first']} 대 {vl['only_second']}, p {vl['p_display']}). 차이가 날 것이라던 예상은 틀렸다.",
+                              f"학습을 다시 하는 것만으로 이보다 더 움직인다. 예전 설정 세 번이 {pct(three['verified_em_lowest'])}에서 {pct(three['verified_em_highest'])}까지다. 1회째가 나머지 둘보다 유의하게 낮다.",
+                              "대표 수치로 쓰는 1회째 값은 결함 때문에 낮았던 것이 아니라 네 번 가운데 가장 낮게 나온 실행이다. 높은 값을 골라 쓰지 않으려고 그대로 둔다.",
+                              "한계. 한 쌍이다. 학습 실행 간 흔들림보다 작은 효과는 가를 수 없다. 10,587문항 모델, 열 번호 형식 모델, 화학 모델은 예전 설정으로 학습한 그대로다."],
+                    "artifact": f"experiments/eval/length_fix_analysis.json (scripts/length_fix_analysis.py), experiments/exaone_lora_full2*/train_info.json. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rpf['replays']}건을 다시 검증했고({rpf['questions_checked']:,}문항) 판정이 다른 문항은 {rpf['questions_that_differ']}개다"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     big = g2["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"] if g2 else None
     rows = []

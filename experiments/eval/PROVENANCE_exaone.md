@@ -37,3 +37,8 @@
   - 반복 실행과 대조군은 같은 가중치에서 시작했다. 두 학습 명령에서 다른 것은 `--sampling`과 `--out`뿐이다. 개발셋의 0걸음 점검이 대조군과 숫자까지 같다. 본 실험 1회째와 다른 것은 `--adapter`와 `--out`이다.
   - 묶음의 `run_info_2.json`은 `run_info_2_repeat.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_repeat.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
   - `scripts/replay_check.py --session repeat`로 다시 검증했다. 4회, 1,458문항에서 판정이 다른 문항은 0개다(`replay_check_repeat.json`).
+- **2번 노트북, 2026-11-16 (Kaggle Tesla T4 ×2, 커밋 `30eef7d`, `experiments/run_info_2_full2.json`)**: I절. 길이 결함을 고친 설정의 전체 데이터 미세조정과, 같은 세션에서 예전 설정으로 한 번 더. 새 파일은 평가 8건 `exaone_full2_vllm_ko_{test,custom}`, `exaone_full2old_vllm_ko_{test,custom}`와 각각의 `_ec`, 학습 기록 `experiments/exaone_lora_full2/train_info.json`(`--max-in 672 --max-len 960`, 정답이 잘린 예제 0)과 `experiments/exaone_lora_full2old/train_info.json`(`--max-len 768`, 정답이 통째로 잘린 예제 385, 일부 잘린 예제 153)이다. 둘 다 3,587문항, 224걸음. 나머지 83개 파일은 저장소의 것과 바이트까지 같다.
+  - 두 학습 명령에서 다른 것은 `--max-in`, `--max-len`, `--out`뿐이다. 예전 설정은 1번 노트북의 전체 데이터 학습(`exaone_lora_full`, `exaone_full_*`)과 같은 설정이다. 그 결과들은 이름을 그대로 두었다.
+  - 묶음의 `run_info_2.json`은 `run_info_2_full2.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_full2.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
+  - `scripts/replay_check.py --session full2`로 다시 검증했다. 8회, 2,916문항에서 판정이 다른 문항은 0개다(`replay_check_full2.json`).
+  - 문항 길이별 분석은 `scripts/prompt_lengths.py`(EXAONE 토크나이저로 센 길이를 `ko_test_prompt_lengths.json`에 저장)와 `scripts/length_fix_analysis.py`(`length_fix_analysis.json`)가 한다.

@@ -692,6 +692,87 @@
   "p_two_sided": 0.07894069368148848,
   "p_display": "0.079"
  },
+ "full2_vs_full2old_ko_test": {
+  "reference": "exaone_full2old_vllm_ko_test",
+  "candidate": "exaone_full2_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 23,
+  "reference_better": 27,
+  "p_two_sided": 0.6718110337653656,
+  "p_display": "0.672"
+ },
+ "full2_vs_full2old_ko_test_ec": {
+  "reference": "exaone_full2old_vllm_ko_test_ec",
+  "candidate": "exaone_full2_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 20,
+  "reference_better": 27,
+  "p_two_sided": 0.38169339766321286,
+  "p_display": "0.382"
+ },
+ "full2_vs_full2old_ko_custom": {
+  "reference": "exaone_full2old_vllm_ko_custom",
+  "candidate": "exaone_full2_vllm_ko_custom",
+  "n": 30,
+  "candidate_better": 3,
+  "reference_better": 0,
+  "p_two_sided": 0.25,
+  "p_display": "0.250"
+ },
+ "full2_vs_full2old_ko_custom_ec": {
+  "reference": "exaone_full2old_vllm_ko_custom_ec",
+  "candidate": "exaone_full2_vllm_ko_custom_ec",
+  "n": 30,
+  "candidate_better": 2,
+  "reference_better": 0,
+  "p_two_sided": 0.5,
+  "p_display": "0.500"
+ },
+ "full2old_vs_full_run1_ko_test": {
+  "reference": "exaone_full_vllm_ko_test",
+  "candidate": "exaone_full2old_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 45,
+  "reference_better": 26,
+  "p_two_sided": 0.03192716208321237,
+  "p_display": "0.032"
+ },
+ "full2old_vs_full_run2_ko_test": {
+  "reference": "exaone_full_vllm_ko_test_run2",
+  "candidate": "exaone_full2old_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 27,
+  "reference_better": 28,
+  "p_two_sided": 1.0,
+  "p_display": "1.000"
+ },
+ "full2_vs_full_run1_ko_test": {
+  "reference": "exaone_full_vllm_ko_test",
+  "candidate": "exaone_full2_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 36,
+  "reference_better": 21,
+  "p_two_sided": 0.0627366803558285,
+  "p_display": "0.063"
+ },
+ "full2_vs_full_run2_ko_test": {
+  "reference": "exaone_full_vllm_ko_test_run2",
+  "candidate": "exaone_full2_vllm_ko_test",
+  "n": 699,
+  "candidate_better": 22,
+  "reference_better": 27,
+  "p_two_sided": 0.5681724128491652,
+  "p_display": "0.568"
+ },
+ "full2_vs_full_run1_ko_test_ec": {
+  "reference": "exaone_full_vllm_ko_test_ec",
+  "candidate": "exaone_full2_vllm_ko_test_ec",
+  "n": 699,
+  "candidate_better": 35,
+  "reference_better": 22,
+  "p_two_sided": 0.11116111910399348,
+  "p_display": "0.111"
+ },
  "ref_7p8b_vs_ref_1p2b_ko_test": {
   "reference": "ref_1p2b_ko_test",
   "candidate": "ref_7p8b_awq_ko_test",

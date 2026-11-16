@@ -77,7 +77,8 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c"), "before the repeat run": ("grpo2c",)}.get(cloned_results, ())
+                later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2"), "before the repeat run": ("grpo2c", "full2"),
+                         "before the full-data rerun": ("full2",)}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -317,6 +318,7 @@ def test_notebook_2_reinforcement_learning_control_run_differs_only_in_sampling(
 RL_CELLS = "RL_RUNS"            # the two cells of section D
 BEFORE = "before the control run"
 BEFORE_REPEAT = "before the repeat run"
+BEFORE_FULL2 = "before the full-data rerun"
 
 
 def test_control_run_in_a_new_session_trains_and_evaluates_its_own_start_model(tmp_path, monkeypatch):
@@ -457,7 +459,7 @@ def test_full_data_fine_tuning_is_repeated_with_whole_targets_next_to_the_old_se
     the full data with a cap that cuts nothing, and once more with the old cap in the same session: two trainings of
     the old setting already differed (84.3% and 87.1%), so the corrected run needs a partner from the same session.
     The two commands must differ in the length options only."""
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_FULL2)
     counts = run.run_all(only=FULL_CELL)
     assert counts["train"] == 2 and counts["eval"] == 8 and counts["grpo"] == 0
     new, old = [c for k, c in run.calls if k == "train"]
@@ -480,8 +482,24 @@ def test_full_data_fine_tuning_is_repeated_with_whole_targets_next_to_the_old_se
     assert run.run_all(only=FULL_CELL) == collections.Counter()                                              # run again: nothing left to do
 
 
+def test_the_recorded_full_data_runs_match_what_the_notebook_does_and_the_section_is_now_finished(tmp_path, monkeypatch):
+    """Section I was run on 2026-11-16. The stored training records carry the options the dry run expects, the old
+    setting reproduced the defect exactly as counted with the tokenizer, and with the results in the repository the
+    section starts nothing."""
+    new = json.loads((ROOT / "experiments/exaone_lora_full2/train_info.json").read_text())
+    old = json.loads((ROOT / "experiments/exaone_lora_full2old/train_info.json").read_text())
+    assert (new["args"]["max_in"], new["args"]["max_len"], new["targets_missing"], new["targets_cut_short"]) == (672, 960, 0, 0)
+    assert (old["args"]["max_in"], old["args"]["max_len"]) == (None, 768)
+    counted = json.loads((ROOT / "experiments/gpu2_2026-11-14/length_cap_check.json").read_text())["settings"]["as_run_until_2026_11_14"]["train"]
+    assert (old["targets_missing"], old["targets_cut_short"]) == (counted["targets_missing"], counted["targets_cut_short"])
+    assert {k for k in set(new["args"]) | set(old["args"]) if new["args"].get(k) != old["args"].get(k)} == {"max_in", "max_len", "out"}
+    assert new["n_examples"] == old["n_examples"] == 3587 and new["steps"] == old["steps"]
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    assert run.run_all(only=FULL_CELL) == collections.Counter()
+
+
 def test_full_data_section_can_run_the_corrected_setting_alone(tmp_path, monkeypatch):
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True, old_setting=False)
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_FULL2, old_setting=False)
     counts = run.run_all(only=FULL_CELL)
     assert counts["train"] == 1 and counts["eval"] == 4
     assert "--max-in 672" in next(c for k, c in run.calls if k == "train") and not any("full2old" in o for o in run.outputs())
