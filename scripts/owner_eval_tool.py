@@ -12,6 +12,7 @@ This script only shows tables, formats calculator answers and checks the two fil
   python scripts/owner_eval_tool.py show ko_29fbd6328d     # one table with its cell ids and passages
   python scripts/owner_eval_tool.py calc ko_29fbd6328d diff 0,4 1,4      # the answer text of a calculation
   python scripts/owner_eval_tool.py review                 # the 30 existing questions next to their tables
+  python scripts/owner_eval_tool.py template               # an empty review file: 30 lines with the verdicts left blank
   python scripts/owner_eval_tool.py check                  # validate the two owner files
 """
 from __future__ import annotations
@@ -150,6 +151,18 @@ def cmd_review(a) -> None:
                 print(f"[본문 {p['id']}] {p['text'][:600]}")
 
 
+def cmd_template(a) -> int:
+    """Write the review file with one line per question and the verdict left empty. The owner fills in every verdict;
+    an empty one does not pass the check, so nothing counts as reviewed before it was looked at."""
+    if REVIEW_FILE.exists():
+        print(f"이미 있습니다: {REVIEW_FILE.relative_to(ROOT)} (덮어쓰지 않습니다. 새로 만들려면 그 파일을 지우고 다시 실행하세요.)")
+        return 1
+    lines = [json.dumps({"qid": r["qid"], "verdict": "", "comment": ""}, ensure_ascii=False) for r in load(KO / "custom_eval.jsonl")]
+    REVIEW_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"만들었습니다: {REVIEW_FILE.relative_to(ROOT)} ({len(lines)}줄). 줄마다 verdict에 ok, fix, drop 가운데 하나를 적으세요. fix와 drop에는 comment에 까닭을 적습니다.")
+    return 0
+
+
 def check_owner(recs: list[dict], docs: dict[str, dict]) -> list[str]:
     import check_data
 
@@ -257,6 +270,7 @@ def main() -> int:
     p.add_argument("cells", nargs="+", help="행,열 (예: 0,4 1,4) 또는 r0c4 r1c4")
     p.set_defaults(fn=cmd_calc)
     sub.add_parser("review").set_defaults(fn=cmd_review)
+    sub.add_parser("template").set_defaults(fn=cmd_template)
     sub.add_parser("check").set_defaults(fn=cmd_check)
     a = ap.parse_args()
     return a.fn(a) or 0

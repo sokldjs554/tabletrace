@@ -80,6 +80,17 @@ def test_review_needs_one_verdict_per_question_and_a_reason_for_every_objection(
     assert any("verdict" in e for e in tool.check_review([{**full[0], "verdict": "good"}, *full[1:]]))
 
 
+def test_the_review_template_leaves_every_verdict_empty_and_does_not_pass_until_filled_in(tmp_path, monkeypatch):
+    """The template saves typing the 30 ids. It must not decide anything: an empty verdict fails the check."""
+    monkeypatch.setattr(tool, "REVIEW_FILE", tmp_path / "custom_eval_review.jsonl")
+    monkeypatch.setattr(tool, "ROOT", tmp_path)
+    assert tool.cmd_template(None) == 0
+    recs = tool.load(tmp_path / "custom_eval_review.jsonl")
+    assert len(recs) == 30 and all(r["verdict"] == "" and r["comment"] == "" for r in recs)
+    assert len(tool.check_review(recs)) == 30                                      # nothing is reviewed yet
+    assert tool.cmd_template(None) == 1 and tool.load(tmp_path / "custom_eval_review.jsonl") == recs      # never overwrites what the owner wrote
+
+
 def test_the_calculator_answer_shown_to_the_owner_is_the_one_the_check_expects(docs, capsys):
     class A:
         table_id, op, cells = TABLE, "diff", ["0,4", "r1c4"]

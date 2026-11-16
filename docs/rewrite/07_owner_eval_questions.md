@@ -34,7 +34,16 @@ python scripts/owner_eval_tool.py review | less      # 스페이스로 넘기고
 3. 질문이 자연스러운 한국어인가. 사람이 실제로 물을 만한가.
 4. 보류 문항(`abstain`)이라면, 정말 표와 본문에 답이 없는가.
 
-판정을 `data/ko/custom_eval_review.jsonl`에 한 줄에 하나씩 적는다. 30줄이어야 한다.
+`less`는 읽기만 하는 화면이다. 여기에 판정을 입력하지 않는다. 스페이스로 다음 쪽, `b`로 앞쪽, `g`로 맨 처음, `/ko_custom_12`와 엔터로 그 문항 찾기, `q`로 나가기다. 판정은 따로 파일에 적는다. 터미널 창을 하나 더 열어(⌘N) 한쪽에서 읽고 다른 쪽에서 적으면 편하다.
+
+판정을 `data/ko/custom_eval_review.jsonl`에 한 줄에 하나씩 적는다. 30줄이어야 한다. 문항 번호 30개를 손으로 치지 않아도 되게, 판정 칸을 비운 파일을 만들어 주는 명령이 있다.
+
+```bash
+python scripts/owner_eval_tool.py template             # 30줄짜리 빈 검수 파일을 만든다. verdict는 비어 있다
+nano data/ko/custom_eval_review.jsonl                  # 또는 VS Code: code data/ko/custom_eval_review.jsonl
+```
+
+`nano`에서는 화살표로 움직여 따옴표 사이에 적고, Ctrl+O와 엔터로 저장하고, Ctrl+X로 나간다. 텍스트 편집기(TextEdit)는 따옴표를 둥근 따옴표로 바꿔서 파일을 망가뜨리니 쓰지 않는다. 판정을 비워 둔 줄은 검사를 통과하지 못한다.
 
 ```json
 {"qid": "ko_custom_01", "verdict": "ok", "comment": ""}
