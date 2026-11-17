@@ -130,6 +130,35 @@ def owner() -> dict:
             "more": "소유자가 쓴 30문항에서의 EXAONE", "link": {"href": "#matrix", "text": "문항별 결과 보기"}}
 
 
+def chem() -> dict:
+    """The chemistry paper tables, from the run that kept per-question predictions (notebook 2, section N)."""
+    a = _load("experiments/eval/chem_rerun_analysis.json")
+    p, before = a["chemistry"]["chem_papers"], a["earlier_run_without_predictions"]["chem_papers"]
+    tuned, plain = p["tuned"], p["untuned_six_examples"]
+    rows = [{"label": "휴리스틱 기준선 (모델 아님)", "value": p["heuristic"]["rate"]},
+            {"label": "mT5-small 최종", "value": p["mt5_small_final"]["rate"]},
+            {"label": "EXAONE 1.2B, 튜닝 없음 (화학 예시 6개)", "value": plain["rate"]},
+            {"label": "EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝", "value": tuned["rate"], "emphasis": True}]
+    assert tuned["rate"] > p["heuristic"]["rate"] > plain["rate"]
+    assert p["tuned_vs_untuned"]["p_two_sided"] < 0.001 and p["tuned_vs_heuristic"]["p_two_sided"] < 0.001
+    assert tuned["correct"] - before["correct"] == before["this_run_minus_earlier_in_questions"] < 0      # said in the caption
+    for r in rows:
+        r["text"] = p1(r["value"])
+    n = tuned["n"]
+    idx = _load("console/data/recorded/index.json")
+    shown = idx["planners"]["kochem"]["totals"]["chem_papers"]
+    assert (shown["right"], shown["n"]) == (tuned["correct"], n)                  # the demo shows the same run
+    one = next(r for r in idx["planners"]["kochem"]["runs"] if r["set"] == "chem_papers" and r["mark"] == "correct" and r["result"]["calculation"])
+    return {"id": "chem", "kind": "bars", "max": 1.0, "rows": rows,
+            "title": f"영어 화학 논문 표에서 화학을 함께 튜닝한 EXAONE은 {p1(tuned['rate'])}, 튜닝하지 않은 같은 모델은 {p1(plain['rate'])}다",
+            "caption": f"공개 논문의 표에 대한 {n}문항의 정답률(verified EM, 주어 검사 없이). 논문 표는 학습에 쓰지 않았고, 학습에 더한 화학 문항은 교과서 표로 만든 합성 문항이다. "
+                       f"같은 문항에서 튜닝한 모델만 맞힌 것이 {p['tuned_vs_untuned']['only_candidate']}개, 튜닝하지 않은 모델만 맞힌 것이 {p['tuned_vs_untuned']['only_reference']}개다. "
+                       "한국어만 튜닝한 모델은 화학 문항으로 재지 않아서, 이 차이에서 화학 문항을 더한 몫이 얼마인지는 알 수 없다. "
+                       f"학습 한 번의 결과이고 95% 구간은 {p1(tuned['ci95']['lo'])}~{p1(tuned['ci95']['hi'])}다. 문항은 AI 도구가 썼고 소유자가 검수하지 않았다. "
+                       f"결과 파일이 남지 않은 예전 실행에서는 {p1(before['verified_em'])}였고, 이번이 {-before['this_run_minus_earlier_in_questions']}문항 낮다.",
+            "more": "영어 화학에서의 EXAONE", "link": {"href": f"#workbench/{one['id']}/kochem", "text": "논문 표 문항 하나 보기"}}
+
+
 def risk() -> dict:
     run = _load("experiments/eval/risk_coverage.json")["runs"]["exaone_full2_vllm_ko_test"]
     series = []
@@ -175,7 +204,7 @@ def _text_ids() -> set[str]:
 
 
 def highlights() -> list[dict]:
-    return [accuracy(), evidence(), verifier(), rl(), owner(), risk()]
+    return [accuracy(), evidence(), verifier(), rl(), owner(), chem(), risk()]
 
 
 # The detail sections, grouped. A section belongs to the first group one of whose keys occurs in its title.

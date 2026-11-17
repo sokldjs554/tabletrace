@@ -1,0 +1,66 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "replay of experiments/eval/ref_1p2b_chem_syndev",
+  "data": [
+   "data/chem/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl"
+  ],
+  "n": 80,
+  "wall_s": 0.0,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "max_in": 672,
+  "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+  "evidence_repair": true,
+  "entity_check": true,
+  "column_check": false,
+  "replay_from": "experiments/eval/ref_1p2b_chem_syndev",
+  "finished": "2026-11-17T06:02:37",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 80,
+  "n_answerable": 64,
+  "n_gold_abstain": 16,
+  "n_calc": 24,
+  "n_lookup": 40,
+  "verified_em": 0.4125,
+  "answer_em_answerable": 0.2969,
+  "raw_answer_em_answerable": 0.3906,
+  "evidence_cells_exact": 0.2188,
+  "evidence_cells_exact_raw": 0.1875,
+  "evidence_repaired_rate": 0.0781,
+  "evidence_cells_overlap": 0.25,
+  "op_acc": 0.65,
+  "lookup_em": 0.475,
+  "calc_em": 0.0,
+  "calc_result_correct": 0.0,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 0.875,
+  "false_abstain_rate": 0.6094,
+  "abstain_precision": 0.2642,
+  "parse_fail_rate": 0.0625,
+  "verifier_corrections": 0.6406,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.4125,
+  "mean_ms_per_example": 2046.5,
+  "by_source": {
+   "synthetic": {
+    "n": 80,
+    "verified_em": 0.4125
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": true
+ }
+}

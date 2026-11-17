@@ -11,7 +11,7 @@ repository. If the outcome of any question differs, the stored numbers do not be
   python scripts/replay_check.py --session rl3 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B        # -> experiments/eval/replay_check_rl3.json
   python scripts/replay_check.py --session owner --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B      # -> experiments/eval/replay_check_owner.json
   python scripts/replay_check.py --session ownloop --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B    # -> experiments/eval/replay_check_ownloop.json
-  python scripts/replay_check.py --session chem --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B       # -> experiments/eval/replay_check_chem.json (once section N has been run)
+  python scripts/replay_check.py --session chem --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B       # -> experiments/eval/replay_check_chem.json (section N, run on 2026-11-17)
 """
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ SESSIONS = {                   # all were evaluated with an input budget of 672 
     "ownloop": [               # the full-data model trained with the fine-tuning loop the owner wrote (2026-11-16, Colab, one T4)
         "exaone_ownloop_vllm_ko_test", "exaone_ownloop_vllm_ko_custom", "exaone_ownloop_vllm_ko_owner",
     ],
-    "chem": [                  # section N: the model tuned on Korean and chemistry, and the untuned 1.2B model on the chemistry sets (prepared 2026-11-17)
+    "chem": [                  # section N: the model tuned on Korean and chemistry, and the untuned 1.2B model on the chemistry sets (2026-11-17, Colab)
         "exaone_kochem2_vllm_chem_custom", "exaone_kochem2_vllm_chem_syndev", "exaone_kochem2_vllm_chem_papers",
         "exaone_kochem2_vllm_ko_test", "exaone_kochem2_vllm_ko_custom", "exaone_kochem2_vllm_ko_owner",
         "ref_1p2b_chem_custom", "ref_1p2b_chem_syndev", "ref_1p2b_chem_papers",

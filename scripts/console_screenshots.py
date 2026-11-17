@@ -208,6 +208,17 @@ def main() -> None:
                             open_question(cut[1]["id"], cut[0])
                             check(f"{label}: rows the planner was not shown are marked", page.locator("tr.is-unseen").count() == cut[1]["rows_shown"][1] - cut[1]["rows_shown"][0]
                                   and str(cut[1]["rows_shown"][0]) in (page.text_content(".unseennote") or ""), (page.text_content(".unseennote") or "")[:60])
+                        # the chemistry documents: left on "auto", a question shows the EXAONE tuned on Korean and chemistry
+                        chem = next((r for r in idx["planners"]["kochem"]["runs"] if by_id[r["id"]]["set"] == "chem_papers" and r["mark"] == "correct" and r["result"]["calculation"]), None)
+                        check(f"{label}: stored EXAONE outputs on the chemistry papers are present", chem is not None)
+                        if chem:
+                            open_question(chem["id"], "auto")
+                            said = page.text_content(".badge-mode") or ""
+                            check(f"{label}: a chemistry question shows the EXAONE tuned on chemistry by default",
+                                  "EXAONE" in said and "화학" in said and "Colab" in (page.text_content(".provenance") or "") and page.locator("td.is-evidence").count() >= 1, said[:70])
+                            pane("center")
+                            page.screenshot(path=str(out / f"{tag}-{label}-12-chem-exaone.png"), full_page=False)
+                            open_question(idx["featured"], "auto")          # back to the Korean corpus for the checks below
                         # every question against every planner
                         page.goto(base + "#matrix", wait_until="networkidle")
                         page.wait_for_selector("table.mx", timeout=15000)

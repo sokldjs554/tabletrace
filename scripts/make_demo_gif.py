@@ -73,10 +73,10 @@ def capture(site: Path, frames: Path, chromium: str | None) -> None:
         shot("답이 없는 질문은 보류하고, 어느 검사에서 걸렸는지 적습니다.", 3.0)
         go("#matrix")
         page.evaluate("document.getElementById('intro').hidden = true; window.scrollTo(0, 150)")
-        shot("문항별 결과: 소유자가 직접 쓴 30문항 전체를 플래너 여섯에 대해.", 3.2)
+        shot("문항별 결과: 소유자가 직접 쓴 30문항 전체를 플래너 일곱에 대해.", 3.2)
         go("#research")
         page.evaluate("document.getElementById('intro').hidden = true")
-        shot("연구 결과: 결론 여섯 개와 그림. 실험 기록은 아래에 접혀 있습니다.", 3.2)
+        shot("연구 결과: 결론 일곱 개와 그림. 실험 기록은 아래에 접혀 있습니다.", 3.2)
         if (site / "live" / "manifest.json").exists():
             ko = next(r for r in idx["planners"]["exaone"]["runs"] if r["set"] == "ko_owner" and r["mark"] == "correct" and "lookup" in r["result"]["planner"]["raw_output"])
             go(f"#workbench/{ko['id']}/exaone")

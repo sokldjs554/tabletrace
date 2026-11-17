@@ -25,6 +25,7 @@ def main() -> int:
     files = sorted(p.name for p in (ROOT / "tests").glob("test_*.py"))
     (dest / "summary.json").write_text(json.dumps({"command": "pytest -q tests", "result_line": tail, "passed": counts.get("passed", 0), "failed": counts.get("failed", 0),
                                                   "skipped": counts.get("skipped", 0), "errors": counts.get("error", 0) + counts.get("errors", 0),
+                                                  "failed_tests": re.findall(r"^(?:FAILED|ERROR) (\S+)", r.stdout, re.M),      # so that a failure names itself
                                                   "test_files": len(files), "wall_s": round(time.time() - t0, 1), "exit_code": r.returncode,
                                                   "finished": time.strftime("%Y-%m-%dT%H:%M:%S")}, indent=1))
     e2e: dict = {}

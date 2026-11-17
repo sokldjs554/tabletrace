@@ -401,7 +401,7 @@
     const { run, key, set } = hit, src = set.source;
     $("#errorbar").hidden = true; $("#resultempty").hidden = true; $("#status").hidden = true;
     renderResult(run.result, { kind: "recorded", at: state.recorded.generated_at, commit: state.recorded.commit, planner: key, set, run, ex,
-      source: src ? { generated: src.generated[ex.set], where: src.where, ms: run.engine_ms } : null });
+      source: src ? { generated: src.generated[ex.set], where: src.where[ex.set], ms: run.engine_ms } : null });
     $("#liveprop").value = (run.result.planner && run.result.planner.raw_output) || "";      // the proposal the visitor may change and verify here
     if (parseHash().view === "workbench") { try { history.replaceState(null, "", `#workbench/${encodeURIComponent(exId)}/${$("#planner").value}`); } catch (e) { /* sandboxed frames may refuse history changes */ } }
   }
@@ -644,7 +644,7 @@
       return `<section><h3>${esc(s.title)} <span class="pill">${s.author === "owner" ? "소유자 작성" : "AI 도구 작성"}</span></h3><p>${esc(s.note)}</p>
         <h4>유형별로 맞은 수</h4><div class="tablescroll">${byCat}</div>
         <h4>문항마다</h4><div class="tablescroll"><table class="res mx"><thead><tr><th>#</th><th>유형</th><th>질문</th><th>정답</th>${keys.map((k) => `<th title="${esc(r.planners[k].model_id || "휴리스틱 기준선")}">${esc(plannerShort(k))}<br><span class="muted">${r.planners[k].totals[s.key].right}/${r.planners[k].totals[s.key].n}</span></th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></section>`; }).join("");
-    const notes = plannerKeys().map((k) => `<li><b>${esc(plannerShort(k))}</b> ${esc(r.planners[k].model_id || "")}. ${esc(r.planners[k].note)}${r.planners[k].source ? ` 출력을 받은 곳: ${esc(r.planners[k].source.where)}.` : ""}</li>`).join("");
+    const notes = plannerKeys().map((k) => `<li><b>${esc(plannerShort(k))}</b> ${esc(r.planners[k].model_id || "")}. ${esc(r.planners[k].note)}${r.planners[k].source ? ` 출력을 받은 곳: ${esc([...new Set(Object.values(r.planners[k].source.where))].join(", "))}.` : ""}</li>`).join("");
     box.innerHTML = `<h2>문항별 결과 <span class="muted sub">기록 ${esc(r.generated_at)} · commit ${esc(r.commit)}</span></h2>
       <p>평가 문항을 하나도 빼지 않고 플래너마다의 결과를 정답과 견줬습니다. 표시를 누르면 그 문항의 근거와 검증을 워크벤치에서 봅니다. 위쪽의 코퍼스 단추로 한국어 표와 영어 화학 문서를 바꿉니다.</p>
       <p class="legend"><b>표시</b> ${legend}. 앞의 ✓와 ✗는 시스템이 옳게 행동했는지이고, 뒤의 말은 무엇을 했는지입니다.</p>
@@ -684,7 +684,7 @@
     const detail = groups.map((g) => { const own = sections.filter((s) => !s.group || s.group === g.name);
       return `<details class="grp"><summary><b>${esc(g.name)}</b> <span class="muted">실험 ${own.length}건</span><span class="grp-titles muted">${esc(own.map((s) => s.title.split(" — ")[0].split(" (")[0]).join(" · "))}</span></summary>${own.map(section).join("")}</details>`; }).join("");
     return `<h2>연구 결과 <span class="muted sub">생성 ${esc(d.generated_at)} · commit ${esc(d.commit)}</span></h2>
-      <p class="muted">아래 여섯 가지가 이 프로젝트에서 잰 것의 요약입니다. 그림의 값은 모두 저장소의 결과 파일에서 읽은 것이고, 그림마다 "표로 보기"에 같은 값이 있습니다.</p>
+      <p class="muted">아래 그림 ${(d.highlights || []).length}개가 이 프로젝트에서 잰 것의 요약입니다. 그림의 값은 모두 저장소의 결과 파일에서 읽은 것이고, 그림마다 "표로 보기"에 같은 값이 있습니다.</p>
       ${top}${odd}
       <h2 id="research-detail">실험별 세부 기록 <span class="muted sub">실험 ${sections.length}건 · 조건, 표본 수, 산출물 경로</span></h2>
       <p class="muted">${esc(d.summary || "")}</p>

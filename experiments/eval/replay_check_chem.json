@@ -1,0 +1,153 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "max_in": 672,
+ "runs": {
+  "exaone_kochem2_vllm_chem_custom": {
+   "first_pass": {
+    "questions": 32,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.75,
+    "verified_em_replayed": 0.75
+   },
+   "subject_check": {
+    "questions": 32,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.75,
+    "verified_em_replayed": 0.75
+   }
+  },
+  "exaone_kochem2_vllm_chem_syndev": {
+   "first_pass": {
+    "questions": 80,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.9125,
+    "verified_em_replayed": 0.9125
+   },
+   "subject_check": {
+    "questions": 80,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.9125,
+    "verified_em_replayed": 0.9125
+   }
+  },
+  "exaone_kochem2_vllm_chem_papers": {
+   "first_pass": {
+    "questions": 62,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7419,
+    "verified_em_replayed": 0.7419
+   },
+   "subject_check": {
+    "questions": 62,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7419,
+    "verified_em_replayed": 0.7419
+   }
+  },
+  "exaone_kochem2_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8612,
+    "verified_em_replayed": 0.8612
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.834,
+    "verified_em_replayed": 0.834
+   }
+  },
+  "exaone_kochem2_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6667,
+    "verified_em_replayed": 0.6667
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6667,
+    "verified_em_replayed": 0.6667
+   }
+  },
+  "exaone_kochem2_vllm_ko_owner": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7333,
+    "verified_em_replayed": 0.7333
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7,
+    "verified_em_replayed": 0.7
+   }
+  },
+  "ref_1p2b_chem_custom": {
+   "first_pass": {
+    "questions": 32,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4062,
+    "verified_em_replayed": 0.4062
+   },
+   "subject_check": {
+    "questions": 32,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4062,
+    "verified_em_replayed": 0.4062
+   }
+  },
+  "ref_1p2b_chem_syndev": {
+   "first_pass": {
+    "questions": 80,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4125,
+    "verified_em_replayed": 0.4125
+   },
+   "subject_check": {
+    "questions": 80,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.4125,
+    "verified_em_replayed": 0.4125
+   }
+  },
+  "ref_1p2b_chem_papers": {
+   "first_pass": {
+    "questions": 62,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.2419,
+    "verified_em_replayed": 0.2419
+   },
+   "subject_check": {
+    "questions": 62,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.2581,
+    "verified_em_replayed": 0.2581
+   }
+  }
+ },
+ "replays": 18,
+ "questions_checked": 2214,
+ "questions_that_differ": 0
+}

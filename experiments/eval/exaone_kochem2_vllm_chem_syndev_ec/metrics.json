@@ -1,0 +1,66 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "replay of experiments/eval/exaone_kochem2_vllm_chem_syndev",
+  "data": [
+   "data/chem/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl"
+  ],
+  "n": 80,
+  "wall_s": 0.0,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "max_in": 672,
+  "tokenizer": "/content/tabletrace/experiments/exaone_lora_kochem2/merged",
+  "evidence_repair": true,
+  "entity_check": true,
+  "column_check": false,
+  "replay_from": "experiments/eval/exaone_kochem2_vllm_chem_syndev",
+  "finished": "2026-11-17T05:55:54",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 80,
+  "n_answerable": 64,
+  "n_gold_abstain": 16,
+  "n_calc": 24,
+  "n_lookup": 40,
+  "verified_em": 0.9125,
+  "answer_em_answerable": 0.8906,
+  "raw_answer_em_answerable": 0.7656,
+  "evidence_cells_exact": 0.8906,
+  "evidence_cells_exact_raw": 0.9219,
+  "evidence_repaired_rate": 0.0,
+  "evidence_cells_overlap": 0.8906,
+  "op_acc": 0.9875,
+  "lookup_em": 0.925,
+  "calc_em": 0.8333,
+  "calc_result_correct": 0.8333,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 1.0,
+  "false_abstain_rate": 0.0625,
+  "abstain_precision": 0.8,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.1875,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.9125,
+  "mean_ms_per_example": 1567.3,
+  "by_source": {
+   "synthetic": {
+    "n": 80,
+    "verified_em": 0.9125
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": true
+ }
+}

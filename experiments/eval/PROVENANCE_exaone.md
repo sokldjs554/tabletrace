@@ -63,3 +63,10 @@
   - 묶음의 `run_info_2.json`은 `run_info_2_ownloop.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_ownloop.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
   - `scripts/replay_check.py --session ownloop`으로 다시 검증했다. 6회, 1,518문항에서 판정이 다른 문항은 0개다(`replay_check_ownloop.json`).
   - 분석은 `scripts/owner_loop_analysis.py`가 한다(`owner_loop_analysis.json`).
+- **2번 노트북, 2026-11-17 (Colab Tesla T4 ×1, 커밋 `d7d8ec0`, `experiments/run_info_2_chem.json`)**: N절. 화학 문항에서의 EXAONE, 문항별 예측을 남기는 재실행. 새 파일은 평가 18건(`exaone_kochem2_vllm_{chem_custom,chem_syndev,chem_papers,ko_test,ko_custom,ko_owner}`, `ref_1p2b_{chem_custom,chem_syndev,chem_papers}`와 각각의 `_ec`), 학습 기록 `experiments/exaone_lora_kochem2/train_info.json`(`"loop": "builtin"`, 4,383문항, 273걸음, 정답이 잘린 예제 0), 서버 로그 둘이다. 묶음의 나머지 160개 파일은 저장소의 것과 같았다.
+  - 학습 명령에서 `exaone_full4`와 다른 것은 `--train`, `--corpus`, `--out`뿐이다. 화학 합성 학습 문항 820개 가운데 정답 행이 입력 길이에 들어가지 않는 24개는 학습 스크립트가 뺐다.
+  - 서버: vLLM. 튜닝한 모델은 병합 가중치를 올려 동시 16건, 튜닝하지 않은 1.2B는 동시 8건으로 평가했다(노트북의 값). 논문 표 평가는 `--row-select overlap`이다. 튜닝하지 않은 모델의 예시 6개는 `data/chem/synthetic_train.jsonl`에서 골랐다(`--shots-per-kind 2`).
+  - 묶음은 소유자가 대화에 올렸다(`gpu_results_2_13.tgz`, 3,193,040바이트, SHA-256 `ac26c31f…`). 묶음 안의 코드는 실행하지 않았고, 결과 파일만 꺼내 넣었다.
+  - 묶음의 `run_info_2.json`은 `run_info_2_chem.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_chem.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
+  - `scripts/replay_check.py --session chem`으로 다시 검증했다. 18회, 2,214문항에서 판정이 다른 문항은 0개다(`replay_check_chem.json`).
+  - 분석은 `scripts/chem_rerun_analysis.py`가 한다(`chem_rerun_analysis.json`). 2026-11-14의 같은 실험(G절)은 수치만 남아 있어 나란히 놓을 수만 있다.

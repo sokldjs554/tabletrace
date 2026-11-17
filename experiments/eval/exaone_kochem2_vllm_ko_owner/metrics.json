@@ -1,0 +1,88 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "engine:planner",
+  "data": [
+   "data/ko/owner_eval.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 30,
+  "wall_s": 7.2,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "max_in": 672,
+  "tokenizer": "/content/tabletrace/experiments/exaone_lora_kochem2/merged",
+  "evidence_repair": true,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-17T05:59:02",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 30,
+  "n_answerable": 26,
+  "n_gold_abstain": 4,
+  "n_calc": 10,
+  "n_lookup": 16,
+  "verified_em": 0.7333,
+  "answer_em_answerable": 0.8077,
+  "raw_answer_em_answerable": 0.7692,
+  "evidence_cells_exact": 0.8077,
+  "evidence_cells_exact_raw": 0.8462,
+  "evidence_repaired_rate": 0.0385,
+  "evidence_cells_overlap": 0.8077,
+  "op_acc": 0.7,
+  "lookup_em": 1.0,
+  "calc_em": 0.5,
+  "calc_result_correct": 0.5,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 0.25,
+  "false_abstain_rate": 0.1538,
+  "abstain_precision": 0.2,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.1923,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.7333,
+  "mean_ms_per_example": 2238.7,
+  "by_source": {
+   "owner": {
+    "n": 30,
+    "verified_em": 0.7333
+   }
+  },
+  "by_category": {
+   "abstain": {
+    "n": 4,
+    "verified_em": 0.25
+   },
+   "calc": {
+    "n": 6,
+    "verified_em": 0.8333
+   },
+   "cell": {
+    "n": 12,
+    "verified_em": 1.0
+   },
+   "text_table": {
+    "n": 4,
+    "verified_em": 0.0
+   },
+   "unit_period": {
+    "n": 4,
+    "verified_em": 1.0
+   }
+  },
+  "gold_subject_fail_rate": 0.0385,
+  "entity_check": false
+ }
+}

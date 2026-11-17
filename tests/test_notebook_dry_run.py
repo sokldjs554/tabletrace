@@ -80,11 +80,12 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                loop = ("ownloop",)                      # section M (2026-11-16, Colab): the last results that came in
+                chem = ("kochem2", "ref_1p2b_chem")      # section N (2026-11-17, Colab): the last results that came in
+                loop = ("ownloop", *chem)                # section M (2026-11-16, Colab)
                 owner = ("full4", "_ko_owner", *loop)    # section L (2026-11-16)
                 later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3", *owner), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3", *owner),
                          "before the full-data rerun": ("full2", "full3", "grpo3", *owner), "before RL on the full-data model": ("full3", "grpo3", *owner),
-                         "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop}.get(cloned_results, ())
+                         "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop, "before the chemistry run": chem}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -690,6 +691,7 @@ def test_the_recorded_owner_loop_run_matches_what_the_notebook_does_and_the_sect
 
 
 CHEM_CELL = "KOCHEM_DIR, KOCHEM_NAME"
+BEFORE_CHEM = "before the chemistry run"
 
 
 def test_chemistry_section_trains_one_model_and_keeps_per_question_predictions(tmp_path, monkeypatch):
@@ -697,7 +699,7 @@ def test_chemistry_section_trains_one_model_and_keeps_per_question_predictions(t
     the experiment again so that per-question predictions exist: one model tuned on Korean and chemistry with the
     corrected length setting, scored on three chemistry sets and three Korean sets, and the untuned 1.2B model on the
     chemistry sets with examples drawn from the chemistry training questions."""
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)                 # main as it is today: no chemistry predictions
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_CHEM)          # main as it was on 2026-11-17: no chemistry predictions
     counts = run.run_all(only=CHEM_CELL)
     assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 2 * (6 + 3)
     train = next(c for k, c in run.calls if k == "train")
@@ -730,7 +732,7 @@ def test_chemistry_section_trains_one_model_and_keeps_per_question_predictions(t
 
 
 def test_chemistry_section_can_leave_out_the_untuned_model_and_does_not_repeat_stored_evaluations(tmp_path, monkeypatch):
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_CHEM)
     assert sum("RUN_UNTUNED_ON_CHEM = True" in src for _, src in run.sections) == 1
     run.sections = [(i, src.replace("RUN_UNTUNED_ON_CHEM = True", "RUN_UNTUNED_ON_CHEM = False")) for i, src in run.sections]
     counts = run.run_all(only=CHEM_CELL)
@@ -748,9 +750,41 @@ def test_the_chemistry_examples_can_be_drawn_and_the_earlier_run_is_only_a_recov
     assert not list((ROOT / "experiments/eval").glob("exaone_kochem_vllm_*"))
     recovered = json.loads((ROOT / "experiments/gpu2_2026-11-14/recovered.json").read_text(encoding="utf-8"))["evals"]
     assert "exaone_kochem_vllm_chem_papers" in recovered
-    intro = "".join(json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"][0]["source"])
-    if not list((ROOT / "experiments/eval").glob("exaone_kochem2_vllm_*")):
-        assert "지금 돌릴 것은 N절 하나입니다" in intro and "아직 돌리지 않음" in intro
+
+
+def test_the_recorded_chemistry_run_matches_what_the_notebook_does_and_the_section_is_now_finished(tmp_path, monkeypatch):
+    """Section N was run on 2026-11-17 on Colab with one T4, from the commit that added the section. The stored training
+    record is the notebook's command: the files of the Korean full-data training plus the chemistry questions, the same
+    lengths, nothing cut. The stored evaluations carry the settings the notebook gives them. With the results in the
+    repository the section starts nothing, and the notebook says so."""
+    info = json.loads((ROOT / "experiments/exaone_lora_kochem2/train_info.json").read_text())
+    same = json.loads((ROOT / "experiments/exaone_lora_full4/train_info.json").read_text())
+    assert {k for k in set(info["args"]) | set(same["args"]) if info["args"].get(k) != same["args"].get(k)} == {"train", "corpus", "out"}
+    assert info["args"]["train"] == [*same["args"]["train"], "data/chem/synthetic_train.jsonl"] and info["args"]["corpus"] == [*same["args"]["corpus"], "data/chem/documents.jsonl"]
+    assert (info["loop"], info["targets_missing"], info["targets_cut_short"], info["max_in"]) == ("builtin", 0, 0, 672) and len(info["loss_log"]) == info["steps"]
+    chem_lines = len([x for x in (ROOT / "data/chem/synthetic_train.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()])
+    assert same["n_examples"] < info["n_examples"] <= same["n_examples"] + chem_lines            # questions whose gold row does not fit are left out
+    run_info = json.loads((ROOT / "experiments/run_info_2_chem.json").read_text())
+    assert run_info["platform"] == "colab" and run_info["gpus"] == ["Tesla T4"] and run_info["finished"].startswith("2026-11-17")
+    planned = DryRun(tmp_path / "before", monkeypatch, cloned_results=BEFORE_CHEM)
+    planned.run_all(only=CHEM_CELL)
+    for out in (o for o in planned.outputs() if o.startswith("experiments/eval/")):
+        meta = json.loads((ROOT / out / "metrics.json").read_text())["meta"]                     # every evaluation the notebook plans is stored
+        cmd = next(c for k, c in planned.calls if k == "eval" and c.split("--out ")[1].split()[0] == out)
+        assert meta["row_select"] == ("overlap" if "chem_papers" in out else "first") and meta["max_in"] == 672, out
+        assert meta["entity_check"] is out.endswith("_ec") and bool(meta["replay_from"]) is out.endswith("_ec"), out
+        assert meta["data"] == re.search(r"--data ((?:(?!--)\S+ ?)+)", cmd).group(1).split(), out
+        if not out.endswith("_ec"):
+            assert (meta["few_shot"] == ["data/chem/synthetic_train.jsonl"]) is ("ref_1p2b" in out) and meta["confidence"] is True, out
+    run = DryRun(tmp_path / "now", monkeypatch, cloned_results=True)
+    assert run.run_all(only=CHEM_CELL) == collections.Counter()
+    cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
+    intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## N."))
+    assert "지금 돌릴 것은 없습니다" in intro and "아직 돌리지 않" not in intro + section and "2026-11-17에 Colab" in section
+    rerun = json.loads((ROOT / "experiments/eval/chem_rerun_analysis.json").read_text())
+    tuned = rerun["chemistry"]["chem_papers"]["tuned"]
+    assert f"{tuned['correct']}/{tuned['n']}({100 * tuned['rate']:.1f}%)" in section          # the section states the result the files give
+    assert f"{100 * rerun['earlier_run_without_predictions']['chem_papers']['verified_em']:.1f}%" in section
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

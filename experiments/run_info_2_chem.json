@@ -1,0 +1,9 @@
+{
+ "notebook": "gpu_experiments_2",
+ "platform": "colab",
+ "gpus": [
+  "Tesla T4"
+ ],
+ "commit": "d7d8ec0",
+ "finished": "2026-11-17T06:03:23"
+}

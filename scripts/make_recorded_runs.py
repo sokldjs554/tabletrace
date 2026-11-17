@@ -93,12 +93,18 @@ PLANNERS = [
      "runs": {"ko_owner": "exaone_ownloop_vllm_ko_owner", "ko_custom": "exaone_ownloop_vllm_ko_custom"},
      "where": "Colab Tesla T4의 vLLM 서버",
      "note": "같은 학습 명령을 소유자가 직접 쓴 학습 루프로 돌린 모델입니다(한국어 test 86.0%)."},
+    {"key": "kochem", "model_id": "EXAONE-4.0-1.2B LoRA (한국어와 화학을 함께 튜닝)", "short": "EXAONE LoRA · 한국어+화학",
+     "runs": {"ko_owner": "exaone_kochem2_vllm_ko_owner", "ko_custom": "exaone_kochem2_vllm_ko_custom",
+              "chem_custom": "exaone_kochem2_vllm_chem_custom", "chem_papers": "exaone_kochem2_vllm_chem_papers"},
+     "where": "Colab Tesla T4의 vLLM 서버",
+     "note": "한국어 학습 문항에 화학 합성 문항을 더해 튜닝한 모델입니다(한국어 test 86.1%). 화학 문서에서 볼 수 있는 EXAONE은 이 모델입니다."},
     {"key": "ref7", "model_id": "EXAONE-3.5-7.8B-Instruct AWQ (튜닝 없음, 예시 6개)", "short": "EXAONE 7.8B 튜닝 없음",
      "runs": {"ko_owner": "ref_7p8b_awq_ko_owner", "ko_custom": "ref_7p8b_awq_ko_custom"},
      "where": "Kaggle Tesla T4의 vLLM 서버", "note": "튜닝하지 않고 프롬프트에 예시 6개를 넣었습니다."},
     {"key": "ref1", "model_id": "EXAONE-4.0-1.2B (튜닝 없음, 예시 6개)", "short": "EXAONE 1.2B 튜닝 없음",
-     "runs": {"ko_owner": "ref_1p2b_ko_owner", "ko_custom": "ref_1p2b_ko_custom"},
-     "where": "Kaggle Tesla T4의 vLLM 서버", "note": "튜닝하지 않고 프롬프트에 예시 6개를 넣었습니다."},
+     "runs": {"ko_owner": "ref_1p2b_ko_owner", "ko_custom": "ref_1p2b_ko_custom", "chem_custom": "ref_1p2b_chem_custom", "chem_papers": "ref_1p2b_chem_papers"},
+     "where": {"*": "Kaggle Tesla T4의 vLLM 서버", "chem_custom": "Colab Tesla T4의 vLLM 서버", "chem_papers": "Colab Tesla T4의 vLLM 서버"},
+     "note": "튜닝하지 않고 프롬프트에 예시 6개를 넣었습니다. 화학 문항에서는 예시를 화학 학습 문항에서 골랐습니다."},
     {"key": "neural", "model_id": "mT5-small 최종 (강화학습 v3)", "short": "mT5-small",
      "runs": {"ko_owner": "rl_v3_ko_owner", "ko_custom": "rl_v3_ko_custom", "chem_custom": "rl_v3_chem_custom", "chem_papers": "rl_v3_chem_papers"},
      "where": "개발 환경의 CPU", "note": "3억 파라미터 모델입니다. 한국어 test에서 휴리스틱 기준선을 넘지 못했습니다."},
@@ -115,8 +121,10 @@ SETTINGS = {"entity_check": False, "evidence_repair": True, "fallback": False}
 # do not record the budget, so the values are the ones that reproduce every stored result; tests hold the replays against
 # the stored predictions, question by question, so a wrong entry here cannot pass.
 EXAONE_BUDGET = ("models/exaone-4.0-1.2b-tokenizer", 672, "first")
+EXAONE_PAPERS = ("models/exaone-4.0-1.2b-tokenizer", 672, "overlap")      # the paper tables: rows chosen by overlap with the question (notebook 2, sections G and N)
 BUDGETS = {
-    "exaone": {"*": EXAONE_BUDGET}, "ownloop": {"*": EXAONE_BUDGET}, "ref7": {"*": EXAONE_BUDGET}, "ref1": {"*": EXAONE_BUDGET},
+    "exaone": {"*": EXAONE_BUDGET}, "ownloop": {"*": EXAONE_BUDGET}, "ref7": {"*": EXAONE_BUDGET},
+    "kochem": {"*": EXAONE_BUDGET, "chem_papers": EXAONE_PAPERS}, "ref1": {"*": EXAONE_BUDGET, "chem_papers": EXAONE_PAPERS},
     "neural": {"*": ("experiments/rl_v3/model", 512, "first"), "chem_papers": ("experiments/rl_v3/model", 512, "overlap")},
     "heuristic": {"*": (None, 512, "first"), "chem_papers": (None, 4096, "first")},     # the paper tables were read whole
 }
@@ -244,7 +252,8 @@ def main() -> None:
             covered = [ex for ex in examples if ex["set"] in dirs]
             rt, mode, stored = AgentRuntime(indexes, planner, **SETTINGS), "neural", planner.rows
             metas = {k: json.loads((d / "metrics.json").read_text(encoding="utf-8"))["meta"] for k, d in dirs.items()}
-            source = {"where": p["where"], "generated": {k: m["finished"][:10] for k, m in metas.items()},
+            where = p["where"] if isinstance(p["where"], dict) else {"*": p["where"]}
+            source = {"where": {k: where.get(k, where["*"]) for k in dirs}, "generated": {k: m["finished"][:10] for k, m in metas.items()},
                       "eval_dirs": {k: f"{EVAL}/{v}" for k, v in p["runs"].items()}}
         runs = run_set(rt, covered, mode, tables, stored, shown_inputs(covered, docs, BUDGETS[p["key"]]))
         planners[p["key"]] = {"model_id": p["model_id"], "short": p["short"], "note": p["note"], "source": source, "totals": totals(runs), "runs": runs}
