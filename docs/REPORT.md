@@ -2081,3 +2081,77 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 | "학습 루프(`lm_loop.py`)는 GPU 학습에 쓰인 적이 없다"(§26의 1번) | 전체 데이터 미세조정 한 번에 쓰였다. test <!-- num:experiments/eval/owner_loop_analysis.json:test.verified_em_owner_loop:pct -->86.0<!-- /num -->%로, 들어 있는 루프로 한 여섯 번의 범위 안이다 |
 | 전체 데이터 미세조정 여섯 번 | 일곱 번. 그 가운데 한 번이 소유자가 쓴 루프다. 대표 수치는 가장 낮은 1회째(<!-- num:experiments/eval/owner_loop_analysis.json:test.verified_em_built_in.old_cap_run1:pct -->84.3<!-- /num -->%)를 그대로 둔다 |
 | "직접 쓴 학습 루프로 미세조정했다"는 쓰면 안 되는 말 | 쓸 수 있다. 범위를 붙인다: 한 번, 68줄의 루프, 스크립트는 AI 도구 작성 |
+
+## 28. 공개 데모를 고쳤다 (2026-11-17)
+
+소유자가 데모를 고치고 싶다고 했다. 먼저 다른 사람들이 이런 과제의 데모를 어떻게 만드는지 조사했다(2026-11-16, AI 도구가 일곱 갈래로 조사). 조사 보고서는 저장소에 넣지 않았다. 조사 환경에서 접속이 막힌 곳이 많아서 근거의 대부분은 README, 데모의 소스 코드, 화면 사진이었고, 실제로 움직이는 화면은 거의 보지 못했다. 조사에서 고칠 후보 열 개가 나왔고 소유자가 그 가운데 여덟 개(1~6, 9, 10)를 골랐다. 이 절은 그 여덟 개를 어떻게 했는지의 기록이다. 화면 코드와 이 절은 AI 도구가 썼다.
+
+조사에서 얻은 판단은 둘이다. 첫째, 근거 셀을 표 위에 표시하고, 검증 항목을 보여 주고, 보류를 이유와 함께 따로 보여 주는 것은 조사한 표 질의응답 데모에서 드물었다. 그래서 이 요소들은 그대로 두고 설명을 붙였다. 둘째, 다른 데모들은 결론 한 줄과 그림 하나를 먼저 보여 주고 세부를 펼치게 한다. 이 데모는 세부가 먼저 나왔다. 그래서 순서를 바꿨다.
+
+### 28.1 무엇을 바꿨나
+
+| 후보 | 한 것 | 상태 |
+|---|---|---|
+| 1. 연구 결과 탭 맨 위에 요약 | 결론 <!-- num:console/data/research.json:counts.highlights:int -->6<!-- /num -->개를 그림 하나씩과 함께 먼저 보여 준다. 기대와 달랐던 결과 <!-- num:console/data/research.json:counts.unexpected:int -->4<!-- /num -->개도 같은 자리에 적는다. 실험 <!-- num:console/data/research.json:counts.sections:int -->35<!-- /num -->건의 조건, 표본 수, 산출물 경로는 주제 <!-- num:console/data/research.json:counts.groups:int -->7<!-- /num -->개로 접어 그대로 둔다. 숫자와 결론 문장은 `scripts/research_highlights.py`가 결과 파일에서 만든다 | 완료 |
+| 2. 예시에 정답과 판정 | 대표 질문 32개 대신 평가 파일 넷의 문항 전체 <!-- num:console/data/recorded/index.json:counts.questions:int -->154<!-- /num -->개를 싣는다. 소유자가 직접 쓴 30문항, AI 도구가 쓴 30문항, 화학 교과서 표 32문항, 화학 논문 표 62문항이다. 문항마다 정답과 판정이 붙고, 소유자가 검수에서 지적한 문항에는 표시가 붙는다. "문항별 결과" 탭이 문항 전체를 플래너마다의 판정과 함께 보여 준다 | 완료 |
+| 3. 첫 화면에 결과 | 들어가면 소유자가 쓴 계산 문항의 결과가 열려 있다. 휴대폰에서도 답이 첫 화면 안에 있다 | 완료 |
+| 4. README 머리 | 링크 줄과 데모 장면 <!-- num:docs/images/demo.json:frames:int -->8<!-- /num -->개를 찍은 움직이는 그림을 맨 위에 뒀다 | 완료 |
+| 5. 플래너 나란히 | 저장된 플래너를 셋에서 <!-- num:console/data/recorded/index.json:counts.planners:int -->6<!-- /num -->개로 늘리고(소유자가 쓴 학습 루프로 학습한 모델, 튜닝 없는 EXAONE 두 크기 추가), 같은 질문에 대한 답과 판정을 한 표에 놓는다 | 완료 |
+| 6. 검증·보류 카드 | 모델의 제안과 검증 뒤의 결과를 나란히 놓고 바뀐 줄에 색을 넣는다. 통과하지 못한 검사가 위에 온다. 보류한 답에는 어느 검사에서 걸렸는지 적는다. 표 위의 세 가지 표시에 범례를 붙인다. 정답 셀이 근거 셀과 다르면 따로 표시한다 | 완료 |
+| 9. 화학 문서 | 화학 논문 표(arXiv, CC BY 4.0) 12편과 그 62문항을 데모에 넣었다. 문서마다 저자, 출처, 라이선스, 바꾼 점을 적는다. 근거 셀을 숫자로 읽은 값과 단위, 단위가 셀에서 왔는지 열 머리에서 왔는지를 보여 준다. 영어 질문은 브라우저에서 직접 써서 실행할 수 있다. **EXAONE의 화학 문항별 출력은 없다.** 화학 문서의 플래너는 mT5-small과 휴리스틱뿐이다 | 부분 |
+| 10. 방문자가 직접 실행 | 검증기, 도구, 휴리스틱 플래너를 방문자의 브라우저 안에서 실행한다(28.3). **모델은 실행하지 않는다.** 방문자가 EXAONE을 돌리는 길은 만들지 않았다 | 부분 |
+
+후보 7(직접 한 것과 AI 도구가 한 것의 구분을 눈에 띄게)과 8(대화·에이전트 화면의 재생)은 소유자가 고르지 않았고 하지 않았다.
+
+### 28.2 저장된 결과를 평가와 같은 조건으로 다시 기록했다
+
+예전 데모의 저장 결과는 서비스의 기본 설정으로 기록돼 있었다. 주어 검사를 켜고, 모델의 제안이 검증에 실패하면 휴리스틱 플래너로 한 번 더 시도하고, 표 전체를 검증기에 줬다. 보고서의 평가 수치는 다르게 잰다. 주어 검사와 보완 시도가 없고, 표가 길면 입력 길이에 들어가는 행만 플래너와 검증기에 준다. 대표 질문 16개만 보여 줄 때는 이 차이가 드러나지 않았다. 문항 전체를 싣고 합계를 내자 평가 수치와 다른 합계가 나왔다. 휴리스틱 보완이 답을 바꾸기 때문에 약한 플래너일수록 차이가 컸다.
+
+그대로 두면 화면의 합계와 문서의 수치가 서로 다르게 된다. 그래서 에이전트에 옵션 둘을 넣었다. `fallback=False`는 휴리스틱으로 다시 시도하지 않는다. `given=`은 플래너와 검증기가 볼 표 행과 본문을 부르는 쪽이 정한다. 기록 스크립트(`scripts/make_recorded_runs.py`)는 저장된 모델 출력을 그 평가가 쓴 표 행과 본문 위에서, 주어 검사 없이 재생한다. 휴리스틱은 기록할 때 같은 입력으로 실행한다.
+
+결과: 기록된 실행 <!-- num:console/data/recorded/index.json:counts.runs:int -->548<!-- /num -->개(질문 <!-- num:console/data/recorded/index.json:counts.questions:int -->154<!-- /num -->개, 플래너 <!-- num:console/data/recorded/index.json:counts.planners:int -->6<!-- /num -->개) 모두에서 상태, 답, 근거 셀, 보류 사유, 판정이 평가 파일과 같다(`tests/test_recorded_demo.py`). 소유자의 30문항에서 합계는 §25의 수치다(전체 데이터 EXAONE <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.correct:int -->24<!-- /num -->, 소유자의 루프로 학습한 EXAONE <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data_owner_loop.owner_first_pass.correct:int -->24<!-- /num -->, 튜닝 없는 7.8B <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_7p8b_untuned.owner_first_pass.correct:int -->20<!-- /num -->, 튜닝 없는 1.2B <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_1p2b_untuned.owner_first_pass.correct:int -->13<!-- /num -->).
+
+이 과정에서 찾은 것이 하나 있다. 평가 파일의 `meta`에 입력 길이 한도와 토크나이저가 적혀 있지 않았다. 대부분의 평가는 기본값으로 돌았지만 화학 논문 표 평가는 달랐다. 휴리스틱은 표 전체를 봤고, mT5는 질문과 겹치는 행을 고르는 방식으로 돌았다. 저장된 결과를 모두 재현하는 설정을 찾아 기록 스크립트에 적었고, 그 설정이 틀리면 테스트가 실패한다. `eval/run.py`는 이제 `max_in`과 `tokenizer`를 `meta`에 쓴다(이슈 77).
+
+서비스의 기본 설정이 어떻게 답하는지는 백엔드를 띄운 실시간 모드에서 본다. 화면과 README에 그렇게 적었다.
+
+### 28.3 검증기를 방문자의 브라우저에서 실행한다
+
+정적 페이지에는 서버가 없다. 그래서 Pyodide(WebAssembly로 컴파일한 CPython, <!-- num:console/live/runtime.lock.json:pyodide.version -->314.0.8<!-- /num -->)와 pydantic을 방문자의 브라우저에 불러오고, 이 저장소의 파일을 그대로 그 안에서 실행한다. 내려받는 양은 약 <!-- num:console/live/runtime.lock.json:download_mb -->15.6<!-- /num --> MB이고 방문자가 단추를 눌렀을 때만 받는다. 소유자가 직접 쓴 프로그램 문법, 숫자 파서, 계산기, 셀 도구, 검증기가 바뀌지 않은 채로 들어간다.
+
+| 서비스와 다른 점 | 어떻게 했나 |
+|---|---|
+| LangGraph가 없다 | 그래프의 네 단계(검색, 제안, 검증, 마무리)를 차례로 부르는 실행기(`console/live/tt_browser.py`)를 쓴다. 이 실행기가 에이전트 그래프와 같은 결과를 내는지 저장된 질문 전체에서 검사한다(휴리스틱, EXAONE과 mT5의 저장 출력, 주어 검사를 켠 경우와 끈 경우) |
+| 한국어 형태소 분석기를 실을 수 없다 | Kiwi는 컴파일된 확장이고 모델이 109 MB다. 검증기와 휴리스틱이 형태소를 묻는 글은 질문과 표의 열 머리뿐이어서, 저장된 한국어 질문과 열 머리의 형태소를 진짜 분석기로 기록해 두고 그것을 돌려주는 대역을 쓴다. 기록된 형태소가 진짜 분석기의 출력과 같은지 검사한다. 기록에 없는 한국어 글은 실행하지 않고 이유를 화면에 적는다 |
+| 모델이 없다 | 제안은 방문자가 저장된 모델 출력을 바꿔서 넣거나, 휴리스틱 플래너가 낸다 |
+| 검색이 없다 | 방문자가 문서와 표를 이미 골랐다. 본문은 그 문서의 첫 문단의 앞 300자다(서비스와 평가도 300자를 쓴다) |
+
+화면 검사는 브라우저에서 나온 결과를 서버에서 같은 호출을 한 결과와 항목마다 견준다. 바꾼 제안의 검증, 주어 검사(브라우저는 기록된 형태소, 서버는 진짜 분석기), 휴리스틱 플래너, 직접 쓴 영어 질문이다. 시간 값을 빼고 모두 같았다.
+
+실행 환경 파일은 저장소에 넣지 않았다. `scripts/fetch_live_runtime.py`가 npm 레지스트리와 PyPI에서 고정한 버전을 받아 `console/live/runtime.lock.json`의 SHA-256과 대조하고, Pages 빌드가 그것을 사이트에 함께 올린다. 내려받기에 실패하면 "직접 실행해 보기" 없이 빌드한다.
+
+**방문자가 EXAONE을 돌리는 길을 만들지 않은 까닭.** 튜닝한 가중치를 공개 서버나 브라우저에 올려야 한다. 그것은 소유자가 정할 일이다. EXAONE 라이선스 문구는 공개 데모나 튜닝한 가중치의 배포를 직접 말하지 않는다. 무료로 GPU 추론을 계속 켜 둘 방법도 좁다(§28.5).
+
+### 28.4 확인한 것
+
+| 무엇 | 결과 |
+|---|---|
+| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->356<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->1<!-- /num -->개 건너뜀 |
+| 화면 검사 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed:int -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total:int -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed:int -->65<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total:int -->65<!-- /num -->. 데스크톱 1440×900과 모바일 390×844, 헤드리스 Chromium |
+| 연구 결과 탭의 길이 | 예전 판은 1440px 폭에서 13,379px였다(2026-11-16의 화면 사진에서 잰 값). 지금은 화면 검사가 6,000px보다 짧은지 본다 |
+| 배포 | 실행 환경을 포함한 Pages 배포가 성공했다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/43999542432), 커밋 `edb5826`) |
+
+### 28.5 하지 못한 것과 한계
+
+- **고친 Pages 화면을 사람이 브라우저에서 확인하지 않았다.** 개발 환경에서는 `github.io`에 접속할 수 없다. 확인한 것은 같은 파일을 로컬에서 띄운 화면과 배포 실행의 성공이다.
+- 화면 검사는 헤드리스 Chromium 하나로 했다. 다른 브라우저와 실제 휴대폰에서는 시험하지 않았다. 실행 환경을 불러오는 시간은 로컬에서 3~4초였고, 방문자의 회선에서는 재지 않았다.
+- 한국어는 저장된 질문에서만 브라우저 실행이 된다.
+- 화학 문서에 EXAONE의 문항별 출력이 없다. 2차 GPU 실험의 화학 수치는 실행 화면의 출력에서 복원한 것이라 문항별 예측이 없다(§21). 넣으려면 GPU 실행을 한 번 더 해야 한다.
+- 방문자가 모델을 실행하는 길이 없다. 조사한 것: Hugging Face의 무료 조건이 2026년 중반에 바뀌어 Gradio와 Docker 공간을 새로 만들려면 유료 요금제가 필요하고, 무료 계정으로는 ZeroGPU 공간만 둘 수 있으며 ZeroGPU는 Gradio 전용이다(2026-11-16 확인, 다시 확인해야 한다). 브라우저 안에서 12억 파라미터 모델을 돌리는 방법은 속도와 파일 크기를 재지 못했다.
+- 데모의 EXAONE 출력은 여섯 번째 전체 데이터 학습의 모델 것이다(한국어 test <!-- num:experiments/eval/exaone_full4_vllm_ko_test/metrics.json:metrics.verified_em:pct -->85.5<!-- /num -->%). 대표 수치 <!-- num:experiments/eval/exaone_full_vllm_ko_test/metrics.json:metrics.verified_em:pct -->84.3<!-- /num -->%의 모델(첫 학습)은 소유자의 문항으로 평가한 적이 없어서 쓰지 않았다.
+- claude.ai Artifact 사본은 예전 판이다(§28.6).
+
+### 28.6 Artifact 사본
+
+같은 저장된 결과를 단일 HTML로 만든 claude.ai Artifact 사본은 2026-11-17의 변경을 반영하지 않은 예전 판이다. 단일 파일에는 실행 환경을 실을 수 없어서 "직접 실행해 보기"는 그 사본에서 나오지 않는다. 사본을 새 판으로 바꿀지는 소유자가 정한다.
+

@@ -6,6 +6,12 @@
 [![pages](https://github.com/sokldjs554/tabletrace/actions/workflows/pages.yml/badge.svg)](https://github.com/sokldjs554/tabletrace/actions/workflows/pages.yml)
 ![license](https://img.shields.io/badge/code-Apache--2.0-blue)
 
+**[공개 데모](https://sokldjs554.github.io/tabletrace/)** · [문항별 결과](https://sokldjs554.github.io/tabletrace/#matrix) · [연구 결과 요약](https://sokldjs554.github.io/tabletrace/#research) · [한 장 요약](docs/ONE_PAGE.md) · [보고서](docs/REPORT.md) · [로컬 실행](#12-로컬-실행)
+
+![공개 데모의 장면들](docs/images/demo.gif)
+
+위 그림은 공개 데모의 장면 <!-- num:docs/images/demo.json:frames:int -->8<!-- /num -->개를 차례로 찍은 것입니다(약 <!-- num:docs/images/demo.json:seconds:int -->26<!-- /num -->초, `scripts/make_demo_gif.py`). 앞의 장면들은 저장된 실행 결과이고, 마지막 두 장면은 이 저장소의 검증기를 브라우저 안에서 실제로 실행한 것입니다. 모델은 이 페이지에서 돌지 않습니다(§2).
+
 **이 프로젝트가 잰 것** (한국어 독립 test 699문항, 표 단위 재분할. 표와 구간은 [§9.6](#96-보강-측정--근거-셀-오류-검증기-앞뒤-표-겹침))
 
 - **답이 맞아도 근거 셀은 절반 넘게 틀립니다. 전체 데이터로 학습하거나, 표 입력에 열 번호를 붙이면 1~3%대가 됩니다.** 답 텍스트가 맞은 조회 답 가운데 모델이 인용한 셀에 그 답이 없는 비율은 mT5-small 최종 모델 <!-- num:experiments/eval/evidence_error.json:rl_v3_ko_test.strict.rate:pct -->52.6<!-- /num -->%, EXAONE-4.0-1.2B LoRA 300개 <!-- num:experiments/eval/evidence_error.json:exaone_vllm_ko_test.strict.rate:pct -->65.2<!-- /num -->%, 같은 모델 전체 데이터 <!-- num:experiments/eval/evidence_error.json:exaone_full_vllm_ko_test.strict.rate:pct -->1.3<!-- /num -->%입니다. 같은 300개 학습에서 표의 셀마다 열 번호(`c0`, `c1`, …)를 붙여 주기만 해도 <!-- num:experiments/eval/evidence_error.json:exaone_colid_vllm_ko_test.strict.rate:pct -->3.2<!-- /num -->%가 됩니다. 다만 답 정확도는 그대로였고, 검증기를 통과하는 오답은 오히려 늘었습니다.
@@ -47,9 +53,7 @@
 
 답과 근거가 따로 맞고 틀리는 문제, 셀 인용 학습, 근거 셀 보상 같은 개별 기법은 이미 연구가 있어서 새로운 방법이라고 주장하지 않습니다. 이 저장소가 보태는 것은 한국어 표에서의 위 측정입니다. 서비스·서빙·컨테이너 스택은 그 측정을 실제로 돌리는 데 쓴 도구입니다.
 
-> **데모 상태**: 저장소는 공개이고 **GitHub Pages에 배포했습니다**(Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281), build와 deploy 단계 모두 통과): <https://sokldjs554.github.io/tabletrace/> 저장소 소유자가 2026-11-08 브라우저에서 열리는 것을 확인했습니다(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 열어 보지 못함). 2026-11-17에 화면을 고쳤고(§2), 고친 화면은 로컬에서 Playwright로 검증했습니다(§13). 고친 뒤의 Pages 화면은 아직 사람이 브라우저에서 확인하지 않았습니다. Pages 화면에는 백엔드가 없어 기본은 **저장된 실행 결과** 모드이고, 원하면 검증기를 브라우저 안에서 직접 실행해 볼 수 있습니다(§2). 모델까지 실제로 도는 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). 같은 저장된 결과를 단일 HTML로 만든 claude.ai Artifact 사본도 있습니다(비공개 링크, 소유자만): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM>
-
-![TableTrace 워크벤치 — 한국어 표 질문의 답변·근거 셀·검증 항목](docs/images/live-desktop-03-result.png)
+> **데모 상태**: 저장소는 공개이고 **GitHub Pages에 배포했습니다**(Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281), build와 deploy 단계 모두 통과): <https://sokldjs554.github.io/tabletrace/> 저장소 소유자가 2026-11-08 브라우저에서 열리는 것을 확인했습니다(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 열어 보지 못함). 2026-11-17에 화면을 고쳤고(§2), 고친 화면은 로컬에서 Playwright로 검증했습니다(§13). 고친 뒤의 Pages 화면은 아직 사람이 브라우저에서 확인하지 않았습니다. Pages 화면에는 백엔드가 없어 기본은 **저장된 실행 결과** 모드이고, 원하면 검증기를 브라우저 안에서 직접 실행해 볼 수 있습니다(§2). 모델까지 실제로 도는 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). 같은 저장된 결과를 단일 HTML로 만든 claude.ai Artifact 사본도 있습니다(비공개 링크, 소유자만. 2026-11-17의 변경을 반영하지 않은 예전 판입니다): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM>
 
 ## 목차
 
