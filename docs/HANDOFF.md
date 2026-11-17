@@ -71,7 +71,7 @@
 | vLLM 텐서 병렬 TP=2 (T4 2장) | 41.0 요청/s, p50 678 ms; 점수는 1장과 같음 | `experiments/bench/engine_vllm_tp2_c32.json`, `experiments/eval/exaone_vllm_tp2_ko_test/metrics.json` |
 | SGLang (T4, 우회 모듈) | vLLM과 같은 답(699문항 중 1개 차이), 속도는 8.3 요청/s | `experiments/eval/exaone_sglang_ko_test/metrics.json`, `experiments/bench/engine_sglang_c32.json` |
 | mT5 2-스테이지 파이프라인 병렬 (T4 2장, NCCL) | 출력 일치, 처리량 이득 없음(설계상 겹치지 않음), 장치당 메모리 분할 | `experiments/bench/pp_*_gpu.json` |
-| 테스트·검증 | pytest 369개 통과(본인이 쓴 학습 코드의 테스트 35개 포함, 1개 건너뜀), E2E 실시간 35/35·정적 69/69, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
+| 테스트·검증 | pytest 373개 통과(본인이 쓴 학습 코드의 테스트 35개 포함, 1개 건너뜀), E2E 실시간 35/35·정적 69/69, CI(test·docker)와 Pages 배포 성공 | `experiments/tests/summary.json`, GitHub Actions |
 
 ## 4. 포트폴리오에 쓸 만한 과정 (전부 기록이 있음)
 
@@ -316,6 +316,8 @@
 - **모델이 도구를 고르는 에이전트(Tool Calling)**: 모델이 표 본문 없이 도구로 표를 읽고 제출한다. 대본대로 답하는 모의 서버로 테스트 6개. 실제 모델로는 CPU에서 튜닝하지 않은 EXAONE-4.0-1.2B로 수작업 30문항만 돌렸다: verified EM 16.7%(5/30, 전부 답 없는 질문의 보류), 같은 모델의 한 줄 답 방식 20.0%, 튜닝한 같은 크기 모델 66.7%. "경로가 실제 모델로 끝까지 돈다"까지만 쓴다. "도구 호출로 성능을 올렸다"는 틀린 말이다(`experiments/eval/tool_calling_cpu.json`).
 - **본인이 직접 쓴 학습 코드**(2026-11-12, PR #6): 보상 함수, GRPO 이점·손실·KL 항, 라벨 가리기·학습률 일정·학습 루프. 전용 테스트 35개 통과. 리뷰에서 보상 함수를 저장된 모델 출력 66,450회 호출에 적용해 AI 도구의 임시 구현과 차이가 없음을 확인했다(`docs/rewrite/LOG.md`). "직접 구현했다"고 쓸 수 있다. 보상과 손실로 EXAONE을 학습한 결과는 9.1b, 9.1c, 9.1e에 있다. 학습 루프(`lm_loop.py`)로 학습한 결과는 9.1g에 있다(한 번). "직접 쓴 학습 루프로 EXAONE을 미세조정했다"고 쓸 수 있다. "모든 미세조정을 직접 쓴 루프로 했다"고는 쓰지 않는다.
 - **큰 모델 참고선용 few-shot 평가, 엔진의 확신도 저장**: 평가 러너의 옵션으로 있고 모의 서버 테스트가 있다. (mT5의 확신도 저장은 실제로 돌렸다. 9.1 참고)
+
+- **한국어만 튜닝한 EXAONE의 화학 평가**(노트북 2의 O절, 2026-11-17 준비). 아직 돌리지 않았다. 9.1i의 결과에서 화학 문항을 더한 몫을 가르려는 실행이다. 돌리기 전에는 "화학 문항을 더해서 올렸다"는 말을 쓰지 않는다. 선택으로 한국어와 화학을 함께 튜닝하는 학습을 한 번 더 할 수 있다(`RUN_KOCHEM_REPEAT`).
 
 ### 9.3 하지 못했거나 재지 못한 것 (쓰지 않는다)
 

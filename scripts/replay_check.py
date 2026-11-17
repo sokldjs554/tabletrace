@@ -12,6 +12,7 @@ repository. If the outcome of any question differs, the stored numbers do not be
   python scripts/replay_check.py --session owner --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B      # -> experiments/eval/replay_check_owner.json
   python scripts/replay_check.py --session ownloop --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B    # -> experiments/eval/replay_check_ownloop.json
   python scripts/replay_check.py --session chem --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B       # -> experiments/eval/replay_check_chem.json (section N, run on 2026-11-17)
+  python scripts/replay_check.py --session share --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B      # -> experiments/eval/replay_check_share.json (once section O has been run)
 """
 from __future__ import annotations
 
@@ -53,7 +54,14 @@ SESSIONS = {                   # all were evaluated with an input budget of 672 
         "exaone_kochem2_vllm_ko_test", "exaone_kochem2_vllm_ko_custom", "exaone_kochem2_vllm_ko_owner",
         "ref_1p2b_chem_custom", "ref_1p2b_chem_syndev", "ref_1p2b_chem_papers",
     ],
+    "share": [                 # section O: a model tuned on Korean only on the same six sets, and optionally section N's training once more (prepared 2026-11-17)
+        "exaone_koonly_vllm_chem_custom", "exaone_koonly_vllm_chem_syndev", "exaone_koonly_vllm_chem_papers",
+        "exaone_koonly_vllm_ko_test", "exaone_koonly_vllm_ko_custom", "exaone_koonly_vllm_ko_owner",
+        "exaone_kochem3_vllm_chem_custom", "exaone_kochem3_vllm_chem_syndev", "exaone_kochem3_vllm_chem_papers",
+        "exaone_kochem3_vllm_ko_test", "exaone_kochem3_vllm_ko_custom", "exaone_kochem3_vllm_ko_owner",
+    ],
 }
+OPTIONAL = "exaone_kochem3_vllm_"      # the repeat of section O is run only when asked for: its evaluations are checked when they exist
 FIELDS = ("pred_status", "pred_answer", "pred_cells", "verified_correct", "evidence_repaired")
 
 
@@ -71,6 +79,8 @@ def main() -> None:
     out: dict = {"tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B", "max_in": a.max_in, "runs": {}}
     with tempfile.TemporaryDirectory() as tmp:
         for run in SESSIONS[a.session]:
+            if run.startswith(OPTIONAL) and not (EVAL / run).exists():
+                continue
             meta = json.loads((EVAL / run / "metrics.json").read_text(encoding="utf-8"))["meta"]
             res = {}
             for label, stored, extra in (("first_pass", EVAL / run, ["--no-entity-check"]), ("subject_check", EVAL / f"{run}_ec", [])):

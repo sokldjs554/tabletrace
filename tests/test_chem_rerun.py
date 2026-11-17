@@ -102,4 +102,4 @@ def test_the_documents_use_the_run_that_kept_its_files_and_say_it_came_out_lower
     handoff = (ROOT / "docs/HANDOFF.md").read_text(encoding="utf-8")
     quoted = [line for line in handoff.splitlines() if f"{old}%" in line]
     assert quoted and all("결과 파일" in line or "예전" in line for line in quoted)
-    assert f"\"화학 논문 표에서 {old}%\"(결과 파일이 없는 예전 실행의 수치다" in handoff and "아직 돌리지 않았다" not in handoff.split("### 9.2")[1].split("### 9.3")[0]
+    assert f"\"화학 논문 표에서 {old}%\"(결과 파일이 없는 예전 실행의 수치다" in handoff and "노트북 2의 N절, 2026-11-17 준비" not in handoff.split("### 9.2")[1].split("### 9.3")[0]

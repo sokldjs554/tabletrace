@@ -80,12 +80,13 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                chem = ("kochem2", "ref_1p2b_chem")      # section N (2026-11-17, Colab): the last results that came in
+                share = ("koonly", "kochem3")            # section O (prepared 2026-11-17): its results, once they are in
+                chem = ("kochem2", "ref_1p2b_chem", *share)   # section N (2026-11-17, Colab): the last results that came in
                 loop = ("ownloop", *chem)                # section M (2026-11-16, Colab)
                 owner = ("full4", "_ko_owner", *loop)    # section L (2026-11-16)
                 later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3", *owner), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3", *owner),
                          "before the full-data rerun": ("full2", "full3", "grpo3", *owner), "before RL on the full-data model": ("full3", "grpo3", *owner),
-                         "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop, "before the chemistry run": chem}.get(cloned_results, ())
+                         "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop, "before the chemistry run": chem, "before the Korean-only run": share}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -170,7 +171,7 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     repo, calls, packs, sections, run_all = run.repo, run.calls, run.packs, run.sections, run.run_all
 
     first = run_all()
-    assert first["train"] == 13 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I + the models of sections L, M and N; RL in D and in J
+    assert first["train"] == 14 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I + the models of sections L, M, N and O; RL in D and in J
     assert len(packs) >= len(sections) - 1                                   # every section ends by packing what exists so far
     assert Path.cwd() == repo                                                # pack() moves away for the download link and must come back
     names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
@@ -224,7 +225,7 @@ def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
     run = DryRun(tmp_path, monkeypatch, n_gpu=1)
     counts = run.run_all()
     commands = [c for _, c in run.calls]
-    assert counts["grpo"] == 2 and counts["train"] == 11                     # no ddp1 / ddp2
+    assert counts["grpo"] == 2 and counts["train"] == 12                     # no ddp1 / ddp2
     assert not any("torchrun" in c for c in commands) and not any("32b" in o.lower() for o in run.outputs())
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
@@ -254,7 +255,7 @@ def test_notebook_2_goes_on_when_a_server_dies_during_evaluation(tmp_path, monke
     counts = run.run_all()
     mine = [c for k, c in run.calls if k == "eval" and "ref_32b_awq" in re.search(r"--out (\S+)", c).group(1)]
     assert len(mine) == 1 and "--replay-from" not in mine[0]                 # no second set, no re-verification of a missing file
-    assert counts["grpo"] == 2 and counts["train"] == 13                     # the other sections still ran
+    assert counts["grpo"] == 2 and counts["train"] == 14                     # the other sections still ran
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
 
@@ -780,11 +781,104 @@ def test_the_recorded_chemistry_run_matches_what_the_notebook_does_and_the_secti
     assert run.run_all(only=CHEM_CELL) == collections.Counter()
     cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
     intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## N."))
-    assert "지금 돌릴 것은 없습니다" in intro and "아직 돌리지 않" not in intro + section and "2026-11-17에 Colab" in section
+    row = next(line for line in intro.split("\n") if line.startswith("| N |"))
+    assert "2026-11-17에 Colab에서 끝남" in row and "아직 돌리지 않" not in row + section and "2026-11-17에 Colab" in section
     rerun = json.loads((ROOT / "experiments/eval/chem_rerun_analysis.json").read_text())
     tuned = rerun["chemistry"]["chem_papers"]["tuned"]
     assert f"{tuned['correct']}/{tuned['n']}({100 * tuned['rate']:.1f}%)" in section          # the section states the result the files give
     assert f"{100 * rerun['earlier_run_without_predictions']['chem_papers']['verified_em']:.1f}%" in section
+
+
+SHARE_CELL = "KOONLY_DIR, KOONLY_NAME"      # the cell of section O
+BEFORE_SHARE = "before the Korean-only run"
+SIX_SETS = ("chem_custom", "chem_syndev", "chem_papers", "ko_test", "ko_custom", "ko_owner")
+
+
+def _train_args(cmd: str) -> tuple[list[str], list[str]]:
+    m = re.search(r"--train (.*?) --corpus (.*?) --epochs", cmd)
+    return m.group(1).split(), m.group(2).split()
+
+
+def _same_evaluations_as_section_n(run, name: str) -> None:
+    """The first-pass evaluations of `name` carry the settings the stored evaluations of section N's tuned model were run with."""
+    first = {re.search(r"--out (\S+)", c).group(1): c for k, c in run.calls if k == "eval" and "--replay-from" not in c and f"/{name}_" in c}
+    assert sorted(first) == sorted(f"experiments/eval/{name}_{s}" for s in SIX_SETS)
+    for out, cmd in first.items():
+        meta = json.loads((ROOT / "experiments/eval" / f"exaone_kochem2_vllm_{out.split(name + '_')[1]}" / "metrics.json").read_text())["meta"]
+        assert re.search(r"--corpus (.*?) --data (.*?) --out", cmd).groups() == (" ".join(meta["corpus"]), " ".join(meta["data"])), out
+        assert ("--row-select overlap" in cmd) == (meta["row_select"] == "overlap") and f"--max-in {meta['max_in']} " in cmd, out
+        assert "--confidence" in cmd and "--no-entity-check" in cmd and "--few-shot" not in cmd and "--concurrency 16 " in cmd, out
+
+
+def test_korean_only_section_trains_the_korean_model_and_scores_it_on_the_chemistry_sets(tmp_path, monkeypatch):
+    """Section N's tuned model saw Korean questions and chemistry questions; the untuned model it was compared with saw
+    neither. No model tuned on Korean only had been scored on chemistry, so the share of the chemistry questions could
+    not be told apart. Section O trains that model with the command of the stored Korean-only training (exaone_full4)
+    and evaluates it as section N evaluated its model."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_SHARE)       # main as it is on 2026-11-17
+    counts = run.run_all(only=SHARE_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 2 * 6
+    train = next(c for k, c in run.calls if k == "train")
+    assert "--out experiments/exaone_lora_koonly" in train and "--merge" in train.split()
+    stored = json.loads((ROOT / "experiments/exaone_lora_full4/train_info.json").read_text())["args"]
+    assert _train_args(train) == (stored["train"], stored["corpus"])
+    for flag, key in (("--epochs", "epochs"), ("--bs", "bs"), ("--grad-accum", "grad_accum"), ("--max-len", "max_len"), ("--max-in", "max_in"), ("--seed", "seed"), ("--limit", "limit")):
+        assert float(re.search(rf"{flag} (\S+)", train).group(1)) == float(stored[key]), flag
+    assert "--loop" not in train                                               # the built-in loop, as in exaone_full4 and exaone_kochem2
+    _same_evaluations_as_section_n(run, "exaone_koonly_vllm")
+    replays = [c for k, c in run.calls if k == "eval" and "--replay-from" in c]
+    assert len(replays) == 6 and all(c.split("--out ")[1].strip().endswith("_ec") for c in replays)
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any("exaone_koonly_vllm_chem_papers_ec" in n for n in names) and any(n.endswith("exaone_lora_koonly/train_info.json") for n in names)
+    assert not any("merged" in n for n in names) and not (run.repo / "experiments/exaone_lora_koonly/merged").exists()
+    assert run.run_all(only=SHARE_CELL) == collections.Counter()               # run again: nothing left to do
+
+
+def test_korean_only_section_can_repeat_the_chemistry_training_in_the_same_session(tmp_path, monkeypatch):
+    """RUN_KOCHEM_REPEAT trains the Korean-and-chemistry model once more with section N's command, for a third value of
+    the paper-table number and a pair of models from one session. It is off unless asked for."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_SHARE)
+    assert sum("RUN_KOCHEM_REPEAT = False" in src for _, src in run.sections) == 1
+    run.sections = [(i, src.replace("RUN_KOCHEM_REPEAT = False", "RUN_KOCHEM_REPEAT = True")) for i, src in run.sections]
+    counts = run.run_all(only=SHARE_CELL)
+    assert counts["train"] == 2 and counts["eval"] == 2 * 2 * 6
+    korean, both = [c for k, c in run.calls if k == "train"]
+    assert "--out experiments/exaone_lora_koonly" in korean and "--out experiments/exaone_lora_kochem3" in both      # the Korean-only model first: it is what the section is for
+    stored = json.loads((ROOT / "experiments/exaone_lora_kochem2/train_info.json").read_text())["args"]
+    assert _train_args(both) == (stored["train"], stored["corpus"])
+    strip = lambda c: re.sub(r"--train .*? --epochs|--out \S+", "", c)  # noqa: E731
+    assert strip(korean) == strip(both)                                        # the two trainings differ in their data and output path only
+    _same_evaluations_as_section_n(run, "exaone_koonly_vllm")
+    _same_evaluations_as_section_n(run, "exaone_kochem3_vllm")
+    assert run.run_all(only=SHARE_CELL) == collections.Counter()
+
+
+def test_korean_only_section_does_not_mix_evaluations_of_two_trainings(tmp_path, monkeypatch):
+    """A session that ended during the evaluations leaves some of them in the archive; the weights are gone. A new session
+    trains the model again, so the leftover evaluations belong to another model: they are removed and every set is
+    scored with the new weights."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_SHARE)
+    for s in ("chem_custom", "chem_custom_ec", "chem_syndev"):
+        d = run.repo / "experiments/eval" / f"exaone_koonly_vllm_{s}"
+        d.mkdir(parents=True)
+        (d / "metrics.json").write_text('{"from": "the session that ended"}')
+    (run.repo / "experiments/exaone_lora_koonly").mkdir(parents=True)
+    (run.repo / "experiments/exaone_lora_koonly/train_info.json").write_text('{"n_examples": 1, "steps": 1}')         # restored from the archive, without weights
+    counts = run.run_all(only=SHARE_CELL)
+    assert counts["train"] == 1 and counts["eval"] == 12
+    assert all(json.loads((run.repo / "experiments/eval" / f"exaone_koonly_vllm_{s}" / "metrics.json").read_text()) == {} for s in SIX_SETS)
+    stored = sorted(d.name for d in (ROOT / "experiments/eval").glob("exaone_kochem2_vllm_*"))
+    assert sorted(d.name for d in (run.repo / "experiments/eval").glob("exaone_kochem2_vllm_*")) == stored      # nothing else is removed
+
+
+def test_the_notebook_names_the_one_section_left_to_run():
+    cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
+    intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## O."))
+    if not list((ROOT / "experiments/eval").glob("exaone_koonly_vllm_*")):
+        row = next(line for line in intro.split("\n") if line.startswith("| O |"))
+        assert "지금 돌릴 것은 O절 하나입니다" in intro and "아직 돌리지 않음" in row and "아직 돌려 본 적이 없습니다" in section
+    rerun = json.loads((ROOT / "experiments/eval/chem_rerun_analysis.json").read_text())["chemistry"]["chem_papers"]
+    assert f"{100 * rerun['tuned']['rate']:.1f}%" in section and f"{100 * rerun['untuned_six_examples']['rate']:.1f}%" in section      # the numbers the section sets out from
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

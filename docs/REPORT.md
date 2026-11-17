@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->369<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->373<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->69<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->69<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 EXAONE-4.0-1.2B에는 소유자가 쓴 보상 함수와 GRPO 손실로 두 번 적용했다. 첫 실험은 효과가 없었고, 학습 스크립트의 프롬프트 잘림과 배치 구성을 고친 두 번째 실험에서 인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->43.8<!-- /num -->%, verified EM <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->55.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->59.4<!-- /num -->%(대응 검정 p <!-- num:experiments/eval/paired_tests.json:grpo2_vs_rlstart2_ko_test.p_display --><0.001<!-- /num -->, 1회). 배치 구성만 첫 실험처럼 되돌린 대조군에서는 인용 셀 정확도가 오르지 않았다(<!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.5<!-- /num -->%, 두 실험의 변화의 차이 p <!-- num:experiments/eval/rl2_control_analysis.json:main_minus_control.first_pass.cited_gold_cell_lookup.p_display --><0.001<!-- /num -->)(1회). 본 실험은 시작 모델을 달리해 한 번 더 돌렸고 같은 결과였다(인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2c_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->46.7<!-- /num -->%, §22.8) | `training/rl_grpo.py`, §7, §18, 이슈 23–24, §21.1, §22.1, §22.7, §22.8 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->369<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->69<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->69<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->373<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->69<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->69<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -2139,7 +2139,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 | 무엇 | 결과 |
 |---|---|
-| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->369<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->1<!-- /num -->개 건너뜀 |
+| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->373<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->1<!-- /num -->개 건너뜀 |
 | 화면 검사 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed:int -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total:int -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed:int -->69<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total:int -->69<!-- /num -->. 데스크톱 1440×900과 모바일 390×844, 헤드리스 Chromium |
 | 연구 결과 탭의 길이 | 예전 판은 1440px 폭에서 13,379px였다(2026-11-16의 화면 사진에서 잰 값). 지금은 화면 검사가 6,000px보다 짧은지 본다 |
 | 배포 | 실행 환경을 포함한 Pages 배포가 성공했다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/43999542432), 커밋 `edb5826`) |
@@ -2241,9 +2241,21 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 | 연구 결과 탭의 결론 6개, 세부 기록 35건 | 결론 <!-- num:console/data/research.json:counts.highlights:int -->7<!-- /num -->개(화학 논문 표가 더해졌다), 세부 기록 <!-- num:console/data/research.json:counts.sections:int -->36<!-- /num -->건 |
 | 노트북 2의 N절을 준비했고 돌리지 않았다 | 돌렸다. 노트북의 설명에 결과를 적었고, 다시 실행해도 아무것도 하지 않는다 |
 | 길이 결함을 고친 설정으로 다시 학습하지 않은 모델: 10,587문항, 열 번호, 화학 | 화학 모델은 고친 설정으로 다시 학습했다. 10,587문항 모델과 열 번호 모델은 그대로다 |
+| 화학 문항을 더한 몫을 가르지 못한다(§29.5의 4번) | 그대로다. 가르기 위한 실행을 준비했고 아직 돌리지 않았다(§29.7) |
 
 결과를 넣으면서 AI 도구가 찾아 고친 것이 셋 있다(`docs/dev/issues-log.md`의 82~84).
 
 1. 분석 스크립트가 처음에 한국어용 분류 함수를 그대로 써서 화학 문항의 비율·변화율 계산 문항을 조회로 셌다. 문서에 넣기 전에 문항 파일의 유형과 맞춰 보다 찾았다.
 2. N절을 준비할 때 노트북에 "튜닝하지 않은 모델과 견주어 화학을 학습한 효과를 본다"고 적었다. 위 4번의 이유로 틀린 말이다. 고쳤다.
 3. 같은 설명에 화학 학습 문항을 <!-- num:experiments/eval/chem_rerun_analysis.json:training.chemistry_questions_in_the_file -->820<!-- /num -->개라고 적었다. 파일의 문항 수이고, 학습에 쓰인 것은 <!-- num:experiments/eval/chem_rerun_analysis.json:training.chemistry_examples_added -->796<!-- /num -->개다. 고쳤다.
+
+### 29.7 다음 실행을 준비했다: 한국어만 튜닝한 모델의 화학 평가 (아직 돌리지 않았다)
+
+§29.5의 4번을 메우는 실행이다. 노트북 2의 O절로 준비했고(2026-11-17) GPU에서는 아직 돌리지 않았다.
+
+- **무엇을 하나.** 한국어 학습 문항만으로 EXAONE 1.2B를 튜닝해(`exaone_koonly`) §29와 같은 여섯 세트로 평가한다. 학습 명령은 `exaone_full4`와 같다. §29의 학습 명령에서 화학 학습 문항 파일과 화학 문서 파일만 뺀 것이기도 하다. 평가 명령은 §29의 튜닝한 모델을 평가한 명령과 같다.
+- **무엇을 견주나.** 같은 화학 문항에서 이 모델과 §29의 모델(`exaone_kochem2`)을 문항 단위로 견준다. 차이가 크면 화학 문항을 더한 것이 그만큼 보탠 것이고, 작으면 한국어 문항으로 형식을 배운 것만으로 화학 표도 풀린다는 뜻이다. 결과를 보기 전에 적어 둔다. 어느 쪽이 나와도 그대로 적는다.
+- **미리 아는 한계.** 두 모델은 다른 세션에서 한 번씩 학습한 것이다. 전체 데이터 학습 일곱 번이 한국어 test에서 수 %p 흩어졌으므로, 화학 논문 표 62문항에서의 작은 차이는 학습마다의 흔들림과 구별되지 않는다.
+- **선택.** `RUN_KOCHEM_REPEAT = True`로 두면 한국어와 화학을 함께 튜닝하는 학습(§29의 명령)을 같은 세션에서 한 번 더 한다(`exaone_kochem3`). 화학 논문 표 수치의 세 번째 값이 생기고, 같은 세션의 두 모델을 견줄 수 있게 된다. 기본값은 끔이다.
+- **GPU 없이 확인한 것.** 명령을 기록만 하며 돌려 보는 시험(`tests/test_notebook_dry_run.py`)이다. 학습 한 번과 평가 열두 건이 나가는지, 학습 명령이 저장된 `exaone_full4`의 기록과 같은지, 평가 명령이 §29의 평가 기록과 같은지, 다시 실행하면 아무것도 하지 않는지, 다른 세션에서 하다 만 평가를 새 가중치의 평가와 섞지 않는지를 본다. 명령 자체는 L절과 N절에서 GPU로 돌아 본 것과 같다.
+- 받은 묶음은 `python scripts/replay_check.py --session share`로 다시 검증한다.
