@@ -1,6 +1,6 @@
 # TableTrace 한 장 요약
 
-**무엇인가.** 한국어 표 질의응답에서 모델이 답과 **근거 셀**을 함께 내고, 규칙으로 된 검증기가 그 셀로 답을 다시 확인해 맞지 않으면 답을 보류하는 연구 프로젝트다. 데이터는 LG AI연구원이 공개한 KorWikiTQ이고, 공고의 테이블이해(Table MRC) 업무에 맞췄다. 저장소 <https://github.com/sokldjs554/tabletrace>, 데모 <https://sokldjs554.github.io/tabletrace/>.
+**무엇인가.** 한국어 표 질의응답에서 모델이 답과 **근거 셀**을 함께 내고, 규칙으로 된 검증기가 그 셀로 답을 다시 확인해 맞지 않으면 답을 보류하는 연구 프로젝트다. 데이터는 LG AI연구원이 공개한 KorWikiTQ이고, 공고의 테이블이해(Table MRC) 업무에 맞췄다. 저장소 <https://github.com/sokldjs554/tabletrace>, 데모 <https://sokldjs554.github.io/tabletrace/>. 데모는 평가 문항 전체의 저장된 결과를 정답과 함께 보여 주고, 검증기를 브라우저에서 직접 실행해 볼 수 있다. 모델은 데모에서 돌지 않는다.
 
 ## 잰 것 (한국어 시험 699문항, 표 단위로 다시 나눈 분할)
 
