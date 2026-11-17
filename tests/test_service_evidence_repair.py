@@ -32,12 +32,14 @@ def test_release_reports_the_setting(flag):
 def test_runtime_withholds_the_model_proposal_when_repair_is_off():
     """A stored EXAONE output that cites a cell without the answer: repaired by default, withheld when repair is off."""
     index = json.loads((ROOT / "console/data/recorded/index.json").read_text(encoding="utf-8"))
-    run = next(r for r in index["planners"]["exaone"]["runs"]
-               if any(c["name"] == "evidence_repaired" for c in r["result"]["verdict"]["checks"]))
+    examples = {e["id"]: e for e in json.loads((ROOT / "console/data/examples.json").read_text(encoding="utf-8"))["examples"]}
+    stored = index["planners"]["ref7"]                 # the untuned 7.8B model: it often cites a neighbouring cell
+    run = next(r for r in stored["runs"] if any(c["name"] == "evidence_repaired" for c in r["result"]["verdict"]["checks"]))
+    ex = examples[run["id"]]
     store = CorpusStore.from_disk()
     indexes = {"ko_tables": CorpusIndex(store.corpora["ko_tables"], "ko")}
-    planner = StoredOutputPlanner(ROOT / index["planners"]["exaone"]["source"]["eval_dir"], "stored")
-    args = dict(doc_id=run["doc_id"], table_id=run["table_id"], planner_mode="neural")
+    planner = StoredOutputPlanner([ROOT / d for d in stored["source"]["eval_dirs"].values()], "stored")
+    args = dict(doc_id=ex["doc_id"], table_id=ex["table_id"], planner_mode="neural")
 
     on = AgentRuntime(indexes, planner).run(run["question"], "ko_tables", **args)
     assert on.status == "answered" and any(c.name == "evidence_repaired" for c in on.verdict.checks)

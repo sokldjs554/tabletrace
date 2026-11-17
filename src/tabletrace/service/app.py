@@ -6,7 +6,7 @@ Endpoints
   GET  /v1/documents?corpus=..            document list (id, title, n_tables)
   GET  /v1/documents/{doc_id}             full document (passages + tables)
   GET  /v1/tables/{table_id}
-  GET  /v1/examples?corpus=..             representative questions for the console
+  GET  /v1/examples?corpus=..             the evaluation questions (with gold answers) the console lists
   POST /v1/search                         {query, corpus, doc_id?} -> table + passage hits
   POST /v1/ask                            {question, corpus, doc_id?, table_id?, planner?} -> job (202) or result (?wait=1)
   GET  /v1/jobs/{id}                      job status / result / trace
@@ -183,7 +183,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             return []
         import json
 
-        return [e for e in json.loads(path.read_text(encoding="utf-8")) if e["corpus"] == corpus]
+        # the file holds the evaluation question sets with their gold answers; the API lists the questions of a corpus
+        return [e for e in json.loads(path.read_text(encoding="utf-8"))["examples"] if e["corpus"] == corpus]
 
     @app.post("/v1/search")
     def search(req: SearchRequest):

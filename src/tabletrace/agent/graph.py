@@ -42,6 +42,7 @@ class AgentState(TypedDict, total=False):
     doc_id: str | None
     table_id: str | None
     planner_mode: str
+    given: dict | None          # {"table", "context", "context_id"}: the caller fixes what the planner and the verifier see
     # filled by nodes
     doc: Document | None
     table: Table | None
@@ -62,12 +63,13 @@ class AgentRuntime:
     """Holds indexes and planners; builds one compiled graph that nodes close over."""
 
     def __init__(self, indexes: dict[str, CorpusIndex], neural_planner: Any | None = None, entity_check: bool = True,
-                 evidence_repair: bool = True, second_opinion: Any | None = None) -> None:
+                 evidence_repair: bool = True, second_opinion: Any | None = None, fallback: bool = True) -> None:
         self.indexes = indexes
         self.neural = neural_planner
         self.entity_check = entity_check
         self.evidence_repair = evidence_repair      # False: a lookup whose cited cell does not hold the answer is withheld, not repaired
         self.second_opinion = second_opinion        # encoder/second_opinion.py: a verified lookup is withheld when the table encoder points elsewhere
+        self.fallback = fallback                    # False: no second proposal from the heuristic planner (the evaluation's setting)
         self.graph = self._build()
 
     # ---- nodes -------------------------------------------------------------------------
@@ -88,7 +90,13 @@ class AgentRuntime:
         if table is None and doc is not None and doc.tables:
             table = doc.tables[0]
         context, pid = None, None
-        if hits_p:
+        given = s.get("given")
+        if given is not None:
+            # A replay of an evaluation: the table rows and the passage text are the ones that evaluation showed the
+            # planner and verified against (a long table is cut to the rows that fit the model's input).
+            table, context, pid = given["table"], given.get("context"), given.get("context_id")
+            doc = idx.docs.get(table.doc_id, doc)
+        elif hits_p:
             p = idx.passages[hits_p[0].id]
             context, pid = p.text[:300], p.id
         elif doc and doc.passages:
@@ -161,12 +169,11 @@ class AgentRuntime:
         return {"result": result}
 
     # ---- edges -------------------------------------------------------------------------
-    @staticmethod
-    def after_verify(s: AgentState) -> str:
+    def after_verify(self, s: AgentState) -> str:
         res: Resolution = s["resolution"]
         prog = s.get("program")
         # one bounded retry with the heuristic planner when the neural proposal was unusable
-        if (res.status == "abstained" and res.verdict.reason in ("invalid_program", "verification_failed")
+        if (self.fallback and res.status == "abstained" and res.verdict.reason in ("invalid_program", "verification_failed")
                 and s.get("attempts", 0) < MAX_PROPOSALS and s.get("planner_info", {}).get("mode") == "neural"
                 and (prog is None or prog.op != "abstain")):
             return "retry"
@@ -198,9 +205,9 @@ class AgentRuntime:
 
     # ---- entry ---------------------------------------------------------------------------
     def run(self, question: str, corpus: Corpus, doc_id: str | None = None, table_id: str | None = None,
-            planner_mode: str = "auto") -> AnswerResult:
+            planner_mode: str = "auto", given: dict | None = None) -> AnswerResult:
         state: AgentState = {"question": question, "corpus": corpus, "doc_id": doc_id, "table_id": table_id,
-                             "planner_mode": planner_mode, "trace": [], "t_start": time.perf_counter()}
+                             "planner_mode": planner_mode, "given": given, "trace": [], "t_start": time.perf_counter()}
         out = self.graph.invoke(state)
         return out["result"]
 

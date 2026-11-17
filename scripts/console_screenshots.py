@@ -83,103 +83,160 @@ def main() -> None:
                 try:
                     page = browser.new_page(viewport=vp, device_scale_factor=1)
                     page.on("console", lambda m: report["console_errors"].append(m.text) if m.type == "error" else None)
+                    page.on("pageerror", lambda e: report["console_errors"].append("page error: " + str(e)))
+                    mobile = label == "mobile"
+
+                    def pane(name: str, mobile: bool = mobile, page=page) -> None:
+                        if mobile:
+                            page.click(f".mtab[data-pane='{name}']")
+
+                    def shown(page=page) -> None:
+                        page.wait_for_function("() => !document.querySelector('#result').hidden || !document.querySelector('#errorbar').hidden", timeout=120000)
+                        page.wait_for_timeout(300)
+
+                    def open_question(qid: str, planner: str, page=page) -> None:
+                        """Open one prepared question: a link in recorded mode; in live mode the link selects it and the chip runs it."""
+                        page.goto(f"{base}#workbench/{qid}/{planner}", wait_until="networkidle")
+                        page.wait_for_selector(f".chip[data-ex='{qid}']", state="attached", timeout=15000)
+                        if tag == "live":
+                            pane("left")
+                            page.click(f".chip[data-ex='{qid}']")
+                        shown()
+
                     page.goto(base, wait_until="networkidle")
                     page.wait_for_timeout(800)
                     badge = page.text_content("#modetext") or ""
                     check(f"{label}: mode badge", ("실시간" in badge) if tag == "live" else ("저장된" in badge), badge)
-                    page.screenshot(path=str(out / f"{tag}-{label}-01-home.png"), full_page=(label == "mobile"))
-                    # a document is auto-selected (one with representative questions)
+                    page.screenshot(path=str(out / f"{tag}-{label}-01-home.png"), full_page=mobile)
+                    data = page.evaluate("async () => (await (await fetch('data/examples.json')).json())")
+                    examples = data["examples"]
+                    if tag == "static":
+                        # the first screen already holds a result: an answer, its gold answer and a mark, with no click
+                        first = page.evaluate("""() => ({ answer: (document.querySelector('.answer') || {}).textContent || '',
+                            gold: (document.querySelector('.goldline') || {}).textContent || '', evidence: document.querySelectorAll('td.is-evidence').length,
+                            top: document.querySelector('.answer') ? document.querySelector('.answer').getBoundingClientRect().top : -1 })""")
+                        check(f"{label}: first screen shows an answer with its gold answer, without a click",
+                              bool(first["answer"]) and "정답" in first["gold"] and "맞음" in first["gold"] and first["evidence"] >= 1 and 0 < first["top"] < vp["height"],
+                              f"answer {first['answer']!r} at y={first['top']:.0f} of {vp['height']}, {first['gold'][:30]!r}")
+                    # a document of the first question set is open, with its questions
+                    pane("left")
                     page.wait_for_selector(".chip", timeout=15000)
-                    check(f"{label}: document + examples rendered", page.locator("table.tt").count() >= 1 and page.locator(".chip").count() >= 1)
-                    if label == "mobile":
-                        page.click(".mtab[data-pane='center']")
+                    check(f"{label}: document + questions rendered", page.locator("table.tt").count() >= 1 and page.locator(".chip").count() >= 1
+                          and page.locator("#setsel option").count() >= 1, page.text_content("#setnote") or "")
+                    if mobile:
+                        pane("center")
                         page.screenshot(path=str(out / f"{tag}-{label}-02-doc.png"), full_page=False)
-                        page.click(".mtab[data-pane='left']")
-                    # answered example
-                    chips = page.locator(".chip")
-                    chips.nth(0).click()
-                    page.wait_for_function("() => !document.querySelector('#result').hidden || !document.querySelector('#errorbar').hidden", timeout=120000)
+                        pane("left")
+                    # a prepared question: the first one whose answer comes with an evidence cell (the live heuristic planner
+                    # withholds some of them; the abstain state has its own check below)
+                    page.locator(".chip:not([disabled])").nth(0).click()
+                    shown()
+                    for ex in [e for e in examples if e["corpus"] == "ko_tables"][:15]:
+                        if page.locator(".evlist .evbtn[data-kind='cell']").count():
+                            break
+                        open_question(ex["id"], "auto")
                     status = page.text_content("#status") or ""
                     has_badge = page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0
-                    check(f"{label}: first example produced a result", has_badge, status)
-                    page.screenshot(path=str(out / f"{tag}-{label}-03-result.png"), full_page=(label == "mobile"))
-                    ev = page.locator(".evbtn")
+                    check(f"{label}: first question produced a result", has_badge, status)
+                    check(f"{label}: the result states the gold answer", "정답" in (page.text_content(".goldline") or ""), (page.text_content(".goldline") or "")[:60])
+                    page.screenshot(path=str(out / f"{tag}-{label}-03-result.png"), full_page=mobile)
+                    ev = page.locator(".evlist .evbtn[data-kind='cell']")
+                    check(f"{label}: an answer with an evidence cell is among the first questions", ev.count() >= 1)
                     if ev.count():
                         ev.nth(0).click()
                         page.wait_for_timeout(500)
                         check(f"{label}: evidence highlighted in table", page.locator("td.is-evidence").count() >= 1)
-                    # Abstain-state rendering. The neural planner often answers questions it should abstain on (a real
-                    # model weakness measured in the evaluation), so this UI check switches to the heuristic planner,
-                    # which abstains deterministically on the representative "no answer" questions.
-                    if label == "mobile":
-                        page.click(".mtab[data-pane='right']")
-                    page.select_option("#planner", "heuristic")
-                    if label == "mobile":
-                        page.click(".mtab[data-pane='left']")
-                    hold = page.locator(".chip", has_text="보류") if page.locator(".chip", has_text="보류").count() else page.locator(".chip", has_text="abstain")
+                        pane("right")
+                    if tag == "static":
+                        # the same question under the other stored planners; a name switches to that planner's result
+                        rows = page.locator(".cmp button[data-planner]")
+                        n_rows = rows.count()
+                        other = rows.nth(n_rows - 1).get_attribute("data-planner") if n_rows else None
+                        if other:
+                            rows.nth(n_rows - 1).click()
+                            page.wait_for_timeout(300)
+                        check(f"{label}: planners are compared on the same question", n_rows >= 2 and page.input_value("#planner") == other
+                              and page.locator(".cmp .mark").count() == n_rows, f"{n_rows} planners, switched to {other}")
+                        page.select_option("#planner", "auto")
+                    # Abstain-state rendering with the heuristic planner on the questions whose gold is "no answer".
                     shown_hold = False
-                    for i in range(hold.count()):
-                        hold.nth(i).click()
-                        page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=120000)
-                        page.wait_for_timeout(300)
+                    for ex in [e for e in examples if e["corpus"] == "ko_tables" and e["gold"]["status"] == "abstained"]:
+                        open_question(ex["id"], "heuristic")
                         if page.locator(".badge-hold").count() > 0:
                             shown_hold = True
                             break
-                    check(f"{label}: abstain state renders 답변 보류 (heuristic planner)", shown_hold)
-                    page.screenshot(path=str(out / f"{tag}-{label}-04-abstain.png"), full_page=(label == "mobile"))
-                    if label == "mobile":
-                        page.click(".mtab[data-pane='right']")
-                    page.select_option("#planner", "auto")
+                    why = (page.text_content(".reason") or "") + " / " + (page.text_content(".holdwhy") or "") if shown_hold else ""
+                    check(f"{label}: abstain state renders 답변 보류 with its reason (heuristic planner)", shown_hold and len(why) > 5, why[:90])
+                    page.screenshot(path=str(out / f"{tag}-{label}-04-abstain.png"), full_page=mobile)
                     # the footer must sit below the panes (with a fixed page height it used to overlap them on narrow screens)
                     gap = page.evaluate("() => document.querySelector('.foot').getBoundingClientRect().top - document.querySelector('#main').getBoundingClientRect().bottom")
                     check(f"{label}: footer below the workbench", gap >= -1, f"gap {gap:.0f}px")
                     if tag == "static":
-                        # stored outputs of the GPU-served model, and an answer whose evidence the verifier repaired
-                        target = page.evaluate("""async () => {
-                            const idx = await (await fetch('data/recorded/index.json')).json();
-                            const set = idx.planners.exaone; if (!set) return null;
-                            const run = set.runs.find((r) => r.result.verdict.checks.some((c) => c.name === 'evidence_repaired'));
-                            return run ? { id: run.id, doc: run.doc_id } : null; }""")
+                        idx = page.evaluate("async () => (await (await fetch('data/recorded/index.json')).json())")
+                        runs = [(k, r) for k in idx["planner_order"] for r in idx["planners"][k]["runs"]]
+                        # stored outputs of a GPU-served model, and an answer whose evidence the verifier repaired
+                        target = next(((k, r) for k, r in runs if "EXAONE" in (idx["planners"][k]["model_id"] or "")
+                                       and any(c["name"] == "evidence_repaired" for c in r["result"]["verdict"]["checks"])), None)
                         check(f"{label}: stored EXAONE outputs are present", target is not None)
                         if target:
-                            if label == "mobile":
-                                page.click(".mtab[data-pane='right']")
-                            page.select_option("#planner", "exaone")
-                            if label == "mobile":
-                                page.click(".mtab[data-pane='left']")
-                            page.click(f"li[data-id='{target['doc']}']")
-                            if label == "mobile":
-                                page.click(".mtab[data-pane='left']")
-                            page.click(f".chip[data-ex='{target['id']}']")
-                            page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=30000)
-                            page.wait_for_timeout(300)
-                            check(f"{label}: stored EXAONE result is labelled with its model", "EXAONE" in (page.text_content(".badge-mode") or ""), page.text_content("#status") or "")
+                            open_question(target[1]["id"], target[0])
+                            check(f"{label}: stored EXAONE result is labelled with its model", "EXAONE" in (page.text_content(".badge-mode") or ""), page.text_content(".badge-mode") or "")
                             cited = page.eval_on_selector_all("td.is-cited", "els => els.map(e => e.dataset.rc)")
-                            shown = page.eval_on_selector_all("td.is-evidence", "els => els.map(e => e.dataset.rc)")
+                            seen = page.eval_on_selector_all("td.is-evidence", "els => els.map(e => e.dataset.rc)")
                             check(f"{label}: repaired answer shows the model-cited cell apart from the evidence cell",
-                                  bool(cited) and bool(shown) and not set(cited) & set(shown) and page.locator(".badge-fix").count() > 0, f"cited {cited}, evidence {shown}")
-                            if label == "mobile":
-                                page.click(".mtab[data-pane='center']")
+                                  bool(cited) and bool(seen) and not set(cited) & set(seen) and page.locator(".badge-fix").count() > 0
+                                  and page.locator(".pv tr.is-diff").count() >= 1 and "표 위의 표시" in (page.text_content(".legend") or ""), f"cited {cited}, evidence {seen}")
+                            pane("center")
                             page.screenshot(path=str(out / f"{tag}-{label}-08-repaired.png"), full_page=False)
-                            if label == "mobile":
-                                page.click(".mtab[data-pane='right']")
-                            page.select_option("#planner", "auto")
+                        # a wrong answer: the gold cell is marked where it is not the evidence cell
+                        by_id = {e["id"]: e for e in examples}
+                        wrong = next(((k, r) for k, r in runs if r["mark"] == "wrong" and r["result"]["evidence_cells"] and by_id[r["id"]]["gold"]["cells"]
+                                      and not {f"r{c['row']}c{c['col']}" for c in r["result"]["evidence_cells"]} & set(by_id[r["id"]]["gold"]["cells"])), None)
+                        if wrong:
+                            open_question(wrong[1]["id"], wrong[0])
+                            check(f"{label}: a wrong answer shows the gold cell apart from the evidence cell",
+                                  page.locator("td.is-gold").count() >= 1 and "틀림" in (page.text_content(".goldline") or ""), (page.text_content(".goldline") or "")[:50])
+                        # a table too long for the input budget: the rows the planner did not see are dimmed, and the card says so
+                        cut = next(((k, r) for k, r in runs if "rows_shown" in r), None)
+                        if cut:
+                            open_question(cut[1]["id"], cut[0])
+                            check(f"{label}: rows the planner was not shown are marked", page.locator("tr.is-unseen").count() == cut[1]["rows_shown"][1] - cut[1]["rows_shown"][0]
+                                  and str(cut[1]["rows_shown"][0]) in (page.text_content(".unseennote") or ""), (page.text_content(".unseennote") or "")[:60])
+                        # every question against every planner
+                        page.goto(base + "#matrix", wait_until="networkidle")
+                        page.wait_for_selector("table.mx", timeout=15000)
+                        owner = idx["planners"]["exaone"]["totals"]["ko_owner"]
+                        text = page.text_content("#matrix") or ""
+                        n_marks = page.locator("table.mx td.mk .mark").count()
+                        want = sum(len([r for r in idx["planners"][k]["runs"] if by_id[r["id"]]["corpus"] == "ko_tables"]) for k in idx["planner_order"])
+                        check(f"{label}: per-question view lists every question of the corpus under every planner",
+                              n_marks == want and f"{owner['right']}/{owner['n']}" in text and "소유자 작성" in text, f"{n_marks} marks, EXAONE {owner['right']}/{owner['n']}")
+                        over = page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth")
+                        check(f"{label}: per-question view does not widen the page", over <= 1, f"overflow {over}px")
+                        gap = page.evaluate("() => document.querySelector('.foot').getBoundingClientRect().top - document.querySelector('#matrix').getBoundingClientRect().bottom")
+                        check(f"{label}: footer below the per-question view", gap >= -1, f"gap {gap:.0f}px")
+                        page.screenshot(path=str(out / f"{tag}-{label}-10-matrix.png"), full_page=False)
+                        page.locator("table.mx td.mk a").nth(0).click()
+                        shown()
+                        check(f"{label}: a mark opens that question in the workbench", "#workbench/" in page.url and page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0, page.url.split("#")[-1])
                     if tag == "live" and label == "desktop":
                         # typed question + keyboard submit + invalid input handling
+                        page.goto(base, wait_until="networkidle")
+                        page.wait_for_selector(".chip", timeout=15000)
+                        page.select_option("#setsel", "ko_custom")
+                        page.wait_for_selector("#doclist li[data-id='doc_ko_8bcc6a21a4']", timeout=15000)
+                        page.locator("#doclist li[data-id='doc_ko_8bcc6a21a4']").click()
+                        page.wait_for_selector("table.tt", timeout=15000)
                         page.fill("#question", "x")
                         page.press("#question", "Enter")
                         page.wait_for_timeout(1500)
                         check("desktop: too-short question shows an error", not page.locator("#errorbar").is_hidden())
-                        page.fill("#question", "국도 1호 자동차 전용도로 구간 중 호남로의 총연장은 몇 km입니까?" if "ko" in page.text_content("#doccount") or True else "")
+                        page.fill("#question", "국도 1호 자동차 전용도로 구간 중 호남로의 총연장은 몇 km입니까?")
                         page.press("#question", "Enter")
                         page.wait_for_function("() => document.querySelector('#status') && /완료|보류|오류/.test(document.querySelector('#status').textContent)", timeout=120000)
                         check("desktop: typed question executed", True, page.text_content("#status") or "")
                         page.screenshot(path=str(out / f"{tag}-{label}-05-typed.png"))
                         # conversation mode: the second and third turns only make sense with the session's memory
-                        page.fill("#docfilter", "국도 1호")
-                        page.locator("#doclist li[data-id='doc_ko_8bcc6a21a4']").click()
-                        page.wait_for_selector("table.tt", timeout=15000)
-                        page.fill("#docfilter", "")
                         page.click("#chatbox summary")
                         page.check("#chatmode")
                         done = "() => /완료|보류|오류/.test(document.querySelector('#status').textContent) && document.querySelectorAll('#transcript li').length === %d"
@@ -200,7 +257,7 @@ def main() -> None:
                         page.locator(".chip").nth(0).click()
                         page.wait_for_function("() => !document.querySelector('#result').hidden", timeout=120000)
                         page.wait_for_timeout(300)
-                        check("desktop: chemistry example produced a result", page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0)
+                        check("desktop: chemistry question produced a result", page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0)
                         page.screenshot(path=str(out / f"{tag}-{label}-06-chem.png"))
                     # research view
                     page.goto(base + "#research", wait_until="networkidle")

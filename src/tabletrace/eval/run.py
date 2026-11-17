@@ -241,7 +241,7 @@ def main() -> None:
     metrics["entity_check"] = not a.no_entity_check
     meta = {"planner": a.planner, "model": planner_id, "data": a.data, "corpus": a.corpus, "n": len(rows),
             "wall_s": round(time.time() - t0, 1), "hardware": platform.processor() or platform.machine(),
-            "label": a.label, "table_format": get_table_format(), "row_select": get_row_select(), "evidence_repair": not a.no_repair, "entity_check": not a.no_entity_check, "column_check": a.column_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None,
+            "label": a.label, "table_format": get_table_format(), "row_select": get_row_select(), "max_in": a.max_in, "tokenizer": a.tokenizer, "evidence_repair": not a.no_repair, "entity_check": not a.no_entity_check, "column_check": a.column_check, "replay_from": a.replay_from, "finished": time.strftime("%Y-%m-%dT%H:%M:%S"), "quantize": a.quantize, "quantize_scope": a.quantize_scope if a.quantize else None,
             "confidence": bool(confidences), "few_shot": a.few_shot or None,
             "sample": {"n": a.sample, "seed": a.sample_seed} if a.sample else None, "tool_calling": a.tool_calling}
     if tool_infos:

@@ -17,6 +17,7 @@
   </div>
   <nav class="topnav" aria-label="주요 화면">
     <a href="#workbench" data-view="workbench" class="navlink is-active">워크벤치</a>
+    <a href="#matrix" data-view="matrix" class="navlink">문항별 결과</a>
     <a href="#research" data-view="research" class="navlink">연구 결과</a>
     <a href="#about" data-view="about" class="navlink">작동 방식</a>
     <a id="apidocs" href="/docs" class="navlink" target="_blank" rel="noopener" hidden>API 문서</a>
@@ -29,21 +30,15 @@
 
 <section class="intro" id="intro">
   <div class="intro-text">
-    <strong>TableTrace는 답만 내놓지 않습니다.</strong> 질문을 받으면 관련 본문과 표를 검색하고, 모델이 <em>어느 셀·어느 문장·어떤 계산</em>으로 답하는지 제안하면, 제한된 도구가 그 계산을 다시 실행해 검증합니다. 근거가 부족하면 답변을 보류하고 이유를 보여 줍니다.
+    <strong>TableTrace는 답만 내놓지 않습니다.</strong> 모델이 <em>어느 셀과 어떤 계산</em>으로 답하는지 제안하면 도구가 그 계산을 다시 실행해 확인하고, 맞지 않으면 답을 보류합니다. 아래 결과에서 번호가 붙은 근거 셀을 눌러 보세요.
   </div>
-  <ol class="steps" aria-label="사용 순서">
-    <li><b>1</b> 문서·표 선택</li>
-    <li><b>2</b> 질문 입력 또는 대표 질문 선택</li>
-    <li><b>3</b> 검색 · 모델 제안 · 도구 실행</li>
-    <li><b>4</b> 답변과 근거 셀·문장·계산식 검토</li>
-  </ol>
   <button class="btn btn-quiet" id="introclose" aria-label="안내 닫기">닫기</button>
 </section>
 
 <div class="corpusbar">
   <div class="seg" role="tablist" aria-label="코퍼스">
     <button role="tab" class="segbtn is-active" data-corpus="ko_tables" aria-selected="true">한국어 표 <small>KorWikiTQ</small></button>
-    <button role="tab" class="segbtn" data-corpus="chem_docs" aria-selected="false">영어 화학 문서 <small>OpenStax Chemistry 2e</small></button>
+    <button role="tab" class="segbtn" data-corpus="chem_docs" aria-selected="false">영어 화학 문서 <small>교과서 표 · 논문 표</small></button>
   </div>
   <div class="mobiletabs" role="tablist" aria-label="화면 영역">
     <button role="tab" class="mtab is-active" data-pane="left">문서</button>
@@ -51,28 +46,31 @@
     <button role="tab" class="mtab" data-pane="right">질문·결과</button>
   </div>
   <div class="notice" id="recordednotice" hidden>
-    저장된 실행 결과를 보고 있습니다. 백엔드가 없으므로 새 질문은 실행되지 않고, 대표 질문의 기록된 결과만 열 수 있습니다.
+    저장된 실행 결과입니다. 모델은 이 페이지에서 돌지 않고, 평가 문항 전체의 기록된 결과를 정답과 함께 보여 줍니다.
   </div>
 </div>
 
 <main id="main" class="layout" data-view="workbench">
   <!-- ===== workbench ===== -->
   <section class="view view-workbench" id="view-workbench">
-    <aside class="pane pane-left" id="pane-left" aria-label="문서 목록">
+    <aside class="pane pane-left" id="pane-left" aria-label="문항 묶음과 문서">
+      <div class="pane-head"><h2>문항 묶음</h2></div>
+      <select id="setsel" class="select" aria-label="문항 묶음"></select>
+      <p class="setnote muted" id="setnote"></p>
       <div class="pane-head">
         <h2>문서</h2>
         <span class="count" id="doccount"></span>
       </div>
       <input type="search" id="docfilter" class="input" placeholder="제목으로 찾기" aria-label="문서 제목으로 찾기" autocomplete="off">
       <ul class="doclist" id="doclist" role="listbox" aria-label="문서" tabindex="0"></ul>
-      <div class="pane-head"><h2>대표 질문</h2></div>
-      <div class="examples" id="examples"><p class="muted">문서를 고르면 그 문서의 대표 질문이 나옵니다.</p></div>
+      <div class="pane-head"><h2>이 문서의 질문</h2><span class="count" id="excount"></span></div>
+      <div class="examples" id="examples"><p class="muted">문서를 고르면 그 문서의 질문이 나옵니다.</p></div>
     </aside>
 
     <section class="pane pane-center" id="pane-center" aria-label="문서 보기">
       <div class="empty" id="docempty">
         <h2>왼쪽에서 문서를 고르세요</h2>
-        <p>한국어 표는 KorWikiTQ(위키백과 표+설명), 영어 화학 문서는 OpenStax <i>Chemistry 2e</i>의 본문과 실험 데이터 표입니다. 표의 각 셀에는 <code>r행c열</code> 좌표가 있어 답변의 근거를 정확히 가리킬 수 있습니다.</p>
+        <p>한국어 표는 KorWikiTQ(위키백과 표+설명), 영어 화학 문서는 OpenStax <i>Chemistry 2e</i>의 본문과 실험 데이터 표, 그리고 arXiv에 CC BY 4.0으로 공개된 화학 논문의 표입니다. 표의 각 셀에는 <code>r행c열</code> 좌표가 있어 답변의 근거를 정확히 가리킬 수 있습니다.</p>
       </div>
       <article class="doc" id="docview" hidden>
         <header class="doc-head">
@@ -90,12 +88,7 @@
         <textarea id="question" class="input question" rows="2" placeholder="문서를 고른 뒤 질문을 입력하세요 (Enter로 실행)" disabled></textarea>
         <div class="askrow">
           <label class="plannerlabel">플래너
-            <select id="planner" class="select" aria-label="플래너">
-              <option value="auto">자동(모델 → 보완)</option>
-              <option value="exaone" title="저장된 실행 결과에서만 볼 수 있습니다">EXAONE 1.2B LoRA(저장된 출력)</option>
-              <option value="neural">신경망(mT5)</option>
-              <option value="heuristic">휴리스틱(어휘 겹침)</option>
-            </select>
+            <select id="planner" class="select" aria-label="플래너"></select>
           </label>
           <button type="submit" class="btn btn-primary" id="askbtn" disabled>실행</button>
         </div>
@@ -114,9 +107,14 @@
       <div class="errorbar" id="errorbar" role="alert" hidden></div>
       <div class="result" id="result" hidden></div>
       <div class="empty small" id="resultempty">
-        <p>결과가 여기에 표시됩니다: 답변 · 근거 셀/문장 · 계산식 · 검증 항목 · 실행 추적.</p>
+        <p>왼쪽에서 질문을 고르면 결과가 여기에 표시됩니다: 답변과 정답 · 근거 셀/문장 · 계산식 · 검증 항목 · 실행 추적.</p>
       </div>
     </aside>
+  </section>
+
+  <!-- ===== per-question results ===== -->
+  <section class="view view-matrix" id="view-matrix" hidden>
+    <div class="matrix" id="matrix"><p class="muted">문항별 결과를 불러오는 중…</p></div>
   </section>
 
   <!-- ===== research ===== -->
@@ -143,7 +141,7 @@
 </main>
 <footer class="foot">
   <span id="footrelease"></span>
-  <span>데이터: KorWikiTQ (LG AI연구원, CC BY-SA 4.0) · OpenStax Chemistry 2e (CC BY-NC-SA 4.0)</span>
+  <span>데이터: KorWikiTQ (LG AI연구원, CC BY-SA 4.0) · OpenStax Chemistry 2e (CC BY-NC-SA 4.0) · arXiv 화학 논문 12편의 표 (CC BY 4.0, 문서마다 저자와 출처 표시)</span>
 </footer>
 <script src="app.js"></script>
 </body>

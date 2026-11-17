@@ -47,7 +47,7 @@
 
 답과 근거가 따로 맞고 틀리는 문제, 셀 인용 학습, 근거 셀 보상 같은 개별 기법은 이미 연구가 있어서 새로운 방법이라고 주장하지 않습니다. 이 저장소가 보태는 것은 한국어 표에서의 위 측정입니다. 서비스·서빙·컨테이너 스택은 그 측정을 실제로 돌리는 데 쓴 도구입니다.
 
-> **데모 상태**: 저장소는 공개이고 **GitHub Pages에 배포했습니다**(Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281), build와 deploy 단계 모두 통과): <https://sokldjs554.github.io/tabletrace/> 저장소 소유자가 2026-11-08 브라우저에서 열리는 것을 확인했습니다(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 열어 보지 못함). 같은 내용을 로컬에서 Playwright로 검증했습니다(§13). Pages 화면에는 백엔드가 없어 항상 **저장된 실행 결과** 모드이고, 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). 같은 저장된 결과를 단일 HTML로 만든 claude.ai Artifact 사본도 있습니다(비공개 링크, 소유자만): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM>
+> **데모 상태**: 저장소는 공개이고 **GitHub Pages에 배포했습니다**(Actions `pages` 실행 [성공](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281), build와 deploy 단계 모두 통과): <https://sokldjs554.github.io/tabletrace/> 저장소 소유자가 2026-11-08 브라우저에서 열리는 것을 확인했습니다(개발 컨테이너에서는 `github.io`가 차단되어 작성자는 열어 보지 못함). 2026-11-17에 화면을 고쳤고(§2), 고친 화면은 로컬에서 Playwright로 검증했습니다(§13). 고친 뒤의 Pages 화면은 아직 사람이 브라우저에서 확인하지 않았습니다. Pages 화면에는 백엔드가 없어 항상 **저장된 실행 결과** 모드이고, 실시간 실행은 `docker compose up --build` 후 <http://localhost:8000> 에서 합니다(§12). 같은 저장된 결과를 단일 HTML로 만든 claude.ai Artifact 사본도 있습니다(비공개 링크, 소유자만): <https://claude.ai/artifact/KvdrLkxC8PbSLWmpLvBPDM>
 
 ![TableTrace 워크벤치 — 한국어 표 질문의 답변·근거 셀·검증 항목](docs/images/live-desktop-03-result.png)
 
@@ -86,26 +86,35 @@ TableTrace는 이 문제를 **"모델은 제안하고, 도구가 실행·검증�
 
 ## 2. 공개 데모와 사용 흐름
 
-1. 상단에서 **한국어 표** 또는 **영어 화학 문서**를 고릅니다.
-2. 왼쪽 목록에서 문서를 고르면 가운데에 본문과 표가 나옵니다. 표의 모든 셀에는 `r행c열` 좌표가 있습니다.
-3. 왼쪽 아래 **대표 질문**(셀 근거 · 계산 · 본문+표 · 단위/기간 주의 · 답 없음→보류)을 누르거나, 실시간 모드에서는 직접 질문을 입력합니다.
-4. 오른쪽에 상태(대기→실행 중→완료/보류/오류)가 흐르고, 답변 카드에 **근거 셀 번호 배지 · 문장 · 계산식(값·단위) · 검증 항목 · 실행 추적(LangGraph 노드·도구 호출·소요 ms)**이 표시됩니다.
+1. 들어가면 결과 하나가 이미 열려 있습니다. 저장소 소유자가 직접 쓴 계산 문항이고, 답과 정답, 근거 셀 두 개, 계산식, 검증 항목이 한 화면에 보입니다.
+2. 상단에서 **한국어 표** 또는 **영어 화학 문서**를 고르고, 왼쪽에서 **문항 묶음**을 고릅니다. 묶음 하나는 평가 파일 하나의 전체입니다. 소유자가 직접 쓴 30문항, AI 도구가 쓴 30문항, 화학 교과서 표 32문항, 화학 논문 표 62문항입니다. 고른 문항이 아닙니다.
+3. 문서를 고르면 가운데에 본문과 표가 나옵니다. 표의 모든 셀에는 `r행c열` 좌표가 있습니다. 그 문서의 질문마다 지금 고른 플래너의 판정(맞음, 틀림, 보류)이 붙어 있습니다.
+4. 질문을 누르면 오른쪽에 차례로 나옵니다. 답과 **정답**, **같은 질문에 다른 플래너가 낸 답과 판정**, 근거 셀과 그 셀을 숫자로 읽은 값·단위, 계산식, **모델의 제안과 검증 뒤의 결과를 나란히 놓은 표**, 검증 항목(통과하지 못한 것이 위), 실행 추적(LangGraph 노드·도구 호출·소요 ms)입니다. 실시간 모드에서는 질문을 직접 입력할 수 있습니다.
 5. 근거 배지를 누르면 가운데 표의 셀로 이동해 강조됩니다. 본문 근거는 문장이 하이라이트됩니다.
-6. 상단 **연구 결과** 탭에서 모델 비교, 강화학습, 추론 최적화, 멀티 GPU 실험의 조건과 결과를 봅니다.
+6. 상단 **문항별 결과** 탭은 한 묶음의 문항 전체를 플래너마다의 판정과 함께 표 하나로 보여 줍니다. 유형별로 맞은 수도 함께 나옵니다. 표시를 누르면 그 문항이 워크벤치에서 열립니다.
+7. 상단 **연구 결과** 탭에서 모델 비교, 강화학습, 추론 최적화, 멀티 GPU 실험의 조건과 결과를 봅니다.
 
 데모 화면은 **실시간 실행**(백엔드 연결, 초록 배지)과 **저장된 실행 결과**(정적 호스팅, 파란 배지 + 기록 시각·모델·커밋)를 구분해 표시합니다. 모델이 실행되지 않은 결과를 실시간처럼 보이게 하지 않습니다.
 
-저장된 실행 결과에는 플래너가 셋 있습니다. **EXAONE-4.0-1.2B LoRA(전체 데이터)**, mT5-small, 휴리스틱입니다. 플래너를 "자동"으로 두면 질문마다 가장 강한 플래너의 결과가 나옵니다. EXAONE의 답은 GPU가 필요하므로 그 자리에서 실행한 것이 아닙니다. 2026-11-08에 Kaggle T4의 vLLM 서버에서 받아 둔 모델 출력을 같은 그래프·도구·검증기에 다시 넣은 결과이고, 화면에 그렇게 적혀 있습니다(한국어 대표 질문 16개. 화학 문서에는 EXAONE 기록이 없습니다). 저장된 출력이 평가 파일의 출력과 같은지는 `tests/test_recorded_demo.py`가 검사합니다.
+저장된 실행 결과에는 플래너가 여섯 있습니다. **EXAONE-4.0-1.2B LoRA(전체 데이터)**, 같은 학습 명령을 **소유자가 직접 쓴 학습 루프**로 돌린 EXAONE LoRA, 튜닝하지 않은 EXAONE 7.8B와 1.2B, mT5-small 최종 모델, 휴리스틱 기준선입니다. 모델의 답은 그 자리에서 실행한 것이 아닙니다. 평가 때 받아 둔 모델 출력(EXAONE은 2026-11-15와 11-16에 Kaggle과 Colab의 T4에서 vLLM으로 받은 것)을 같은 그래프·도구·검증기에 다시 넣은 결과이고, 화면에 그렇게 적혀 있습니다. 화학 문서에는 EXAONE의 문항별 출력이 없어서 mT5-small과 휴리스틱만 있습니다. 플래너를 "자동"으로 두면 그 문항 묶음에서 가장 많이 맞힌 플래너의 결과가 나옵니다.
 
-모델이 인용한 셀과 최종 근거 셀이 다르면 표에 둘을 따로 표시합니다. 근거 셀은 노란 바탕에 번호가 붙고, 모델이 인용했지만 근거가 되지 못한 셀은 붉은 점선에 "모델" 표시가 붙습니다. 검증기가 근거를 고쳐서 답한 경우에는 "검증 통과"가 아니라 **"근거를 고쳐 답함"** 배지가 나옵니다(§9.6의 측정을 화면에서 보는 방법입니다).
+**저장된 결과는 평가와 같은 조건으로 기록했습니다.** 주어 검사를 끄고, 모델의 제안이 검증에 실패해도 휴리스틱으로 다시 시도하지 않고, 긴 표는 평가 때 플래너에 보여 준 행까지만 씁니다. 그래서 화면의 판정은 평가 파일의 판정과 문항마다 같습니다. 기록된 실행 <!-- num:console/data/recorded/index.json:counts.runs:int -->548<!-- /num -->개(질문 <!-- num:console/data/recorded/index.json:counts.questions:int -->154<!-- /num -->개, 플래너 <!-- num:console/data/recorded/index.json:counts.planners:int -->6<!-- /num -->개)의 상태, 답, 근거 셀, 판정이 평가 파일과 같은지를 `tests/test_recorded_demo.py`가 검사합니다. 소유자의 30문항에서 "문항별 결과" 탭의 합계는 §9.12의 수치 그대로입니다(전체 데이터 EXAONE <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.correct:int -->24<!-- /num -->, 소유자의 루프로 학습한 EXAONE <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data_owner_loop.owner_first_pass.correct:int -->24<!-- /num -->, 튜닝 없는 7.8B <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_7p8b_untuned.owner_first_pass.correct:int -->20<!-- /num -->, 튜닝 없는 1.2B <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_1p2b_untuned.owner_first_pass.correct:int -->13<!-- /num -->). 서비스의 기본 설정(주어 검사와 보완 시도를 켬)은 백엔드를 띄운 실시간 모드에서 봅니다.
+
+표 위에는 세 가지 표시가 있습니다. **검증기가 확인한 근거 셀**은 노란 바탕에 번호가 붙습니다. **모델이 인용했지만 근거가 되지 못한 셀**은 붉은 점선에 "모델" 표시가 붙습니다. **정답의 근거 셀**이 근거 셀과 다르면 초록 점선에 "정답" 표시가 붙습니다. 검증기가 근거를 고쳐서 답한 경우에는 "검증 통과"가 아니라 **"근거를 고쳐 답함"** 배지가 나오고, 제안과 검증 결과를 나란히 놓은 표에서 바뀐 줄에 색이 듭니다(§9.6의 측정을 화면에서 보는 방법입니다). 표가 길어 평가 때 플래너에 일부 행만 보여 준 경우에는 플래너가 보지 못한 행을 흐리게 표시하고 몇 행을 보여 줬는지 적습니다. 보류한 답에는 사유와 함께 어느 검사에서 걸렸는지가 나옵니다.
+
+결과 하나를 주소로 가리킬 수 있습니다. `#workbench/<문항 id>/<플래너>` 형식이고, 예를 들어 [`#workbench/ko_owner_17/exaone`](https://sokldjs554.github.io/tabletrace/#workbench/ko_owner_17/exaone)은 모델이 적은 숫자(189.55)와 도구가 다시 계산한 값(289.55)이 다른 문항입니다.
 
 ## 3. 화면
 
-| 데스크톱 — 답변과 근거 셀 | 모바일 — 질문·결과 탭 | 답변 보류 |
+| 첫 화면 — 답, 정답, 근거 셀, 플래너 비교 | 모바일 첫 화면 | 답변 보류 |
 |---|---|---|
-| ![desktop](docs/images/live-desktop-03-result.png) | ![mobile](docs/images/live-mobile-03-result.png) | ![abstain](docs/images/live-desktop-04-abstain.png) |
+| ![desktop](docs/images/static-desktop-01-home.png) | ![mobile](docs/images/static-mobile-01-home.png) | ![abstain](docs/images/static-desktop-04-abstain.png) |
 
-근거를 고친 답의 화면입니다. 모델은 `r0c1`을 인용했고 답 "목포대교"는 `r0c0`에 있습니다. 이 질문의 정답은 본문에 있어서 답 자체도 틀렸습니다. 검증기는 "답이 표의 한 셀과 같다"는 것만 확인하므로 이런 답이 통과합니다(§11).
+문항별 결과 탭입니다. 소유자가 직접 쓴 30문항을 플래너 여섯에 대해 유형별로 센 표가 위에 있고, 그 아래에 문항마다의 판정이 있습니다.
+
+![문항별 결과 — 문항 전체와 플래너마다의 판정](docs/images/static-desktop-10-matrix.png)
+
+근거를 고친 답의 화면입니다. 튜닝하지 않은 EXAONE 7.8B의 출력이고, 모델은 `r8c2`를 인용했는데 답 "김혜성"은 `r8c1`에 있습니다. 검증기가 근거를 `r8c1`로 고쳤고 이 답은 정답과 같습니다. 근거를 고친 답이 늘 맞는 것은 아닙니다. 검증기는 "답이 표의 한 셀과 같다"는 것만 확인하므로, 답이 틀렸는데 표의 다른 셀과 우연히 같으면 통과합니다(§11).
 
 ![근거를 고친 답 — 모델이 인용한 셀(점선)과 근거 셀](docs/images/static-desktop-08-repaired.png)
 
@@ -1050,7 +1059,7 @@ python3.11+ -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"            # 휴리스틱 플래너 + API + 콘솔 (torch 없음)
 pip install -e ".[model]"          # + PyTorch/Transformers (모델 플래너)
 python scripts/check_data.py       # 데이터 무결성
-pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->331<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
+pytest -q                          # <!-- num:experiments/tests/summary.json:passed:int -->341<!-- /num -->개 테스트(모델 없으면 모델 테스트 skip)
 tabletrace serve                   # http://127.0.0.1:8000  (모델이 models/mt5-small-tabletrace 에 있으면 자동 사용)
 ```
 
@@ -1064,8 +1073,8 @@ Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker c
 
 ## 13. 테스트·CI·배포
 
-- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 소유자가 쓴 학습 코드(보상, GRPO 손실, 학습 루프), 모델 로딩, gRPC, 대화·기억, 행 선별, 도구 호출 플래너(대본 모의 서버), 표 인코더, 두 번째 의견, CPU 엔진 서버, 노트북이 넘기는 옵션 검사. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->331<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내 문구를 확인하는 테스트로, 그 파일이 생긴 뒤에는 건너뜁니다. 소유자가 직접 쓴 학습 코드의 테스트 35개(`docs/rewrite/06_training_code.md`)는 통과에 들어 있습니다. 모델 가중치가 없으면 모델 테스트도 skip됩니다.
-- **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·대표 질문·결과·근거 강조·보류·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 정적 모드에서는 EXAONE 저장 결과에 모델 이름이 붙는지, 근거를 고친 답에서 모델이 인용한 셀과 근거 셀이 따로 표시되는지도 봅니다. 두 모드 모두 푸터가 본문과 겹치지 않는지 검사합니다. 최종 실행: 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->21<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->21<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->21<!-- /num --> 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
+- **테스트**: `tests/` — 숫자·단위 파서, 제한 계산기(코드 주입 거부 포함), 프로그램 문법, 검증기(근거 복구·퇴화 계산 거부 포함), 휴리스틱, 검색, API(정상·422·404·409·429, 비동기 작업·동시 5건·타임아웃·큐 제한), 서빙 엔진 모의 서버, 학습 데이터·RL 보상, 소유자가 쓴 학습 코드(보상, GRPO 손실, 학습 루프), 모델 로딩, gRPC, 대화·기억, 행 선별, 도구 호출 플래너(대본 모의 서버), 표 인코더, 두 번째 의견, CPU 엔진 서버, 노트북이 넘기는 옵션 검사. 최종 실행: **<!-- num:experiments/tests/summary.json:passed -->341<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패**(`experiments/tests/summary.json`). skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내 문구를 확인하는 테스트로, 그 파일이 생긴 뒤에는 건너뜁니다. 소유자가 직접 쓴 학습 코드의 테스트 35개(`docs/rewrite/06_training_code.md`)는 통과에 들어 있습니다. 모델 가중치가 없으면 모델 테스트도 skip됩니다.
+- **E2E**: `scripts/console_screenshots.py` — 실시간/정적 모드 × 데스크톱/모바일에서 배지·문서·질문·결과·정답 표시·근거 강조·보류와 그 사유·입력 오류·연구 결과 화면을 검사하고 스크린샷을 찍습니다. 정적 모드에서는 다음도 봅니다. 첫 화면에 누르지 않아도 답과 정답이 보이는지, 같은 질문의 플래너 비교가 나오고 이름을 누르면 바뀌는지, EXAONE 저장 결과에 모델 이름이 붙는지, 근거를 고친 답에서 모델이 인용한 셀과 근거 셀이 따로 표시되는지, 틀린 답에서 정답 셀이 따로 표시되는지, 플래너가 보지 못한 행이 표시되는지, 문항별 결과 탭이 문항 전체를 싣고 화면 폭을 넘지 않는지입니다. 두 모드 모두 푸터가 본문과 겹치지 않는지 검사합니다. 최종 실행: 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->25<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->25<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->41<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->41<!-- /num --> 통과(`docs/images/e2e-*.json`). 보류 화면 검사는 신경망 플래너가 보류하지 않는 사례가 있어 휴리스틱 플래너로 렌더링을 확인합니다.
 - **Docker**: 이미지(786 MB)를 이 세션에서 빌드하고 컨테이너 smoke(health·release·corpora·ask·콘솔)를 통과했습니다(`experiments/docker/smoke.json`). Docker Hub·ECR이 429를 돌려 MCR 베이스 이미지로 빌드했습니다.
 - **CI**: `.github/workflows/ci.yml`(ruff, pytest, 데이터 무결성, **README·REPORT 표·수치 대조**, Docker 빌드·smoke)가 GitHub Actions에서 실행되어 **전부 통과**했습니다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/41213002277): `test` 작업과 `docker` 작업 모두 success, 커밋 `0f38f8d`). 그 뒤 커밋의 실행 결과는 저장소 Actions 탭에서 확인하세요.
 - **배포**: `.github/workflows/pages.yml`이 `main` 푸시 때 정적 데모를 GitHub Pages에 배포합니다. 첫 실행이 성공했습니다([기록](https://github.com/sokldjs554/tabletrace/actions/runs/41213002281)). 실시간 모드(백엔드)는 호스팅하지 않습니다. claude.ai Artifact 사본은 위 "데모 상태" 참고.

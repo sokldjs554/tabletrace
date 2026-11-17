@@ -19,7 +19,7 @@ from tabletrace.service.pb import tabletrace_pb2_grpc as pb_grpc  # noqa: E402
 from tabletrace.service.settings import Settings  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-EXAMPLES = {e["id"]: e for e in json.loads((ROOT / "console/data/examples.json").read_text(encoding="utf-8"))}
+EXAMPLES = {e["id"]: e for e in json.loads((ROOT / "console/data/examples.json").read_text(encoding="utf-8"))["examples"]}
 
 
 @pytest.fixture(scope="module")
