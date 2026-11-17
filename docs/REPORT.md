@@ -2307,3 +2307,12 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 | "화학 문항을 더한 몫은 가르지 못한다" | 답할 수 있는 질문에서는 검출되는 차이가 없고, 답 없는 질문에서 갈린다. 단서: 한 번씩 학습, 결과를 본 뒤의 나눔 |
 | 데모의 화학 문서에 EXAONE 두 가지 | 세 가지. 한국어만 튜닝한 모델을 화학 문서에 더했다. 플래너 <!-- num:console/data/recorded/index.json:counts.planners:int -->8<!-- /num -->개, 기록된 실행 <!-- num:console/data/recorded/index.json:counts.runs:int -->890<!-- /num -->개 |
 | 노트북 2의 O절: 준비했고 돌리지 않음 | 돌렸다. 반복 학습은 돌리지 않았다 |
+
+**반복 학습을 돌리기 전에 적어 둔다 (2026-11-17).** 소유자가 `RUN_KOCHEM_REPEAT = True`로 한국어와 화학을 함께 튜닝하는 학습을 한 번 더 돌리기로 했다(`exaone_kochem3`, 학습 명령은 §29와 같다). 결과를 보기 전에 무엇을 볼지 정한다.
+
+1. **화학 논문 표의 맞힌 수.** 화학 문항을 더한 모델의 지금까지 두 값은 <!-- num:experiments/eval/chem_rerun_analysis.json:earlier_run_without_predictions.chem_papers.correct -->50<!-- /num -->개(결과 파일 없음)와 <!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_papers.tuned.correct -->46<!-- /num -->개다. 세 번째 값을 그대로 적는다. 문서의 대표 수치는 문항별 파일이 있는 첫 실행의 <!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_papers.tuned.correct -->46<!-- /num -->개로 두고, 새 값이 높든 낮든 바꾸지 않는다.
+2. **위 3번의 확인.** 화학 세 세트의 답 없는 질문 <!-- num:experiments/eval/chem_share_analysis.json:chemistry_three_sets_by_kind.korean_only.unanswerable.n -->31<!-- /num -->개에서 새 모델과 한국어 전용 모델(`exaone_koonly`)을 문항 단위로 견준다. 3번이 맞다면 새 모델도 답 없는 질문을 한국어 전용 모델보다 유의하게 더 많이 보류한다. 그렇지 않으면 3번은 그 한 번의 학습에서만 나온 것으로 고쳐 적는다.
+3. **위 4번의 확인.** 답할 수 있는 질문 <!-- num:experiments/eval/chem_share_analysis.json:chemistry_three_sets_by_kind.with_chemistry_vs_korean_only_on_answerable_questions.n -->143<!-- /num -->개에서는 새 모델과 한국어 전용 모델 사이에 유의한 차이가 없을 것으로 예상한다.
+4. 세트마다의 짝 비교(새 모델 대 한국어 전용 모델, 새 모델 대 §29의 모델)도 유의하든 아니든 그대로 적는다.
+
+이 확인의 한계도 미리 적는다. 한국어 전용 모델과 문항은 그대로이고, 새로 생기는 것은 화학 문항을 더한 모델의 학습 한 번이다. 다른 문항에서도 성립하는지는 이 실행으로 알 수 없다. 새 모델은 한국어 전용 모델과 다른 세션에서 학습된다.
