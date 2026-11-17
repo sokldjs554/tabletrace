@@ -99,6 +99,7 @@
     else if (state.mode === "recorded" && state.recorded && state.exById[state.recorded.featured]) await openExample(state.recorded.featured);
     else selectFirstDoc();
     route(true);
+    initLive();
   }
 
   async function loadRecorded() {
@@ -252,8 +253,9 @@
     resetChat();                                   // another document starts another conversation
     $$("li[data-id]", $("#doclist")).forEach((li) => li.setAttribute("aria-selected", li.dataset.id === id));
     renderDoc(doc);
-    $("#question").disabled = state.mode !== "live"; $("#askbtn").disabled = state.mode !== "live";
-    $("#question").placeholder = state.mode === "live" ? "이 문서에 대해 질문하세요 (Enter로 실행)" : "저장된 결과에서는 왼쪽의 질문을 골라 주세요";
+    const here = !!(window.TTLive && window.TTLive.ready());        // the verifier is loaded in this browser: a question can be typed
+    $("#question").disabled = state.mode !== "live" && !here; $("#askbtn").disabled = state.mode !== "live";
+    $("#question").placeholder = state.mode === "live" ? "이 문서에 대해 질문하세요 (Enter로 실행)" : here ? "질문 (영어 화학 문서에서는 직접 써도 됩니다)" : "저장된 결과에서는 왼쪽의 질문을 골라 주세요";
     clearResult();
     renderExamples();
     const first = docExamples(id).find((x) => state.mode !== "recorded" || recordedRun(x.id));
@@ -265,7 +267,7 @@
     $("#docempty").hidden = true; $("#docview").hidden = false;
     $("#doctitle").textContent = doc.title;
     const src = doc.source || {};
-    $("#docmeta").innerHTML = `${esc(src.name || "")} · ${esc(src.license || "")}${src.url ? ` · <a href="${esc(src.url)}" target="_blank" rel="noopener">출처</a>` : ""} · 문단 ${doc.passages.length} · 표 ${doc.tables.length}${src.note ? `<br><span class="srcnote">원문에서 바꾼 것: ${esc(src.note)}</span>` : ""}`;
+    $("#docmeta").innerHTML = `${esc(src.name || "")} · ${esc(src.license || "")}${src.url ? ` · <a href="${esc(src.url)}" target="_blank" rel="noopener">출처</a>` : ""} · 문단 ${doc.passages.length} · 표 ${doc.tables.length}${src.note ? `<br><span class="srcnote">출처 메모: ${esc(src.note)}</span>` : ""}`;
     const body = $("#docbody");
     const parts = [];
     const maxP = Math.min(doc.passages.length, 60);
@@ -400,7 +402,50 @@
     $("#errorbar").hidden = true; $("#resultempty").hidden = true; $("#status").hidden = true;
     renderResult(run.result, { kind: "recorded", at: state.recorded.generated_at, commit: state.recorded.commit, planner: key, set, run, ex,
       source: src ? { generated: src.generated[ex.set], where: src.where, ms: run.engine_ms } : null });
+    $("#liveprop").value = (run.result.planner && run.result.planner.raw_output) || "";      // the proposal the visitor may change and verify here
     if (parseHash().view === "workbench") { try { history.replaceState(null, "", `#workbench/${encodeURIComponent(exId)}/${$("#planner").value}`); } catch (e) { /* sandboxed frames may refuse history changes */ } }
+  }
+
+  // ---------- "run it here" (static demo): the repository's verifier, tools and heuristic planner in this browser ----------
+  async function initLive() {
+    if (state.mode !== "recorded" || !window.TTLive) return;
+    const m = await window.TTLive.available(); if (!m) return;        // this build carries no runtime (for example the single-file page)
+    $("#livebox").hidden = false;
+    $("#livesize").textContent = `약 ${m.download_mb} MB를 내려받습니다`;
+    $("#liveload").addEventListener("click", async () => {
+      $("#liveload").disabled = true;
+      try {
+        const t0 = performance.now();
+        await window.TTLive.load((t) => { $("#livestep").textContent = t; });
+        $("#liveintro").hidden = true; $("#liveform").hidden = false;
+        $("#question").disabled = false; $("#question").placeholder = "질문 (영어 화학 문서에서는 직접 써도 됩니다)";
+        setStatus(`실행 환경을 불러왔습니다 · ${fmtMs(performance.now() - t0)} · Python ${m.pyodide} (WebAssembly)`, false);
+      } catch (e) { $("#liveload").disabled = false; $("#livestep").textContent = ""; showError("실행 환경을 불러오지 못했습니다: " + e.message); }
+    });
+    $("#liveverify").addEventListener("click", () => runHere($("#liveprop").value.trim() || "op: abstain ; cells: - ; answer: -"));
+    $("#liveheur").addEventListener("click", () => runHere(null));
+  }
+  function runHere(proposal) {
+    const question = $("#question").value.trim();
+    if (!state.doc || !question || !window.TTLive.ready()) return;
+    const ex = state.examples.find((x) => x.doc_id === state.doc.id && x.question === question) || null;      // a stored question: its gold is known
+    const tableId = (ex && ex.table_id) || state.tableId;
+    // the passage a stored question was recorded with (the one its run names), else the document's first
+    const hit = ex ? recordedRun(ex.id) : null;
+    const first = hit && hit.run.result.trace.find((s) => s.step === "retrieve");
+    const passageId = first && first.output ? first.output.context_passage : null;
+    $("#errorbar").hidden = true;
+    let res;
+    try { res = window.TTLive.run(state.doc, tableId, question, proposal, passageId, $("#liveentity").checked, ex ? ex.gold : null); }
+    catch (e) { showError("실행 중 오류: " + String(e.message || e).split("\n").slice(-2).join(" ")); return; }
+    if (res.error === "missing_tokens") {
+      showError("한국어는 기록해 둔 질문과 표의 낱말로만 실행할 수 있습니다(형태소 분석기를 이 페이지에 실을 수 없습니다). 질문은 그대로 두고 제안만 바꿔 보거나, 영어 화학 문서에서 질문을 직접 써 보세요.");
+      return;
+    }
+    window.__ttLast = res;                                   // read by the screen checks, which compare it with the same call on a server
+    $("#resultempty").hidden = true;
+    setStatus(`이 브라우저에서 실행 · ${fmtMs(res.browser_ms)} · ${res.status === "answered" ? "완료" : "보류"}`, false);
+    renderResult(res, { kind: "browser", ex, run: { mark: res.mark, values: res.values }, settings: res.settings });
   }
 
   // ---------- result rendering ----------
@@ -414,8 +459,10 @@
   function renderResult(res, meta) {
     const box = $("#result"); box.hidden = false;
     const ex = meta.ex || null, run = meta.run || null;
-    const modeBadge = meta.kind === "live" ? '<span class="badge badge-live">실시간 실행</span>' : `<span class="badge badge-rec" title="commit ${esc(meta.commit)}">저장된 실행 결과 · ${esc(meta.at)}</span>`;
-    const plannerBadge = res.planner ? `<span class="badge badge-mode">${res.planner.mode === "neural" ? "모델 " + esc(res.planner.model_id || "") : "휴리스틱"}${res.trace && res.trace.some((s) => s.input && s.input.fallback) ? " → 휴리스틱 보완" : ""}</span>` : "";
+    const modeBadge = meta.kind === "live" ? '<span class="badge badge-live">실시간 실행</span>'
+      : meta.kind === "browser" ? '<span class="badge badge-live">실시간 실행 · 이 브라우저</span>'
+      : `<span class="badge badge-rec" title="commit ${esc(meta.commit)}">저장된 실행 결과 · ${esc(meta.at)}</span>`;
+    const plannerBadge = res.planner ? `<span class="badge badge-mode">${res.planner.mode === "neural" ? "모델 " + esc(res.planner.model_id || "") : res.planner.mode === "visitor" ? "방문자가 넣은 제안" : "휴리스틱"}${res.trace && res.trace.some((s) => s.input && s.input.fallback) ? " → 휴리스틱 보완" : ""}</span>` : "";
     const checksAll = (res.verdict && res.verdict.checks) || [];
     const failed = checksAll.filter((c) => !c.passed);
     let head, bodyHtml;
@@ -447,7 +494,8 @@
         ${meta.kind === "live" ? `<p class="muted qline">질문: ${esc(res.question)} · 표 ${esc(res.table_id || "-")} · ${fmtMs(res.elapsed_ms || 0)}</p>` : ""}
         ${meta.chat && (meta.chat.memory.notes.length || meta.chat.question !== meta.chat.message) ? `<p class="memline"><b>기억에서 채운 것</b> ${esc(meta.chat.memory.notes.join(" "))}<br>파이프라인에 보낸 질문: ${esc(meta.chat.question)}</p>` : ""}
         ${meta.source ? `<p class="muted provenance">모델 출력은 ${esc(meta.source.generated)}에 ${esc(meta.source.where)}에서 받아 저장한 것입니다${meta.source.ms ? `(그때의 응답 시간 ${fmtMs(meta.source.ms)})` : ""}. 검증·근거·실행 추적은 그 출력을 같은 파이프라인에 다시 넣은 결과입니다.</p>`
-          : meta.kind === "recorded" ? `<p class="muted provenance">모델이 아닌 휴리스틱 기준선입니다. ${esc(meta.at)}에 이 저장소의 파이프라인으로 실행해 기록했습니다.</p>` : ""}
+          : meta.kind === "recorded" ? `<p class="muted provenance">모델이 아닌 휴리스틱 기준선입니다. ${esc(meta.at)}에 이 저장소의 파이프라인으로 실행해 기록했습니다.</p>`
+          : meta.kind === "browser" ? `<p class="muted provenance">지금 이 브라우저에서 저장소의 검증기와 도구를 실행한 결과입니다. 모델은 실행하지 않았습니다. ${res.planner.mode === "visitor" ? "제안은 위 칸에 적힌 것입니다." : "제안은 휴리스틱 플래너가 냈습니다."} 설정: 주어 검사 ${meta.settings && meta.settings.entity_check ? "켬" : "끔"}, 근거 복구 켬, 다시 시도 없음, 표 전체.</p>` : ""}
         ${run && run.rows_shown ? `<p class="muted provenance unseennote">이 표는 ${run.rows_shown[1]}행인데, 평가 때 입력 길이 한도 때문에 플래너에는 ${run.rows_shown[0]}행만 보여 줬습니다(${run.rows_list ? "질문과 겹치는 행을 골라서" : "앞에서부터"}). 표에서 흐린 행은 플래너가 보지 못한 행입니다.</p>` : ""}</div></div>
       ${renderCompare(ex, meta)}
       <div class="card"><div class="card-head"><span>근거</span><span>${res.evidence_cells.length}개 셀 · ${res.evidence_spans.length}개 문장</span></div><div class="card-body">${evidence}</div></div>

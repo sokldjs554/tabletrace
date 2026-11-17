@@ -19,14 +19,20 @@ evaluation showed the planner (a long table is cut to the rows that fit the inpu
 tokenizer), no subject check, no second proposal. So a stored result is, question by question, the result the
 reported numbers count; tests/test_recorded_demo.py holds every status and verdict against the evaluation files.
 
+Needs what the evaluations counted their input budget with: the EXAONE tokenizer (models/exaone-4.0-1.2b-tokenizer), the
+final mT5 model's tokenizer (experiments/rl_v3/model) and models/mt5-small-base. They are not in the repository, so this
+script runs where the models are; the tests then hold its output against the evaluation files without them.
+
 Writes console/data/examples.json (the sets and their questions with gold), console/data/recorded/index.json (runs + provenance),
-console/data/recorded/documents.json (the documents those runs use) and console/data/graph.json.
+console/data/recorded/documents.json (the documents those runs use), console/data/recorded/kiwi_tokens.json (the Korean
+tokens the in-browser path reads) and console/data/graph.json.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -34,16 +40,32 @@ from tabletrace import __version__
 from tabletrace.agent.graph import AgentRuntime
 from tabletrace.agent.program import ProgramParseError, parse
 from tabletrace.corpus.store import CorpusStore, read_jsonl
-from tabletrace.eval.metrics import answer_match
 from tabletrace.model.approx_tokenizer import load_tokenizer
 from tabletrace.model.serialize import set_row_select
 from tabletrace.retrieval.index import CorpusIndex
 from tabletrace.schema import Document
-from tabletrace.tools.numbers import parse_number
 from tabletrace.training.data import build_examples
 
 ROOT = Path(__file__).resolve().parents[1]
 EVAL = "experiments/eval"
+sys.path.insert(0, str(ROOT / "console" / "live"))
+from tt_browser import cell_values as _cell_values  # noqa: E402  (one implementation for the recorder and the browser path)
+from tt_browser import mark_of  # noqa: E402
+
+
+def cell_values(res, tables: dict) -> list[dict]:
+    return _cell_values(res.evidence_cells, tables[res.table_id]) if res.evidence_cells else []
+
+
+def kiwi_tokens(examples: list[dict], docs: dict) -> dict[str, list[list[str]]]:
+    """What the Korean tokenizer returns for every Korean question and column header of the demo. The browser path cannot
+    load the tokenizer (a compiled extension with a 109 MB model); console/live/shim/kiwipiepy.py hands these back instead."""
+    from tabletrace.retrieval.tokenize import _kiwi
+
+    texts = {e["question"] for e in examples if e["corpus"] == "ko_tables"}
+    for doc_id in {e["doc_id"] for e in examples if e["corpus"] == "ko_tables"}:
+        texts |= {h for t in docs[doc_id].tables for h in t.header}
+    return {text: [[tok.form, tok.tag] for tok in _kiwi().tokenize(text)] for text in sorted(texts) if text.strip()}
 
 # The question files, in the order the demo lists them. `gold` names an evaluation run whose predictions.jsonl carries
 # the gold status and answer the evaluation resolved for each question (the same for every run on that file).
@@ -123,28 +145,6 @@ class StoredOutputPlanner:
         except ProgramParseError:
             prog = None
         return prog, r["raw_output"], None, r["ms"]      # rows shown to the model were not recorded
-
-
-def mark_of(status: str, answer: str | None, gold: dict) -> str:
-    """Whether a stored result is right, by the evaluation's own rule (eval/run.py: same status, and a matching answer)."""
-    if gold["status"] == "abstained":
-        return "hold_ok" if status == "abstained" else "answered_unanswerable"
-    if status == "abstained":
-        return "hold_miss"
-    return "correct" if any(answer_match(answer, g) for g in gold["answers"]) else "wrong"
-
-
-def cell_values(res, tables: dict) -> list[dict]:
-    """How the number parser reads each evidence cell: raw text, parsed value, unit and where the unit came from."""
-    out = []
-    for c in res.evidence_cells:
-        t = tables[c.table_id]
-        raw = t.rows[c.row][c.col]
-        own = parse_number(raw)
-        num = parse_number(raw, default_unit=t.units.get(c.col))
-        out.append({"cell": f"r{c.row}c{c.col}", "raw": raw, "value": num.value if num else None, "unit": num.unit if num else None,
-                    "unit_from": None if not num or num.unit is None else ("cell" if own and own.unit is not None else "header")})
-    return out
 
 
 def load_examples() -> tuple[list[dict], dict[str, Document]]:
@@ -271,6 +271,7 @@ def main() -> None:
     (out / "documents.json").write_text(json.dumps({i: json.loads(docs[i].model_dump_json()) for i in sorted(used)}, ensure_ascii=False), encoding="utf-8")
     sets = [{k: s[k] for k in ("key", "corpus", "author", "title", "note")} | {"n": sum(1 for e in examples if e["set"] == s["key"])} for s in SETS]
     (ROOT / "console/data/examples.json").write_text(json.dumps({"sets": sets, "marks": MARKS, "examples": examples}, ensure_ascii=False, indent=1), encoding="utf-8")
+    (out / "kiwi_tokens.json").write_text(json.dumps(kiwi_tokens(examples, docs), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (ROOT / "console/data/graph.json").write_text(json.dumps({"mermaid": AgentRuntime(indexes, None).mermaid()}), encoding="utf-8")
     print("wrote", out, "featured", first, {f.name: f.stat().st_size for f in out.glob("*.json")})
 

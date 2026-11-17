@@ -4,12 +4,12 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 2026-11-17 01:21 UTC · commit 437362e"
+   "detail": "저장된 실행 결과 · 2026-11-17 01:45 UTC · commit 8ae2dd8"
   },
   {
    "name": "desktop: first screen shows an answer with its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=436 of 900, '정답 2 ✓ 맞음'"
+   "detail": "answer '2' at y=497 of 900, '정답 2 ✓ 맞음'"
   },
   {
    "name": "desktop: document + questions rendered",
@@ -97,6 +97,41 @@
    "detail": "workbench/ko_owner_01/exaone"
   },
   {
+   "name": "desktop: the verifier loads into the browser",
+   "ok": true,
+   "detail": "loaded in 3.3s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+  },
+  {
+   "name": "desktop: a changed proposal is verified in the browser as on a server",
+   "ok": true,
+   "detail": "'op: lookup ; cells: r6c2 ; answer: 무한도전' -> abstained, ['cells_in_range']"
+  },
+  {
+   "name": "desktop: a stored answer that the subject check withholds exists",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: the subject check agrees with the real Korean tokenizer",
+   "ok": true,
+   "detail": "ko_owner_21 (exaone): ['subject_in_evidence']"
+  },
+  {
+   "name": "desktop: the heuristic planner runs in the browser on a stored Korean question",
+   "ok": true,
+   "detail": "'op: abstain ; cells: - ; answer: - ; reason: ambiguous_question' -> abstained"
+  },
+  {
+   "name": "desktop: an unrecorded Korean question is refused with the reason",
+   "ok": true,
+   "detail": "한국어는 기록해 둔 질문과 표의 낱말로만 실행할 수 있습니다(형태소 분석기를 이 페이지에 "
+  },
+  {
+   "name": "desktop: a typed English question runs in the browser as on a server",
+   "ok": true,
+   "detail": "'Which the laminar-jet-absorption (LJA) measurement' -> answered '12.02'"
+  },
+  {
    "name": "desktop: research view renders",
    "ok": true,
    "detail": ""
@@ -134,7 +169,7 @@
   {
    "name": "mobile: first screen shows an answer with its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=498 of 844, '정답 2 ✓ 맞음'"
+   "detail": "answer '2' at y=560 of 844, '정답 2 ✓ 맞음'"
   },
   {
    "name": "mobile: document + questions rendered",
@@ -220,6 +255,41 @@
    "name": "mobile: a mark opens that question in the workbench",
    "ok": true,
    "detail": "workbench/ko_owner_01/exaone"
+  },
+  {
+   "name": "mobile: the verifier loads into the browser",
+   "ok": true,
+   "detail": "loaded in 3.4s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+  },
+  {
+   "name": "mobile: a changed proposal is verified in the browser as on a server",
+   "ok": true,
+   "detail": "'op: lookup ; cells: r6c2 ; answer: 무한도전' -> abstained, ['cells_in_range']"
+  },
+  {
+   "name": "mobile: a stored answer that the subject check withholds exists",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: the subject check agrees with the real Korean tokenizer",
+   "ok": true,
+   "detail": "ko_owner_21 (exaone): ['subject_in_evidence']"
+  },
+  {
+   "name": "mobile: the heuristic planner runs in the browser on a stored Korean question",
+   "ok": true,
+   "detail": "'op: abstain ; cells: - ; answer: - ; reason: ambiguous_question' -> abstained"
+  },
+  {
+   "name": "mobile: an unrecorded Korean question is refused with the reason",
+   "ok": true,
+   "detail": "한국어는 기록해 둔 질문과 표의 낱말로만 실행할 수 있습니다(형태소 분석기를 이 페이지에 "
+  },
+  {
+   "name": "mobile: a typed English question runs in the browser as on a server",
+   "ok": true,
+   "detail": "'Which the laminar-jet-absorption (LJA) measurement' -> answered '12.02'"
   },
   {
    "name": "mobile: research view renders",

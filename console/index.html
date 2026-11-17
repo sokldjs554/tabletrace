@@ -103,6 +103,24 @@
         <p class="muted chathelp">예: "그럼 독전은?", "매출액은?", "그 영화의 개봉일은 언제입니까?", "이 표를 '박스오피스'로 기억해줘"(사용자 ID 필요). 답은 항상 검증 파이프라인이 내고, 기억은 어느 표의 어떤 질문인지만 채웁니다.</p>
         <ol class="transcript" id="transcript" aria-live="polite"></ol>
       </details>
+      <details class="chatbox" id="livebox" hidden>
+        <summary>직접 실행해 보기 <span class="muted">저장소의 검증기가 이 브라우저 안에서 실행됩니다. 모델은 돌지 않습니다</span></summary>
+        <div id="liveintro">
+          <p class="muted chathelp">저장된 결과는 기록입니다. 여기서는 이 저장소의 검증기·도구·휴리스틱 플래너 코드를 이 브라우저에 불러와 실제로 실행합니다. 서버로 보내는 것은 없습니다.</p>
+          <button type="button" class="btn" id="liveload">실행 환경 불러오기</button> <span class="muted" id="livesize"></span>
+          <p class="muted chathelp" id="livestep" role="status" aria-live="polite"></p>
+        </div>
+        <div id="liveform" hidden>
+          <label for="liveprop" class="livelabel">모델의 제안 <span class="muted">셀이나 답을 바꿔서 검증기가 어떻게 판정하는지 보세요</span></label>
+          <textarea id="liveprop" class="input" rows="2" spellcheck="false" autocomplete="off"></textarea>
+          <div class="chatrow">
+            <button type="button" class="btn btn-primary" id="liveverify">이 제안을 검증기에 넣기</button>
+            <button type="button" class="btn" id="liveheur">휴리스틱 플래너로 실행</button>
+            <label class="chatcheck"><input type="checkbox" id="liveentity"> 주어 검사</label>
+          </div>
+          <p class="muted chathelp">제안의 형식: <code>op: lookup ; cells: r6c4 ; answer: 5,436,789</code>. 연산은 lookup, diff, sum, avg, ratio, text, abstain입니다. 영어 화학 문서에서는 위의 질문 칸에 질문을 직접 써서 휴리스틱 플래너로 실행할 수 있습니다. 한국어는 형태소 분석기를 이 페이지에 실을 수 없어서 기록해 둔 질문에서만 됩니다.</p>
+        </div>
+      </details>
       <div class="status" id="status" role="status" aria-live="polite" hidden></div>
       <div class="errorbar" id="errorbar" role="alert" hidden></div>
       <div class="result" id="result" hidden></div>
@@ -144,6 +162,7 @@
   <span>데이터: KorWikiTQ (LG AI연구원, CC BY-SA 4.0) · OpenStax Chemistry 2e (CC BY-NC-SA 4.0) · arXiv 화학 논문 12편의 표 (CC BY 4.0, 문서마다 저자와 출처 표시)</span>
 </footer>
 <script src="charts.js"></script>
+<script src="live.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

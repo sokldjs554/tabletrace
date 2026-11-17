@@ -22,7 +22,8 @@ jobs:
         with:
           python-version: "3.12"
       - name: Build static site
-        run: python scripts/build_static_site.py --out _site --commit ${GITHUB_SHA::7}
+        # --live downloads the pinned in-browser runtime (npm registry and PyPI, checked against console/live/runtime.lock.json)
+        run: python scripts/build_static_site.py --out _site --commit ${GITHUB_SHA::7} --live
       - uses: actions/configure-pages@v5
         with:
           enablement: true

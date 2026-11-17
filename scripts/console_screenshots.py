@@ -10,6 +10,7 @@ import argparse
 import http.server
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -19,6 +20,10 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "console" / "live"))
+import tt_browser  # noqa: E402  (the file the browser runs; called here too, to compare)
+
+from tabletrace.schema import Document  # noqa: E402
 
 
 def free_port() -> int:
@@ -173,6 +178,7 @@ def main() -> None:
                     check(f"{label}: footer below the workbench", gap >= -1, f"gap {gap:.0f}px")
                     if tag == "static":
                         idx = page.evaluate("async () => (await (await fetch('data/recorded/index.json')).json())")
+                        recorded_docs = json.loads((ROOT / a.static / "data" / "recorded" / "documents.json").read_text(encoding="utf-8"))
                         runs = [(k, r) for k in idx["planner_order"] for r in idx["planners"][k]["runs"]]
                         # stored outputs of a GPU-served model, and an answer whose evidence the verifier repaired
                         target = next(((k, r) for k, r in runs if "EXAONE" in (idx["planners"][k]["model_id"] or "")
@@ -219,6 +225,97 @@ def main() -> None:
                         page.locator("table.mx td.mk a").nth(0).click()
                         shown()
                         check(f"{label}: a mark opens that question in the workbench", "#workbench/" in page.url and page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0, page.url.split("#")[-1])
+                    if tag == "static" and (ROOT / a.static / "live" / "manifest.json").exists():
+                        # "Run it here": the repository's verifier in this browser (Pyodide). Each result is held against the same
+                        # call made here on the server with the real Korean tokenizer; they must agree in every field but the timings.
+                        def here(page=page) -> dict:
+                            page.wait_for_function("() => window.__ttLast !== undefined", timeout=30000)
+                            got = page.evaluate("() => { const r = window.__ttLast; window.__ttLast = undefined; return r; }")
+                            page.wait_for_timeout(200)
+                            return got
+
+                        def same(got: dict, ref: dict) -> bool:
+                            def strip(r: dict) -> dict:
+                                r = json.loads(json.dumps(r))
+                                for k in ("elapsed_ms", "browser_ms", "mark"):
+                                    r.pop(k, None)
+                                for s in r["trace"]:
+                                    s["ms"] = 0
+                                return r
+                            return strip(got) == strip(ref)
+
+                        ko = next(e for e in examples if e["set"] == "ko_owner" and e["category"] == "cell")
+                        stored = next(r for r in idx["planners"]["exaone"]["runs"] if r["id"] == ko["id"])
+                        raw = stored["result"]["planner"]["raw_output"]
+                        pid = next(s for s in stored["result"]["trace"] if s["step"] == "retrieve")["output"]["context_passage"]
+                        doc = Document.model_validate(recorded_docs[ko["doc_id"]])
+                        open_question(ko["id"], "exaone")
+                        pane("right")
+                        page.click("#livebox summary")
+                        t_load = time.time()
+                        page.click("#liveload")
+                        page.wait_for_selector("#liveform:not([hidden])", timeout=180000)
+                        check(f"{label}: the verifier loads into the browser", page.input_value("#liveprop") == raw and not page.locator("#question").is_disabled(),
+                              f"loaded in {time.time() - t_load:.1f}s; proposal {raw!r}")
+                        # the model's proposal with its cell moved one row away: the verifier must repair or withhold, as on a server
+                        moved = re.sub(r"cells: r(\d+)c(\d+)", lambda m: f"cells: r{int(m[1]) + 1}c{m[2]}", raw, count=1)
+                        page.fill("#liveprop", moved)
+                        page.click("#liveverify")
+                        got = here()
+                        ref = tt_browser.run(doc, ko["table_id"], ko["question"], moved, pid, False)
+                        check(f"{label}: a changed proposal is verified in the browser as on a server", same(got, ref) and got["planner"]["mode"] == "visitor"
+                              and "이 브라우저" in (page.text_content(".badge-live") or ""), f"{moved!r} -> {got['status']}, {[c['name'] for c in got['verdict']['checks'] if not c['passed']]}")
+                        page.screenshot(path=str(out / f"{tag}-{label}-11-here.png"), full_page=mobile)
+                        # the subject check needs the Korean tokenizer: the browser reads recorded tokens, the server runs the tokenizer
+                        # Take a stored model answer that the subject check withholds on a server, and ask the browser for the same verdict.
+                        flip = None
+                        for k in [k for k in idx["planner_order"] if idx["planners"][k]["source"]]:
+                            for r in idx["planners"][k]["runs"]:
+                                e = by_id[r["id"]]
+                                if e["corpus"] != "ko_tables" or r["result"]["status"] != "answered":
+                                    continue
+                                d = Document.model_validate(recorded_docs[e["doc_id"]])
+                                out_k = r["result"]["planner"]["raw_output"]
+                                pid_k = next(s for s in r["result"]["trace"] if s["step"] == "retrieve")["output"]["context_passage"]
+                                on = tt_browser.run(d, e["table_id"], e["question"], out_k, pid_k, True)
+                                if on["status"] == "abstained" and tt_browser.run(d, e["table_id"], e["question"], out_k, pid_k, False)["status"] == "answered":
+                                    flip = (k, e, on)
+                                    break
+                            if flip:
+                                break
+                        check(f"{label}: a stored answer that the subject check withholds exists", flip is not None)
+                        if flip:
+                            open_question(flip[1]["id"], flip[0])
+                            pane("right")
+                            page.check("#liveentity")
+                            page.click("#liveverify")
+                            got = here()
+                            check(f"{label}: the subject check agrees with the real Korean tokenizer", same(got, flip[2]) and got["settings"]["entity_check"] is True
+                                  and got["status"] == "abstained", f"{flip[1]['id']} ({flip[0]}): {[c['name'] for c in got['verdict']['checks'] if not c['passed']]}")
+                            page.uncheck("#liveentity")
+                            open_question(ko["id"], "exaone")
+                            pane("right")
+                        page.click("#liveheur")
+                        got = here()
+                        ref = tt_browser.run(doc, ko["table_id"], ko["question"], None, pid, False)
+                        check(f"{label}: the heuristic planner runs in the browser on a stored Korean question", same(got, ref) and got["planner"]["mode"] == "heuristic",
+                              f"{got['planner']['raw_output']!r} -> {got['status']}")
+                        # a Korean question nobody recorded cannot be tokenized here, and the page says so
+                        page.fill("#question", "이 표에서 가장 최근에 방송된 프로그램은 무엇입니까?")
+                        page.click("#liveheur")
+                        page.wait_for_selector("#errorbar:not([hidden])", timeout=15000)
+                        check(f"{label}: an unrecorded Korean question is refused with the reason", "형태소 분석기" in (page.text_content("#errorbar") or ""), (page.text_content("#errorbar") or "")[:50])
+                        # English needs no recorded tokens: a question typed by the visitor runs end to end
+                        en = next(e for e in examples if e["set"] == "chem_papers" and e["category"] == "cell")
+                        en_doc = Document.model_validate(recorded_docs[en["doc_id"]])
+                        open_question(en["id"], "heuristic")
+                        pane("right")
+                        typed = "Which " + en["question"].split(" ", 1)[1]
+                        page.fill("#question", typed)
+                        page.click("#liveheur")
+                        got = here()
+                        ref = tt_browser.run(en_doc, page.evaluate("() => document.querySelector('.tablewrap.is-selected').dataset.tid"), typed, None, None, False)
+                        check(f"{label}: a typed English question runs in the browser as on a server", same(got, ref) and typed != en["question"], f"{typed[:50]!r} -> {got['status']} {got['answer']!r}")
                     if tag == "live" and label == "desktop":
                         # typed question + keyboard submit + invalid input handling
                         page.goto(base, wait_until="networkidle")

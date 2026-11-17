@@ -1,0 +1,76 @@
+{
+ "pyodide": {
+  "version": "314.0.8",
+  "url": "https://registry.npmjs.org/pyodide/-/pyodide-314.0.8.tgz",
+  "sha256": "9a52704e0ae5b07aaacb8e4fed9f1658e8024694a078695ea45ac79dee4cefcb",
+  "files": {
+   "pyodide.js": {
+    "size": 18726,
+    "sha256": "d4e1e0f06c29162eadf0c3f323c746884242b257d1faa94760442a4ac929e9a1"
+   },
+   "pyodide.mjs": {
+    "size": 17758,
+    "sha256": "1bb8cc14f9405aaa7cd4e00c12edd0a8539de9cc026618d6ee5a9663f367dc70"
+   },
+   "pyodide.asm.mjs": {
+    "size": 1250259,
+    "sha256": "22514b8be6980e28a02c8b1d6387ce8dfe666fc4edf8d547cff5dce29ff4d972"
+   },
+   "pyodide.asm.wasm": {
+    "size": 9597892,
+    "sha256": "e14d49ceca9b4a0e274ea918f3a898de2d3880b6e5573a6cfe1a2267ecc70329"
+   },
+   "python_stdlib.zip": {
+    "size": 2545550,
+    "sha256": "2bd3394a145bfbbe5bbc9d9d6ab9136abbb986c6fef6c142b3a2962227aa5c28"
+   },
+   "pyodide-lock.json": {
+    "size": 119077,
+    "sha256": "5dc2fc119108bc148c7457dc86e7675b5c87e1cafd420b9c34c1eaef7b36c010"
+   }
+  }
+ },
+ "wheels": [
+  {
+   "name": "pydantic",
+   "version": "2.14.3",
+   "filename": "pydantic-2.14.3-py3-none-any.whl",
+   "url": "https://files.pythonhosted.org/packages/72/b8/b864503789ef5c58597d2a7b4adbee62c26440ab1e682581fc6838df8947/pydantic-2.14.3-py3-none-any.whl",
+   "size": 494071,
+   "sha256": "3f7b347782ab7e4cf4c798496ae3a82787d9f21ec12676a9c564355eeef8daa8"
+  },
+  {
+   "name": "pydantic-core",
+   "version": "2.50.4",
+   "filename": "pydantic_core-2.50.4-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+   "url": "https://files.pythonhosted.org/packages/c6/07/a7d8615b8677bf69e24666bbce431299850c95a7b084649342582a1c3210/pydantic_core-2.50.4-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+   "size": 1496509,
+   "sha256": "e6da138a1ecc1341c8b788a5ee822670b03788e1f5decf7af9d461de6e508b8e"
+  },
+  {
+   "name": "typing-extensions",
+   "version": "4.16.0",
+   "filename": "typing_extensions-4.16.0-py3-none-any.whl",
+   "url": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+   "size": 45571,
+   "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+  },
+  {
+   "name": "annotated-types",
+   "version": "0.8.0",
+   "filename": "annotated_types-0.8.0-py3-none-any.whl",
+   "url": "https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl",
+   "size": 13427,
+   "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+  },
+  {
+   "name": "typing-inspection",
+   "version": "0.4.5",
+   "filename": "typing_inspection-0.4.5-py3-none-any.whl",
+   "url": "https://files.pythonhosted.org/packages/de/0c/ea2544850a7c135e15033a5c7a8e7211136184b7ae63e2239d557c2b3019/typing_inspection-0.4.5-py3-none-any.whl",
+   "size": 14874,
+   "sha256": "bc210535442b39e1bf2805e0c7a17dfd6a4ace760c84c7f7d16245d23a6b1c39"
+  }
+ ],
+ "download_mb": 15.6
+}
