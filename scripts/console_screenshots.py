@@ -263,7 +263,28 @@ def main() -> None:
                     page.goto(base + "#research", wait_until="networkidle")
                     page.wait_for_timeout(800)
                     check(f"{label}: research view renders", "연구 결과" in (page.text_content("#research") or ""))
+                    # the view opens with a few conclusions, each with a chart and the same values as a table; the detail is folded
+                    top = page.evaluate("""() => { const hl = [...document.querySelectorAll('.hl')];
+                        return { cards: hl.length, charts: hl.filter((c) => c.querySelector('.viz')).length, tables: hl.filter((c) => c.querySelector('.viz-table tbody tr')).length,
+                                 titles: hl.filter((c) => /\\d/.test(c.querySelector('h3').textContent)).length, groups: document.querySelectorAll('details.grp').length,
+                                 open: document.querySelectorAll('details.grp[open]').length, sections: document.querySelectorAll('details.grp section[data-title]').length,
+                                 height: document.documentElement.scrollHeight, over: document.documentElement.scrollWidth - document.documentElement.clientWidth }; }""")
+                    research = page.evaluate("async () => (await (await fetch('data/research.json')).json())")
+                    check(f"{label}: research view leads with conclusions, each with a chart and a table of its values",
+                          top["cards"] == len(research["highlights"]) >= 5 and top["charts"] == top["tables"] == top["cards"] and top["titles"] >= 4, str(top))
+                    check(f"{label}: every experiment is kept below, folded by topic", top["groups"] == len(research["groups"]) and top["open"] == 0
+                          and top["sections"] == len(research["sections"]), f"{top['sections']} sections in {top['groups']} groups")
+                    check(f"{label}: research view fits the screen width and is short", top["over"] <= 1 and top["height"] < 6000, f"height {top['height']}px, overflow {top['over']}px")
                     page.screenshot(path=str(out / f"{tag}-{label}-07-research.png"), full_page=True)
+                    # a chart mark answers hover and keyboard focus with its value
+                    page.locator(".hl .vb-bar").nth(0).focus()
+                    tip = page.text_content("#viztip") or ""
+                    check(f"{label}: a chart mark shows its value on focus", "%" in tip and not page.locator("#viztip").is_hidden(), tip[:60])
+                    # "세부 기록 보기" opens the group that holds the experiment
+                    page.locator(".hl a[data-more]").nth(0).click()
+                    page.wait_for_timeout(600)
+                    check(f"{label}: a conclusion links to its experiment record", page.locator("details.grp[open] section.is-target").count() == 1,
+                          (page.text_content("details.grp[open] section.is-target h3") or "")[:60])
                     page.close()
                 except Exception as e:  # a crash must show up as a FAILED check, never as a missing report
                     check(f"{label}: unexpected error", False, f"{type(e).__name__}: {str(e)[:240]}")

@@ -612,15 +612,35 @@
     try {
       const data = await fetchJSON("data/research.json", {}, 10000);
       box.innerHTML = renderResearch(data); researchLoaded = true;
+      if (window.TTCharts) window.TTCharts.bind(box);
+      // "세부 기록 보기": open the group that holds the section and scroll to it
+      $$("a[data-more]", box).forEach((a) => a.addEventListener("click", (e) => {
+        const sec = $$("section[data-title]", box).find((s) => s.dataset.title.startsWith(a.dataset.more)); if (!sec) return;
+        e.preventDefault();
+        sec.closest("details").open = true; sec.scrollIntoView({ block: "start", behavior: "smooth" }); sec.classList.add("is-target");
+        setTimeout(() => sec.classList.toggle("is-target", false), 2500);
+      }));
     } catch (e) { box.innerHTML = `<p class="muted">연구 결과 파일(data/research.json)을 아직 만들지 않았습니다: ${esc(e.message)}</p>`; }
   }
   function renderResearch(d) {
     const pill = (s) => s === "done" ? '<span class="pill done">실행·측정 완료</span>' : s === "prep" ? '<span class="pill prep">구현 후 미실행</span>' : s === "fail" ? '<span class="pill fail">실행했으나 실패/미달</span>' : s === "none" ? '<span class="pill">미구현</span>' : "";
     const cond = (c) => c && Object.keys(c).length ? `<div class="condbox"><dl>${Object.entries(c).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(typeof v === "object" ? JSON.stringify(v) : v)}</dd>`).join("")}</dl></div>` : "";
     const table = (cols, rows) => `<div class="tablescroll"><table class="res"><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((v, i) => `<td class="${typeof v === "number" || /^[\d.,%\s−-]+$/.test(String(v)) ? "num" : ""}">${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    const section = (s) => `<section data-title="${esc(s.title)}"><h3>${esc(s.title)} ${pill(s.status)}</h3>${s.description ? `<p>${esc(s.description)}</p>` : ""}${cond(s.conditions)}${s.columns ? table(s.columns, s.rows || []) : ""}${(s.notes || []).length ? `<ul>${s.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}${s.artifact ? `<p class="muted">산출물: <code>${esc(s.artifact)}</code></p>` : ""}</section>`;
+    const sections = d.sections || [];
+    // The top layer: a few conclusions, each with one small chart, then what went against expectations.
+    const top = (d.highlights || []).length && window.TTCharts ? `<div class="hl-grid">${d.highlights.map((h) => window.TTCharts.card(h)).join("")}</div>` : "";
+    const odd = (d.unexpected || []).length ? `<section class="hl-odd"><h3>기대와 달랐던 결과</h3><ul>${d.unexpected.map((u) => `<li>${esc(u.text)} <a href="#research" data-more="${esc(u.more)}">세부 기록</a></li>`).join("")}</ul></section>` : "";
+    // Below it every experiment keeps its conditions, sample sizes and artifact paths, folded by topic.
+    const groups = (d.groups || []).length ? d.groups : [{ name: "모든 실험", sections: sections.length }];
+    const detail = groups.map((g) => { const own = sections.filter((s) => !s.group || s.group === g.name);
+      return `<details class="grp"><summary><b>${esc(g.name)}</b> <span class="muted">실험 ${own.length}건</span><span class="grp-titles muted">${esc(own.map((s) => s.title.split(" — ")[0].split(" (")[0]).join(" · "))}</span></summary>${own.map(section).join("")}</details>`; }).join("");
     return `<h2>연구 결과 <span class="muted sub">생성 ${esc(d.generated_at)} · commit ${esc(d.commit)}</span></h2>
-      <p>${esc(d.summary || "")}</p>
-      ${(d.sections || []).map((s) => `<section><h3>${esc(s.title)} ${pill(s.status)}</h3>${s.description ? `<p>${esc(s.description)}</p>` : ""}${cond(s.conditions)}${s.columns ? table(s.columns, s.rows || []) : ""}${(s.notes || []).length ? `<ul>${s.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}${s.artifact ? `<p class="muted">산출물: <code>${esc(s.artifact)}</code></p>` : ""}</section>`).join("")}`
+      <p class="muted">아래 여섯 가지가 이 프로젝트에서 잰 것의 요약입니다. 그림의 값은 모두 저장소의 결과 파일에서 읽은 것이고, 그림마다 "표로 보기"에 같은 값이 있습니다.</p>
+      ${top}${odd}
+      <h2 id="research-detail">실험별 세부 기록 <span class="muted sub">실험 ${sections.length}건 · 조건, 표본 수, 산출물 경로</span></h2>
+      <p class="muted">${esc(d.summary || "")}</p>
+      ${detail}`;
   }
   async function loadGraph() {
     const pre = $("#graphsrc"); if (pre.textContent) return;

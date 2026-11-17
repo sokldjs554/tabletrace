@@ -684,11 +684,18 @@ def main() -> None:
     else:
         sections.append({"title": "멀티 GPU Model Parallelism", "status": "prep", "description": "src/tabletrace/bench/pipeline_parallel.py 준비, 실행 전."})
     sections += gpu_sections()
+    # the top layer of the view: a few conclusions with one chart each, then the sections above in groups
+    from research_highlights import check_links, group_sections, highlights, unexpected
+
+    top, odd = highlights(), unexpected()
+    check_links(top + odd, sections)
+    groups = group_sections(sections)
     data = {"generated_at": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "commit": commit,
             "summary": "모든 수치는 이 저장소의 experiments/ 산출물에서 그대로 가져왔다. CPU 실험(mT5-small 학습·평가·양자화)은 4 vCPU Intel Xeon 2.10GHz, 15 GB RAM, GPU 없는 개발 환경에서 실행했다. "
                        "[GPU] 표시가 있는 실험(EXAONE LoRA, vLLM·SGLang 서빙, 멀티 GPU)은 저장소 소유자가 Kaggle·Colab의 Tesla T4에서 실행해 결과 파일을 받은 것이다. "
                        "해석과 한계는 저장소의 README와 docs/REPORT.md에 있다." + (" " + json.dumps(env, ensure_ascii=False) if env else ""),
-            "sections": sections}
+            "counts": {"highlights": len(top), "unexpected": len(odd), "groups": len(groups), "sections": len(sections)},
+            "highlights": top, "unexpected": odd, "groups": groups, "sections": sections}
     out = ROOT / "console" / "data" / "research.json"
     out.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     print("wrote", out, "sections:", [s["title"][:30] + " " + s["status"] for s in sections])

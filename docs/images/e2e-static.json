@@ -4,7 +4,7 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 2026-11-17 01:04 UTC · commit 437362e"
+   "detail": "저장된 실행 결과 · 2026-11-17 01:21 UTC · commit 437362e"
   },
   {
    "name": "desktop: first screen shows an answer with its gold answer, without a click",
@@ -100,6 +100,31 @@
    "name": "desktop: research view renders",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "desktop: research view leads with conclusions, each with a chart and a table of its values",
+   "ok": true,
+   "detail": "{'cards': 6, 'charts': 6, 'tables': 6, 'titles': 4, 'groups': 7, 'open': 0, 'sections': 35, 'height': 2501, 'over': 0}"
+  },
+  {
+   "name": "desktop: every experiment is kept below, folded by topic",
+   "ok": true,
+   "detail": "35 sections in 7 groups"
+  },
+  {
+   "name": "desktop: research view fits the screen width and is short",
+   "ok": true,
+   "detail": "height 2501px, overflow 0px"
+  },
+  {
+   "name": "desktop: a chart mark shows its value on focus",
+   "ok": true,
+   "detail": "휴리스틱 기준선 (모델 아님): 36.2%"
+  },
+  {
+   "name": "desktop: a conclusion links to its experiment record",
+   "ok": true,
+   "detail": "한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160) 실행·측정 완료"
   },
   {
    "name": "mobile: mode badge",
@@ -200,6 +225,31 @@
    "name": "mobile: research view renders",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "mobile: research view leads with conclusions, each with a chart and a table of its values",
+   "ok": true,
+   "detail": "{'cards': 6, 'charts': 6, 'tables': 6, 'titles': 4, 'groups': 7, 'open': 0, 'sections': 35, 'height': 4519, 'over': 0}"
+  },
+  {
+   "name": "mobile: every experiment is kept below, folded by topic",
+   "ok": true,
+   "detail": "35 sections in 7 groups"
+  },
+  {
+   "name": "mobile: research view fits the screen width and is short",
+   "ok": true,
+   "detail": "height 4519px, overflow 0px"
+  },
+  {
+   "name": "mobile: a chart mark shows its value on focus",
+   "ok": true,
+   "detail": "휴리스틱 기준선 (모델 아님): 36.2%"
+  },
+  {
+   "name": "mobile: a conclusion links to its experiment record",
+   "ok": true,
+   "detail": "한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160) 실행·측정 완료"
   },
   {
    "name": "no browser console errors",

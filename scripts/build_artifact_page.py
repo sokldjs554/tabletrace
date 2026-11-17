@@ -29,8 +29,9 @@ def main() -> None:
     html = (CONSOLE / "index.html").read_text(encoding="utf-8")
     css = (CONSOLE / "styles.css").read_text(encoding="utf-8")
     js = (CONSOLE / "app.js").read_text(encoding="utf-8")
+    charts = (CONSOLE / "charts.js").read_text(encoding="utf-8")
     body = re.search(r"<body>(.*)</body>", html, re.S).group(1)
-    body = re.sub(r'<script src="app.js"></script>', "", body).strip()
+    body = re.sub(r'<script src="(app|charts).js"></script>', "", body).strip()
     data = {p: json.loads((CONSOLE / p).read_text(encoding="utf-8")) for p in DATA_FILES}
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     old = "async function fetchJSON(url, opts = {}, timeoutMs = 8000) {"
@@ -46,6 +47,9 @@ def main() -> None:
 </style>
 {body}
 <script>window.__TT_DATA__ = {blob};</script>
+<script>
+{charts}
+</script>
 <script>
 {js}
 </script>
