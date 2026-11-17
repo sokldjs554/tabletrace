@@ -169,7 +169,7 @@ def test_notebook_2_skips_finished_work_and_packs_results(tmp_path, monkeypatch)
     repo, calls, packs, sections, run_all = run.repo, run.calls, run.packs, run.sections, run.run_all
 
     first = run_all()
-    assert first["train"] == 12 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I + the models of sections L and M; RL in D and in J
+    assert first["train"] == 13 and first["grpo"] == 2 and first["eval"] >= 50               # 8 + the two full-data runs of section I + the models of sections L, M and N; RL in D and in J
     assert len(packs) >= len(sections) - 1                                   # every section ends by packing what exists so far
     assert Path.cwd() == repo                                                # pack() moves away for the download link and must come back
     names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
@@ -223,7 +223,7 @@ def test_notebook_2_on_a_single_gpu(tmp_path, monkeypatch):
     run = DryRun(tmp_path, monkeypatch, n_gpu=1)
     counts = run.run_all()
     commands = [c for _, c in run.calls]
-    assert counts["grpo"] == 2 and counts["train"] == 10                     # no ddp1 / ddp2
+    assert counts["grpo"] == 2 and counts["train"] == 11                     # no ddp1 / ddp2
     assert not any("torchrun" in c for c in commands) and not any("32b" in o.lower() for o in run.outputs())
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
@@ -253,7 +253,7 @@ def test_notebook_2_goes_on_when_a_server_dies_during_evaluation(tmp_path, monke
     counts = run.run_all()
     mine = [c for k, c in run.calls if k == "eval" and "ref_32b_awq" in re.search(r"--out (\S+)", c).group(1)]
     assert len(mine) == 1 and "--replay-from" not in mine[0]                 # no second set, no re-verification of a missing file
-    assert counts["grpo"] == 2 and counts["train"] == 12                     # the other sections still ran
+    assert counts["grpo"] == 2 and counts["train"] == 13                     # the other sections still ran
     assert (tmp_path / "gpu_results_2.tgz").exists()
 
 
@@ -687,6 +687,70 @@ def test_the_recorded_owner_loop_run_matches_what_the_notebook_does_and_the_sect
     assert info["platform"] == "colab" and info["gpus"] == ["Tesla T4"]
     run = DryRun(tmp_path, monkeypatch, cloned_results=True)
     assert run.run_all(only=OWNLOOP_CELL) == collections.Counter()
+
+
+CHEM_CELL = "KOCHEM_DIR, KOCHEM_NAME"
+
+
+def test_chemistry_section_trains_one_model_and_keeps_per_question_predictions(tmp_path, monkeypatch):
+    """Section G's chemistry results (2026-11-14) survive as numbers read off the notebook's output only. Section N runs
+    the experiment again so that per-question predictions exist: one model tuned on Korean and chemistry with the
+    corrected length setting, scored on three chemistry sets and three Korean sets, and the untuned 1.2B model on the
+    chemistry sets with examples drawn from the chemistry training questions."""
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)                 # main as it is today: no chemistry predictions
+    counts = run.run_all(only=CHEM_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 2 * (6 + 3)
+    train = next(c for k, c in run.calls if k == "train")
+    assert "--train data/ko/train.jsonl data/ko/synthetic_train.jsonl data/chem/synthetic_train.jsonl " in train
+    assert "--corpus data/ko/documents.jsonl data/chem/documents.jsonl " in train and "--out experiments/exaone_lora_kochem2" in train and "--merge" in train.split()
+    assert "--max-in 672" in train and "--max-len 960" in train and "--limit 0 " in train          # whole prompts and whole targets (issue 66)
+    stored = json.loads((ROOT / "experiments/exaone_lora_full4/train_info.json").read_text())["args"]   # a full-data training with the same lengths
+    for flag, key in (("--epochs", "epochs"), ("--bs", "bs"), ("--grad-accum", "grad_accum"), ("--max-len", "max_len"), ("--max-in", "max_in"), ("--seed", "seed"), ("--limit", "limit")):
+        assert float(re.search(rf"{flag} (\S+)", train).group(1)) == float(stored[key]), flag
+    first = {re.search(r"--out (\S+)", c).group(1): c for k, c in run.calls if k == "eval" and "--replay-from" not in c}
+    tuned, untuned = "experiments/eval/exaone_kochem2_vllm_", "experiments/eval/ref_1p2b_"
+    assert sorted(first) == sorted([tuned + s for s in ("chem_custom", "chem_syndev", "chem_papers", "ko_test", "ko_custom", "ko_owner")]
+                                   + [untuned + s for s in ("chem_custom", "chem_syndev", "chem_papers")])
+    for out, cmd in first.items():
+        assert ("--row-select overlap" in cmd) == out.endswith("chem_papers"), out            # the paper tables: rows chosen by overlap, as in section G
+        assert ("--few-shot data/chem/synthetic_train.jsonl --shots-per-kind 2" in cmd) == out.startswith(untuned), out
+        assert "--confidence" in cmd and "--no-entity-check" in cmd and "--max-in 672" in cmd
+    assert "--corpus data/chem/documents.jsonl --data data/chem/custom_eval.jsonl" in first[tuned + "chem_custom"]
+    assert "--corpus data/chem_papers/documents.jsonl --data data/chem_papers/custom_eval.jsonl" in first[tuned + "chem_papers"]
+    # the examples of the untuned model come from the textbook documents, so its paper evaluation is given both document files
+    assert "--corpus data/chem_papers/documents.jsonl data/chem/documents.jsonl --data data/chem_papers/custom_eval.jsonl" in first[untuned + "chem_papers"]
+    assert "--concurrency 8 " in first[untuned + "chem_papers"] and "--data data/ko/owner_eval.jsonl" in first[tuned + "ko_owner"]
+    replays = [c for k, c in run.calls if k == "eval" and "--replay-from" in c]
+    assert len(replays) == 9 and all(c.split("--out ")[1].strip().endswith("_ec") for c in replays)
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any("exaone_kochem2_vllm_chem_papers_ec" in n for n in names) and any("ref_1p2b_chem_custom_ec" in n for n in names)
+    assert any(n.endswith("exaone_lora_kochem2/train_info.json") for n in names) and not any("merged" in n for n in names)
+    assert not (run.repo / "experiments/exaone_lora_kochem2/merged").exists()
+    assert run.run_all(only=CHEM_CELL) == collections.Counter()                                # run again: nothing left to do
+
+
+def test_chemistry_section_can_leave_out_the_untuned_model_and_does_not_repeat_stored_evaluations(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    assert sum("RUN_UNTUNED_ON_CHEM = True" in src for _, src in run.sections) == 1
+    run.sections = [(i, src.replace("RUN_UNTUNED_ON_CHEM = True", "RUN_UNTUNED_ON_CHEM = False")) for i, src in run.sections]
+    counts = run.run_all(only=CHEM_CELL)
+    assert counts["train"] == 1 and counts["eval"] == 12
+    outs = run.outputs()
+    assert not any("ref_1p2b" in o for o in outs)                                              # the stored Korean evaluations of the untuned model are left alone
+    assert all("kochem2" in o for o in outs)
+
+
+def test_the_chemistry_examples_can_be_drawn_and_the_earlier_run_is_only_a_recovered_record():
+    """Six examples for the untuned model need a lookup, a calculation and a withheld answer twice over in the chemistry
+    training questions. The earlier run of the same experiment (section G) left numbers but no predictions."""
+    ops = collections.Counter(json.loads(line)["op"] for line in (ROOT / "data/chem/synthetic_train.jsonl").read_text(encoding="utf-8").splitlines() if line.strip())
+    assert ops["lookup"] >= 2 and ops["abstain"] >= 2 and sum(n for op, n in ops.items() if op not in ("lookup", "abstain", "text")) >= 2
+    assert not list((ROOT / "experiments/eval").glob("exaone_kochem_vllm_*"))
+    recovered = json.loads((ROOT / "experiments/gpu2_2026-11-14/recovered.json").read_text(encoding="utf-8"))["evals"]
+    assert "exaone_kochem_vllm_chem_papers" in recovered
+    intro = "".join(json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"][0]["source"])
+    if not list((ROOT / "experiments/eval").glob("exaone_kochem2_vllm_*")):
+        assert "지금 돌릴 것은 N절 하나입니다" in intro and "아직 돌리지 않음" in intro
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):
