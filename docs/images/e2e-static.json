@@ -4,7 +4,7 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 2026-11-17 06:19 UTC · commit d7d8ec0"
+   "detail": "저장된 실행 결과 · 2026-11-17 10:15 UTC · commit 50b1b7e"
   },
   {
    "name": "desktop: first screen shows an answer with its gold answer, without a click",
@@ -87,6 +87,16 @@
    "detail": "모델 EXAONE-4.0-1.2B LoRA (한국어와 화학을 함께 튜닝)"
   },
   {
+   "name": "desktop: stored outputs of the Korean-only EXAONE on the chemistry papers are present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop: the Korean-only model's answer to an unanswerable question is shown beside the other planners",
+   "ok": true,
+   "detail": "모델 EXAONE-4.0-1.2B LoRA (한국어만 튜닝, 화학 문항  | {'kochem': '✓ 보류', 'koonly': '✗ 답함', 'ref1': '✓ 보류', 'neural': '✗ 답함', 'heuristic': '✓ 보류'}"
+  },
+  {
    "name": "desktop: per-question view lists every question of the corpus under every planner",
    "ok": true,
    "detail": "420 marks, EXAONE 24/30"
@@ -109,7 +119,7 @@
   {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.1s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.4s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -149,7 +159,7 @@
   {
    "name": "desktop: research view leads with conclusions, each with a chart and a table of its values",
    "ok": true,
-   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 36, 'height': 2875, 'over': 0}"
+   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 36, 'height': 2933, 'over': 0}"
   },
   {
    "name": "desktop: every experiment is kept below, folded by topic",
@@ -159,7 +169,7 @@
   {
    "name": "desktop: research view fits the screen width and is short",
    "ok": true,
-   "detail": "height 2875px, overflow 0px"
+   "detail": "height 2933px, overflow 0px"
   },
   {
    "name": "desktop: a chart mark shows its value on focus",
@@ -257,6 +267,16 @@
    "detail": "모델 EXAONE-4.0-1.2B LoRA (한국어와 화학을 함께 튜닝)"
   },
   {
+   "name": "mobile: stored outputs of the Korean-only EXAONE on the chemistry papers are present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "mobile: the Korean-only model's answer to an unanswerable question is shown beside the other planners",
+   "ok": true,
+   "detail": "모델 EXAONE-4.0-1.2B LoRA (한국어만 튜닝, 화학 문항  | {'kochem': '✓ 보류', 'koonly': '✗ 답함', 'ref1': '✓ 보류', 'neural': '✗ 답함', 'heuristic': '✓ 보류'}"
+  },
+  {
    "name": "mobile: per-question view lists every question of the corpus under every planner",
    "ok": true,
    "detail": "420 marks, EXAONE 24/30"
@@ -319,7 +339,7 @@
   {
    "name": "mobile: research view leads with conclusions, each with a chart and a table of its values",
    "ok": true,
-   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 36, 'height': 5081, 'over': 0}"
+   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 36, 'height': 5147, 'over': 0}"
   },
   {
    "name": "mobile: every experiment is kept below, folded by topic",
@@ -329,7 +349,7 @@
   {
    "name": "mobile: research view fits the screen width and is short",
    "ok": true,
-   "detail": "height 5081px, overflow 0px"
+   "detail": "height 5147px, overflow 0px"
   },
   {
    "name": "mobile: a chart mark shows its value on focus",

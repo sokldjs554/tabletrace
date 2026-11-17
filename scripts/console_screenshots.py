@@ -218,6 +218,21 @@ def main() -> None:
                                   "EXAONE" in said and "화학" in said and "Colab" in (page.text_content(".provenance") or "") and page.locator("td.is-evidence").count() >= 1, said[:70])
                             pane("center")
                             page.screenshot(path=str(out / f"{tag}-{label}-12-chem-exaone.png"), full_page=False)
+                        # an unanswerable chemistry question on which the two tuned models part: the Korean-only model sent an answer, the other withheld
+                        held = {r["id"] for r in idx["planners"]["kochem"]["runs"] if r["mark"] == "hold_ok"}
+                        apart = next((r for r in idx["planners"]["koonly"]["runs"] if by_id[r["id"]]["set"] == "chem_papers" and r["mark"] == "answered_unanswerable" and r["id"] in held), None)
+                        check(f"{label}: stored outputs of the Korean-only EXAONE on the chemistry papers are present", apart is not None)
+                        if apart:
+                            open_question(apart["id"], "koonly")
+                            said = page.text_content(".badge-mode") or ""
+                            rows_ = page.eval_on_selector_all("table.cmp tr", "els => els.map(e => [e.querySelector('button').dataset.planner, e.classList.contains('is-current'), e.querySelector('.mk').textContent])")
+                            both = {k: mk for k, _, mk in rows_}
+                            check(f"{label}: the Korean-only model's answer to an unanswerable question is shown beside the other planners",
+                                  "한국어만" in said and [k for k, cur, _ in rows_ if cur] == ["koonly"] and len(rows_) == 5 and "✗" in both.get("koonly", "") and "✓" in both.get("kochem", "")
+                                  and "답 없음" in (page.text_content(".goldline") or ""), f"{said[:40]} | {both}")
+                            pane("right")
+                            page.screenshot(path=str(out / f"{tag}-{label}-13-chem-share.png"), full_page=False)
+                        if chem or apart:
                             open_question(idx["featured"], "auto")          # back to the Korean corpus for the checks below
                         # every question against every planner
                         page.goto(base + "#matrix", wait_until="networkidle")

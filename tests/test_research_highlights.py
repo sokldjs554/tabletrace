@@ -36,20 +36,30 @@ def test_the_headline_is_the_lowest_of_the_full_data_trainings():
     assert sorted(row["ticks"])[-1] == _em("exaone_full_vllm_ko_test_run2")
 
 
-def test_the_chemistry_conclusion_is_the_run_that_kept_its_predictions_and_says_the_earlier_number():
-    """The chart is counted from the per-question files of the rerun, and the caption gives the earlier, higher number
-    (recovered from the notebook's output) next to it instead of leaving it out."""
+def test_the_chemistry_conclusion_sets_the_korean_only_model_beside_the_one_that_saw_chemistry():
+    """The chart is counted from the per-question files of the two reruns. The conclusion does not credit the chemistry
+    questions with the whole gain over the untuned model: it leads with the model that never saw chemistry, says the
+    two tuned models are not told apart on this set, where they do part, and that this split was made after the result.
+    The earlier, higher number of the run without files is given too."""
     h = next(h for h in DATA["highlights"] if h["id"] == "chem")
-    rows = {r["label"].split(" ")[0] + ("+" if r.get("emphasis") else ""): r["value"] for r in h["rows"]}
-    assert rows["EXAONE+"] == _em("exaone_kochem2_vllm_chem_papers") and rows["EXAONE"] == _em("ref_1p2b_chem_papers")
-    assert rows["휴리스틱"] == _em("heuristic_chem_papers") and rows["mT5-small"] == _em("rl_v3_chem_papers")
+    rows = {r["label"]: r["value"] for r in h["rows"]}
+    ko, both = rows["EXAONE 1.2B LoRA, 한국어만 튜닝"], rows["EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝"]
+    assert (ko, both) == (_em("exaone_koonly_vllm_chem_papers"), _em("exaone_kochem2_vllm_chem_papers"))
+    assert rows["EXAONE 1.2B, 튜닝 없음 (화학 예시 6개)"] == _em("ref_1p2b_chem_papers")
+    assert rows["휴리스틱 기준선 (모델 아님)"] == _em("heuristic_chem_papers") and rows["mT5-small 최종"] == _em("rl_v3_chem_papers") and len(rows) == 5
+    assert h["title"].index(f"{100 * ko:.1f}%") < h["title"].index(f"{100 * both:.1f}%") and "한국어 표만으로" in h["title"]
+    for needle in ("화학 문항을 한 번도 보지 않았다", "차이가 유의하지 않다", "답 없는 질문에서 갈린다", "결과를 본 뒤에 한 것이다", "다른 세션에서 한 번씩 학습했다", "검수하지 않았다"):
+        assert needle in h["caption"], needle
     earlier = json.loads((ROOT / "experiments/gpu2_2026-11-14/recovered.json").read_text(encoding="utf-8"))["evals"]["exaone_kochem_vllm_chem_papers"]["v1"]["metrics"]["verified_em"]
-    assert earlier > rows["EXAONE+"] and f"{100 * earlier:.1f}%" in h["caption"] and "학습 한 번" in h["caption"] and "검수하지 않았다" in h["caption"]
+    assert earlier > both and f"{100 * earlier:.1f}%" in h["caption"]
     record = next(s for s in DATA["sections"] if s["title"].startswith(h["more"]))
     assert record["group"] == "영어 화학" and any("한계" in n for n in record["notes"]) and any("짝 검정을 할 수 없다" in n for n in record["notes"])
+    assert any(row[0].startswith("EXAONE 1.2B LoRA, 한국어만 튜닝") for row in record["rows"]) and any("실행 전에 정해 둔 이 세 비교는 어느 것도 유의하지 않고" in n for n in record["notes"])
+    # the link opens a question on which the two tuned models part: unanswerable, the Korean-only model sent an answer
     index = json.loads((ROOT / "console/data/recorded/index.json").read_text(encoding="utf-8"))
     shown = h["link"]["href"].split("/")
-    assert shown[0] == "#workbench" and shown[2] == "kochem" and any(r["id"] == shown[1] and r["mark"] == "correct" for r in index["planners"]["kochem"]["runs"])
+    marks = {k: next(r["mark"] for r in index["planners"][k]["runs"] if r["id"] == shown[1]) for k in ("koonly", "kochem")}
+    assert shown[0] == "#workbench" and shown[2] == "koonly" and marks == {"koonly": "answered_unanswerable", "kochem": "hold_ok"}
 
 
 def test_results_that_went_against_expectations_are_listed():

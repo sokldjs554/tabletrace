@@ -117,6 +117,8 @@ def owner() -> dict:
     idx = _load("console/data/recorded/index.json")
     rows = []
     for k in idx["planner_order"]:
+        if "ko_owner" not in idx["planners"][k]["totals"]:      # a planner recorded on the chemistry documents only
+            continue
         t = idx["planners"][k]["totals"]["ko_owner"]
         rows.append({"label": idx["planners"][k]["short"], "value": t["right"], "of": t["n"], "text": f"{t['right']}/{t['n']}"})
     assert rows[0]["value"] == max(r["value"] for r in rows) and rows[-1]["label"] == "휴리스틱"
@@ -131,32 +133,41 @@ def owner() -> dict:
 
 
 def chem() -> dict:
-    """The chemistry paper tables, from the run that kept per-question predictions (notebook 2, section N)."""
-    a = _load("experiments/eval/chem_rerun_analysis.json")
-    p, before = a["chemistry"]["chem_papers"], a["earlier_run_without_predictions"]["chem_papers"]
-    tuned, plain = p["tuned"], p["untuned_six_examples"]
+    """The chemistry paper tables: the untuned model, the model tuned on Korean only and the model tuned on Korean and
+    chemistry (notebook 2, sections N and O; both runs kept per-question predictions)."""
+    a, sh = _load("experiments/eval/chem_rerun_analysis.json"), _load("experiments/eval/chem_share_analysis.json")
+    p, q, before = a["chemistry"]["chem_papers"], sh["chemistry"]["chem_papers"], a["earlier_run_without_predictions"]["chem_papers"]
+    both, plain, ko = p["tuned"], p["untuned_six_examples"], q["korean_only"]
+    kinds = sh["chemistry_three_sets_by_kind"]
+    apart, hold, rest = q["with_chemistry_vs_korean_only"], kinds["with_chemistry_vs_korean_only"]["unanswerable"], kinds["with_chemistry_vs_korean_only_on_answerable_questions"]
     rows = [{"label": "휴리스틱 기준선 (모델 아님)", "value": p["heuristic"]["rate"]},
             {"label": "mT5-small 최종", "value": p["mt5_small_final"]["rate"]},
             {"label": "EXAONE 1.2B, 튜닝 없음 (화학 예시 6개)", "value": plain["rate"]},
-            {"label": "EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝", "value": tuned["rate"], "emphasis": True}]
-    assert tuned["rate"] > p["heuristic"]["rate"] > plain["rate"]
-    assert p["tuned_vs_untuned"]["p_two_sided"] < 0.001 and p["tuned_vs_heuristic"]["p_two_sided"] < 0.001
-    assert tuned["correct"] - before["correct"] == before["this_run_minus_earlier_in_questions"] < 0      # said in the caption
+            {"label": "EXAONE 1.2B LoRA, 한국어만 튜닝", "value": ko["rate"], "emphasis": True},
+            {"label": "EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝", "value": both["rate"], "emphasis": True}]
+    # what the title and the caption say
+    assert both["rate"] > ko["rate"] > p["heuristic"]["rate"] > plain["rate"] and (q["korean_and_chemistry"]["correct"], q["korean_and_chemistry"]["n"]) == (both["correct"], both["n"])
+    assert q["korean_only_vs_untuned"]["p_two_sided"] < 0.001 and apart["p_two_sided"] > 0.05
+    assert ko["correct"] - plain["correct"] > 3 * (both["correct"] - ko["correct"])                     # "most of the difference"
+    assert hold["p_two_sided"] < 0.001 and hold["only_reference"] == 0 and rest["p_two_sided"] > 0.05 and not kinds["planned_before_the_result"]
+    assert both["correct"] < before["correct"]
     for r in rows:
         r["text"] = p1(r["value"])
-    n = tuned["n"]
+    n = both["n"]
     idx = _load("console/data/recorded/index.json")
-    shown = idx["planners"]["kochem"]["totals"]["chem_papers"]
-    assert (shown["right"], shown["n"]) == (tuned["correct"], n)                  # the demo shows the same run
-    one = next(r for r in idx["planners"]["kochem"]["runs"] if r["set"] == "chem_papers" and r["mark"] == "correct" and r["result"]["calculation"])
+    shown = {k: idx["planners"][k]["totals"]["chem_papers"] for k in ("kochem", "koonly")}
+    assert (shown["kochem"]["right"], shown["koonly"]["right"], shown["koonly"]["n"]) == (both["correct"], ko["correct"], n)      # the demo shows the same runs
+    held = {r["id"] for r in idx["planners"]["kochem"]["runs"] if r["set"] == "chem_papers" and r["mark"] == "hold_ok"}
+    one = next(r for r in idx["planners"]["koonly"]["runs"] if r["set"] == "chem_papers" and r["mark"] == "answered_unanswerable" and r["id"] in held)
     return {"id": "chem", "kind": "bars", "max": 1.0, "rows": rows,
-            "title": f"영어 화학 논문 표에서 화학을 함께 튜닝한 EXAONE은 {p1(tuned['rate'])}, 튜닝하지 않은 같은 모델은 {p1(plain['rate'])}다",
-            "caption": f"공개 논문의 표에 대한 {n}문항의 정답률(verified EM, 주어 검사 없이). 논문 표는 학습에 쓰지 않았고, 학습에 더한 화학 문항은 교과서 표로 만든 합성 문항이다. "
-                       f"같은 문항에서 튜닝한 모델만 맞힌 것이 {p['tuned_vs_untuned']['only_candidate']}개, 튜닝하지 않은 모델만 맞힌 것이 {p['tuned_vs_untuned']['only_reference']}개다. "
-                       "한국어만 튜닝한 모델은 화학 문항으로 재지 않아서, 이 차이에서 화학 문항을 더한 몫이 얼마인지는 알 수 없다. "
-                       f"학습 한 번의 결과이고 95% 구간은 {p1(tuned['ci95']['lo'])}~{p1(tuned['ci95']['hi'])}다. 문항은 AI 도구가 썼고 소유자가 검수하지 않았다. "
-                       f"결과 파일이 남지 않은 예전 실행에서는 {p1(before['verified_em'])}였고, 이번이 {-before['this_run_minus_earlier_in_questions']}문항 낮다.",
-            "more": "영어 화학에서의 EXAONE", "link": {"href": f"#workbench/{one['id']}/kochem", "text": "논문 표 문항 하나 보기"}}
+            "title": f"한국어 표만으로 튜닝한 EXAONE이 영어 화학 논문 표에서 {p1(ko['rate'])}를 맞혔다. 화학 문항을 더한 모델은 {p1(both['rate'])}다",
+            "caption": f"공개 논문의 표에 대한 {n}문항의 정답률(verified EM, 주어 검사 없이). 논문 표는 어떤 학습에도 쓰지 않았다. 한국어만 튜닝한 모델은 화학 문항을 한 번도 보지 않았다. "
+                       f"튜닝하지 않은 모델({p1(plain['rate'])})과의 차이는 대부분 한국어 문항으로 튜닝한 데서 나온다. 화학 합성 문항을 더한 모델과 한국어만 튜닝한 모델은 "
+                       f"같은 문항에서 한쪽만 맞힌 것이 {apart['only_candidate']}개와 {apart['only_reference']}개로, 이 세트에서는 차이가 유의하지 않다(p {apart['p_display']}). "
+                       f"화학 세 세트를 합쳐 보면 두 모델은 답 없는 질문에서 갈린다({hold['only_candidate']} 대 {hold['only_reference']}). 답할 수 있는 질문에서는 {rest['only_candidate']}개와 {rest['only_reference']}개다. "
+                       "이 나눔은 결과를 본 뒤에 한 것이다. 두 모델은 다른 세션에서 한 번씩 학습했다. 문항은 AI 도구가 썼고 소유자가 검수하지 않았다. "
+                       f"결과 파일이 남지 않은 예전 실행에서는 화학 문항을 더한 모델이 {p1(before['verified_em'])}였다.",
+            "more": "영어 화학에서의 EXAONE", "link": {"href": f"#workbench/{one['id']}/koonly", "text": "두 모델이 갈린 문항 하나 보기"}}
 
 
 def risk() -> dict:

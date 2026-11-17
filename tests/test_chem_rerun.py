@@ -92,7 +92,7 @@ def test_the_documents_use_the_run_that_kept_its_files_and_say_it_came_out_lower
     assert "§29" in earlier_sec and "결과 파일이 남지 않은 실행" in earlier_sec
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sec = readme[readme.index("### 9.14 화학 문항에서의 EXAONE"):readme.index("## 10. 추론 최적화")]
-    for needle in ("예전 실행의 수치보다 낮습니다", "학습 한 번입니다", "소유자가 검수하지 않았습니다", "화학 문항을 더한 몫은 가르지 못합니다"):
+    for needle in ("예전 실행의 수치보다 낮습니다", "모델마다 학습 한 번이고", "소유자가 검수하지 않았습니다"):
         assert needle in sec, needle
     # wherever the earlier number is still quoted, the same line says where it comes from
     for name in ("README.md", "docs/ONE_PAGE.md"):
@@ -103,3 +103,57 @@ def test_the_documents_use_the_run_that_kept_its_files_and_say_it_came_out_lower
     quoted = [line for line in handoff.splitlines() if f"{old}%" in line]
     assert quoted and all("결과 파일" in line or "예전" in line for line in quoted)
     assert f"\"화학 논문 표에서 {old}%\"(결과 파일이 없는 예전 실행의 수치다" in handoff and "노트북 2의 N절, 2026-11-17 준비" not in handoff.split("### 9.2")[1].split("### 9.3")[0]
+
+
+# ---- section O: a model tuned on Korean only on the same questions (what the chemistry training questions add)
+SHARE = json.loads((EVAL / "chem_share_analysis.json").read_text(encoding="utf-8"))
+
+
+def test_the_korean_only_numbers_are_counted_from_the_predictions():
+    for s in CHEM:
+        ko, both, plain = rows(f"exaone_koonly_vllm_{s}"), rows(f"exaone_kochem2_vllm_{s}"), rows(f"ref_1p2b_{s}")
+        e = SHARE["chemistry"][s]
+        assert (e["korean_only"]["n"], e["korean_only"]["correct"]) == (len(ko), sum(bool(r["verified_correct"]) for r in ko.values()))
+        assert e["korean_and_chemistry"]["correct"] == A["chemistry"][s]["tuned"]["correct"] and e["untuned_six_examples"]["correct"] == A["chemistry"][s]["untuned_six_examples"]["correct"]
+        t = e["with_chemistry_vs_korean_only"]
+        assert t["only_candidate"] == sum(bool(both[q]["verified_correct"]) and not ko[q]["verified_correct"] for q in ko)
+        assert t["only_reference"] == sum(bool(ko[q]["verified_correct"]) and not both[q]["verified_correct"] for q in ko)
+        u = e["korean_only_vs_untuned"]
+        assert u["only_candidate"] == sum(bool(ko[q]["verified_correct"]) and not plain[q]["verified_correct"] for q in ko)
+        m = json.loads((EVAL / f"exaone_koonly_vllm_{s}" / "metrics.json").read_text(encoding="utf-8"))["metrics"]
+        assert m["verified_em"] == pytest.approx(e["korean_only"]["correct"] / e["korean_only"]["n"], abs=5e-5)
+    t = SHARE["training"]
+    assert t["args_that_differ_from_the_stored_korean_only_training"] == ["out"] and t["chemistry_questions_in_training"] == 0
+    assert t["args_that_differ_from_the_korean_and_chemistry_training"] == ["corpus", "out", "train"] and t["targets_cut_short"] == 0
+
+
+def test_what_the_chemistry_questions_add_is_reported_without_overreading():
+    """The comparison fixed before the run (each set, question by question) is not significant anywhere; the split by
+    kind of question and the pooling of the two hand-written sets were made after the result and are marked so."""
+    planned = [SHARE["chemistry"][s]["with_chemistry_vs_korean_only"] for s in CHEM]
+    assert all(t["p_two_sided"] > 0.05 and t["only_candidate"] > t["only_reference"] for t in planned)
+    three, hand = SHARE["chemistry_three_sets_by_kind"], SHARE["chemistry_hand_written_together"]
+    assert three["planned_before_the_result"] is False and hand["planned_before_the_result"] is False
+    assert three["questions"] == sum(len(rows(f"exaone_koonly_vllm_{s}")) for s in CHEM)
+    for who, prefix in (("korean_only", "exaone_koonly_vllm"), ("korean_and_chemistry", "exaone_kochem2_vllm")):
+        un = [r for s in CHEM for r in rows(f"{prefix}_{s}").values() if r["gold_status"] != "answered"]
+        k = three[who]["unanswerable"]
+        assert (k["n"], k["correct"], k["wrong"]) == (len(un), sum(bool(r["verified_correct"]) for r in un), sum(not r["verified_correct"] and r["pred_status"] != "abstained" for r in un))
+    hold, rest = three["with_chemistry_vs_korean_only"]["unanswerable"], three["with_chemistry_vs_korean_only_on_answerable_questions"]
+    assert hold["only_reference"] == 0 and hold["p_two_sided"] < 0.001 and rest["p_two_sided"] > 0.05
+    assert three["korean_only_unanswerable_errors"]["answer_sent"] == three["korean_only"]["unanswerable"]["wrong"]
+    ko, plain = SHARE["chemistry"]["chem_papers"]["korean_only"], SHARE["chemistry"]["chem_papers"]["untuned_six_examples"]
+    report = (ROOT / "docs/REPORT.md").read_text(encoding="utf-8")
+    sec = report[report.index("### 29.7 화학 문항을 더한 몫"):]
+    for needle in ("실행 전에 적어 둔 것", "실행 전에 정한 세 비교는 어느 것도 유의하지 않다", "실행 전에 정한 검정이 아니다", "다른 세션에서 한 번씩 학습했다", "반복 학습은 돌리지 않았다",
+                   "소유자가 검수하지 않았다", "말은 이 결과와 맞지 않는다"):
+        assert needle in sec, needle
+    assert f">{100 * ko['rate']:.1f}<" in sec and ko["rate"] - plain["rate"] > 0.3
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    sec = readme[readme.index("### 9.14 화학 문항에서의 EXAONE"):readme.index("## 10. 추론 최적화")]
+    for needle in ("화학 문항을 한 번도 보지 않았습니다", "실행 전에 정한 비교는 유의하지 않습니다", "실행 전에 정한 검정이 아닙니다", "다른 세션에서 학습했습니다"):
+        assert needle in sec, needle
+    assert f">{100 * ko['rate']:.1f}<" in readme[:readme.index("## 목차")]                      # the top of the README gives the Korean-only number next to the other
+    handoff = (ROOT / "docs/HANDOFF.md").read_text(encoding="utf-8")
+    assert f"화학 문항 없이도 {100 * ko['rate']:.1f}%다" in handoff and "\"화학 도메인 튜닝으로" in handoff.split("**쓰면 안 되는 것.**")[-1] + handoff
+    assert "한국어만 튜닝한 EXAONE의 화학 평가**(노트북 2의 O절, 2026-11-17 준비)" not in handoff

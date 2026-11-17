@@ -80,7 +80,7 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                share = ("koonly", "kochem3")            # section O (prepared 2026-11-17): its results, once they are in
+                share = ("koonly", "kochem3")            # section O (2026-11-17, Colab): the last results that came in
                 chem = ("kochem2", "ref_1p2b_chem", *share)   # section N (2026-11-17, Colab): the last results that came in
                 loop = ("ownloop", *chem)                # section M (2026-11-16, Colab)
                 owner = ("full4", "_ko_owner", *loop)    # section L (2026-11-16)
@@ -871,14 +871,47 @@ def test_korean_only_section_does_not_mix_evaluations_of_two_trainings(tmp_path,
     assert sorted(d.name for d in (run.repo / "experiments/eval").glob("exaone_kochem2_vllm_*")) == stored      # nothing else is removed
 
 
-def test_the_notebook_names_the_one_section_left_to_run():
+def test_the_recorded_korean_only_run_matches_what_the_notebook_does_and_the_section_is_now_finished(tmp_path, monkeypatch):
+    """Section O was run on 2026-11-17 on Colab with one T4, from the commit that added the section, without the optional
+    repeat. The stored training record is the stored Korean-only training's command with another output path; the
+    stored evaluations carry the settings the notebook gives them. With the results in the repository the section
+    starts nothing, the optional repeat is still there to be run, and the notebook says what came out."""
+    info = json.loads((ROOT / "experiments/exaone_lora_koonly/train_info.json").read_text())
+    same = json.loads((ROOT / "experiments/exaone_lora_full4/train_info.json").read_text())
+    both = json.loads((ROOT / "experiments/exaone_lora_kochem2/train_info.json").read_text())
+    assert {k for k in set(info["args"]) | set(same["args"]) if info["args"].get(k) != same["args"].get(k)} == {"out"}
+    assert {k for k in set(info["args"]) | set(both["args"]) if info["args"].get(k) != both["args"].get(k)} == {"train", "corpus", "out"}
+    assert (info["n_examples"], info["steps"], info["loop"], info["targets_missing"], info["targets_cut_short"]) == (same["n_examples"], same["steps"], "builtin", 0, 0)
+    assert not any("chem" in f for f in info["args"]["train"] + info["args"]["corpus"])            # the model never saw a chemistry question or document
+    run_info = json.loads((ROOT / "experiments/run_info_2_share.json").read_text())
+    assert run_info["platform"] == "colab" and run_info["gpus"] == ["Tesla T4"] and run_info["finished"].startswith("2026-11-17")
+    planned = DryRun(tmp_path / "before", monkeypatch, cloned_results=BEFORE_SHARE)
+    planned.run_all(only=SHARE_CELL)
+    for out in (o for o in planned.outputs() if o.startswith("experiments/eval/")):
+        meta = json.loads((ROOT / out / "metrics.json").read_text())["meta"]                     # every evaluation the notebook plans is stored
+        cmd = next(c for k, c in planned.calls if k == "eval" and c.split("--out ")[1].split()[0] == out)
+        assert meta["row_select"] == ("overlap" if "chem_papers" in out else "first") and meta["max_in"] == 672 and not meta["few_shot"], out
+        assert meta["entity_check"] is out.endswith("_ec") and bool(meta["replay_from"]) is out.endswith("_ec"), out
+        assert (" ".join(meta["corpus"]), " ".join(meta["data"])) == re.search(r"--corpus (.*?) --data (.*?) --out", cmd).groups(), out
+    assert not list((ROOT / "experiments/eval").glob("exaone_kochem3_vllm_*"))                   # the repeat was not run
+    run = DryRun(tmp_path / "now", monkeypatch, cloned_results=True)
+    assert run.run_all(only=SHARE_CELL) == collections.Counter()
+    run.sections = [(i, src.replace("RUN_KOCHEM_REPEAT = False", "RUN_KOCHEM_REPEAT = True")) for i, src in run.sections]
+    counts = run.run_all(only=SHARE_CELL)                                                      # asked for later: only the repeat is trained
+    assert counts["train"] == 1 and counts["eval"] == 12 and all("kochem3" in o for o in run.outputs())
+
+
+def test_the_notebook_says_what_section_o_gave_and_that_nothing_is_left_to_run():
     cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
     intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## O."))
-    if not list((ROOT / "experiments/eval").glob("exaone_koonly_vllm_*")):
-        row = next(line for line in intro.split("\n") if line.startswith("| O |"))
-        assert "지금 돌릴 것은 O절 하나입니다" in intro and "아직 돌리지 않음" in row and "아직 돌려 본 적이 없습니다" in section
+    row = next(line for line in intro.split("\n") if line.startswith("| O |"))
+    assert "지금 돌릴 것은 없습니다" in intro and "2026-11-17에 Colab에서 끝남" in row and "아직 돌리지 않" not in intro + section
+    assert "반복 학습" in row and "돌리지 않았습니다" in section                                    # the optional repeat is said to be not run
     rerun = json.loads((ROOT / "experiments/eval/chem_rerun_analysis.json").read_text())["chemistry"]["chem_papers"]
-    assert f"{100 * rerun['tuned']['rate']:.1f}%" in section and f"{100 * rerun['untuned_six_examples']['rate']:.1f}%" in section      # the numbers the section sets out from
+    assert f"{100 * rerun['tuned']['rate']:.1f}%" in section and f"{100 * rerun['untuned_six_examples']['rate']:.1f}%" in section      # the numbers the section set out from
+    share = json.loads((ROOT / "experiments/eval/chem_share_analysis.json").read_text())
+    ko = share["chemistry"]["chem_papers"]["korean_only"]
+    assert f"{ko['correct']}/{ko['n']}" in section and f"{100 * ko['rate']:.1f}%" in section and "어디서도 유의하지 않고" in section and "결과를 본 뒤에 나눠 본 것" in section
 
 
 def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_way(tmp_path):

@@ -17,11 +17,11 @@
    "abstain": 1
   },
   "kept": 26,
-  "stored_runs": 66,
+  "stored_runs": 68,
   "largest_rate_gain_without_flagged": 0.0462,
   "largest_rate_loss_without_flagged": -0.0462,
-  "runs_with_a_flagged_question_right": 58,
-  "pairs_of_runs_ranked_strictly": 1980,
+  "runs_with_a_flagged_question_right": 60,
+  "pairs_of_runs_ranked_strictly": 2100,
   "pairs_whose_order_reverses_without_flagged": 7
  },
  "runs_on_the_ai_written_set": {
@@ -548,6 +548,42 @@
    "rate_change": -0.0129
   },
   "exaone_kochem2_vllm_ko_custom_ec": {
+   "all": {
+    "n": 30,
+    "correct": 20,
+    "rate": 0.6667
+   },
+   "without_flagged": {
+    "n": 26,
+    "correct": 17,
+    "rate": 0.6538
+   },
+   "flagged": {
+    "n": 4,
+    "correct": 3,
+    "rate": 0.75
+   },
+   "rate_change": -0.0129
+  },
+  "exaone_koonly_vllm_ko_custom": {
+   "all": {
+    "n": 30,
+    "correct": 19,
+    "rate": 0.6333
+   },
+   "without_flagged": {
+    "n": 26,
+    "correct": 16,
+    "rate": 0.6154
+   },
+   "flagged": {
+    "n": 4,
+    "correct": 3,
+    "rate": 0.75
+   },
+   "rate_change": -0.0179
+  },
+  "exaone_koonly_vllm_ko_custom_ec": {
    "all": {
     "n": 30,
     "correct": 20,

@@ -98,6 +98,11 @@ PLANNERS = [
               "chem_custom": "exaone_kochem2_vllm_chem_custom", "chem_papers": "exaone_kochem2_vllm_chem_papers"},
      "where": "Colab Tesla T4의 vLLM 서버",
      "note": "한국어 학습 문항에 화학 합성 문항을 더해 튜닝한 모델입니다(한국어 test 86.1%). 화학 문서에서 볼 수 있는 EXAONE은 이 모델입니다."},
+    {"key": "koonly", "model_id": "EXAONE-4.0-1.2B LoRA (한국어만 튜닝, 화학 문항 없이)", "short": "EXAONE LoRA · 한국어만",
+     "runs": {"chem_custom": "exaone_koonly_vllm_chem_custom", "chem_papers": "exaone_koonly_vllm_chem_papers"},
+     "where": "Colab Tesla T4의 vLLM 서버",
+     "note": "화학 문항을 한 번도 보지 않고 한국어 학습 문항만으로 튜닝한 모델입니다. 화학 문항을 더한 모델과 견주려고 화학 문서에만 실었습니다. "
+             "한국어 문항에서는 같은 학습 명령으로 만든 \"EXAONE 1.2B LoRA\"가 그 자리에 있습니다."},
     {"key": "ref7", "model_id": "EXAONE-3.5-7.8B-Instruct AWQ (튜닝 없음, 예시 6개)", "short": "EXAONE 7.8B 튜닝 없음",
      "runs": {"ko_owner": "ref_7p8b_awq_ko_owner", "ko_custom": "ref_7p8b_awq_ko_custom"},
      "where": "Kaggle Tesla T4의 vLLM 서버", "note": "튜닝하지 않고 프롬프트에 예시 6개를 넣었습니다."},
@@ -124,7 +129,7 @@ EXAONE_BUDGET = ("models/exaone-4.0-1.2b-tokenizer", 672, "first")
 EXAONE_PAPERS = ("models/exaone-4.0-1.2b-tokenizer", 672, "overlap")      # the paper tables: rows chosen by overlap with the question (notebook 2, sections G and N)
 BUDGETS = {
     "exaone": {"*": EXAONE_BUDGET}, "ownloop": {"*": EXAONE_BUDGET}, "ref7": {"*": EXAONE_BUDGET},
-    "kochem": {"*": EXAONE_BUDGET, "chem_papers": EXAONE_PAPERS}, "ref1": {"*": EXAONE_BUDGET, "chem_papers": EXAONE_PAPERS},
+    "kochem": {"*": EXAONE_BUDGET, "chem_papers": EXAONE_PAPERS}, "koonly": {"*": EXAONE_BUDGET, "chem_papers": EXAONE_PAPERS}, "ref1": {"*": EXAONE_BUDGET, "chem_papers": EXAONE_PAPERS},
     "neural": {"*": ("experiments/rl_v3/model", 512, "first"), "chem_papers": ("experiments/rl_v3/model", 512, "overlap")},
     "heuristic": {"*": (None, 512, "first"), "chem_papers": (None, 4096, "first")},     # the paper tables were read whole
 }

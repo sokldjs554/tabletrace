@@ -70,3 +70,11 @@
   - 묶음의 `run_info_2.json`은 `run_info_2_chem.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_chem.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
   - `scripts/replay_check.py --session chem`으로 다시 검증했다. 18회, 2,214문항에서 판정이 다른 문항은 0개다(`replay_check_chem.json`).
   - 분석은 `scripts/chem_rerun_analysis.py`가 한다(`chem_rerun_analysis.json`). 2026-11-14의 같은 실험(G절)은 수치만 남아 있어 나란히 놓을 수만 있다.
+- **2번 노트북, 2026-11-17 뒤의 세션 (Colab Tesla T4 ×1, 커밋 `50b1b7e`, `experiments/run_info_2_share.json`)**: O절. 한국어만 튜닝한 EXAONE을 화학 문항으로 평가. 새 파일은 평가 12건(`exaone_koonly_vllm_{chem_custom,chem_syndev,chem_papers,ko_test,ko_custom,ko_owner}`와 각각의 `_ec`)과 학습 기록 `experiments/exaone_lora_koonly/train_info.json`(`"loop": "builtin"`, 3,587문항, 224걸음, 정답이 잘린 예제 0)이다. 묶음의 나머지 199개 파일은 저장소의 것과 같았다.
+  - 학습 명령에서 `exaone_full4`와 다른 것은 `--out`뿐이다. `exaone_kochem2`(N절)와는 `--train`, `--corpus`, `--out`이 다르다. 이 모델의 학습 파일과 문서 파일에 화학은 없다.
+  - 평가 명령은 N절이 `exaone_kochem2`를 평가한 명령과 같다(병합 가중치를 vLLM으로 올려 동시 16건, 논문 표는 `--row-select overlap`, 예시 없음).
+  - 선택 항목인 반복 학습(`RUN_KOCHEM_REPEAT`, `exaone_kochem3`)은 돌리지 않았다. 묶음에 그 결과는 없다.
+  - 묶음은 소유자가 대화에 올렸다(`gpu_results_2_15.tgz`, 3,438,462바이트, SHA-256 `d1eed075…`). 묶음 안의 코드는 실행하지 않았고, 결과 파일만 꺼내 넣었다.
+  - 묶음의 `run_info_2.json`은 `run_info_2_share.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_share.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
+  - `scripts/replay_check.py --session share`로 다시 검증했다. 12회, 1,866문항에서 판정이 다른 문항은 0개다(`replay_check_share.json`).
+  - 분석은 `scripts/chem_share_analysis.py`가 한다(`chem_share_analysis.json`). 두 튜닝 모델은 다른 세션에서 한 번씩 학습한 것이다.

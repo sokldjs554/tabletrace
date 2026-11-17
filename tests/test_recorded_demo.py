@@ -67,7 +67,7 @@ def test_stored_model_outputs_match_the_evaluation_they_come_from():
     run must be that evaluation's result: the same output, status, answer, evidence cells and verdict."""
     assert INDEX["settings"]["entity_check"] is False and INDEX["settings"]["fallback"] is False
     stored_planners = {k: p for k, p in INDEX["planners"].items() if p["source"]}
-    assert set(stored_planners) == {"exaone", "ownloop", "kochem", "ref7", "ref1", "neural"}
+    assert set(stored_planners) == {"exaone", "ownloop", "kochem", "koonly", "ref7", "ref1", "neural"}
     for key, planner in stored_planners.items():
         assert set(planner["source"]["where"]) == set(planner["source"]["eval_dirs"]) == set(planner["totals"])
         for set_key, rel in planner["source"]["eval_dirs"].items():
@@ -98,7 +98,7 @@ def test_totals_shown_are_the_reported_numbers():
             runs = [r for r in planner["runs"] if r["set"] == set_key]
             assert t["n"] == len(runs) == next(s["n"] for s in DATA["sets"] if s["key"] == set_key), (key, set_key)
             assert t["right"] == sum(r["mark"] in RIGHT for r in runs)
-    owner = {k: p["totals"]["ko_owner"]["right"] for k, p in INDEX["planners"].items()}
+    owner = {k: p["totals"]["ko_owner"]["right"] for k, p in INDEX["planners"].items() if "ko_owner" in p["totals"]}
     assert owner == {"exaone": 24, "ownloop": 24, "kochem": 22, "ref7": 20, "ref1": 13, "neural": 8, "heuristic": 7}
     analysis = json.loads((ROOT / "experiments/eval/owner_eval_analysis.json").read_text(encoding="utf-8"))
     gpu = analysis["gpu_planners"]
@@ -108,21 +108,24 @@ def test_totals_shown_are_the_reported_numbers():
     assert gpu["exaone_1p2b_untuned"]["owner_first_pass"]["correct"] == owner["ref1"]
 
 
-def test_the_chemistry_documents_show_an_exaone_model_with_the_numbers_of_the_rerun():
-    """The chemistry sets carry the EXAONE tuned on Korean and chemistry and the untuned 1.2B, from the run that kept
-    per-question predictions (notebook 2, section N); their totals are the ones experiments/eval/chem_rerun_analysis.json reports."""
+def test_the_chemistry_documents_show_the_exaone_models_with_the_numbers_of_the_reruns():
+    """The chemistry sets carry three EXAONE planners from the runs that kept per-question predictions (notebook 2,
+    sections N and O): tuned on Korean and chemistry, tuned on Korean only, untuned. Their totals are the ones the
+    analysis files report."""
     rerun = json.loads((ROOT / "experiments/eval/chem_rerun_analysis.json").read_text(encoding="utf-8"))
+    share = json.loads((ROOT / "experiments/eval/chem_share_analysis.json").read_text(encoding="utf-8"))
     for set_key in ("chem_custom", "chem_papers"):
         shown = {k: p["totals"][set_key]["right"] for k, p in INDEX["planners"].items() if set_key in p["totals"]}
-        assert set(shown) == {"kochem", "ref1", "neural", "heuristic"}
         r = rerun["chemistry"][set_key]
-        assert shown == {"kochem": r["tuned"]["correct"], "ref1": r["untuned_six_examples"]["correct"],
+        assert shown == {"kochem": r["tuned"]["correct"], "koonly": share["chemistry"][set_key]["korean_only"]["correct"], "ref1": r["untuned_six_examples"]["correct"],
                          "neural": r["mt5_small_final"]["correct"], "heuristic": r["heuristic"]["correct"]}
         assert max(shown, key=shown.get) == "kochem"          # what "auto" shows on a chemistry question
-        for key in ("kochem", "ref1"):
+        for key, finished in (("kochem", rerun["finished"]), ("ref1", rerun["finished"]), ("koonly", share["finished"])):
             source = INDEX["planners"][key]["source"]
-            assert "Colab" in source["where"][set_key] and source["generated"][set_key] == rerun["finished"][:10]
+            assert "Colab" in source["where"][set_key] and source["generated"][set_key] == finished[:10]
     assert "Kaggle" in INDEX["planners"]["ref1"]["source"]["where"]["ko_owner"]
+    # the Korean-only model is shown on the chemistry documents only; on the Korean sets the same command's model is "exaone"
+    assert set(INDEX["planners"]["koonly"]["totals"]) == {"chem_custom", "chem_papers"} and "화학 문서에만" in INDEX["planners"]["koonly"]["note"]
 
 
 def test_a_long_table_is_shown_to_the_planner_as_the_evaluation_showed_it():
@@ -159,7 +162,7 @@ def test_evidence_cells_carry_how_the_number_parser_read_them():
 def test_console_offers_the_stored_planners_and_marks_cited_cells():
     js = (ROOT / "console" / "app.js").read_text(encoding="utf-8")
     css = (ROOT / "console" / "styles.css").read_text(encoding="utf-8")
-    assert INDEX["planner_order"] == ["exaone", "ownloop", "kochem", "ref7", "ref1", "neural", "heuristic"] and "planner_order" in js
+    assert INDEX["planner_order"] == ["exaone", "ownloop", "kochem", "koonly", "ref7", "ref1", "neural", "heuristic"] and "planner_order" in js
     assert "is-cited" in js and "td.is-cited" in css and "badge-fix" in js and ".badge-fix" in css
     assert "is-gold" in js and "td.is-gold" in css and "renderCompare" in js and "renderProposal" in js and "renderMatrix" in js
 
