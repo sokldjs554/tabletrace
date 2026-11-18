@@ -10,6 +10,7 @@ outputs, and reports every input on which they disagree. A rewrite that passes t
   python scripts/rewrite_parity.py program      # agent/program.py: parse()+serialize() on every stored model output and gold program
   python scripts/rewrite_parity.py cells        # tools/cells.py: normalize_text, lookup_cell, find_cells, row/column overlap scores over the corpora and every question
   python scripts/rewrite_parity.py verifier     # verify/verifier.py: resolve() on every stored model output (8.6k) and gold program, 3 settings each; find_span probes
+  python scripts/rewrite_parity.py metrics      # eval/metrics.py: summarize() on every stored evaluation (whole, halves, by source), answer_match on every stored answer pair and probes, cells_match on every stored cell pair
   python scripts/rewrite_parity.py numbers --ref <commit>     # compare against another commit
 
 Each side runs in its own Python process (reference from `git archive <ref> src`), so the two packages
@@ -172,6 +173,39 @@ elif mode == "verifier":
                 for probe in (t[10:30], t[10:30].upper(), t[10:30].replace(" ", ""), t[10:30].replace(" ", "  "), " " + t[200:215] + " ", "zzz_not_there", "", t[:5] * 50):
                     sp = find_span(probe, t, "p")
                     out[f"span:{t[:20]}:{probe[:40]}"] = None if sp is None else [sp.passage_id, sp.start, sp.end, sp.text]
+elif mode == "metrics":
+    from tabletrace.eval.metrics import answer_match, cells_match, summarize
+    pairs, cell_pairs, golds = set(), set(), set()
+    for path in sorted(glob.glob(f"{root}/experiments/eval/*/predictions.jsonl")):
+        name = path.split("/")[-2]
+        rows = [json.loads(line) for line in open(path, encoding="utf-8")]
+        # as JSON text, so a different key order counts as a difference (metrics.json would not come out the same)
+        out["summarize:" + name] = json.dumps(summarize(rows), ensure_ascii=False)
+        out["half:" + name] = [json.dumps(summarize(rows[: len(rows) // 2]), ensure_ascii=False), json.dumps(summarize(rows[len(rows) // 2:]), ensure_ascii=False)]
+        out["nocategory:" + name] = json.dumps(summarize([{k: v for k, v in r.items() if k != "category"} for r in rows[:40]]), ensure_ascii=False)
+        for r in rows:
+            p, g = r.get("pred_answer"), r.get("gold_answer")
+            pairs.add((p, g))
+            pairs.add((g, p))
+            golds.add(g)
+            cell_pairs.add((tuple(r.get("pred_cells") or []), tuple(r.get("gold_cells") or [])))
+    # around every gold answer: unit added, case and spacing changed, and numbers moved to just inside and outside the tolerance
+    from tabletrace.tools.numbers import parse_number
+    for g in sorted(x for x in golds if x is not None):
+        probes = [g + " 명", g.upper(), "  " + g + "  ", g.replace(" ", ""), None]
+        n = parse_number(g)
+        if n is not None:
+            for f in (0.995, 0.9951, 1.0049, 1.005, 1.0051, -1.0):
+                probes.append(repr(n.value * f) + (" " + n.unit if n.unit else ""))
+            probes += [repr(n.value) + " xyz", repr(n.value + 1e-6), repr(n.value + 2e-6)]
+        for q in probes:
+            pairs.add((q, g))
+    for p, g in sorted(pairs, key=repr):
+        out[f"answer:{p!r}|{g!r}"] = answer_match(p, g)
+    for pc, gc in sorted(cell_pairs):
+        out[f"cells:{list(pc)}|{list(gc)}"] = cells_match(list(pc), list(gc))
+        out[f"cells-swap:{list(gc)}|{list(pc)}"] = cells_match(list(gc), list(pc))
+    out["summarize:empty"] = json.dumps(summarize([]))
 elif mode == "program":
     from tabletrace.agent.program import ProgramParseError, parse, serialize
     raws = set()
@@ -198,7 +232,7 @@ def run(mode: str, src: Path) -> dict:
 
 def main() -> None:
     args = sys.argv[1:]
-    if not args or args[0] not in ("numbers", "calculator", "program", "cells", "verifier"):
+    if not args or args[0] not in ("numbers", "calculator", "program", "cells", "verifier", "metrics"):
         sys.exit(__doc__)
     mode = args[0]
     ref = args[args.index("--ref") + 1] if "--ref" in args else "origin/main"
