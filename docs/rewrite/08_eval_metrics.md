@@ -1,5 +1,7 @@
 # 7단계 명세 — `eval/metrics.py` (평가 지표)
 
+**끝났다(2026-11-19).** 소유자가 이 명세와 테스트만 보고 다시 써서 PR #8로 합쳤다. 기록은 `docs/rewrite/LOG.md`.
+
 이 프로젝트의 모든 보고 수치(verified EM, 근거 셀 정확도, 보류 재현율 등)는 이 파일의 세 함수가 계산한다. 평가 러너(`eval/run.py`)가 문항마다 기록을 만들고, `summarize`가 그 기록에서 `metrics.json`의 지표를 낸다. `answer_match`는 평가 러너, 본인이 쓴 강화학습 보상(`training/evidence_reward.py`), 근거 오류 분석, 대화 평가, 브라우저 데모가 함께 쓴다.
 
 테스트는 `tests/test_eval_metrics.py`(지금 구현으로 모두 통과한다). **끝났는지는 `python scripts/rewrite_parity.py metrics`로 본다.** 저장된 평가 276건 전체의 `summarize` 결과와, 저장된 답 쌍 1만 5천여 개의 `answer_match`, 셀 쌍 전부의 `cells_match`를 원본과 비교한다. 차이 0개여야 저장된 `metrics.json`이 그대로 재현된다.

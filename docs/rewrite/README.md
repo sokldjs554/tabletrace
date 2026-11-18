@@ -20,7 +20,7 @@
 | 4 | `verify/verifier.py` | 289 | `tests/test_program_verifier.py` | 프로젝트의 핵심. 답·근거·계산 검증과 보류 결정, 개체 일치 검사 |
 | 5 | `agent/heuristic.py` | 113 | `tests/test_api.py` 일부 | 어휘 겹침 기준선 |
 | 6 | `retrieval/tokenize.py`, `bm25.py`, `index.py` | 66 + 50 + 66 | `tests/test_retrieval.py` | 검색 |
-| 7 | `eval/metrics.py` | 71 | `tests/test_eval_metrics.py`(59개) + `rewrite_parity.py metrics` | 지표 계산. 모든 보고 수치가 여기서 나온다. **준비됨(2026-11-18)**: 명세 `08_eval_metrics.md` |
+| 7 | `eval/metrics.py` | 71 | `tests/test_eval_metrics.py`(59개) + `rewrite_parity.py metrics` | 지표 계산. 모든 보고 수치가 여기서 나온다. **완료(2026-11-19, PR #8)**: 명세 `08_eval_metrics.md` |
 | 8 | `tools/registry.py`, `agent/graph.py` | 94 + 177 | `tests/test_api.py` | 도구 등록과 LangGraph 그래프 |
 | 9 | `service/jobs.py`, `service/app.py` | 96 + 220 | `tests/test_api.py` | 비동기 작업 러너와 FastAPI |
 
@@ -30,7 +30,7 @@
 
 **E (평가 문항 과제, 완료: 2026-11-16, PR #7)**: 코드가 아니라 평가 문항이다. AI 도구가 쓴 한국어 수작업 30문항을 본인이 검수하고(`data/ko/custom_eval_review.jsonl`), 시험 표로 새 문항을 직접 쓴다(`data/ko/owner_eval.jsonl`). 안내는 `docs/rewrite/07_owner_eval_questions.md`, 도구는 `scripts/owner_eval_tool.py`(표를 보여 주고 파일을 검사할 뿐 질문은 쓰지 않는다), 검사는 `tests/test_owner_eval.py`와 `scripts/check_data.py`다. 끝나면 "평가 문항을 직접 썼다"가 그 파일에 한해 사실이 된다.
 
-**7단계(지표)는 2026-11-18에 준비했다.** 명세는 `docs/rewrite/08_eval_metrics.md`, 테스트는 `tests/test_eval_metrics.py`(59개, 지금 구현으로 통과), 동작 비교는 `python scripts/rewrite_parity.py metrics`(저장된 평가 276건의 지표, 답 쌍과 셀 쌍 6만 2천여 개)다. 5·6단계보다 먼저 해도 된다. 의존하는 `normalize_text`와 `parse_number`는 이미 본인이 쓴 것이다.
+**7단계(지표)는 끝났다(2026-11-19, PR #8).** 명세는 `docs/rewrite/08_eval_metrics.md`, 테스트는 `tests/test_eval_metrics.py`(59개), 동작 비교는 `python scripts/rewrite_parity.py metrics`(저장된 평가 276건의 지표, 답 쌍과 셀 쌍 6만 2천여 개, 차이 0)다. 5·6단계는 순서를 건너뛰어 아직 하지 않았다.
 
 1~4단계(약 640줄)가 끝나면 "검증 파이프라인의 핵심을 직접 구현했다"가 사실이 된다. T는 2026-11-12에 끝났으므로 "강화학습 보상과 손실, 학습 루프를 직접 썼다"는 사실이다(그 세 파일에 한해서. 이를 불러 쓰는 스크립트는 AI 작성). 9단계까지 가면 서비스 계층도 포함된다. 그 밖의 학습·벤치 스크립트(`training/sft.py`, `training/rl_grpo.py`, `bench/`, `scripts/`)와 문서는 이 계획에 없고 AI 작성으로 남는다.
 
