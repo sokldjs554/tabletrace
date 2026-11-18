@@ -1,0 +1,105 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "max_in": 672,
+ "runs": {
+  "exaone_kochem3_vllm_chem_custom": {
+   "first_pass": {
+    "questions": 32,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6562,
+    "verified_em_replayed": 0.6562
+   },
+   "subject_check": {
+    "questions": 32,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6562,
+    "verified_em_replayed": 0.6562
+   }
+  },
+  "exaone_kochem3_vllm_chem_syndev": {
+   "first_pass": {
+    "questions": 80,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.925,
+    "verified_em_replayed": 0.925
+   },
+   "subject_check": {
+    "questions": 80,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.925,
+    "verified_em_replayed": 0.925
+   }
+  },
+  "exaone_kochem3_vllm_chem_papers": {
+   "first_pass": {
+    "questions": 62,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7581,
+    "verified_em_replayed": 0.7581
+   },
+   "subject_check": {
+    "questions": 62,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7581,
+    "verified_em_replayed": 0.7581
+   }
+  },
+  "exaone_kochem3_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8755,
+    "verified_em_replayed": 0.8755
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8469,
+    "verified_em_replayed": 0.8469
+   }
+  },
+  "exaone_kochem3_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7333,
+    "verified_em_replayed": 0.7333
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7333,
+    "verified_em_replayed": 0.7333
+   }
+  },
+  "exaone_kochem3_vllm_ko_owner": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7667,
+    "verified_em_replayed": 0.7667
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7333,
+    "verified_em_replayed": 0.7333
+   }
+  }
+ },
+ "replays": 12,
+ "questions_checked": 1866,
+ "questions_that_differ": 0
+}

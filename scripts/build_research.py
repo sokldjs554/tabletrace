@@ -566,11 +566,34 @@ def gpu3_cards() -> list[dict]:
                 f"화학 문항을 더한 모델은 {three['korean_and_chemistry']['unanswerable']['correct']}개를 보류했다(한쪽만 맞힌 문항 {hold['only_candidate']} 대 {hold['only_reference']}, p {hold['p_display']}). "
                 f"답할 수 있는 질문 {rest['n']}개에서는 한쪽만 맞힌 문항이 {rest['only_candidate']}개와 {rest['only_reference']}개다(p {rest['p_display']}). 이 나눔은 세트마다의 결과를 본 뒤에 한 것이다.",
                 "읽는 법. 답할 수 있는 질문에서는 두 모델 사이에 검출되는 차이가 없다. 표를 읽고 프로그램을 쓰는 것은 한국어 문항으로 튜닝한 것만으로 영어 화학 표에서도 되었다. "
-                "화학 합성 문항이 보탠 것으로 보이는 것은 화학 표에서 답이 없을 때 보류하는 것이다. 두 모델은 다른 세션에서 한 번씩 학습했고, 같은 세션에서 반복하지 않았다."]
+                "화학 합성 문항이 보탠 것으로 보이는 것은 화학 표에서 답이 없을 때 보류하는 것이다. 두 모델은 다른 세션에서 한 번씩 학습했다(화학 문항을 더한 학습의 반복은 아래)."]
             assert hw["planned_before_the_result"] is False and all(sc[s]["with_chemistry_vs_korean_only"]["p_two_sided"] > 0.05 for s in sets)
             assert all(sc[s]["with_chemistry_vs_korean_only"]["only_candidate"] > sc[s]["with_chemistry_vs_korean_only"]["only_reference"] for s in sets) and rest["p_two_sided"] > 0.05
             share_files = (f" 한국어만 튜닝한 모델: experiments/eval/exaone_koonly_vllm_*/, experiments/eval/chem_share_analysis.json, experiments/exaone_lora_koonly/train_info.json"
                            f"(같은 날 Colab T4 한 장, 학습 {sh['training']['minutes']}분. 평가 {rps['replays']}건, {rps['questions_checked']:,}문항을 다시 검증해 다른 판정 {rps['questions_that_differ']}개)")
+        # the Korean-and-chemistry training once more (2026-11-18), with what to look at written down before it (commit b3bffd2)
+        rpt, rpr = load(EXP / "eval" / "chem_repeat_analysis.json"), load(EXP / "eval" / "replay_check_chemrepeat.json")
+        if sh and rps and rpt and rpr:
+            rc, un, an, ptab = rpt["chemistry"], rpt["checks"]["unanswerable"], rpt["checks"]["answerable"], rpt["paper_tables"]
+            assert un["holds"] and an["as_expected"] and ptab["headline_stays"] == "first_run_with_files"
+            rows.insert(1, ["EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝, 같은 설정으로 다시 학습 (2026-11-18)"] + [cell(rc[s]["repeat"]) for s in sets])
+
+            def pairs(key: str) -> str:
+                return ", ".join(f"{name} {rc[s][key]['only_candidate']} 대 {rc[s][key]['only_reference']}(p {rc[s][key]['p_display']})"
+                                 for s, name in (("chem_papers", "논문 표"), ("chem_custom", "교과서 수작업"), ("chem_syndev", "합성 개발")))
+            kr = rpt["korean"]["ko_test"]
+            share_notes += [
+                f"미리 적어 두고 한 확인(2026-11-18). 답 없는 질문에서 갈린다는 것은 결과를 본 뒤에 찾은 것이라, 무엇을 볼지 커밋 {rpt['written_down_before_the_run']['commit']}에 적어 두고 "
+                f"화학 문항을 더한 학습을 같은 명령으로 한 번 더 했다. 다시 학습한 모델은 답 없는 질문 {un['n']}개 가운데 {un['withheld_right']['new']}개를 보류했다"
+                f"(처음 학습 {un['withheld_right']['first']}개, 한국어 전용 모델 {un['withheld_right']['ko_only']}개). 한국어 전용 모델과 한쪽만 맞힌 문항은 "
+                f"{un['repeat_vs_korean_only']['only_candidate']} 대 {un['repeat_vs_korean_only']['only_reference']}(p {un['repeat_vs_korean_only']['p_display']})로 확인됐다. "
+                f"답할 수 있는 질문 {an['n']}개에서는 {an['repeat_vs_korean_only']['only_candidate']} 대 {an['repeat_vs_korean_only']['only_reference']}(p {an['repeat_vs_korean_only']['p_display']})로 예상대로 유의한 차이가 없다.",
+                f"다시 학습한 모델의 세트마다 짝 비교. 한국어 전용 모델과는 {pairs('repeat_vs_korean_only')}. 처음 학습과는 {pairs('repeat_vs_first_training')}. "
+                f"논문 표의 맞힌 수는 화학 문항을 더한 학습 세 번에서 {ptab['earlier_run_without_files']}개(결과 파일 없음), {ptab['first_run_with_files']}개, {ptab['repeat']}개다. 대표 수치는 미리 적어 둔 대로 {ptab['first_run_with_files']}개를 둔다. "
+                f"한국어 test는 {cell(kr['repeat'])}로 지금까지 가장 높지만 처음 학습과 {kr['repeat_vs_first_training']['only_candidate']} 대 {kr['repeat_vs_first_training']['only_reference']}(p {kr['repeat_vs_first_training']['p_display']})다.",
+                "이 확인이 말하는 것은 화학 문항을 더한 학습을 다시 해도 답 없는 질문에서 같은 차이가 났다는 것까지다. 한국어 전용 모델은 한 번만 학습했고 문항은 그대로다."]
+            share_files += (f" 다시 학습한 모델: experiments/eval/exaone_kochem3_vllm_*/, experiments/eval/chem_repeat_analysis.json, experiments/exaone_lora_kochem3/train_info.json"
+                            f"(2026-11-18 Colab T4 한 장, 학습 {rpt['training']['minutes']}분. 평가 {rpr['replays']}건, {rpr['questions_checked']:,}문항을 다시 검증해 다른 판정 {rpr['questions_that_differ']}개)")
         pp, pc = ch["chem_papers"], ch["chem_custom"]
         kinds, book, plain = pp["tuned"]["by_kind"], pc["tuned"]["by_kind"], pp["untuned_six_examples"]["by_kind"]
         others_text = [pc[k]["by_kind"]["text"]["correct"] for k in ("untuned_six_examples", "heuristic", "mt5_small_final")]
@@ -579,7 +602,7 @@ def gpu3_cards() -> list[dict]:
         out.append({"title": "영어 화학에서의 EXAONE — 문항별 예측을 남긴 실행 (2026-11-17)", "status": "done",
                     "description": f"한국어 학습 문항 {tr['korean_examples_in_the_full_data_training']:,}개에 화학 합성 문항 {tr['chemistry_examples_added']}개를 더해 EXAONE 1.2B를 튜닝하고 화학 세 세트로 쟀다. "
                                    "같은 문항을 튜닝하지 않은 1.2B에도 물었다(프롬프트의 예시 6개는 화학 합성 학습 문항에서 골랐다). 2026-11-14의 같은 실험은 결과 파일이 남지 않아 "
-                                   "실행 화면의 출력에서 수치만 되살렸었다. 이번에는 문항별 예측이 남아서 문항 단위로 견줄 수 있다. 같은 날 한국어만 튜닝한 모델도 같은 문항으로 쟀다. 검증기 v1, 주어 검사 없이.",
+                                   "실행 화면의 출력에서 수치만 되살렸었다. 이번에는 문항별 예측이 남아서 문항 단위로 견줄 수 있다. 같은 날 한국어만 튜닝한 모델도 같은 문항으로 쟀고, 다음 날 화학 문항을 더한 학습을 한 번 더 했다. 검증기 v1, 주어 검사 없이.",
                     "columns": ["플래너", f"논문 표 ({pp['tuned']['n']}문항)", f"교과서 표 수작업 ({pc['tuned']['n']}문항)", f"화학 합성 개발 ({ch['chem_syndev']['tuned']['n']}문항)"], "rows": rows,
                     "notes": [*share_notes,
                               f"논문 표에서 한국어와 화학을 함께 튜닝한 모델만 맞힌 문항이 {pp['tuned_vs_untuned']['only_candidate']}개, 튜닝하지 않은 모델만 맞힌 문항이 {pp['tuned_vs_untuned']['only_reference']}개다"

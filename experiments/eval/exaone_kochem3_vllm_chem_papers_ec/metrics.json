@@ -1,0 +1,80 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "replay of experiments/eval/exaone_kochem3_vllm_chem_papers",
+  "data": [
+   "data/chem_papers/custom_eval.jsonl"
+  ],
+  "corpus": [
+   "data/chem_papers/documents.jsonl"
+  ],
+  "n": 62,
+  "wall_s": 0.0,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "overlap",
+  "max_in": 672,
+  "tokenizer": "/content/tabletrace/experiments/exaone_lora_kochem3/merged",
+  "evidence_repair": true,
+  "entity_check": true,
+  "column_check": false,
+  "replay_from": "experiments/eval/exaone_kochem3_vllm_chem_papers",
+  "finished": "2026-11-18T04:55:56",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 62,
+  "n_answerable": 52,
+  "n_gold_abstain": 10,
+  "n_calc": 19,
+  "n_lookup": 33,
+  "verified_em": 0.7581,
+  "answer_em_answerable": 0.8077,
+  "raw_answer_em_answerable": 0.6923,
+  "evidence_cells_exact": 0.8077,
+  "evidence_cells_exact_raw": 0.8269,
+  "evidence_repaired_rate": 0.0385,
+  "evidence_cells_overlap": 0.8654,
+  "op_acc": 0.8871,
+  "lookup_em": 0.8788,
+  "calc_em": 0.6842,
+  "calc_result_correct": 0.6842,
+  "unit_error_rate": 0.0588,
+  "abstain_recall": 0.5,
+  "false_abstain_rate": 0.0769,
+  "abstain_precision": 0.5556,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.3077,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.7581,
+  "mean_ms_per_example": 2667.0,
+  "by_source": {
+   "custom_papers": {
+    "n": 62,
+    "verified_em": 0.7581
+   }
+  },
+  "by_category": {
+   "abstain": {
+    "n": 10,
+    "verified_em": 0.5
+   },
+   "calc": {
+    "n": 19,
+    "verified_em": 0.6842
+   },
+   "cell": {
+    "n": 33,
+    "verified_em": 0.8788
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": true
+ }
+}

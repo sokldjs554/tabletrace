@@ -34,11 +34,12 @@ def p1(x: float) -> str:
 
 
 def accuracy() -> dict:
-    """Korean test: the planners side by side. The full-data model was trained seven times; the bar is the first
-    (lowest) training, which is the number the documents lead with, and the other six are drawn as ticks."""
+    """Korean test: the planners side by side. The full-data model was trained eight times (the eighth is section O's
+    Korean-only model, the same command as exaone_full4); the bar is the first (lowest) training, which is the number
+    the documents lead with, and the other seven are drawn as ticks."""
     full = [_em("exaone_full_vllm_ko_test"), _em("exaone_full_vllm_ko_test_run2"), _em("exaone_full2old_vllm_ko_test"),
             _em("exaone_full2_vllm_ko_test"), _em("exaone_full3_vllm_ko_test"), _em("exaone_full4_vllm_ko_test"),
-            _em("exaone_ownloop_vllm_ko_test")]
+            _em("exaone_ownloop_vllm_ko_test"), _em("exaone_koonly_vllm_ko_test")]
     small = [_em("exaone_vllm_ko_test_run1"), _em("exaone_vllm_ko_test_run2"), _em("exaone_vllm_ko_test")]
     b32 = _load("experiments/gpu2_2026-11-14/recovered.json")["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"]["verified_em"]
     rows = [
@@ -135,7 +136,7 @@ def owner() -> dict:
 def chem() -> dict:
     """The chemistry paper tables: the untuned model, the model tuned on Korean only and the model tuned on Korean and
     chemistry (notebook 2, sections N and O; both runs kept per-question predictions)."""
-    a, sh = _load("experiments/eval/chem_rerun_analysis.json"), _load("experiments/eval/chem_share_analysis.json")
+    a, sh, rp = _load("experiments/eval/chem_rerun_analysis.json"), _load("experiments/eval/chem_share_analysis.json"), _load("experiments/eval/chem_repeat_analysis.json")
     p, q, before = a["chemistry"]["chem_papers"], sh["chemistry"]["chem_papers"], a["earlier_run_without_predictions"]["chem_papers"]
     both, plain, ko = p["tuned"], p["untuned_six_examples"], q["korean_only"]
     kinds = sh["chemistry_three_sets_by_kind"]
@@ -144,7 +145,10 @@ def chem() -> dict:
             {"label": "mT5-small 최종", "value": p["mt5_small_final"]["rate"]},
             {"label": "EXAONE 1.2B, 튜닝 없음 (화학 예시 6개)", "value": plain["rate"]},
             {"label": "EXAONE 1.2B LoRA, 한국어만 튜닝", "value": ko["rate"], "emphasis": True},
-            {"label": "EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝", "value": both["rate"], "emphasis": True}]
+            {"label": "EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝", "value": both["rate"], "emphasis": True,
+             "ticks": [rp["chemistry"]["chem_papers"]["repeat"]["rate"]]}]
+    check = rp["checks"]["unanswerable"]
+    assert check["holds"] and rp["checks"]["answerable"]["as_expected"] and rp["paper_tables"]["first_run_with_files"] == both["correct"]
     # what the title and the caption say
     assert both["rate"] > ko["rate"] > p["heuristic"]["rate"] > plain["rate"] and (q["korean_and_chemistry"]["correct"], q["korean_and_chemistry"]["n"]) == (both["correct"], both["n"])
     assert q["korean_only_vs_untuned"]["p_two_sided"] < 0.001 and apart["p_two_sided"] > 0.05
@@ -165,9 +169,12 @@ def chem() -> dict:
                        f"튜닝하지 않은 모델({p1(plain['rate'])})과의 차이는 대부분 한국어 문항으로 튜닝한 데서 나온다. 화학 합성 문항을 더한 모델과 한국어만 튜닝한 모델은 "
                        f"같은 문항에서 한쪽만 맞힌 것이 {apart['only_candidate']}개와 {apart['only_reference']}개로, 이 세트에서는 차이가 유의하지 않다(p {apart['p_display']}). "
                        f"화학 세 세트를 합쳐 보면 두 모델은 답 없는 질문에서 갈린다({hold['only_candidate']} 대 {hold['only_reference']}). 답할 수 있는 질문에서는 {rest['only_candidate']}개와 {rest['only_reference']}개다. "
-                       "이 나눔은 결과를 본 뒤에 한 것이다. 두 모델은 다른 세션에서 한 번씩 학습했다. 문항은 AI 도구가 썼고 소유자가 검수하지 않았다. "
+                       f"이 나눔은 결과를 본 뒤에 찾은 것이라, 무엇을 볼지 미리 적어 두고 화학 문항을 더한 학습을 한 번 더 했다. 다시 학습한 모델도 답 없는 질문에서 한국어 전용 모델과 갈렸다"
+                       f"({check['repeat_vs_korean_only']['only_candidate']} 대 {check['repeat_vs_korean_only']['only_reference']}, p {check['repeat_vs_korean_only']['p_display']}). "
+                       f"다시 학습한 모델은 논문 표에서 {p1(rp['chemistry']['chem_papers']['repeat']['rate'])}다(막대 끝의 가는 선). 한국어 전용 모델은 한 번만 학습했고, 문항은 그대로다. "
+                       "문항은 AI 도구가 썼고 소유자가 검수하지 않았다. "
                        f"결과 파일이 남지 않은 예전 실행에서는 화학 문항을 더한 모델이 {p1(before['verified_em'])}였다.",
-            "more": "영어 화학에서의 EXAONE", "link": {"href": f"#workbench/{one['id']}/koonly", "text": "두 모델이 갈린 문항 하나 보기"}}
+            "more": "영어 화학에서의 EXAONE", "tick_label": "같은 설정으로 다시 학습", "link": {"href": f"#workbench/{one['id']}/koonly", "text": "두 모델이 갈린 문항 하나 보기"}}
 
 
 def risk() -> dict:

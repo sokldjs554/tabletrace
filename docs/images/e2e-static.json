@@ -119,7 +119,7 @@
   {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.4s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.1s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -159,7 +159,7 @@
   {
    "name": "desktop: research view leads with conclusions, each with a chart and a table of its values",
    "ok": true,
-   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 36, 'height': 2933, 'over': 0}"
+   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 36, 'height': 3013, 'over': 0}"
   },
   {
    "name": "desktop: every experiment is kept below, folded by topic",
@@ -169,7 +169,7 @@
   {
    "name": "desktop: research view fits the screen width and is short",
    "ok": true,
-   "detail": "height 2933px, overflow 0px"
+   "detail": "height 3013px, overflow 0px"
   },
   {
    "name": "desktop: a chart mark shows its value on focus",
@@ -299,7 +299,7 @@
   {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.3s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.2s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",
@@ -339,7 +339,7 @@
   {
    "name": "mobile: research view leads with conclusions, each with a chart and a table of its values",
    "ok": true,
-   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 36, 'height': 5147, 'over': 0}"
+   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 36, 'height': 5263, 'over': 0}"
   },
   {
    "name": "mobile: every experiment is kept below, folded by topic",
@@ -349,7 +349,7 @@
   {
    "name": "mobile: research view fits the screen width and is short",
    "ok": true,
-   "detail": "height 5147px, overflow 0px"
+   "detail": "height 5263px, overflow 0px"
   },
   {
    "name": "mobile: a chart mark shows its value on focus",

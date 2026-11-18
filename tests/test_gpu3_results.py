@@ -33,7 +33,8 @@ def test_run_names_hold_no_dots():
 @pytest.mark.parametrize("script, out", [("rl2_analysis.py", "rl2_analysis.json"), ("rl2_analysis.py", "rl2_control_analysis.json"), ("rl2_analysis.py", "rl2_repeat_analysis.json"),
                                          ("gpu3_summary.py", "gpu3_summary.json"), ("length_fix_analysis.py", "length_fix_analysis.json"),
                                          ("rl3_analysis.py", "rl3_analysis.json"), ("owner_loop_analysis.py", "owner_loop_analysis.json"),
-                                         ("chem_rerun_analysis.py", "chem_rerun_analysis.json"), ("chem_share_analysis.py", "chem_share_analysis.json")])
+                                         ("chem_rerun_analysis.py", "chem_rerun_analysis.json"), ("chem_share_analysis.py", "chem_share_analysis.json"),
+                                         ("chem_repeat_analysis.py", "chem_repeat_analysis.json")])
 def test_derived_files_are_reproduced_from_the_predictions(script, out):
     stored = (EVAL / out).read_text(encoding="utf-8")
     r = subprocess.run([sys.executable, str(ROOT / "scripts" / script)], cwd=ROOT, capture_output=True, text=True)
@@ -73,7 +74,7 @@ def test_analysis_says_what_did_not_improve():
     assert all(v["unparsable"] == 0 for v in t["dev"].values())
 
 
-@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8), ("repeat", 4), ("full2", 8), ("rl3", 8), ("owner", 10), ("ownloop", 6), ("chem", 18), ("share", 12)])
+@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8), ("repeat", 4), ("full2", 8), ("rl3", 8), ("owner", 10), ("ownloop", 6), ("chem", 18), ("share", 12), ("chemrepeat", 12)])
 def test_replay_record_covers_every_run_of_the_session(session, replays):
     d = json.loads((EVAL / f"replay_check_{session}.json").read_text(encoding="utf-8"))
     assert d["replays"] == 2 * len(d["runs"]) == replays and d["questions_that_differ"] == 0

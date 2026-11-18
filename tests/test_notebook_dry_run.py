@@ -80,13 +80,14 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                share = ("koonly", "kochem3")            # section O (2026-11-17, Colab): the last results that came in
+                again = ("kochem3",)                     # section O's optional repeat (2026-11-18, Colab): the last results that came in
+                share = ("koonly", *again)               # section O (2026-11-17, Colab)
                 chem = ("kochem2", "ref_1p2b_chem", *share)   # section N (2026-11-17, Colab): the last results that came in
                 loop = ("ownloop", *chem)                # section M (2026-11-16, Colab)
                 owner = ("full4", "_ko_owner", *loop)    # section L (2026-11-16)
                 later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3", *owner), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3", *owner),
                          "before the full-data rerun": ("full2", "full3", "grpo3", *owner), "before RL on the full-data model": ("full3", "grpo3", *owner),
-                         "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop, "before the chemistry run": chem, "before the Korean-only run": share}.get(cloned_results, ())
+                         "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop, "before the chemistry run": chem, "before the Korean-only run": share, "before the chemistry repeat run": again}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -791,6 +792,7 @@ def test_the_recorded_chemistry_run_matches_what_the_notebook_does_and_the_secti
 
 SHARE_CELL = "KOONLY_DIR, KOONLY_NAME"      # the cell of section O
 BEFORE_SHARE = "before the Korean-only run"
+BEFORE_CHEM_REPEAT = "before the chemistry repeat run"
 SIX_SETS = ("chem_custom", "chem_syndev", "chem_papers", "ko_test", "ko_custom", "ko_owner")
 
 
@@ -893,12 +895,39 @@ def test_the_recorded_korean_only_run_matches_what_the_notebook_does_and_the_sec
         assert meta["row_select"] == ("overlap" if "chem_papers" in out else "first") and meta["max_in"] == 672 and not meta["few_shot"], out
         assert meta["entity_check"] is out.endswith("_ec") and bool(meta["replay_from"]) is out.endswith("_ec"), out
         assert (" ".join(meta["corpus"]), " ".join(meta["data"])) == re.search(r"--corpus (.*?) --data (.*?) --out", cmd).groups(), out
-    assert not list((ROOT / "experiments/eval").glob("exaone_kochem3_vllm_*"))                   # the repeat was not run
+    later = DryRun(tmp_path / "later", monkeypatch, cloned_results=BEFORE_CHEM_REPEAT)               # the next day: the repeat asked for
+    later.sections = [(i, src.replace("RUN_KOCHEM_REPEAT = False", "RUN_KOCHEM_REPEAT = True")) for i, src in later.sections]
+    counts = later.run_all(only=SHARE_CELL)                                                    # only the repeat is trained
+    assert counts["train"] == 1 and counts["eval"] == 12 and all("kochem3" in o for o in later.outputs())
     run = DryRun(tmp_path / "now", monkeypatch, cloned_results=True)
     assert run.run_all(only=SHARE_CELL) == collections.Counter()
     run.sections = [(i, src.replace("RUN_KOCHEM_REPEAT = False", "RUN_KOCHEM_REPEAT = True")) for i, src in run.sections]
-    counts = run.run_all(only=SHARE_CELL)                                                      # asked for later: only the repeat is trained
-    assert counts["train"] == 1 and counts["eval"] == 12 and all("kochem3" in o for o in run.outputs())
+    assert run.run_all(only=SHARE_CELL) == collections.Counter()                               # with the repeat stored too, nothing is left
+
+
+def test_the_recorded_repeat_matches_what_the_notebook_does(tmp_path, monkeypatch):
+    """The optional repeat of section O was run on 2026-11-18 on Colab with one T4, from the commit that wrote down what
+    it would be checked for. The training record is section N's command with another output path; the evaluations carry
+    the settings the notebook gives them, and they are those of section N's evaluations."""
+    info = json.loads((ROOT / "experiments/exaone_lora_kochem3/train_info.json").read_text())
+    first = json.loads((ROOT / "experiments/exaone_lora_kochem2/train_info.json").read_text())
+    assert {k for k in set(info["args"]) | set(first["args"]) if info["args"].get(k) != first["args"].get(k)} == {"out"}
+    assert (info["n_examples"], info["steps"], info["loop"], info["targets_missing"], info["targets_cut_short"]) == (first["n_examples"], first["steps"], "builtin", 0, 0)
+    run_info = json.loads((ROOT / "experiments/run_info_2_chemrepeat.json").read_text())
+    assert run_info["platform"] == "colab" and run_info["gpus"] == ["Tesla T4"] and run_info["commit"] == "b3bffd2"
+    planned = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_CHEM_REPEAT)
+    planned.sections = [(i, src.replace("RUN_KOCHEM_REPEAT = False", "RUN_KOCHEM_REPEAT = True")) for i, src in planned.sections]
+    planned.run_all(only=SHARE_CELL)
+    outs = [o for o in planned.outputs() if o.startswith("experiments/eval/")]
+    assert sorted(outs) == sorted(str(d.relative_to(ROOT)) for d in (ROOT / "experiments/eval").glob("exaone_kochem3_vllm_*"))
+    for out in outs:
+        meta = json.loads((ROOT / out / "metrics.json").read_text())["meta"]
+        same = json.loads((ROOT / out.replace("kochem3", "kochem2") / "metrics.json").read_text())["meta"]
+        cmd = next(c for k, c in planned.calls if k == "eval" and c.split("--out ")[1].split()[0] == out)
+        assert (" ".join(meta["corpus"]), " ".join(meta["data"])) == re.search(r"--corpus (.*?) --data (.*?) --out", cmd).groups(), out
+        for key in ("row_select", "max_in", "entity_check", "few_shot", "corpus", "data", "table_format", "confidence"):
+            assert meta.get(key) == same.get(key), (out, key)
+        assert meta["tokenizer"] == same["tokenizer"].replace("kochem2", "kochem3")             # each model's own merged weights
 
 
 def test_the_notebook_says_what_section_o_gave_and_that_nothing_is_left_to_run():
@@ -906,7 +935,7 @@ def test_the_notebook_says_what_section_o_gave_and_that_nothing_is_left_to_run()
     intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## O."))
     row = next(line for line in intro.split("\n") if line.startswith("| O |"))
     assert "지금 돌릴 것은 없습니다" in intro and "2026-11-17에 Colab에서 끝남" in row and "아직 돌리지 않" not in intro + section
-    assert "반복 학습" in row and "돌리지 않았습니다" in section                                    # the optional repeat is said to be not run
+    assert "반복 학습은 2026-11-18에 끝남" in row and "반복 학습의 결과" in section and "돌리지 않았습니다" not in section
     rerun = json.loads((ROOT / "experiments/eval/chem_rerun_analysis.json").read_text())["chemistry"]["chem_papers"]
     assert f"{100 * rerun['tuned']['rate']:.1f}%" in section and f"{100 * rerun['untuned_six_examples']['rate']:.1f}%" in section      # the numbers the section set out from
     share = json.loads((ROOT / "experiments/eval/chem_share_analysis.json").read_text())

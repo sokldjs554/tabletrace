@@ -92,7 +92,7 @@ def test_the_documents_use_the_run_that_kept_its_files_and_say_it_came_out_lower
     assert "§29" in earlier_sec and "결과 파일이 남지 않은 실행" in earlier_sec
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sec = readme[readme.index("### 9.14 화학 문항에서의 EXAONE"):readme.index("## 10. 추론 최적화")]
-    for needle in ("예전 실행의 수치보다 낮습니다", "모델마다 학습 한 번이고", "소유자가 검수하지 않았습니다"):
+    for needle in ("예전 실행의 수치보다 낮습니다", "한국어 전용 모델은 학습 한 번입니다", "소유자가 검수하지 않았습니다"):
         assert needle in sec, needle
     # wherever the earlier number is still quoted, the same line says where it comes from
     for name in ("README.md", "docs/ONE_PAGE.md"):
@@ -145,15 +145,57 @@ def test_what_the_chemistry_questions_add_is_reported_without_overreading():
     ko, plain = SHARE["chemistry"]["chem_papers"]["korean_only"], SHARE["chemistry"]["chem_papers"]["untuned_six_examples"]
     report = (ROOT / "docs/REPORT.md").read_text(encoding="utf-8")
     sec = report[report.index("### 29.7 화학 문항을 더한 몫"):]
-    for needle in ("실행 전에 적어 둔 것", "실행 전에 정한 세 비교는 어느 것도 유의하지 않다", "실행 전에 정한 검정이 아니다", "다른 세션에서 한 번씩 학습했다", "반복 학습은 돌리지 않았다",
+    for needle in ("실행 전에 적어 둔 것", "실행 전에 정한 세 비교는 어느 것도 유의하지 않다", "실행 전에 정한 검정이 아니다", "다른 세션에서 한 번씩 학습했다", "다음 날 한 번 더 했다(§29.8)",
                    "소유자가 검수하지 않았다", "말은 이 결과와 맞지 않는다"):
         assert needle in sec, needle
     assert f">{100 * ko['rate']:.1f}<" in sec and ko["rate"] - plain["rate"] > 0.3
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sec = readme[readme.index("### 9.14 화학 문항에서의 EXAONE"):readme.index("## 10. 추론 최적화")]
-    for needle in ("화학 문항을 한 번도 보지 않았습니다", "실행 전에 정한 비교는 유의하지 않습니다", "실행 전에 정한 검정이 아닙니다", "다른 세션에서 학습했습니다"):
+    for needle in ("화학 문항을 한 번도 보지 않았습니다", "실행 전에 정한 비교는 유의하지 않습니다", "실행 전에 정한 검정이 아닙니다", "모두 다른 세션에서 학습했고"):
         assert needle in sec, needle
     assert f">{100 * ko['rate']:.1f}<" in readme[:readme.index("## 목차")]                      # the top of the README gives the Korean-only number next to the other
     handoff = (ROOT / "docs/HANDOFF.md").read_text(encoding="utf-8")
     assert f"화학 문항 없이도 {100 * ko['rate']:.1f}%다" in handoff and "\"화학 도메인 튜닝으로" in handoff.split("**쓰면 안 되는 것.**")[-1] + handoff
     assert "한국어만 튜닝한 EXAONE의 화학 평가**(노트북 2의 O절, 2026-11-17 준비)" not in handoff
+
+
+# ---- section O's repeat: the Korean-and-chemistry training once more, checked against what was written down before it
+REPEAT = json.loads((EVAL / "chem_repeat_analysis.json").read_text(encoding="utf-8"))
+
+
+def test_the_repeat_checks_are_counted_from_the_predictions():
+    new = {s: rows(f"exaone_kochem3_vllm_{s}") for s in CHEM}
+    ko = {s: rows(f"exaone_koonly_vllm_{s}") for s in CHEM}
+    for s in CHEM:
+        e = REPEAT["chemistry"][s]
+        assert (e["repeat"]["n"], e["repeat"]["correct"]) == (len(new[s]), sum(bool(r["verified_correct"]) for r in new[s].values()))
+        assert e["first_training"]["correct"] == A["chemistry"][s]["tuned"]["correct"] and e["korean_only"]["correct"] == SHARE["chemistry"][s]["korean_only"]["correct"]
+    un = [(new[s][q], ko[s][q]) for s in CHEM for q in new[s] if new[s][q]["gold_status"] != "answered"]
+    an = [(new[s][q], ko[s][q]) for s in CHEM for q in new[s] if new[s][q]["gold_status"] == "answered"]
+    for key, pairs_ in (("unanswerable", un), ("answerable", an)):
+        t = REPEAT["checks"][key]["repeat_vs_korean_only"]
+        assert REPEAT["checks"][key]["n"] == len(pairs_)
+        assert t["only_candidate"] == sum(bool(a["verified_correct"]) and not b["verified_correct"] for a, b in pairs_)
+        assert t["only_reference"] == sum(bool(b["verified_correct"]) and not a["verified_correct"] for a, b in pairs_)
+    # what was written down before the run, and how it came out
+    assert REPEAT["written_down_before_the_run"]["commit"] == "b3bffd2" and REPEAT["training"]["args_that_differ_from_the_first_training"] == ["out"]
+    assert REPEAT["checks"]["unanswerable"]["holds"] and REPEAT["checks"]["answerable"]["as_expected"]
+    assert REPEAT["paper_tables"]["headline_stays"] == "first_run_with_files" and REPEAT["paper_tables"]["first_run_with_files"] == A["chemistry"]["chem_papers"]["tuned"]["correct"]
+
+
+def test_the_documents_report_the_repeat_as_written_down_before_it():
+    report = (ROOT / "docs/REPORT.md").read_text(encoding="utf-8")
+    before = report[report.index("**반복 학습을 돌리기 전에 적어 둔다 (2026-11-17).**"):report.index("### 29.8")]
+    assert "대표 수치는" in before and "새 값이 높든 낮든 바꾸지 않는다" in before and "유의하게 더 많이 보류한다" in before      # the plan is kept as it was written
+    sec = report[report.index("### 29.8"):]
+    for needle in ("미리 적어 둔 네 가지", "성립했다", "예상대로 유의한 차이가 없다", "대표 수치는 문항별 파일이 있는 첫 실행의", "한국어 전용 모델은 한 번만 학습했다", "다른 문항이나 다른 분야에서도 성립하는지는 모른다"):
+        assert needle in sec, needle
+    t = REPEAT["checks"]["unanswerable"]["repeat_vs_korean_only"]
+    assert f">{t['only_candidate']}<" in sec and f">{t['p_display']}<" in sec
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "미리 적어 두고 다시 확인했습니다(2026-11-18)" in readme and "다시 학습한 모델에서도 같았습니다" in readme[:readme.index("## 목차")]
+    handoff = (ROOT / "docs/HANDOFF.md").read_text(encoding="utf-8")
+    assert "미리 적어 두고 다시 확인" in handoff and "**성립했다.**" in handoff and "결과를 본 뒤에 나눠 본 것이고 모델마다 학습 한 번" not in handoff
+    nb = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))
+    o = next("".join(c["source"]) for c in nb["cells"] if "".join(c["source"]).startswith("## O."))
+    assert "반복 학습의 결과" in o and f"{REPEAT['paper_tables']['repeat']}/{REPEAT['paper_tables']['n']}" in o

@@ -78,3 +78,10 @@
   - 묶음의 `run_info_2.json`은 `run_info_2_share.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_share.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
   - `scripts/replay_check.py --session share`로 다시 검증했다. 12회, 1,866문항에서 판정이 다른 문항은 0개다(`replay_check_share.json`).
   - 분석은 `scripts/chem_share_analysis.py`가 한다(`chem_share_analysis.json`). 두 튜닝 모델은 다른 세션에서 한 번씩 학습한 것이다.
+- **2번 노트북, 2026-11-18 (Colab Tesla T4 ×1, 커밋 `b3bffd2`, `experiments/run_info_2_chemrepeat.json`)**: O절을 `RUN_KOCHEM_REPEAT = True`로. 한국어 전용 모델은 결과가 저장소에 있어서 건너뛰었고, 한국어와 화학을 함께 튜닝하는 학습만 한 번 더 돌았다. 새 파일은 평가 12건(`exaone_kochem3_vllm_{chem_custom,chem_syndev,chem_papers,ko_test,ko_custom,ko_owner}`와 각각의 `_ec`)과 학습 기록 `experiments/exaone_lora_kochem3/train_info.json`(`"loop": "builtin"`, 4,383문항, 273걸음, 정답이 잘린 예제 0)이다. 묶음의 나머지 225개 파일은 저장소의 것과 같았다.
+  - 학습 명령에서 `exaone_kochem2`와 다른 것은 `--out`뿐이다. 평가 명령도 `exaone_kochem2`의 것과 같다.
+  - 볼 것은 실행 전에 적어 두었다(커밋 `b3bffd2`, `docs/REPORT.md` §29.7 끝).
+  - 묶음은 소유자가 대화에 올렸다(`gpu_results_2_17.tgz`, 3,680,973바이트, SHA-256 `ee21ff2d…`). 묶음 안의 코드는 실행하지 않았고, 결과 파일만 꺼내 넣었다.
+  - 묶음의 `run_info_2.json`은 `run_info_2_chemrepeat.json`으로, `run_logs/vllm_8001.log`는 `vllm_8001_chemrepeat.log`로 이름을 바꿔 넣었다. 내용은 그대로다.
+  - `scripts/replay_check.py --session chemrepeat`으로 다시 검증했다. 12회, 1,866문항에서 판정이 다른 문항은 0개다(`replay_check_chemrepeat.json`). O절 첫 실행의 기록(`replay_check_share.json`)과 섞이지 않도록 세션을 따로 두었다.
+  - 분석은 `scripts/chem_repeat_analysis.py`가 한다(`chem_repeat_analysis.json`).

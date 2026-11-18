@@ -1,0 +1,537 @@
+{
+ "platform": "colab",
+ "gpus": [
+  "Tesla T4"
+ ],
+ "notebook_commit": "b3bffd2",
+ "finished": "2026-11-18T04:59:04",
+ "written_down_before_the_run": {
+  "commit": "b3bffd2",
+  "where": "docs/REPORT.md §29.7, 반복 학습을 돌리기 전에 적어 둔다"
+ },
+ "training": {
+  "examples": 4383,
+  "steps": 273,
+  "minutes": 38.3,
+  "loop": "builtin",
+  "targets_missing": 0,
+  "targets_cut_short": 0,
+  "loss_first_20_steps": 0.9749,
+  "loss_last_20_steps": 0.042,
+  "args_that_differ_from_the_first_training": [
+   "out"
+  ]
+ },
+ "chemistry": {
+  "chem_custom": {
+   "label": "화학 교과서 표, 수작업",
+   "repeat": {
+    "n": 32,
+    "correct": 21,
+    "rate": 0.6562,
+    "ci95": {
+     "lo": 0.4831,
+     "hi": 0.7959
+    },
+    "by_kind": {
+     "lookup": {
+      "n": 13,
+      "correct": 11,
+      "wrong": 2,
+      "withheld": 0
+     },
+     "calc": {
+      "n": 7,
+      "correct": 6,
+      "wrong": 1,
+      "withheld": 0
+     },
+     "text": {
+      "n": 7,
+      "correct": 0,
+      "wrong": 6,
+      "withheld": 1
+     },
+     "unanswerable": {
+      "n": 5,
+      "correct": 4,
+      "wrong": 1,
+      "withheld": 0
+     }
+    },
+    "by_category": {
+     "cell": {
+      "n": 10,
+      "correct": 8,
+      "wrong": 2,
+      "withheld": 0
+     },
+     "calc": {
+      "n": 7,
+      "correct": 6,
+      "wrong": 1,
+      "withheld": 0
+     },
+     "unit_period": {
+      "n": 4,
+      "correct": 3,
+      "wrong": 1,
+      "withheld": 0
+     },
+     "text_table": {
+      "n": 6,
+      "correct": 0,
+      "wrong": 5,
+      "withheld": 1
+     },
+     "abstain": {
+      "n": 5,
+      "correct": 4,
+      "wrong": 1,
+      "withheld": 0
+     }
+    },
+    "cited": {
+     "lookup_questions": 13,
+     "cited_gold_cell": 11,
+     "rate": 0.8462,
+     "evidence_repaired": 1
+    },
+    "with_subject_check": 21
+   },
+   "first_training": {
+    "n": 32,
+    "correct": 24,
+    "rate": 0.75,
+    "ci95": {
+     "lo": 0.5789,
+     "hi": 0.8675
+    }
+   },
+   "korean_only": {
+    "n": 32,
+    "correct": 19,
+    "rate": 0.5938,
+    "ci95": {
+     "lo": 0.4226,
+     "hi": 0.7448
+    }
+   },
+   "repeat_vs_korean_only": {
+    "only_candidate": 3,
+    "only_reference": 1,
+    "p_two_sided": 0.625,
+    "p_display": "0.625"
+   },
+   "repeat_vs_first_training": {
+    "only_candidate": 0,
+    "only_reference": 3,
+    "p_two_sided": 0.25,
+    "p_display": "0.250"
+   },
+   "outputs_repeat_vs_first_training": {
+    "questions": 32,
+    "same_raw_output": 20,
+    "rate": 0.625
+   }
+  },
+  "chem_syndev": {
+   "label": "화학 합성 개발",
+   "repeat": {
+    "n": 80,
+    "correct": 74,
+    "rate": 0.925,
+    "ci95": {
+     "lo": 0.8459,
+     "hi": 0.9652
+    },
+    "by_kind": {
+     "lookup": {
+      "n": 40,
+      "correct": 37,
+      "wrong": 3,
+      "withheld": 0
+     },
+     "calc": {
+      "n": 24,
+      "correct": 21,
+      "wrong": 3,
+      "withheld": 0
+     },
+     "unanswerable": {
+      "n": 16,
+      "correct": 16,
+      "wrong": 0,
+      "withheld": 0
+     }
+    },
+    "cited": {
+     "lookup_questions": 40,
+     "cited_gold_cell": 38,
+     "rate": 0.95,
+     "evidence_repaired": 1
+    },
+    "with_subject_check": 74
+   },
+   "first_training": {
+    "n": 80,
+    "correct": 73,
+    "rate": 0.9125,
+    "ci95": {
+     "lo": 0.8302,
+     "hi": 0.957
+    }
+   },
+   "korean_only": {
+    "n": 80,
+    "correct": 66,
+    "rate": 0.825,
+    "ci95": {
+     "lo": 0.7274,
+     "hi": 0.8928
+    }
+   },
+   "repeat_vs_korean_only": {
+    "only_candidate": 8,
+    "only_reference": 0,
+    "p_two_sided": 0.0078125,
+    "p_display": "0.008"
+   },
+   "repeat_vs_first_training": {
+    "only_candidate": 2,
+    "only_reference": 1,
+    "p_two_sided": 1.0,
+    "p_display": "1.000"
+   },
+   "outputs_repeat_vs_first_training": {
+    "questions": 80,
+    "same_raw_output": 65,
+    "rate": 0.8125
+   }
+  },
+  "chem_papers": {
+   "label": "화학 논문 표, 수작업",
+   "repeat": {
+    "n": 62,
+    "correct": 47,
+    "rate": 0.7581,
+    "ci95": {
+     "lo": 0.6385,
+     "hi": 0.8475
+    },
+    "by_kind": {
+     "lookup": {
+      "n": 33,
+      "correct": 29,
+      "wrong": 3,
+      "withheld": 1
+     },
+     "calc": {
+      "n": 19,
+      "correct": 13,
+      "wrong": 4,
+      "withheld": 2
+     },
+     "unanswerable": {
+      "n": 10,
+      "correct": 5,
+      "wrong": 5,
+      "withheld": 0
+     }
+    },
+    "by_category": {
+     "cell": {
+      "n": 33,
+      "correct": 29,
+      "wrong": 3,
+      "withheld": 1
+     },
+     "calc": {
+      "n": 19,
+      "correct": 13,
+      "wrong": 4,
+      "withheld": 2
+     },
+     "abstain": {
+      "n": 10,
+      "correct": 5,
+      "wrong": 5,
+      "withheld": 0
+     }
+    },
+    "cited": {
+     "lookup_questions": 33,
+     "cited_gold_cell": 30,
+     "rate": 0.9091,
+     "evidence_repaired": 3
+    },
+    "with_subject_check": 47
+   },
+   "first_training": {
+    "n": 62,
+    "correct": 46,
+    "rate": 0.7419,
+    "ci95": {
+     "lo": 0.6212,
+     "hi": 0.8345
+    }
+   },
+   "korean_only": {
+    "n": 62,
+    "correct": 42,
+    "rate": 0.6774,
+    "ci95": {
+     "lo": 0.5537,
+     "hi": 0.7805
+    }
+   },
+   "repeat_vs_korean_only": {
+    "only_candidate": 7,
+    "only_reference": 2,
+    "p_two_sided": 0.1796875,
+    "p_display": "0.180"
+   },
+   "repeat_vs_first_training": {
+    "only_candidate": 5,
+    "only_reference": 4,
+    "p_two_sided": 1.0,
+    "p_display": "1.000"
+   },
+   "outputs_repeat_vs_first_training": {
+    "questions": 62,
+    "same_raw_output": 38,
+    "rate": 0.6129
+   }
+  }
+ },
+ "korean": {
+  "ko_test": {
+   "repeat": {
+    "n": 699,
+    "correct": 612,
+    "rate": 0.8755,
+    "ci95": {
+     "lo": 0.849,
+     "hi": 0.898
+    },
+    "with_subject_check": 592
+   },
+   "first_training": {
+    "n": 699,
+    "correct": 602,
+    "rate": 0.8612,
+    "ci95": {
+     "lo": 0.8336,
+     "hi": 0.8849
+    }
+   },
+   "korean_only": {
+    "n": 699,
+    "correct": 604,
+    "rate": 0.8641,
+    "ci95": {
+     "lo": 0.8367,
+     "hi": 0.8875
+    }
+   },
+   "repeat_vs_first_training": {
+    "only_candidate": 27,
+    "only_reference": 17,
+    "p_two_sided": 0.17417114727072658,
+    "p_display": "0.174"
+   },
+   "repeat_vs_korean_only": {
+    "only_candidate": 32,
+    "only_reference": 24,
+    "p_two_sided": 0.3496819529836849,
+    "p_display": "0.350"
+   }
+  },
+  "ko_custom": {
+   "repeat": {
+    "n": 30,
+    "correct": 22,
+    "rate": 0.7333,
+    "ci95": {
+     "lo": 0.5555,
+     "hi": 0.8582
+    },
+    "with_subject_check": 22
+   },
+   "first_training": {
+    "n": 30,
+    "correct": 20,
+    "rate": 0.6667,
+    "ci95": {
+     "lo": 0.4878,
+     "hi": 0.8077
+    }
+   },
+   "korean_only": {
+    "n": 30,
+    "correct": 19,
+    "rate": 0.6333,
+    "ci95": {
+     "lo": 0.4551,
+     "hi": 0.7813
+    }
+   },
+   "repeat_vs_first_training": {
+    "only_candidate": 2,
+    "only_reference": 0,
+    "p_two_sided": 0.5,
+    "p_display": "0.500"
+   },
+   "repeat_vs_korean_only": {
+    "only_candidate": 3,
+    "only_reference": 0,
+    "p_two_sided": 0.25,
+    "p_display": "0.250"
+   }
+  },
+  "ko_owner": {
+   "repeat": {
+    "n": 30,
+    "correct": 23,
+    "rate": 0.7667,
+    "ci95": {
+     "lo": 0.5907,
+     "hi": 0.8821
+    },
+    "with_subject_check": 22
+   },
+   "first_training": {
+    "n": 30,
+    "correct": 22,
+    "rate": 0.7333,
+    "ci95": {
+     "lo": 0.5555,
+     "hi": 0.8582
+    }
+   },
+   "korean_only": {
+    "n": 30,
+    "correct": 22,
+    "rate": 0.7333,
+    "ci95": {
+     "lo": 0.5555,
+     "hi": 0.8582
+    }
+   },
+   "repeat_vs_first_training": {
+    "only_candidate": 1,
+    "only_reference": 0,
+    "p_two_sided": 1.0,
+    "p_display": "1.000"
+   },
+   "repeat_vs_korean_only": {
+    "only_candidate": 1,
+    "only_reference": 0,
+    "p_two_sided": 1.0,
+    "p_display": "1.000"
+   }
+  }
+ },
+ "paper_tables": {
+  "earlier_run_without_files": 50,
+  "first_run_with_files": 46,
+  "repeat": 47,
+  "n": 62,
+  "headline_stays": "first_run_with_files"
+ },
+ "checks": {
+  "unanswerable": {
+   "n": 31,
+   "withheld_right": {
+    "new": 25,
+    "first": 28,
+    "ko_only": 15
+   },
+   "answer_sent": {
+    "new": 6,
+    "first": 3,
+    "ko_only": 16
+   },
+   "repeat_vs_korean_only": {
+    "only_candidate": 10,
+    "only_reference": 0,
+    "p_two_sided": 0.001953125,
+    "p_display": "0.002"
+   },
+   "by_set": {
+    "chem_custom": {
+     "new": 4,
+     "first": 5,
+     "ko_only": 2
+    },
+    "chem_syndev": {
+     "new": 16,
+     "first": 16,
+     "ko_only": 10
+    },
+    "chem_papers": {
+     "new": 5,
+     "first": 7,
+     "ko_only": 3
+    }
+   },
+   "holds": true
+  },
+  "answerable": {
+   "n": 143,
+   "right": {
+    "new": 117,
+    "first": 115,
+    "ko_only": 112
+   },
+   "repeat_vs_korean_only": {
+    "only_candidate": 8,
+    "only_reference": 3,
+    "p_two_sided": 0.2265625,
+    "p_display": "0.227"
+   },
+   "as_expected": true
+  }
+ },
+ "chemistry_three_sets": {
+  "repeat": {
+   "n": 174,
+   "correct": 142,
+   "rate": 0.8161,
+   "ci95": {
+    "lo": 0.7519,
+    "hi": 0.8666
+   }
+  },
+  "first_training": {
+   "n": 174,
+   "correct": 143,
+   "rate": 0.8218,
+   "ci95": {
+    "lo": 0.7582,
+    "hi": 0.8716
+   }
+  },
+  "korean_only": {
+   "n": 174,
+   "correct": 127,
+   "rate": 0.7299,
+   "ci95": {
+    "lo": 0.6595,
+    "hi": 0.7904
+   }
+  },
+  "repeat_vs_first_training": {
+   "only_candidate": 7,
+   "only_reference": 8,
+   "p_two_sided": 1.0,
+   "p_display": "1.000"
+  },
+  "repeat_vs_korean_only": {
+   "only_candidate": 18,
+   "only_reference": 3,
+   "p_two_sided": 0.0014896392822265625,
+   "p_display": "0.001"
+  }
+ }
+}
