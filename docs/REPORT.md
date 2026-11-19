@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->568<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->20<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->588<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 EXAONE-4.0-1.2B에는 소유자가 쓴 보상 함수와 GRPO 손실로 두 번 적용했다. 첫 실험은 효과가 없었고, 학습 스크립트의 프롬프트 잘림과 배치 구성을 고친 두 번째 실험에서 인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->43.8<!-- /num -->%, verified EM <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->55.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->59.4<!-- /num -->%(대응 검정 p <!-- num:experiments/eval/paired_tests.json:grpo2_vs_rlstart2_ko_test.p_display --><0.001<!-- /num -->, 1회). 배치 구성만 첫 실험처럼 되돌린 대조군에서는 인용 셀 정확도가 오르지 않았다(<!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.5<!-- /num -->%, 두 실험의 변화의 차이 p <!-- num:experiments/eval/rl2_control_analysis.json:main_minus_control.first_pass.cited_gold_cell_lookup.p_display --><0.001<!-- /num -->)(1회). 본 실험은 시작 모델을 달리해 한 번 더 돌렸고 같은 결과였다(인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2c_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->46.7<!-- /num -->%, §22.8) | `training/rl_grpo.py`, §7, §18, 이슈 23–24, §21.1, §22.1, §22.7, §22.8 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->568<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->588<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -2140,7 +2140,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 | 무엇 | 결과 |
 |---|---|
-| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->568<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->20<!-- /num -->개 건너뜀 |
+| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->588<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->1<!-- /num -->개 건너뜀 |
 | 화면 검사 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed:int -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total:int -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed:int -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total:int -->73<!-- /num -->. 데스크톱 1440×900과 모바일 390×844, 헤드리스 Chromium |
 | 연구 결과 탭의 길이 | 예전 판은 1440px 폭에서 13,379px였다(2026-11-16의 화면 사진에서 잰 값). 지금은 화면 검사가 6,000px보다 짧은지 본다 |
 | 배포 | 실행 환경을 포함한 Pages 배포가 성공했다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/43999542432), 커밋 `edb5826`) |
@@ -2418,3 +2418,38 @@ AI 도구가 이 <!-- num:experiments/eval/chem_review_analysis.json:counts.both
 - 문제없음으로 판정된 문항에 문제가 없다는 보장은 아니다. 한 사람이 한 번 본 결과다.
 - 데모는 화학 문항에도 "검수: 고쳐야 함" 표시를 붙인다(`scripts/make_recorded_runs.py`).
 - 역할. 판정은 소유자가 했다. 도구, 다시 세는 분석, 이 절은 AI 도구가 썼다. 소유자는 판정 근거를 정리한 표도 따로 만들었는데 저장소에는 넣지 않았다.
+
+## 33. 다시 쓰다가 찾은 결함 두 개를 소유자가 고쳤다 (2026-11-20)
+
+1단계 다시 쓰기(2026-11-10)에서 소유자의 첫 구현이 원본과 다르게 동작한 곳을 따라가다가 원본 결함 두 개를 찾았다(`docs/dev/issues-log.md` 40, 41). 그때는 고치면 합성 데이터와 학습 목표가 바뀐다는 이유로 원본 동작에 맞추고 기록만 했다. 그래서 지금까지는 "찾았다"까지만 말할 수 있었다.
+
+| 이슈 | 결함 | 그 때문에 틀린 것 |
+|---|---|---|
+| 40 | `format_number`가 0이 아닌 아주 작은 값(절댓값 1e-9 미만)을 `0`으로 쓴다. 정수에 가까운지를 먼저 보기 때문이다 | 화학 합성 학습 문항 4개의 정답. 전자의 전하 1.602e-19가 `0`, 양성자의 질량이 `0 g` |
+| 41 | `header_unit`이 괄호 안의 짧은 영문을 모두 단위로 받는다. `predicted`, `measured`, `UTC`, `MVP` 같은 말이 단위가 된다 | 화학 합성 학습 문항 6개의 정답에 `predicted`, `measured`가 단위처럼 붙었다 |
+
+- **준비(AI 도구, 2026-11-19).** 명세 `docs/rewrite/09_numbers_fix.md`, 테스트 `tests/test_numbers_fix.py`(고쳐야 통과하는 것 19개와, 고쳐도 바뀌면 안 되는 것), 데이터를 다시 만들고 영향을 재는 `scripts/numbers_fix.py`. 고치기 전에 실험용 사본에 임시로 고쳐 넣어 영향을 미리 쟀다(그 사본은 저장소에 없다).
+- **수정(소유자).** `src/tabletrace/tools/numbers.py`를 고쳐 소유자 계정으로 커밋했다(`5058e59`, PR #10. 11줄 추가, 2줄 삭제). 이슈 40은 작은 값의 판정을 정수 판정 앞으로 옮겼다. 이슈 41은 명세가 내놓은 두 방법 가운데 소유자가 닫힌 목록을 골랐다. 괄호 안은 단위 목록에 있을 때만 단위로 보고, 머리글에만 나오는 진짜 단위 19개는 머리글 전용 목록에 따로 두었다. 셀 값을 읽는 목록은 그대로라 저장된 셀 읽기가 바뀌지 않는다.
+- **데이터.** 표에 저장된 단위와 합성 문항은 스크립트(`numbers_fix.py data`)로 다시 만들어 같은 커밋에 넣었다. 리뷰에서 다시 돌려 바뀌는 것이 없음을 확인했다.
+
+### 33.1 무엇이 바뀌고 무엇이 그대로인가
+
+병합 전 커밋(`<!-- num:experiments/eval/numbers_fix_impact.json:summary.reference_commit -->4fdbbd8<!-- /num -->`)과 견준 것이다(`experiments/eval/numbers_fix_impact.json`).
+
+| 견준 것 | 결과 |
+|---|---|
+| 세 말뭉치의 모든 셀 읽기, 머리글 단위, 수의 표기 <!-- num:experiments/eval/numbers_fix_impact.json:summary.function_inputs -->35,803<!-- /num -->개 | 머리글 <!-- num:experiments/eval/numbers_fix_impact.json:summary.headers_changed -->12<!-- /num -->개와 작은 값 <!-- num:experiments/eval/numbers_fix_impact.json:summary.formats_changed -->16<!-- /num -->개만 다르다. 셀 읽기는 차이 <!-- num:experiments/eval/numbers_fix_impact.json:summary.cells_read_differently -->0<!-- /num --> |
+| 표에 저장된 단위 | 표 <!-- num:experiments/eval/numbers_fix_impact.json:summary.tables_whose_units_changed -->7<!-- /num -->개에서 단위 아닌 말이 빠졌다(한국어 4, 화학 교과서 3) |
+| 합성 문항의 정답 | 화학 학습 문항 <!-- num:experiments/eval/numbers_fix_impact.json:summary.synthetic_answers_changed.chem_synthetic_train -->10<!-- /num -->개. 한국어 합성 문항(학습 <!-- num:experiments/eval/numbers_fix_impact.json:summary.synthetic_answers_changed.ko_synthetic_train -->0<!-- /num -->, 개발 <!-- num:experiments/eval/numbers_fix_impact.json:summary.synthetic_answers_changed.ko_synthetic_dev -->0<!-- /num -->, 시험 <!-- num:experiments/eval/numbers_fix_impact.json:summary.synthetic_answers_changed.ko_synthetic_test -->0<!-- /num -->)과 화학 개발 문항(<!-- num:experiments/eval/numbers_fix_impact.json:summary.synthetic_answers_changed.chem_synthetic_dev -->0<!-- /num -->)은 그대로 |
+| 저장된 모델 출력(검증 설정 셋)과 정답 프로그램 <!-- num:experiments/eval/numbers_fix_impact.json:summary.verdict_inputs -->39,504<!-- /num -->건의 판정 | 차이 <!-- num:experiments/eval/numbers_fix_impact.json:summary.verdicts_changed -->0<!-- /num --> |
+
+미리 잰 것과 같다. 평가 문항은 하나도 바뀌지 않았고, 이 보고서의 수치도 바뀌지 않았다. 리뷰에서는 GPU 세션 다섯 개(소유자 문항, 직접 쓴 루프, 화학 실행 셋)의 저장된 출력 9,102문항도 실제 평가와 같은 입력으로 다시 검증했고 판정이 다른 문항은 없었다. 공개 데모가 보여 주는 표 59개에는 단위가 바뀐 표가 없어 데모 데이터는 그대로다(다시 만들어 확인했다).
+
+### 33.2 남은 것
+
+1. **고친 정답으로 다시 학습하지 않았다.** 화학을 더한 EXAONE 둘(§29, §29.8)과 mT5 화학 튜닝은 고치기 전의 학습 문항으로 학습했다. 틀린 정답은 화학 합성 학습 문항 820개 가운데 10개였다. 다시 학습하면 결과가 달라지는지는 재지 않았다. 앞으로 같은 명령으로 화학 학습을 다시 하면 학습 문항 10개의 정답이 예전 실행과 다르다.
+2. **나머지 말뭉치의 저장된 단위는 그대로다(이슈 88).** AI 도구가 명세의 머리글 목록을 세 말뭉치에서만 뽑았다. 저장소에는 표가 든 말뭉치가 아홉 개 더 있고(표 10,073개: 학습 풀, 큰 표 평가용, 표 겹침 측정용, 본문 문서), 그 파일들의 단위는 예전 규칙으로 만든 그대로다. 새 규칙이라면 다르게 나올 표가 68개다. 단위가 아닌 말(`UTC`, `MVP`, `TBS`)이 남아 있고, 새 목록에 없는 진짜 단위(`km/h`, `hPa`, `m/s`, `MHz`, `MW`)도 있다. 이 PR은 그 파일들을 건드리지 않아 저장된 결과는 바뀌지 않는다. 그 말뭉치들의 질문은 조회와 본문 문항이라 단위가 정답에 붙지 않는다. 이것은 소유자의 수정이 아니라 AI 도구가 준비한 범위의 빈틈이고, 리뷰에서 찾았다.
+3. **닫힌 목록의 대가.** 목록에 없는 단위는 단위로 보지 않는다. 처음 보는 표의 머리글에 `(m/s)`가 있으면 그 열의 단위 검사를 건너뛴다. 단위가 아닌 말을 단위로 받아 정답에 붙이는 것보다 덜 해롭다는 것이 명세가 닫힌 목록을 권한 이유였고, 소유자가 그쪽을 골랐다.
+4. `format_number`는 계산 오차로 생긴 아주 작은 값(`0.1 + 0.2 - 0.3`)과 진짜 작은 값을 가르지 못한다. 이제 둘 다 지수 표기로 나온다. 지금 데이터에는 앞의 경우가 없다.
+
+**범위.** 직접 쓴 코드는 9개 파일 728줄(`src/` 5,173줄의 14%)이 됐다. 역할: 결함을 찾은 것은 소유자의 다시 쓰기와 AI 도구의 동작 비교였고, 고친 것은 소유자다. 명세, 테스트, 영향 측정, 이 절은 AI 도구가 썼다.

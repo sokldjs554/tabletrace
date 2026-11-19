@@ -1,0 +1,248 @@
+{
+ "reference": "4fdbbd8",
+ "functions": {
+  "inputs": 35803,
+  "differ": {
+   "format:-1.602e-19": [
+    "0",
+    "-1.602e-19"
+   ],
+   "format:1.5e-10": [
+    "0",
+    "1.500e-10"
+   ],
+   "format:1.602e-19": [
+    "0",
+    "1.602e-19"
+   ],
+   "format:1.6605402e-27": [
+    "0",
+    "1.661e-27"
+   ],
+   "format:1.6726199999999997e-24": [
+    "0",
+    "1.673e-24"
+   ],
+   "format:1.6726231e-27": [
+    "0",
+    "1.673e-27"
+   ],
+   "format:1.6749274e-27": [
+    "0",
+    "1.675e-27"
+   ],
+   "format:1.6749299999999997e-24": [
+    "0",
+    "1.675e-24"
+   ],
+   "format:1e-10": [
+    "0",
+    "1.000e-10"
+   ],
+   "format:2.06e-11": [
+    "0",
+    "2.060e-11"
+   ],
+   "format:2e-10": [
+    "0",
+    "2.000e-10"
+   ],
+   "format:3.3e-10": [
+    "0",
+    "3.300e-10"
+   ],
+   "format:4.1e-22": [
+    "0",
+    "4.100e-22"
+   ],
+   "format:4.3e-10": [
+    "0",
+    "4.300e-10"
+   ],
+   "format:8.24e-11": [
+    "0",
+    "8.240e-11"
+   ],
+   "format:9.099999999999999e-28": [
+    "0",
+    "9.100e-28"
+   ],
+   "header:CCSD(T)": [
+    "T",
+    null
+   ],
+   "header:Symbol (state)": [
+    "state",
+    null
+   ],
+   "header:i (measured)": [
+    "measured",
+    null
+   ],
+   "header:i (predicted)": [
+    "predicted",
+    null
+   ],
+   "header:pKwpKw = –log10(Kw)": [
+    "Kw",
+    null
+   ],
+   "header:관동(NTV)": [
+    "NTV",
+    null
+   ],
+   "header:높이 (max)": [
+    "max",
+    null
+   ],
+   "header:발생일시 (UTC)": [
+    "UTC",
+    null
+   ],
+   "header:삿포로(STV)": [
+    "STV",
+    null
+   ],
+   "header:최우수선수상 (MVP)": [
+    "MVP",
+    null
+   ],
+   "header:층수 (t1/t2)": [
+    "t1/t2",
+    null
+   ],
+   "header:칸사이(YTV)": [
+    "YTV",
+    null
+   ]
+  }
+ },
+ "table_units": [
+  [
+   "ko_d6eb073b62",
+   {
+    "0": "UTC"
+   },
+   {}
+  ],
+  [
+   "ko_c9f94e4dd8",
+   {
+    "3": "MVP"
+   },
+   {}
+  ],
+  [
+   "ko_b618c34dd8",
+   {
+    "3": "NTV",
+    "4": "YTV",
+    "5": "STV"
+   },
+   {}
+  ],
+  [
+   "ko_3ffbe7faf5",
+   {
+    "3": "max",
+    "4": "t1/t2"
+   },
+   {}
+  ],
+  [
+   "chem_m68724_t0",
+   {
+    "1": "state",
+    "2": "J/g °C"
+   },
+   {
+    "2": "J/g °C"
+   }
+  ],
+  [
+   "chem_m68783_t1",
+   {
+    "3": "predicted",
+    "4": "measured"
+   },
+   {}
+  ],
+  [
+   "chem_m68863_t2",
+   {
+    "2": "Kw"
+   },
+   {}
+  ]
+ ],
+ "synthetic": {
+  "data/ko/synthetic_train.jsonl": {},
+  "data/ko/synthetic_dev.jsonl": {},
+  "data/ko/synthetic_test.jsonl": {},
+  "data/chem/synthetic_train.jsonl": {
+   "synchem_train_217": [
+    "0 g",
+    "2.310e-27 g"
+   ],
+   "synchem_train_37": [
+    "0 g",
+    "1.672e-24 g"
+   ],
+   "synchem_train_39": [
+    "0 g",
+    "3.348e-24 g"
+   ],
+   "synchem_train_403": [
+    "1 predicted",
+    "1"
+   ],
+   "synchem_train_405": [
+    "3 predicted",
+    "3"
+   ],
+   "synchem_train_52": [
+    "0 predicted",
+    "0"
+   ],
+   "synchem_train_525": [
+    "0.9 measured",
+    "0.9"
+   ],
+   "synchem_train_54": [
+    "4 predicted",
+    "4"
+   ],
+   "synchem_train_617": [
+    "1.5 measured",
+    "1.5"
+   ],
+   "synchem_train_639": [
+    "0",
+    "1.602e-19"
+   ]
+  },
+  "data/chem/synthetic_dev.jsonl": {}
+ },
+ "verdicts": {
+  "inputs": 39504,
+  "differ": {}
+ },
+ "summary": {
+  "reference_commit": "4fdbbd8",
+  "function_inputs": 35803,
+  "cells_read_differently": 0,
+  "headers_changed": 12,
+  "formats_changed": 16,
+  "tables_whose_units_changed": 7,
+  "synthetic_answers_changed": {
+   "ko_synthetic_train": 0,
+   "ko_synthetic_dev": 0,
+   "ko_synthetic_test": 0,
+   "chem_synthetic_train": 10,
+   "chem_synthetic_dev": 0
+  },
+  "synthetic_answers_changed_total": 10,
+  "verdict_inputs": 39504,
+  "verdicts_changed": 0
+ }
+}

@@ -8,7 +8,7 @@ either function this script refreshes the stored units from the stored headers a
   python scripts/numbers_fix.py data      # refresh `units` in the three documents files, rebuild data/{ko,chem}/synthetic_*.jsonl
   python scripts/numbers_fix.py impact    # compare with origin/main: cells, headers, number formats, stored units, synthetic answers,
                                           # and the verdict on every stored model output (takes about 20 minutes)
-  python scripts/numbers_fix.py impact --ref <commit> --out experiments/eval/numbers_fix_impact.json
+  python scripts/numbers_fix.py impact --ref 4fdbbd8 --out experiments/eval/numbers_fix_impact.json     # the owner's fix (PR #10) against main before it
 
 `data` keeps units that were set by hand (a table whose stored units are neither what the reference implementation
 nor what the working tree gives). Written by the AI coding tool; it does not change tools/numbers.py.
@@ -146,6 +146,20 @@ def cmd_impact(ref: str, out_path: str | None) -> None:
         print(f"verdicts: {len(keys)} stored outputs and gold programs re-verified, {len(vd)} differ")
         for k, (a, b) in list(vd.items())[:12]:
             print(f"  {k[:90]!r}\n     before: {a and {x: a[x] for x in ('status', 'answer', 'reason')}}\n     after:  {b and {x: b[x] for x in ('status', 'answer', 'reason')}}")
+    fd = report["functions"]["differ"]
+    report["summary"] = {                       # the counts the documents quote
+        "reference_commit": subprocess.run(["git", "rev-parse", "--short", ref], capture_output=True, text=True, cwd=ROOT).stdout.strip(),
+        "function_inputs": report["functions"]["inputs"],
+        "cells_read_differently": sum(k.startswith("cell:") for k in fd),
+        "headers_changed": sum(k.startswith("header:") for k in fd),
+        "formats_changed": sum(k.startswith("format:") for k in fd),
+        "tables_whose_units_changed": len(report["table_units"]),
+        "synthetic_answers_changed": {rel.split("data/")[1].replace("/", "_").replace(".jsonl", ""): len(ch) for rel, ch in report["synthetic"].items()},
+        "synthetic_answers_changed_total": sum(len(ch) for ch in report["synthetic"].values()),
+        "verdict_inputs": report["verdicts"]["inputs"],
+        "verdicts_changed": len(report["verdicts"]["differ"]),
+    }
+    print("summary:", report["summary"])
     if out_path:
         Path(out_path).write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         print("wrote", out_path)

@@ -1,6 +1,8 @@
 # 결함 고치기 — `tools/numbers.py`의 이슈 40, 41
 
-**상태: 준비됨(2026-11-19). 소유자가 고친다.** 고칠 파일은 1단계에서 본인이 쓴 `src/tabletrace/tools/numbers.py`다. AI 도구는 이 명세, 테스트(`tests/test_numbers_fix.py`), 데이터를 다시 만들고 영향을 세는 스크립트(`scripts/numbers_fix.py`)만 만들었다. 코드는 쓰지 않는다.
+> **끝났다(2026-11-20, PR #10, 소유자 커밋 `5058e59`).** 소유자가 닫힌 목록(A)을 골라 고쳤다. 영향은 아래 "미리 잰 영향"과 똑같이 나왔다(`experiments/eval/numbers_fix_impact.json`). 남은 것: 이 문서의 머리글 목록은 세 말뭉치에서만 뽑은 것이고, 나머지 말뭉치의 저장된 단위는 그대로다(`docs/dev/issues-log.md` 88). 결과는 `docs/REPORT.md` §33. 아래는 과제를 할 때의 안내문 그대로다.
+
+**준비됨(2026-11-19). 소유자가 고친다.** 고칠 파일은 1단계에서 본인이 쓴 `src/tabletrace/tools/numbers.py`다. AI 도구는 이 명세, 테스트(`tests/test_numbers_fix.py`), 데이터를 다시 만들고 영향을 세는 스크립트(`scripts/numbers_fix.py`)만 만들었다. 코드는 쓰지 않는다.
 
 ## 왜 하는가
 

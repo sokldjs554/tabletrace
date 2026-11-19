@@ -1,8 +1,8 @@
 """Tests for fixing issues 40 and 41 in tools/numbers.py (docs/rewrite/09_numbers_fix.md).
 
-Written by the AI coding tool as the specification the owner's fix must meet. The tests for each defect are skipped
-until that defect is fixed (the module the owner wrote is not changed by the AI tool). The other tests pass now and
-must still pass after the fix: they guard what the fix must NOT change.
+Written by the AI coding tool as the specification the owner's fix must meet. The tests for each defect were skipped
+until the owner fixed it (the module the owner wrote is not changed by the AI tool); the owner did on 2026-11-20
+(PR #10), so nothing is skipped any more. The other tests guard what the fix must NOT change.
 """
 import json
 from pathlib import Path
@@ -105,3 +105,30 @@ def test_stored_table_units_are_what_header_unit_gives():
                 elif stored != derived:
                     stale.append((t["id"], stored, derived))
     assert not stale, f"{len(stale)} tables store other units than header_unit gives, e.g. {stale[:3]}"
+
+
+# ---------------------------------------------------------------- what the fix changed, as measured (PR #10)
+
+def test_the_stored_impact_of_the_fix_and_what_the_documents_say_about_it():
+    """experiments/eval/numbers_fix_impact.json compares the merged fix with the commit before it. The documents say that
+    no cell is read differently and no stored verdict changed; they may say so only while this file does."""
+    impact = json.loads((ROOT / "experiments/eval/numbers_fix_impact.json").read_text(encoding="utf-8"))
+    s = impact["summary"]
+    assert FIXED_40 and FIXED_41
+    assert s["cells_read_differently"] == 0 and s["verdicts_changed"] == 0 and s["verdict_inputs"] > 30000
+    assert s["headers_changed"] == len(NOT_UNITS)                      # exactly the words listed above, nothing else
+    assert {k.split("header:")[1] for k in impact["functions"]["differ"] if k.startswith("header:")} == {h for h, _ in NOT_UNITS}
+    assert all(old == "0" and new != "0" for k, (old, new) in impact["functions"]["differ"].items() if k.startswith("format:"))
+    changed = s["synthetic_answers_changed"]
+    assert changed["chem_synthetic_train"] == s["synthetic_answers_changed_total"] == 10 and sum(changed.values()) == 10
+    report = (ROOT / "docs/REPORT.md").read_text(encoding="utf-8")
+    sec = report[report.index("## 33. 다시 쓰다가 찾은 결함 두 개를 소유자가 고쳤다"):]
+    for needle in ("소유자가 닫힌 목록을 골랐다", "고친 정답으로 다시 학습하지 않았다", "나머지 말뭉치의 저장된 단위는 그대로다", "AI 도구가 준비한 범위의 빈틈", "PR #10"):
+        assert needle in sec, needle
+    log = (ROOT / "docs/dev/issues-log.md").read_text(encoding="utf-8")
+    rows = {line.split("|")[1].strip(): line for line in log.splitlines() if line.startswith("| ")}
+    assert "**수정(2026-11-20" in rows["40"] and "**수정(2026-11-20" in rows["41"] and "**미수정" in rows["88"]
+    handoff = (ROOT / "docs/HANDOFF.md").read_text(encoding="utf-8")
+    for needle in ("직접 고쳤다", '"고친 데이터로 다시 학습했다"', '"모든 말뭉치의 단위를 바로잡았다"'):
+        assert needle in handoff, needle
+
