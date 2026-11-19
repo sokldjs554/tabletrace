@@ -930,11 +930,11 @@ def test_the_recorded_repeat_matches_what_the_notebook_does(tmp_path, monkeypatc
         assert meta["tokenizer"] == same["tokenizer"].replace("kochem2", "kochem3")             # each model's own merged weights
 
 
-def test_the_notebook_says_what_section_o_gave_and_that_nothing_is_left_to_run():
+def test_the_notebook_says_what_section_o_gave_and_that_only_section_p_is_left_to_run():
     cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
     intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## O."))
     row = next(line for line in intro.split("\n") if line.startswith("| O |"))
-    assert "지금 돌릴 것은 없습니다" in intro and "2026-11-17에 Colab에서 끝남" in row and "아직 돌리지 않" not in intro + section
+    assert "지금 돌릴 것은 P절뿐입니다" in intro and "2026-11-17에 Colab에서 끝남" in row and "아직 돌리지 않" not in row + section
     assert "반복 학습은 2026-11-18에 끝남" in row and "반복 학습의 결과" in section and "돌리지 않았습니다" not in section
     rerun = json.loads((ROOT / "experiments/eval/chem_rerun_analysis.json").read_text())["chemistry"]["chem_papers"]
     assert f"{100 * rerun['tuned']['rate']:.1f}%" in section and f"{100 * rerun['untuned_six_examples']['rate']:.1f}%" in section      # the numbers the section set out from
@@ -976,3 +976,93 @@ def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_
     assert (clone / "code.py").read_text() == "new\n" and git(clone, "rev-parse", "HEAD") == git(origin, "rev-parse", "HEAD")
     assert (clone / "results" / "metrics.json").read_text() == "committed\n" and (clone / "weights.bin").read_text() == "large\n"
 
+
+
+P_CELL = "KOONLY2_DIR"        # the cell of section P: three experiments that ran once, run once more
+
+
+def _with(run, *flags: str) -> None:
+    for f in flags:
+        assert sum(f"{f} = False" in src for _, src in run.sections) == 1
+        run.sections = [(i, src.replace(f"{f} = False", f"{f} = True")) for i, src in run.sections]
+
+
+def _same_training(cmd: str, stored_run: str) -> None:
+    stored = json.loads((ROOT / "experiments" / stored_run / "train_info.json").read_text())["args"]
+    assert _train_args(cmd) == (stored["train"], stored["corpus"])
+    for flag, key in (("--epochs", "epochs"), ("--bs", "bs"), ("--grad-accum", "grad_accum"), ("--max-len", "max_len"), ("--max-in", "max_in"), ("--seed", "seed"), ("--limit", "limit")):
+        assert float(re.search(rf"{flag} (\S+)", cmd).group(1)) == float(stored[key]), flag
+    assert ("--loop owner" in cmd) == (stored.get("loop") == "owner")
+
+
+def test_section_p_starts_nothing_unless_asked(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    assert run.run_all(only=P_CELL) == collections.Counter()
+
+
+def test_section_p_repeats_the_korean_only_model_with_section_o_command(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    _with(run, "P_KOONLY")
+    counts = run.run_all(only=P_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 2 * 6
+    train = next(c for k, c in run.calls if k == "train")
+    assert "--out experiments/exaone_lora_koonly2" in train and "--merge" in train.split()
+    _same_training(train, "exaone_lora_koonly")
+    _same_evaluations_as_section_n(run, "exaone_koonly2_vllm")
+    names = tarfile.open(tmp_path / "gpu_results_2.tgz").getnames()
+    assert any("exaone_koonly2_vllm_chem_papers_ec" in n for n in names) and any(n.endswith("exaone_lora_koonly2/train_info.json") for n in names)
+    assert not any("merged" in n for n in names) and not (run.repo / "experiments/exaone_lora_koonly2/merged").exists()
+    assert run.run_all(only=P_CELL) == collections.Counter()                       # run again: nothing left to do
+
+
+def test_section_p_repeats_rl_from_a_full_data_model_with_section_j_command(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    _with(run, "P_RL")
+    counts = run.run_all(only=P_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8
+    assert [k for k, _ in run.calls if k in ("train", "grpo")] == ["train", "grpo"]
+    start, rl = next(c for k, c in run.calls if k == "train"), next(c for k, c in run.calls if k == "grpo")
+    assert "--out experiments/exaone_lora_full5" in start and "--adapter experiments/exaone_lora_full5 " in rl and "--out experiments/exaone_grpo4" in rl
+    _same_training(start, "exaone_lora_full3")
+    stored = json.loads((ROOT / "experiments/exaone_grpo3/train_info.json").read_text())["args"]
+    for flag, key in (("--steps", "steps"), ("--prompts", "prompts"), ("--group", "group"), ("--chunk", "chunk"), ("--max-in", "max_in"), ("--max-len", "max_len"),
+                      ("--sampling", "sampling"), ("--dev-sample", "dev_sample"), ("--dev-n", "dev_n"), ("--eval-every", "eval_every")):
+        assert re.search(rf"{flag} (\S+)", rl).group(1) == str(stored[key]), flag
+    assert float(re.search(r"--lr (\S+)", rl).group(1)) == stored["lr"]
+    assert run.outputs() == [f"experiments/eval/{n}_vllm_ko_{s}{ec}" for n in ("exaone_full5", "exaone_grpo4") for s in ("custom", "test") for ec in ("", "_ec")] + [
+        "experiments/exaone_grpo4", "experiments/exaone_lora_full5"]
+    assert run.run_all(only=P_CELL) == collections.Counter()
+
+
+def test_section_p_repeats_the_owner_loop_with_section_m_command(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    _with(run, "P_OWNLOOP")
+    counts = run.run_all(only=P_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 6
+    train = next(c for k, c in run.calls if k == "train")
+    assert "--out experiments/exaone_lora_ownloop2" in train and "--loop owner" in train
+    stored = json.loads((ROOT / "experiments/exaone_lora_ownloop/train_info.json").read_text())["args"]
+    assert stored["loop"] == "owner"
+    _same_training(train, "exaone_lora_ownloop")
+    assert run.outputs() == sorted([f"experiments/eval/exaone_ownloop2_vllm_ko_{s}{ec}" for s in ("test", "custom", "owner") for ec in ("", "_ec")] + ["experiments/exaone_lora_ownloop2"])
+    assert run.run_all(only=P_CELL) == collections.Counter()
+
+
+def test_section_p_all_three_in_one_session(tmp_path, monkeypatch):
+    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    _with(run, "P_KOONLY", "P_RL", "P_OWNLOOP")
+    counts = run.run_all(only=P_CELL)
+    assert counts["train"] == 3 and counts["grpo"] == 1 and counts["eval"] == 12 + 8 + 6
+    assert not list((run.repo / "experiments").glob("*/merged"))                  # every model's weights freed after its evaluation
+
+
+def test_what_section_p_is_checked_for_was_written_down_before_it_ran():
+    cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
+    section = next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## P."))
+    assert "docs/REPORT.md` §31" in section and "scripts/repeat_once_analysis.py" in section
+    report = (ROOT / "docs/REPORT.md").read_text(encoding="utf-8")
+    assert "## 31." in report
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import repeat_once_analysis
+    out = repeat_once_analysis.analyse()
+    assert out["P1_korean_only"]["run"] is False or "1a_unanswerable_repeat_vs_new_korean_only" in out["P1_korean_only"]
