@@ -23,7 +23,7 @@
 | 공개 데모 (GitHub Pages, 저장된 실행 결과 모드) | <https://sokldjs554.github.io/tabletrace/> — 소유자가 2026-11-08 브라우저에서 열리는 것을 확인. 2026-11-17에 화면을 고쳤고(§9.1h), 고친 화면은 로컬에서만 검사했다. 평가 문항 전체(154개)를 정답, 판정과 함께 보여 주고, 플래너의 답을 나란히 놓는다(한국어 문항에 일곱, 화학 문서에 다섯). 화학 문서에도 EXAONE의 결과가 있다(§9.1i). 검증기는 방문자의 브라우저 안에서 직접 실행해 볼 수 있다. 모델은 실행되지 않는다 |
 | 최종 보고서 | `docs/REPORT.md` (공고 대조표 §3, 확인 가능한 사실 §17, 2차 시도 §18) |
 | README | `README.md` (결과 표 §9·§10, 수행/미수행 표 §14) |
-| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (86건) |
+| 발견한 문제와 수정 기록 | `docs/dev/issues-log.md` (87건) |
 | 한 장 요약 | `docs/ONE_PAGE.md` (모든 수치가 산출물에 묶여 검사됨) |
 | 2차 GPU 실험 | 소유자가 2026-11-14에 Kaggle에서 실행. 결과 파일은 사라졌고 수치는 노트북 출력에서 복원: `experiments/gpu2_2026-11-14/`(원본 노트북과 `recovered.json`), `docs/REPORT.md` §21. 노트북은 `notebooks/gpu_experiments_2.ipynb` |
 | 본인이 직접 쓴 학습 코드 | `src/tabletrace/training/evidence_reward.py`, `grpo.py`, `lm_loop.py` (명세 `docs/rewrite/06_training_code.md`, 테스트 `tests/test_owner_training_code.py`, 기록 `docs/rewrite/LOG.md`) |

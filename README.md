@@ -1132,6 +1132,8 @@ GPU가 없는 곳에서 엔진 플래너를 써 보려면 `python scripts/servin
 
 Docker: `docker compose up --build` (휴리스틱) 또는 `WITH_MODEL=1 docker compose up --build` (모델; `models/` 마운트). 환경 변수는 `.env.example`.
 
+맥북 같은 개인 컴퓨터에서 테스트, 한국어 형태소 분석기, 기준선 평가, 저장된 모델 출력의 재검증을 돌리는 순서와 기대값은 [docs/LOCAL_RUN.md](docs/LOCAL_RUN.md)에 있습니다.
+
 모델 가중치는 git에 없습니다. `scripts/train/README.md`의 명령으로 재학습하거나, `models/mt5-small-base`를 만들려면 `scripts/model/`(GCS 다운로드 + 변환)을 실행합니다.
 
 ## 13. 테스트·CI·배포
