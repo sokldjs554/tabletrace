@@ -18,7 +18,7 @@
 | 2 | `agent/program.py` | 85 | `tests/test_program_verifier.py`(파서 부분) | 프로그램 문법 `op ; cells ; answer` 파서 |
 | 3 | `tools/cells.py` | 62 | 간접(`pytest -q` 전체) + `rewrite_parity.py cells` | 셀 읽기·찾기, 질문과 행·열의 겹침 점수 |
 | 4 | `verify/verifier.py` | 289 | `tests/test_program_verifier.py` | 프로젝트의 핵심. 답·근거·계산 검증과 보류 결정, 개체 일치 검사 |
-| 5 | `agent/heuristic.py` | 113 | `tests/test_api.py` 일부 | 어휘 겹침 기준선 |
+| 5 | `agent/heuristic.py` | 113 | `tests/test_agent_heuristic.py`(50개) + `rewrite_parity.py heuristic` | 어휘 겹침 기준선. 보고하는 기준선 수치가 모두 여기서 나온다. **준비됨(2026-11-19)**: 명세 `10_agent_heuristic.md` |
 | 6 | `retrieval/tokenize.py`, `bm25.py`, `index.py` | 66 + 50 + 66 | `tests/test_retrieval.py` | 검색 |
 | 7 | `eval/metrics.py` | 71 | `tests/test_eval_metrics.py`(59개) + `rewrite_parity.py metrics` | 지표 계산. 모든 보고 수치가 여기서 나온다. **완료(2026-11-19, PR #8)**: 명세 `08_eval_metrics.md` |
 | 8 | `tools/registry.py`, `agent/graph.py` | 94 + 177 | `tests/test_api.py` | 도구 등록과 LangGraph 그래프 |

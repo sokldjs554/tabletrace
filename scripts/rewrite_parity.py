@@ -10,6 +10,7 @@ outputs, and reports every input on which they disagree. A rewrite that passes t
   python scripts/rewrite_parity.py program      # agent/program.py: parse()+serialize() on every stored model output and gold program
   python scripts/rewrite_parity.py cells        # tools/cells.py: normalize_text, lookup_cell, find_cells, row/column overlap scores over the corpora and every question
   python scripts/rewrite_parity.py verifier     # verify/verifier.py: resolve() on every stored model output (8.6k) and gold program, 3 settings each; find_span probes
+  python scripts/rewrite_parity.py heuristic    # agent/heuristic.py: plan() on every question of every set (table as evaluated, and whole), _calc_intent, probe questions on every table
   python scripts/rewrite_parity.py metrics      # eval/metrics.py: summarize() on every stored evaluation (whole, halves, by source), answer_match on every stored answer pair and probes, cells_match on every stored cell pair
   python scripts/rewrite_parity.py numbers --ref <commit>     # compare against another commit
 
@@ -206,6 +207,44 @@ elif mode == "metrics":
         out[f"cells:{list(pc)}|{list(gc)}"] = cells_match(list(pc), list(gc))
         out[f"cells-swap:{list(gc)}|{list(pc)}"] = cells_match(list(gc), list(pc))
     out["summarize:empty"] = json.dumps(summarize([]))
+elif mode == "heuristic":
+    import gzip
+    from pathlib import Path
+    from tabletrace.agent.heuristic import _calc_intent, plan
+    from tabletrace.agent.program import serialize
+    from tabletrace.model.approx_tokenizer import ApproxTokenizer
+    from tabletrace.training.data import build_examples, load_docs
+    def program(question, table):
+        try:
+            return serialize(plan(question, table, table.lang))
+        except Exception as exc:                 # a crash on one side and not the other is a difference too
+            return "raised " + type(exc).__name__
+    sets = [(["data/ko/train.jsonl", "data/ko/dev.jsonl", "data/ko/test.jsonl", "data/ko/synthetic_train.jsonl", "data/ko/synthetic_dev.jsonl",
+              "data/ko/synthetic_test.jsonl", "data/ko/custom_eval.jsonl", "data/ko/owner_eval.jsonl"], ["data/ko/documents.jsonl"]),
+            (["data/ko/unseen_dev.jsonl"], ["data/ko/unseen_dev_documents.jsonl.gz"]),
+            (["data/ko/leak_probe_seen.jsonl", "data/ko/leak_probe_unseen.jsonl"], ["data/ko/documents.jsonl", "data/ko/leak_probe_documents.jsonl"]),
+            (["data/chem/synthetic_train.jsonl", "data/chem/synthetic_dev.jsonl", "data/chem/custom_eval.jsonl"], ["data/chem/documents.jsonl"]),
+            (["data/chem_papers/custom_eval.jsonl"], ["data/chem_papers/documents.jsonl"])]
+    tok = ApproxTokenizer()
+    for recs_paths, corpus in sets:
+        docs = load_docs(*[Path(root) / c for c in corpus])
+        for rp in recs_paths:
+            recs = [json.loads(line) for line in open(f"{root}/{rp}", encoding="utf-8") if line.strip()]
+            for e in build_examples(recs, docs, tok, 512):      # the table as an evaluation shows it (rows cut to fit 512 tokens)
+                out[f"cut:{rp}:{e.qid}"] = program(e.question, e.table)
+                if e.table_full is not None and e.table_full.rows != e.table.rows:
+                    out[f"whole:{rp}:{e.qid}"] = program(e.question, e.table_full)
+                out[f"intent:{e.question}"] = _calc_intent(e.question)
+    # every table once more with questions made of its own header and first cells (named column, no column, two rows)
+    for c in ["data/ko/documents.jsonl", "data/chem/documents.jsonl", "data/chem_papers/documents.jsonl"]:
+        for d in load_docs(Path(root) / c).values():
+            for t in d.tables:
+                if not t.rows or not t.header:
+                    continue
+                a, h = t.rows[0][0], t.header[-1]
+                b = t.rows[1][0] if len(t.rows) > 1 else a
+                for q in (f"{a}의 {h}은?", f"{a}", f"{a}와 {b}의 {h} 차이는?", f"What is the {h} of {a}?", f"total {h} of {a} and {b}"):
+                    out[f"probe:{t.id}:{q}"] = program(q, t)
 elif mode == "program":
     from tabletrace.agent.program import ProgramParseError, parse, serialize
     raws = set()
@@ -232,7 +271,7 @@ def run(mode: str, src: Path) -> dict:
 
 def main() -> None:
     args = sys.argv[1:]
-    if not args or args[0] not in ("numbers", "calculator", "program", "cells", "verifier", "metrics"):
+    if not args or args[0] not in ("numbers", "calculator", "program", "cells", "verifier", "metrics", "heuristic"):
         sys.exit(__doc__)
     mode = args[0]
     ref = args[args.index("--ref") + 1] if "--ref" in args else "origin/main"
