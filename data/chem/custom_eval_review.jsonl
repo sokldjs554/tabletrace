@@ -1,0 +1,32 @@
+{"qid": "chem_custom_01", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_02", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_03", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_04", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_05", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_06", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_07", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_08", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_09", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_10", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_11", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_12", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_13", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_14", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_15", "verdict": "fix", "comment": "-10 °C에서 얼음이 되는 압력은 하나가 아니다. 본문의 예에서 사용한 압력을 물으면 50 kPa로 답이 정해진다."}
+{"qid": "chem_custom_16", "verdict": "fix", "comment": "4번 실험의 반응 속도는 3.96e-4 mol/(L*s)다. 정답에서 -4가 지수로 읽히도록 표기를 고친다."}
+{"qid": "chem_custom_17", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_18", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_19", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_20", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_21", "verdict": "fix", "comment": "645 K에서 k는 8.59e-5 L/(mol*s)다. 정답에서 -5가 지수로 읽히도록 표기를 고친다."}
+{"qid": "chem_custom_22", "verdict": "fix", "comment": "180 kJ/mol은 맞다. 대체 정답에는 10의 5제곱이 105로 붙어 있다. 1.8e5 J/mol로 고친다."}
+{"qid": "chem_custom_23", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_24", "verdict": "fix", "comment": "25.67%는 본문 17번 문단이 설명하는 지각과 대기의 값이다. 질문도 이 표에서 규소가 차지하는 질량 비율로 좁힌다."}
+{"qid": "chem_custom_25", "verdict": "fix", "comment": "산소와 규소를 더한 74.87%는 지각과 대기 기준이다. 질문에 이 범위를 밝혀야 한다."}
+{"qid": "chem_custom_26", "verdict": "fix", "comment": "질문의 범위를 지각과 대기로 좁힌다. 이 표에는 금만의 비율이 없어 답은 여전히 구할 수 없다."}
+{"qid": "chem_custom_27", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_28", "verdict": "fix", "comment": "본문과 정답에 10의 10제곱이 1010으로 붙어 있다. 정답을 1.8e10 kJ로 적는다."}
+{"qid": "chem_custom_29", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_30", "verdict": "fix", "comment": "화학식만 물었으므로 대표 정답은 HOBr가 맞다. 셀에 함께 적힌 (8.7)은 뺀다."}
+{"qid": "chem_custom_31", "verdict": "ok", "comment": ""}
+{"qid": "chem_custom_32", "verdict": "ok", "comment": ""}
