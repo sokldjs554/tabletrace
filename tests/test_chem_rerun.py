@@ -92,7 +92,7 @@ def test_the_documents_use_the_run_that_kept_its_files_and_say_it_came_out_lower
     assert "§29" in earlier_sec and "결과 파일이 남지 않은 실행" in earlier_sec
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sec = readme[readme.index("### 9.14 화학 문항에서의 EXAONE"):readme.index("## 10. 추론 최적화")]
-    for needle in ("예전 실행의 수치보다 낮습니다", "한국어 전용 모델은 학습 한 번입니다", "소유자가 검수하지 않았습니다"):
+    for needle in ("예전 실행의 수치보다 낮습니다", "한국어 전용 모델은 학습 한 번입니다", "소유자가 2026-11-19에 검수했습니다"):
         assert needle in sec, needle
     # wherever the earlier number is still quoted, the same line says where it comes from
     for name in ("README.md", "docs/ONE_PAGE.md"):

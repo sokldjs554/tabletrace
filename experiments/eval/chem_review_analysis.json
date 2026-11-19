@@ -1,0 +1,761 @@
+{
+ "review": {
+  "chem_papers": {
+   "ok": [
+    "chem_paper_01",
+    "chem_paper_02",
+    "chem_paper_03",
+    "chem_paper_05",
+    "chem_paper_06",
+    "chem_paper_07",
+    "chem_paper_08",
+    "chem_paper_09",
+    "chem_paper_10",
+    "chem_paper_11",
+    "chem_paper_12",
+    "chem_paper_13",
+    "chem_paper_14",
+    "chem_paper_15",
+    "chem_paper_16",
+    "chem_paper_18",
+    "chem_paper_19",
+    "chem_paper_20",
+    "chem_paper_21",
+    "chem_paper_22",
+    "chem_paper_23",
+    "chem_paper_24",
+    "chem_paper_25",
+    "chem_paper_26",
+    "chem_paper_27",
+    "chem_paper_28",
+    "chem_paper_29",
+    "chem_paper_30",
+    "chem_paper_31",
+    "chem_paper_32",
+    "chem_paper_33",
+    "chem_paper_34",
+    "chem_paper_35",
+    "chem_paper_36",
+    "chem_paper_37",
+    "chem_paper_38",
+    "chem_paper_39",
+    "chem_paper_40",
+    "chem_paper_41",
+    "chem_paper_42",
+    "chem_paper_43",
+    "chem_paper_44",
+    "chem_paper_45",
+    "chem_paper_47",
+    "chem_paper_50",
+    "chem_paper_51",
+    "chem_paper_52",
+    "chem_paper_53",
+    "chem_paper_54",
+    "chem_paper_55",
+    "chem_paper_56",
+    "chem_paper_57",
+    "chem_paper_58",
+    "chem_paper_59",
+    "chem_paper_60",
+    "chem_paper_61",
+    "chem_paper_62"
+   ],
+   "fix": [
+    "chem_paper_04",
+    "chem_paper_17",
+    "chem_paper_46",
+    "chem_paper_48",
+    "chem_paper_49"
+   ],
+   "drop": []
+  },
+  "chem_custom": {
+   "ok": [
+    "chem_custom_01",
+    "chem_custom_02",
+    "chem_custom_03",
+    "chem_custom_04",
+    "chem_custom_05",
+    "chem_custom_06",
+    "chem_custom_07",
+    "chem_custom_08",
+    "chem_custom_09",
+    "chem_custom_10",
+    "chem_custom_11",
+    "chem_custom_12",
+    "chem_custom_13",
+    "chem_custom_14",
+    "chem_custom_17",
+    "chem_custom_18",
+    "chem_custom_19",
+    "chem_custom_20",
+    "chem_custom_23",
+    "chem_custom_27",
+    "chem_custom_29",
+    "chem_custom_31",
+    "chem_custom_32"
+   ],
+   "fix": [
+    "chem_custom_15",
+    "chem_custom_16",
+    "chem_custom_21",
+    "chem_custom_22",
+    "chem_custom_24",
+    "chem_custom_25",
+    "chem_custom_26",
+    "chem_custom_28",
+    "chem_custom_30"
+   ],
+   "drop": []
+  }
+ },
+ "counts": {
+  "chem_papers": {
+   "ok": 57,
+   "fix": 5,
+   "drop": 0,
+   "questions": 62
+  },
+  "chem_custom": {
+   "ok": 23,
+   "fix": 9,
+   "drop": 0,
+   "questions": 32
+  },
+  "both_sets": {
+   "questions": 94,
+   "ok": 80,
+   "fix": 14,
+   "drop": 0,
+   "set_aside": 14
+  }
+ },
+ "set_aside": [
+  "chem_custom_15",
+  "chem_custom_16",
+  "chem_custom_21",
+  "chem_custom_22",
+  "chem_custom_24",
+  "chem_custom_25",
+  "chem_custom_26",
+  "chem_custom_28",
+  "chem_custom_30",
+  "chem_paper_04",
+  "chem_paper_17",
+  "chem_paper_46",
+  "chem_paper_48",
+  "chem_paper_49"
+ ],
+ "runs": {
+  "base_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 5,
+    "rate": 0.1562,
+    "ci95": {
+     "lo": 0.0686,
+     "hi": 0.3175
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 4,
+    "rate": 0.1739,
+    "ci95": {
+     "lo": 0.0698,
+     "hi": 0.3714
+    }
+   },
+   "rate_change": 0.0177
+  },
+  "exaone_kochem2_vllm_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 24,
+    "rate": 0.75,
+    "ci95": {
+     "lo": 0.5789,
+     "hi": 0.8675
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 19,
+    "rate": 0.8261,
+    "ci95": {
+     "lo": 0.6286,
+     "hi": 0.9302
+    }
+   },
+   "rate_change": 0.0761
+  },
+  "exaone_kochem2_vllm_chem_papers": {
+   "all": {
+    "n": 62,
+    "correct": 46,
+    "rate": 0.7419,
+    "ci95": {
+     "lo": 0.6212,
+     "hi": 0.8345
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 43,
+    "rate": 0.7544,
+    "ci95": {
+     "lo": 0.629,
+     "hi": 0.8477
+    }
+   },
+   "rate_change": 0.0125
+  },
+  "exaone_kochem3_vllm_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 21,
+    "rate": 0.6562,
+    "ci95": {
+     "lo": 0.4831,
+     "hi": 0.7959
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 17,
+    "rate": 0.7391,
+    "ci95": {
+     "lo": 0.5353,
+     "hi": 0.8745
+    }
+   },
+   "rate_change": 0.0829
+  },
+  "exaone_kochem3_vllm_chem_papers": {
+   "all": {
+    "n": 62,
+    "correct": 47,
+    "rate": 0.7581,
+    "ci95": {
+     "lo": 0.6385,
+     "hi": 0.8475
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 42,
+    "rate": 0.7368,
+    "ci95": {
+     "lo": 0.6102,
+     "hi": 0.8335
+    }
+   },
+   "rate_change": -0.0213
+  },
+  "exaone_koonly_vllm_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 19,
+    "rate": 0.5938,
+    "ci95": {
+     "lo": 0.4226,
+     "hi": 0.7448
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 16,
+    "rate": 0.6957,
+    "ci95": {
+     "lo": 0.4913,
+     "hi": 0.844
+    }
+   },
+   "rate_change": 0.1019
+  },
+  "exaone_koonly_vllm_chem_papers": {
+   "all": {
+    "n": 62,
+    "correct": 42,
+    "rate": 0.6774,
+    "ci95": {
+     "lo": 0.5537,
+     "hi": 0.7805
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 39,
+    "rate": 0.6842,
+    "ci95": {
+     "lo": 0.5552,
+     "hi": 0.79
+    }
+   },
+   "rate_change": 0.0068
+  },
+  "final_int8_lm_head_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 8,
+    "rate": 0.25,
+    "ci95": {
+     "lo": 0.1325,
+     "hi": 0.4211
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 7,
+    "rate": 0.3043,
+    "ci95": {
+     "lo": 0.156,
+     "hi": 0.5087
+    }
+   },
+   "rate_change": 0.0543
+  },
+  "heuristic_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 18,
+    "rate": 0.5625,
+    "ci95": {
+     "lo": 0.3933,
+     "hi": 0.7183
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 13,
+    "rate": 0.5652,
+    "ci95": {
+     "lo": 0.3681,
+     "hi": 0.7437
+    }
+   },
+   "rate_change": 0.0027
+  },
+  "heuristic_chem_papers": {
+   "all": {
+    "n": 62,
+    "correct": 27,
+    "rate": 0.4355,
+    "ci95": {
+     "lo": 0.3194,
+     "hi": 0.5591
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 26,
+    "rate": 0.4561,
+    "ci95": {
+     "lo": 0.3337,
+     "hi": 0.5841
+    }
+   },
+   "rate_change": 0.0206
+  },
+  "ref_1p2b_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 13,
+    "rate": 0.4062,
+    "ci95": {
+     "lo": 0.2552,
+     "hi": 0.5774
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 11,
+    "rate": 0.4783,
+    "ci95": {
+     "lo": 0.2924,
+     "hi": 0.6704
+    }
+   },
+   "rate_change": 0.0721
+  },
+  "ref_1p2b_chem_papers": {
+   "all": {
+    "n": 62,
+    "correct": 15,
+    "rate": 0.2419,
+    "ci95": {
+     "lo": 0.1525,
+     "hi": 0.3615
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 15,
+    "rate": 0.2632,
+    "ci95": {
+     "lo": 0.1665,
+     "hi": 0.3898
+    }
+   },
+   "rate_change": 0.0213
+  },
+  "rl_ko_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 4,
+    "rate": 0.125,
+    "ci95": {
+     "lo": 0.0497,
+     "hi": 0.2807
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 4,
+    "rate": 0.1739,
+    "ci95": {
+     "lo": 0.0698,
+     "hi": 0.3714
+    }
+   },
+   "rate_change": 0.0489
+  },
+  "rl_ko_v1_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 5,
+    "rate": 0.1562,
+    "ci95": {
+     "lo": 0.0686,
+     "hi": 0.3175
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 4,
+    "rate": 0.1739,
+    "ci95": {
+     "lo": 0.0698,
+     "hi": 0.3714
+    }
+   },
+   "rate_change": 0.0177
+  },
+  "rl_v3_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 7,
+    "rate": 0.2188,
+    "ci95": {
+     "lo": 0.1102,
+     "hi": 0.3875
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 6,
+    "rate": 0.2609,
+    "ci95": {
+     "lo": 0.1255,
+     "hi": 0.4647
+    }
+   },
+   "rate_change": 0.0421
+  },
+  "rl_v3_chem_papers": {
+   "all": {
+    "n": 62,
+    "correct": 14,
+    "rate": 0.2258,
+    "ci95": {
+     "lo": 0.1396,
+     "hi": 0.3441
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 14,
+    "rate": 0.2456,
+    "ci95": {
+     "lo": 0.1523,
+     "hi": 0.371
+    }
+   },
+   "rate_change": 0.0198
+  },
+  "sft_chem2_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 6,
+    "rate": 0.1875,
+    "ci95": {
+     "lo": 0.0889,
+     "hi": 0.3531
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 4,
+    "rate": 0.1739,
+    "ci95": {
+     "lo": 0.0698,
+     "hi": 0.3714
+    }
+   },
+   "rate_change": -0.0136
+  },
+  "sft_chem2_chem_papers": {
+   "all": {
+    "n": 62,
+    "correct": 12,
+    "rate": 0.1935,
+    "ci95": {
+     "lo": 0.1143,
+     "hi": 0.3085
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 12,
+    "rate": 0.2105,
+    "ci95": {
+     "lo": 0.1247,
+     "hi": 0.3329
+    }
+   },
+   "rate_change": 0.017
+  },
+  "sft_chem_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 5,
+    "rate": 0.1562,
+    "ci95": {
+     "lo": 0.0686,
+     "hi": 0.3175
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 3,
+    "rate": 0.1304,
+    "ci95": {
+     "lo": 0.0454,
+     "hi": 0.3213
+    }
+   },
+   "rate_change": -0.0258
+  },
+  "sft_chem_int8_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 8,
+    "rate": 0.25,
+    "ci95": {
+     "lo": 0.1325,
+     "hi": 0.4211
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 7,
+    "rate": 0.3043,
+    "ci95": {
+     "lo": 0.156,
+     "hi": 0.5087
+    }
+   },
+   "rate_change": 0.0543
+  },
+  "sft_ko2_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 3,
+    "rate": 0.0938,
+    "ci95": {
+     "lo": 0.0324,
+     "hi": 0.2422
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 3,
+    "rate": 0.1304,
+    "ci95": {
+     "lo": 0.0454,
+     "hi": 0.3213
+    }
+   },
+   "rate_change": 0.0366
+  },
+  "sft_ko3_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 6,
+    "rate": 0.1875,
+    "ci95": {
+     "lo": 0.0889,
+     "hi": 0.3531
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 5,
+    "rate": 0.2174,
+    "ci95": {
+     "lo": 0.0966,
+     "hi": 0.419
+    }
+   },
+   "rate_change": 0.0299
+  },
+  "sft_ko4_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 6,
+    "rate": 0.1875,
+    "ci95": {
+     "lo": 0.0889,
+     "hi": 0.3531
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 6,
+    "rate": 0.2609,
+    "ci95": {
+     "lo": 0.1255,
+     "hi": 0.4647
+    }
+   },
+   "rate_change": 0.0734
+  },
+  "sft_ko_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 4,
+    "rate": 0.125,
+    "ci95": {
+     "lo": 0.0497,
+     "hi": 0.2807
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 3,
+    "rate": 0.1304,
+    "ci95": {
+     "lo": 0.0454,
+     "hi": 0.3213
+    }
+   },
+   "rate_change": 0.0054
+  }
+ },
+ "checks": {
+  "1_paper_headline": {
+   "all": {
+    "n": 62,
+    "correct": 46,
+    "rate": 0.7419,
+    "ci95": {
+     "lo": 0.6212,
+     "hi": 0.8345
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 43,
+    "rate": 0.7544,
+    "ci95": {
+     "lo": 0.629,
+     "hi": 0.8477
+    }
+   },
+   "rate_change": 0.0125
+  },
+  "2_papers_korean_only_vs_chemistry": {
+   "all": {
+    "only_candidate": 7,
+    "only_reference": 3,
+    "p_two_sided": 0.34375,
+    "p_display": "0.344"
+   },
+   "without_set_aside": {
+    "only_candidate": 6,
+    "only_reference": 2,
+    "p_two_sided": 0.2890625,
+    "p_display": "0.289"
+   },
+   "questions_set_aside": 5,
+   "same_conclusion": true
+  },
+  "3_papers_untuned_vs_korean_only": {
+   "all": {
+    "only_candidate": 30,
+    "only_reference": 3,
+    "p_two_sided": 1.4011748135089874e-06,
+    "p_display": "<0.001"
+   },
+   "without_set_aside": {
+    "only_candidate": 27,
+    "only_reference": 3,
+    "p_two_sided": 8.430331945419312e-06,
+    "p_display": "<0.001"
+   },
+   "questions_set_aside": 5,
+   "same_conclusion": true
+  },
+  "3_papers_baseline_vs_korean_only": {
+   "all": {
+    "only_candidate": 24,
+    "only_reference": 9,
+    "p_two_sided": 0.013530986849218607,
+    "p_display": "0.014"
+   },
+   "without_set_aside": {
+    "only_candidate": 21,
+    "only_reference": 8,
+    "p_two_sided": 0.0241195447742939,
+    "p_display": "0.024"
+   },
+   "questions_set_aside": 5,
+   "same_conclusion": true
+  },
+  "4_textbook_korean_only_vs_chemistry": {
+   "all": {
+    "only_candidate": 5,
+    "only_reference": 0,
+    "p_two_sided": 0.0625,
+    "p_display": "0.062"
+   },
+   "without_set_aside": {
+    "only_candidate": 3,
+    "only_reference": 0,
+    "p_two_sided": 0.25,
+    "p_display": "0.250"
+   },
+   "questions_set_aside": 9,
+   "same_conclusion": true
+  },
+  "5_unanswerable_repeat_vs_korean_only": {
+   "all": {
+    "only_candidate": 10,
+    "only_reference": 0,
+    "p_two_sided": 0.001953125,
+    "p_display": "0.002"
+   },
+   "without_set_aside": {
+    "only_candidate": 9,
+    "only_reference": 0,
+    "p_two_sided": 0.00390625,
+    "p_display": "0.004"
+   },
+   "questions_set_aside": 1,
+   "same_conclusion": true
+  }
+ },
+ "n_runs": 24,
+ "paper_runs_whose_order_reverses": 1,
+ "every_conclusion_same": true
+}

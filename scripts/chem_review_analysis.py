@@ -82,6 +82,7 @@ def analyse(flagged: set[str]) -> dict:
                 before = x["all"]["rate"] - y["all"]["rate"]
                 after = x["without_set_aside"]["rate"] - y["without_set_aside"]["rate"]
                 rev += before * after < 0
+    out["n_runs"] = len(out["runs"])
     out["paper_runs_whose_order_reverses"] = rev
     out["every_conclusion_same"] = all(c["same_conclusion"] for k, c in out["checks"].items() if "same_conclusion" in c)
     return out
@@ -98,7 +99,10 @@ def main() -> int:
             sys.exit("검수 파일에 문제가 있습니다:\n" + "\n".join(errs))
         review[SET_OF[name]] = {v: [r["qid"] for r in rows if r["verdict"] == v] for v in tool.VERDICTS}
         flagged |= {r["qid"] for r in rows if r["verdict"] != "ok"}
-    out = {"review": review, **analyse(flagged)}
+    counts = {s: {v: len(q) for v, q in verdicts.items()} | {"questions": sum(len(q) for q in verdicts.values())} for s, verdicts in review.items()}
+    counts["both_sets"] = {k: sum(c[k] for c in counts.values()) for k in ("questions", *tool.VERDICTS)}
+    counts["both_sets"]["set_aside"] = len(flagged)
+    out = {"review": review, "counts": counts, **analyse(flagged)}
     dest = EVAL / "chem_review_analysis.json"
     dest.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     for k, c in out["checks"].items():

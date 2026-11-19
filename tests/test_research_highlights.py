@@ -49,7 +49,7 @@ def test_the_chemistry_conclusion_sets_the_korean_only_model_beside_the_one_that
     assert rows["휴리스틱 기준선 (모델 아님)"] == _em("heuristic_chem_papers") and rows["mT5-small 최종"] == _em("rl_v3_chem_papers") and len(rows) == 5
     assert h["title"].index(f"{100 * ko:.1f}%") < h["title"].index(f"{100 * both:.1f}%") and "한국어 표만으로" in h["title"]
     for needle in ("화학 문항을 한 번도 보지 않았다", "차이가 유의하지 않다", "답 없는 질문에서 갈린다", "결과를 본 뒤에 찾은 것이라", "미리 적어 두고",
-                   "한국어 전용 모델은 한 번만 학습했고", "검수하지 않았다"):
+                   "한국어 전용 모델은 한 번만 학습했고", "소유자가 검수했다", "결론은 모두 같다"):
         assert needle in h["caption"], needle
     # the repeat of the Korean-and-chemistry training is drawn as a tick on that bar, and the check written down before it is quoted
     repeat = json.loads((ROOT / "experiments/eval/chem_repeat_analysis.json").read_text(encoding="utf-8"))

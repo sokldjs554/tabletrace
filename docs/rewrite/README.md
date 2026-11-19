@@ -24,7 +24,7 @@
 | 8 | `tools/registry.py`, `agent/graph.py` | 94 + 177 | `tests/test_api.py` | 도구 등록과 LangGraph 그래프 |
 | 9 | `service/jobs.py`, `service/app.py` | 96 + 220 | `tests/test_api.py` | 비동기 작업 러너와 FastAPI |
 
-**C (화학 문항 검수, 준비됨: 2026-11-19)**: 코드가 아니라 평가 문항이다. AI 도구가 쓴 화학 평가 문항 94개(논문 표 62, 교과서 표 32)를 본인이 검수한다. 안내는 `docs/rewrite/11_chem_eval_review.md`, 도구는 `scripts/chem_review_tool.py`(문항을 보여 주고 파일을 검사할 뿐 판정하지 않는다), 분석은 `scripts/chem_review_analysis.py`(문제 문항을 빼고 저장된 화학 결과를 다시 센다. 볼 것 다섯은 검수 전에 적어 두었다).
+**C (화학 문항 검수, 완료: 2026-11-19, PR #9)**: 코드가 아니라 평가 문항이다. AI 도구가 쓴 화학 평가 문항 94개(논문 표 62, 교과서 표 32)를 본인이 검수한다. 안내는 `docs/rewrite/11_chem_eval_review.md`, 도구는 `scripts/chem_review_tool.py`(문항을 보여 주고 파일을 검사할 뿐 판정하지 않는다), 분석은 `scripts/chem_review_analysis.py`(문제 문항을 빼고 저장된 화학 결과를 다시 센다. 볼 것 다섯은 검수 전에 적어 두었다). 결과: 고쳐야 함 14문항, 그 문항을 빼도 결론이 모두 같다(`docs/REPORT.md` §32).
 
 **F (결함 고치기, 준비됨: 2026-11-19)**: 1단계에서 찾고 기록만 해 둔 원래 코드의 결함 두 개(이슈 40: 아주 작은 값을 `0`으로 씀, 이슈 41: 괄호 안의 단위 아닌 말을 단위로 받음)를 본인이 쓴 `tools/numbers.py`에서 고친다. 명세는 `docs/rewrite/09_numbers_fix.md`, 테스트는 `tests/test_numbers_fix.py`(고치기 전에는 해당 테스트를 건너뜀), 데이터를 다시 만들고 영향을 세는 것은 `scripts/numbers_fix.py`다. 미리 잰 영향: 화학 학습 문항 10개의 정답만 바뀌고 저장된 출력 39,504건의 판정은 그대로다.
 

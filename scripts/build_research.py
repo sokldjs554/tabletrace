@@ -503,7 +503,7 @@ def gpu3_cards() -> list[dict]:
                               f"많아야 {100 * rv['largest_rate_gain_without_flagged']:.1f}%p 움직이고, 순서가 뒤집히는 쌍은 {rv['pairs_of_runs_ranked_strictly']:,} 가운데 {rv['pairs_whose_order_reverses_without_flagged']}이다.",
                               "30문항씩이고 서로 다른 문항이라 전체 점수의 구간은 겹친다.",
                               f"한계. 새 문항은 한 사람이 썼고 다른 사람이 검수하지 않았다. "
-                              f"기존 test 문항과 같은 셀을 묻는 문항이 {os_['same_cells_as_an_existing_test_question']['count']}개 있다. 화학 문항은 AI 도구가 쓴 그대로다. EXAONE의 결과는 다음 항목에 있다."],
+                              f"기존 test 문항과 같은 셀을 묻는 문항이 {os_['same_cells_as_an_existing_test_question']['count']}개 있다. 화학 문항은 2026-11-19에 소유자가 따로 검수했다('영어 화학 평가 문항의 검수' 항목). EXAONE의 결과는 다음 항목에 있다."],
                     "artifact": "data/ko/owner_eval.jsonl, data/ko/custom_eval_review.jsonl (소유자 작성, PR #7), experiments/eval/owner_eval_analysis.json (scripts/owner_eval_analysis.py), experiments/eval/*_ko_owner*/"})
     rpo = load(EXP / "eval" / "replay_check_owner.json")
     if oe and oe.get("gpu_planners") and rpo:
@@ -623,10 +623,45 @@ def gpu3_cards() -> list[dict]:
                               f"예전 실행의 되살린 수치와 견주면 논문 표는 {pct(old['chem_papers']['verified_em'])}에서 {pct(pp['tuned']['rate'])}로 {-old['chem_papers']['this_run_minus_earlier_in_questions']}문항 낮고, "
                               f"교과서 표 수작업은 {old['chem_custom']['this_run_minus_earlier_in_questions']}문항 높다. 예전 실행은 문항별 파일이 없어 짝 검정을 할 수 없다. "
                               "두 실행은 길이 설정이 다르고 학습도 따로 했다. 차이가 설정 때문인지 학습마다의 흔들림인지는 가릴 수 없다.",
-                              f"한계. 모델마다 학습 한 번이다. 논문 표 {pp['tuned']['n']}문항과 교과서 표 {pc['tuned']['n']}문항은 AI 도구가 썼고 소유자가 검수하지 않았다. "
+                              f"한계. 모델마다 학습 한 번이다. 논문 표 {pp['tuned']['n']}문항과 교과서 표 {pc['tuned']['n']}문항은 AI 도구가 썼다. 소유자가 2026-11-19에 검수했고 결과는 다음 항목에 있다. "
                               f"화학 합성 학습 문항 {tr['chemistry_questions_in_the_file']}개 가운데 정답 행이 입력 길이에 들어가지 않는 {tr['chemistry_questions_left_out']}개는 학습에서 빠졌다."],
                     "artifact": f"experiments/eval/exaone_kochem2_vllm_*/, experiments/eval/ref_1p2b_chem_*/, experiments/eval/chem_rerun_analysis.json, experiments/exaone_lora_kochem2/train_info.json. "
                                 f"소유자가 Colab T4 한 장에서 실행(학습 {tr['minutes']}분). 평가 {rpc['replays']}건을 다시 검증했고({rpc['questions_checked']:,}문항) 판정이 다른 문항은 {rpc['questions_that_differ']}개다." + share_files})
+    cv = load(EXP / "eval" / "chem_review_analysis.json")
+    if cv:
+        rv, ck = cv["review"], cv["checks"]
+        n_fix = {k: len(v["fix"]) + len(v["drop"]) for k, v in rv.items()}
+        n_all = {k: sum(len(x) for x in v.values()) for k, v in rv.items()}
+
+        def split(c: dict, key: str) -> str:
+            return f"{c[key]['only_candidate']} 대 {c[key]['only_reference']} (p {c[key]['p_display']})"
+
+        head = ck["1_paper_headline"]
+        two = [cv["runs"][f"exaone_{k}_vllm_chem_papers"] for k in ("kochem2", "kochem3")]
+        rows = [["논문 표: 한국어와 화학을 함께 튜닝한 모델의 정답 수", f"{head['all']['correct']}/{head['all']['n']} ({pct(head['all']['rate'])})",
+                 f"{head['without_set_aside']['correct']}/{head['without_set_aside']['n']} ({pct(head['without_set_aside']['rate'])})", "같다"]]
+        for key, label in (("2_papers_korean_only_vs_chemistry", "논문 표: 화학을 더한 모델 대 한국어 전용 모델"),
+                           ("3_papers_untuned_vs_korean_only", "논문 표: 한국어 전용 모델 대 튜닝하지 않은 모델"),
+                           ("3_papers_baseline_vs_korean_only", "논문 표: 한국어 전용 모델 대 휴리스틱"),
+                           ("4_textbook_korean_only_vs_chemistry", "교과서 표: 화학을 더한 모델 대 한국어 전용 모델"),
+                           ("5_unanswerable_repeat_vs_korean_only", "답 없는 질문(세 세트): 다시 학습한 모델 대 한국어 전용 모델")):
+            rows.append([label, split(ck[key], "all"), split(ck[key], "without_set_aside"), "같다" if ck[key]["same_conclusion"] else "바뀌었다"])
+        out.append({"title": "영어 화학 평가 문항의 검수 (2026-11-19)", "status": "done",
+                    "description": f"화학 수작업 문항 {sum(n_all.values())}개(논문 표 {n_all['chem_papers']}, 교과서 표 {n_all['chem_custom']})는 AI 도구가 썼다. 저장소 소유자가 한 문항씩 검수해 "
+                                   f"논문 표 {n_fix['chem_papers']}문항, 교과서 표 {n_fix['chem_custom']}문항을 고쳐야 한다고 적었다. 빼야 한다고 적은 문항은 없다. "
+                                   "문항은 고치지 않았다. 저장된 결과가 그 문항에 묶여 있기 때문이다. 대신 그 문항들을 빼고 저장된 화학 결과를 다시 셌다. "
+                                   "무엇을 다시 셀지는 검수 전에 적어 두었다. 쌍 비교는 왼쪽만 맞힌 문항 수 대 오른쪽만 맞힌 문항 수다.",
+                    "columns": ["검수 전에 적어 둔 비교", "전체 문항", f"고쳐야 할 {sum(n_fix.values())}문항을 뺀 뒤", "결론"], "rows": rows,
+                    "notes": ["지적된 내용: 정답의 지수 표기가 깨진 것(1.8 × 10^10이 1010으로 붙음) 4문항, 질문의 범위가 표와 다른 것(지구 전체 대 지각과 대기) 3문항, "
+                              "'몇 배 큰가'가 비율인지 증가분인지 모호한 것 2문항, 표에 단위가 없는 것 2문항, 질문에 답이 드러난 것, 정답에 괄호 값이 붙은 것, "
+                              "본문의 예에만 맞는 질문이 1문항씩이다. AI 도구가 문항과 표를 대조했고 지적은 모두 사실과 맞다.",
+                              f"쌍 비교 다섯 개 모두 방향(어느 쪽이 더 맞혔나)과 유의성(p < 0.05인가)이 그대로다. 논문 표의 저장된 실행들 가운데 순서가 바뀐 쌍은 {cv['paper_runs_whose_order_reverses']}개다. "
+                              f"같은 명령으로 두 번 학습한 화학 추가 모델 둘이 {two[0]['all']['correct']}개와 {two[1]['all']['correct']}개에서 "
+                              f"{two[0]['without_set_aside']['correct']}개와 {two[1]['without_set_aside']['correct']}개가 됐다.",
+                              "한계. 검수자는 소유자 한 사람이다. 검수한 것은 저장소에 있는 표, 캡션, 본문과 문항이 맞는지이고, 표가 원 논문과 교과서에서 바르게 옮겨졌는지는 범위 밖이다. "
+                              "합성 문항(학습용, 개발용)은 검수하지 않았다."],
+                    "artifact": "data/chem_papers/custom_eval_review.jsonl, data/chem/custom_eval_review.jsonl (소유자 작성, PR #9), experiments/eval/chem_review_analysis.json "
+                                "(scripts/chem_review_analysis.py), docs/rewrite/11_chem_eval_review.md"})
     g2 = load(EXP / "gpu2_2026-11-14" / "recovered.json")
     big = g2["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"] if g2 else None
     rows = []

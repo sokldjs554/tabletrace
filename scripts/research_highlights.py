@@ -147,6 +147,9 @@ def chem() -> dict:
             {"label": "EXAONE 1.2B LoRA, 한국어만 튜닝", "value": ko["rate"], "emphasis": True},
             {"label": "EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝", "value": both["rate"], "emphasis": True,
              "ticks": [rp["chemistry"]["chem_papers"]["repeat"]["rate"]]}]
+    rev = _load("experiments/eval/chem_review_analysis.json")      # the owner's review of the questions (2026-11-19)
+    flagged, head = len(rev["set_aside"]), rev["checks"]["1_paper_headline"]["without_set_aside"]
+    assert rev["every_conclusion_same"] and head["n"] == both["n"] - len(rev["review"]["chem_papers"]["fix"]) - len(rev["review"]["chem_papers"]["drop"])
     check = rp["checks"]["unanswerable"]
     assert check["holds"] and rp["checks"]["answerable"]["as_expected"] and rp["paper_tables"]["first_run_with_files"] == both["correct"]
     # what the title and the caption say
@@ -172,7 +175,8 @@ def chem() -> dict:
                        f"이 나눔은 결과를 본 뒤에 찾은 것이라, 무엇을 볼지 미리 적어 두고 화학 문항을 더한 학습을 한 번 더 했다. 다시 학습한 모델도 답 없는 질문에서 한국어 전용 모델과 갈렸다"
                        f"({check['repeat_vs_korean_only']['only_candidate']} 대 {check['repeat_vs_korean_only']['only_reference']}, p {check['repeat_vs_korean_only']['p_display']}). "
                        f"다시 학습한 모델은 논문 표에서 {p1(rp['chemistry']['chem_papers']['repeat']['rate'])}다(막대 끝의 가는 선). 한국어 전용 모델은 한 번만 학습했고, 문항은 그대로다. "
-                       "문항은 AI 도구가 썼고 소유자가 검수하지 않았다. "
+                       f"문항은 AI 도구가 썼고 소유자가 검수했다. 고쳐야 한다고 적은 {flagged}문항(화학 세 세트 가운데 수작업 두 세트)을 빼고 세어도 "
+                       f"화학 문항을 더한 모델은 논문 표에서 {head['correct']}/{head['n']}({p1(head['rate'])})이고, 미리 정해 둔 비교의 결론은 모두 같다. "
                        f"결과 파일이 남지 않은 예전 실행에서는 화학 문항을 더한 모델이 {p1(before['verified_em'])}였다.",
             "more": "영어 화학에서의 EXAONE", "tick_label": "같은 설정으로 다시 학습", "link": {"href": f"#workbench/{one['id']}/koonly", "text": "두 모델이 갈린 문항 하나 보기"}}
 

@@ -7,8 +7,8 @@ answer and whether the stored result is right:
 
   ko_owner     data/ko/owner_eval.jsonl            the repository owner's own 30 questions
   ko_custom    data/ko/custom_eval.jsonl           30 questions the AI tool wrote (the owner reviewed them)
-  chem_custom  data/chem/custom_eval.jsonl         32 questions on chemistry textbook tables (AI-written)
-  chem_papers  data/chem_papers/custom_eval.jsonl  62 questions on tables of CC BY chemistry papers (AI-written)
+  chem_custom  data/chem/custom_eval.jsonl         32 questions on chemistry textbook tables (AI-written, the owner reviewed them)
+  chem_papers  data/chem_papers/custom_eval.jsonl  62 questions on tables of CC BY chemistry papers (AI-written, the owner reviewed them)
 
 Planners. A "stored" planner answers with the raw output a model produced in an earlier evaluation run
 (experiments/eval/<run>/predictions.jsonl); that output goes through the same graph, tools and verifier as a live
@@ -77,10 +77,11 @@ SETS = [
      "review": "data/ko/custom_eval_review.jsonl", "title": "AI 도구가 쓴 30문항",
      "note": "AI 도구가 쓴 평가 문항 전체입니다. 소유자가 한 문항씩 검수했고, 고쳐야 한다고 적은 문항에는 표시가 붙습니다."},
     {"key": "chem_custom", "corpus": "chem_docs", "data": "data/chem/custom_eval.jsonl", "gold": "heuristic_chem_custom", "author": "ai",
-     "title": "화학 교과서 표 32문항", "note": "OpenStax Chemistry 2e의 표에 AI 도구가 쓴 평가 문항 전체입니다. 검수되지 않았습니다."},
+     "review": "data/chem/custom_eval_review.jsonl", "title": "화학 교과서 표 32문항",
+     "note": "OpenStax Chemistry 2e의 표에 AI 도구가 쓴 평가 문항 전체입니다. 소유자가 한 문항씩 검수했고, 고쳐야 한다고 적은 문항에는 표시가 붙습니다."},
     {"key": "chem_papers", "corpus": "chem_docs", "data": "data/chem_papers/custom_eval.jsonl", "gold": "heuristic_chem_papers", "author": "ai",
-     "docs": "data/chem_papers/documents.jsonl", "title": "화학 논문 표 62문항",
-     "note": "arXiv의 CC BY 4.0 화학 논문 12편의 표에 AI 도구가 쓴 평가 문항 전체입니다. 검수되지 않았습니다. 어떤 학습에도 쓰지 않은 표입니다."},
+     "docs": "data/chem_papers/documents.jsonl", "review": "data/chem_papers/custom_eval_review.jsonl", "title": "화학 논문 표 62문항",
+     "note": "arXiv의 CC BY 4.0 화학 논문 12편의 표에 AI 도구가 쓴 평가 문항 전체입니다. 소유자가 한 문항씩 검수했고, 고쳐야 한다고 적은 문항에는 표시가 붙습니다. 어떤 학습에도 쓰지 않은 표입니다."},
 ]
 
 # Planners, strongest first ("auto" in the demo shows the first one that has a result for the question).

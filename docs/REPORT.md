@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->566<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->20<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->568<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->20<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 EXAONE-4.0-1.2B에는 소유자가 쓴 보상 함수와 GRPO 손실로 두 번 적용했다. 첫 실험은 효과가 없었고, 학습 스크립트의 프롬프트 잘림과 배치 구성을 고친 두 번째 실험에서 인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->43.8<!-- /num -->%, verified EM <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->55.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->59.4<!-- /num -->%(대응 검정 p <!-- num:experiments/eval/paired_tests.json:grpo2_vs_rlstart2_ko_test.p_display --><0.001<!-- /num -->, 1회). 배치 구성만 첫 실험처럼 되돌린 대조군에서는 인용 셀 정확도가 오르지 않았다(<!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.5<!-- /num -->%, 두 실험의 변화의 차이 p <!-- num:experiments/eval/rl2_control_analysis.json:main_minus_control.first_pass.cited_gold_cell_lookup.p_display --><0.001<!-- /num -->)(1회). 본 실험은 시작 모델을 달리해 한 번 더 돌렸고 같은 결과였다(인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2c_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->46.7<!-- /num -->%, §22.8) | `training/rl_grpo.py`, §7, §18, 이슈 23–24, §21.1, §22.1, §22.7, §22.8 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->566<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->568<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -1205,7 +1205,7 @@ mT5-small 최종 모델, 한국어 시험 <!-- num:experiments/eval/risk_coverag
 
 교과서 표보다 어려운 점: 단위가 따로 행으로 있다, 기호가 수식이다, 셀에 불확도(`1.50 ± 0.19`)나 괄호 오차(`9.85549(4)`)가 있다, 행 이름이 위 행에서 이어져 빈 칸이다, 56행짜리 표가 있다.
 
-질문 62개(`custom_eval.jsonl`, 조회 33, 계산 19, 보류 10)는 AI 도구가 표를 읽고 썼다. 화학 전공자가 쓴 것이 아니고 다른 사람이 검수하지 않았다. 손으로 쓴 것은 질문·연산·정답 셀뿐이고, 답은 표와 계산기에서 채운다(`scripts/data/build_chem_papers_eval.py`). 보류 질문은 표에 없는 행을 묻거나 논문이 비워 둔 칸(`-`)을 묻는다.
+질문 62개(`custom_eval.jsonl`, 조회 33, 계산 19, 보류 10)는 AI 도구가 표를 읽고 썼다. 화학 전공자가 쓴 것이 아니고 다른 사람이 검수하지 않았다(2026-11-19에 소유자가 검수했다, §32). 손으로 쓴 것은 질문·연산·정답 셀뿐이고, 답은 표와 계산기에서 채운다(`scripts/data/build_chem_papers_eval.py`). 보류 질문은 표에 없는 행을 묻거나 논문이 비워 둔 칸(`-`)을 묻는다.
 
 | 플래너 | verified EM | 조회(33) | 계산(19) | 보류(10) |
 |---|---:|---:|---:|---:|
@@ -1227,7 +1227,7 @@ AI 도구가 국내 기관 소속 저자의 연구를 따로 찾아 `docs/resear
 ### 20.12 이번에도 고칠 수 없는 것
 
 - **커밋 기록.** 대부분의 커밋에 AI 공동 작성 표식이 있다. 지우거나 고쳐 쓰지 않는다. 소유자가 직접 쓴 코드는 소유자 계정의 커밋으로 따로 들어와 있다(`docs/rewrite/LOG.md`).
-- **검수.** 수작업 질문(한국어 30, 화학 교과서 32, 화학 논문 62)은 AI 도구가 썼고 여러 사람이 검수하지 않았다. 답이 표·계산기와 맞는지만 기계로 확인한다. (2026-11-16: 한국어 30문항은 소유자가 검수해 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->문항에 문제가 있음을 찾았고, 소유자가 직접 쓴 30문항을 더했다. 전체 데이터 EXAONE은 그 문항에서 <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.rate:pct -->80.0<!-- /num -->%(<!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.correct -->24<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.n -->30<!-- /num -->)다. §25)
+- **검수.** 수작업 질문(한국어 30, 화학 교과서 32, 화학 논문 62)은 AI 도구가 썼고 여러 사람이 검수하지 않았다. 답이 표·계산기와 맞는지만 기계로 확인한다. (2026-11-16: 한국어 30문항은 소유자가 검수해 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->문항에 문제가 있음을 찾았고, 소유자가 직접 쓴 30문항을 더했다. 전체 데이터 EXAONE은 그 문항에서 <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.rate:pct -->80.0<!-- /num -->%(<!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.correct -->24<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.n -->30<!-- /num -->)다. §25) (2026-11-19: 화학 94문항도 소유자가 검수했다. §32)
 - **GPU에서만 잴 수 있는 것.** §20.8의 실험은 소유자가 돌렸고 결과는 §21에 있다. 결과 파일이 남지 않아 문항별 분석(대응 검정, 확신도 곡선, 복구를 끈 정답률)은 하지 못했다. 그 분석이 필요하면 다시 돌려야 한다.
 - **전형의 다른 단계.** 코딩테스트와 인성검사는 이 저장소와 무관하다.
 
@@ -1980,13 +1980,13 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 4. **셀 조회 12문항은 조건이 하나인 조회다.** 순위, 처음과 마지막, 두 조건을 함께 보는 질문은 단위·기간 범주의 4문항에 있다.
 5. **한 사람이 썼고 다른 사람이 검수하지 않았다.** 기존 30문항의 검수도 한 사람(소유자)의 판정이다. 판정자 사이의 일치도 같은 것은 없다.
 6. **30문항이다.** verified EM의 95% 구간이 30%p 가까이 된다. 범주별 수치는 문항 넷에서 여섯 개다.
-7. 화학 문항(교과서 32, 논문 62)은 AI 도구가 쓴 그대로이고 검수되지 않았다.
+7. 화학 문항(교과서 32, 논문 62)은 AI 도구가 쓴 그대로이고 검수되지 않았다. (2026-11-19에 소유자가 검수했다, §32.)
 
 ### 25.5 이 결과로 문서에서 바뀌는 것
 
 | 그전에 적혀 있던 것 | 지금 |
 |---|---|
-| "수작업 질문(한국어 30, 화학 교과서 32, 화학 논문 62)은 AI 도구가 썼고 여러 사람이 검수하지 않았다" | 한국어 30문항은 소유자가 검수했다(문제없음 <!-- num:experiments/eval/owner_eval_analysis.json:review.ok -->26<!-- /num -->, 고쳐야 함 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->). 소유자가 쓴 30문항이 따로 있다. 화학 문항은 그대로다. "여러 사람"의 검수는 여전히 아니다 |
+| "수작업 질문(한국어 30, 화학 교과서 32, 화학 논문 62)은 AI 도구가 썼고 여러 사람이 검수하지 않았다" | 한국어 30문항은 소유자가 검수했다(문제없음 <!-- num:experiments/eval/owner_eval_analysis.json:review.ok -->26<!-- /num -->, 고쳐야 함 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->). 소유자가 쓴 30문항이 따로 있다. 화학 문항은 그대로다(2026-11-19에 소유자가 검수했다, §32). "여러 사람"의 검수는 여전히 아니다 |
 | 수작업 30문항의 수치 | 그대로 둔다. 지적된 4문항을 뺀 26문항에서의 값을 `experiments/eval/owner_eval_analysis.json`에 함께 둔다 |
 | "한국어 벤치마크 구축": 재분할, 합성, AI 도구가 쓴 수작업 30문항 | 소유자가 쓴 30문항과 기존 문항의 검수 기록이 더해졌다. 전체 데이터 EXAONE은 그 문항에서 <!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.rate:pct -->80.0<!-- /num -->%(<!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.correct -->24<!-- /num -->/<!-- num:experiments/eval/owner_eval_analysis.json:gpu_planners.exaone_full_data.owner_first_pass.n -->30<!-- /num -->)다(§25.6) |
 
@@ -2140,7 +2140,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 | 무엇 | 결과 |
 |---|---|
-| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->566<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->20<!-- /num -->개 건너뜀 |
+| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->568<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->20<!-- /num -->개 건너뜀 |
 | 화면 검사 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed:int -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total:int -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed:int -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total:int -->73<!-- /num -->. 데스크톱 1440×900과 모바일 390×844, 헤드리스 Chromium |
 | 연구 결과 탭의 길이 | 예전 판은 1440px 폭에서 13,379px였다(2026-11-16의 화면 사진에서 잰 값). 지금은 화면 검사가 6,000px보다 짧은지 본다 |
 | 배포 | 실행 환경을 포함한 Pages 배포가 성공했다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/43999542432), 커밋 `edb5826`) |
@@ -2226,7 +2226,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 1. **학습 한 번이다.** 시드 하나, Colab의 T4 한 장이다.
 2. **문항이 적다.** 논문 표 <!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_papers.tuned.n -->62<!-- /num -->문항, 교과서 표 <!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_custom.tuned.n -->32<!-- /num -->문항이다. 논문 표 수치의 95% 구간은 <!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_papers.tuned.ci95.lo:pct -->62.1<!-- /num -->%에서 <!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_papers.tuned.ci95.hi:pct -->83.5<!-- /num -->%다.
-3. **화학 문항은 AI 도구가 썼고 소유자가 검수하지 않았다.** 한국어 수작업 30문항은 소유자가 검수해 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->문항에서 문제를 찾았다(§25). 화학 문항에도 그런 문항이 있을 수 있다.
+3. **화학 문항은 AI 도구가 썼고 소유자가 검수하지 않았다.** 한국어 수작업 30문항은 소유자가 검수해 <!-- num:experiments/eval/owner_eval_analysis.json:review.fix -->4<!-- /num -->문항에서 문제를 찾았다(§25). 화학 문항에도 그런 문항이 있을 수 있다. (2026-11-19에 소유자가 검수했다. 94문항 가운데 14문항에 고칠 점이 있었고, 그 문항을 빼고 세어도 결론은 같다. §32)
 4. **화학 문항을 더한 몫은 가르지 못한다.** 튜닝한 모델과 튜닝하지 않은 모델의 차이에는 한국어 문항으로 출력 형식을 배운 효과와 화학 문항을 더한 효과가 섞여 있다. 이 절을 쓸 때는 한국어만 튜닝한 모델을 화학 문항으로 잰 적이 없었다. **그 뒤에 쟀다(§29.7).**
 5. **튜닝하지 않은 모델의 예시는 교과서 표의 합성 문항이다.** 논문 표에 맞는 예시를 줬을 때의 수치는 모른다.
 6. **화학 합성 개발의 수치는 학습 문항과 같은 틀로 만든 문항에서 나온 것이다.** 처음 보는 표현에 대한 근거로 쓰지 않는다.
@@ -2239,7 +2239,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 | 화학 논문 표에서 한국어와 화학을 함께 튜닝한 EXAONE <!-- num:experiments/eval/chem_rerun_analysis.json:earlier_run_without_predictions.chem_papers.verified_em:pct -->80.7<!-- /num -->%(§21.8, 결과 파일 없음) | <!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_papers.tuned.rate:pct -->74.2<!-- /num -->%(<!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_papers.tuned.correct -->46<!-- /num -->/<!-- num:experiments/eval/chem_rerun_analysis.json:chemistry.chem_papers.tuned.n -->62<!-- /num -->). 문항별 파일과 재검증 기록이 있다. 예전 수치는 §21.8에 남기고 출처를 적는다 |
 | 데모의 화학 문서에 EXAONE이 없다(§28.5) | 한국어와 화학을 함께 튜닝한 EXAONE과 튜닝하지 않은 1.2B가 들어갔다. 화학 문항을 "자동"으로 열면 튜닝한 EXAONE의 결과가 나온다 |
 | 데모의 플래너 6개, 기록된 실행 548개 | 플래너 7개, 실행 796개(§29.7 뒤에는 <!-- num:console/data/recorded/index.json:counts.planners:int -->8<!-- /num -->개, <!-- num:console/data/recorded/index.json:counts.runs:int -->890<!-- /num -->개). 모두 평가 파일과 문항마다 같다(`tests/test_recorded_demo.py`) |
-| 연구 결과 탭의 결론 6개, 세부 기록 35건 | 결론 <!-- num:console/data/research.json:counts.highlights:int -->7<!-- /num -->개(화학 논문 표가 더해졌다), 세부 기록 <!-- num:console/data/research.json:counts.sections:int -->36<!-- /num -->건 |
+| 연구 결과 탭의 결론 6개, 세부 기록 35건 | 결론 <!-- num:console/data/research.json:counts.highlights:int -->7<!-- /num -->개(화학 논문 표가 더해졌다), 세부 기록 <!-- num:console/data/research.json:counts.sections:int -->37<!-- /num -->건 |
 | 노트북 2의 N절을 준비했고 돌리지 않았다 | 돌렸다. 노트북의 설명에 결과를 적었고, 다시 실행해도 아무것도 하지 않는다 |
 | 길이 결함을 고친 설정으로 다시 학습하지 않은 모델: 10,587문항, 열 번호, 화학 | 화학 모델은 고친 설정으로 다시 학습했다. 10,587문항 모델과 열 번호 모델은 그대로다 |
 | 화학 문항을 더한 몫을 가르지 못한다(§29.5의 4번) | 쟀다(§29.7). 화학 문항을 한 번도 보지 않은 한국어 전용 모델이 논문 표에서 <!-- num:experiments/eval/chem_share_analysis.json:chemistry.chem_papers.korean_only.rate:pct -->67.7<!-- /num -->%다. 튜닝하지 않은 모델과의 차이는 대부분 한국어 문항으로 튜닝한 데서 나온다. 화학 문항이 보탠 것으로 보이는 것은 답 없는 질문의 보류다 |
@@ -2296,7 +2296,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 1. 두 모델은 다른 세션에서 한 번씩 학습했다. 한국어 test에서 전체 데이터 학습들은 <!-- num:experiments/eval/chem_share_analysis.json:korean.ko_test.full_data_trainings_before_this_one.questions_between_lowest_and_highest -->20<!-- /num -->문항 폭으로 흩어졌다. 같은 세션에서 나란히 학습한 비교는 없다. 화학 문항을 더한 학습은 다음 날 한 번 더 했다(§29.8).
 2. 3번과 5번은 결과를 본 뒤에 한 나눔이다. 3번은 세 세트에서 방향이 같고 차이가 커서 우연으로 보기는 어렵지만, 이 절을 쓸 때는 미리 정해 놓고 확인한 것이 아니었다. 그 뒤 볼 것을 적어 두고 화학 문항을 더한 학습을 한 번 더 해 3번을 확인했다(§29.8).
-3. 문항은 AI 도구가 썼고 소유자가 검수하지 않았다. 답 없는 질문은 논문 표 <!-- num:experiments/eval/chem_share_analysis.json:chemistry.chem_papers.korean_only.by_kind.unanswerable.n -->10<!-- /num -->개, 교과서 수작업 <!-- num:experiments/eval/chem_share_analysis.json:chemistry.chem_custom.korean_only.by_kind.unanswerable.n -->5<!-- /num -->개뿐이다.
+3. 문항은 AI 도구가 썼고 소유자가 검수하지 않았다. 답 없는 질문은 논문 표 <!-- num:experiments/eval/chem_share_analysis.json:chemistry.chem_papers.korean_only.by_kind.unanswerable.n -->10<!-- /num -->개, 교과서 수작업 <!-- num:experiments/eval/chem_share_analysis.json:chemistry.chem_custom.korean_only.by_kind.unanswerable.n -->5<!-- /num -->개뿐이다. (2026-11-19에 소유자가 수작업 문항을 검수했다, §32.)
 4. 화학 합성 개발 세트는 화학 학습 문항과 같은 틀로 만든 것이다. 그 세트에서의 차이는 틀을 본 효과일 수 있다.
 
 **이 결과로 문서에서 바뀌는 것.**
@@ -2343,7 +2343,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 **읽는 법.** 답 없는 질문에서의 차이는 화학 문항을 더한 학습을 두 번 했을 때 두 번 다 나왔다. 화학 합성 문항이 보탠 것이 화학 표에서 답이 없을 때 보류하는 것이라는 §29.7의 읽기는 이 확인으로 더 단단해졌다. 답할 수 있는 질문에서는 두 번 다 한국어 전용 모델과 검출되는 차이가 없었다.
 
-**한계.** 한국어 전용 모델은 한 번만 학습했다. 문항은 §29.7과 같은 31개이고, AI 도구가 썼고 검수하지 않았다. 이 확인이 말하는 것은 "화학 문항을 더한 학습을 다시 해도 같은 문항에서 같은 차이가 났다"까지다. 다른 문항이나 다른 분야에서도 성립하는지는 모른다. 세 모델은 모두 다른 세션에서 학습했다.
+**한계.** 한국어 전용 모델은 한 번만 학습했다. 문항은 §29.7과 같은 31개이고, AI 도구가 썼고 검수하지 않았다(2026-11-19에 수작업 문항은 소유자가 검수했다. 고쳐야 할 문항을 빼면 <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.without_set_aside.only_candidate -->9<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.without_set_aside.only_reference -->0<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.without_set_aside.p_display -->0.004<!-- /num -->)다. §32). 이 확인이 말하는 것은 "화학 문항을 더한 학습을 다시 해도 같은 문항에서 같은 차이가 났다"까지다. 다른 문항이나 다른 분야에서도 성립하는지는 모른다. 세 모델은 모두 다른 세션에서 학습했다.
 
 ## 30. 평가 지표를 소유자가 직접 다시 썼다 (2026-11-19)
 
@@ -2370,3 +2370,51 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 - 셋 가운데 하나라도 결론이 남지 않으면, 그 결론을 문서에서 고친다. 대표 수치(84.3%, 74.2% 등)는 바꾸지 않고, 반복 결과를 옆에 함께 적는다.
 - 숫자로만 함께 적는 것: 새 모델들의 각 세트 점수, 새 한국어 전용 모델과 처음 모델의 논문 표 비교, 강화학습 전후의 인용 셀 정확도, 직접 쓴 루프 학습이 지금까지의 한국어 전용 전체 데이터 학습 여덟 번의 범위(84.3%~87.1%) 안에 드는지.
 - 결함 고치기(`docs/rewrite/09_numbers_fix.md`)가 먼저 합쳐져도 P1~P3에는 영향이 없다. 바뀌는 것은 화학 학습 문항 10개뿐이고, 셋은 화학 학습 문항을 쓰지 않는다.
+
+## 32. 화학 평가 문항을 소유자가 검수했다 (2026-11-19)
+
+이 보고서는 화학 결과를 적을 때마다 "문항은 AI 도구가 썼고 검수하지 않았다"를 한계로 달았다(§20.10, §29). 한국어 30문항을 검수했을 때는 4문항에서 문제가 나왔다(§25). 화학 문항에도 그런 문항이 있다면 화학 결론이 그 문항들에 기대고 있을 수 있었다. 소유자가 화학 수작업 문항 <!-- num:experiments/eval/chem_review_analysis.json:counts.both_sets.questions -->94<!-- /num -->개를 한 문항씩 검수했다.
+
+- **준비(AI 도구).** 안내 `docs/rewrite/11_chem_eval_review.md`, 문항을 표와 정답 셀 옆에 보여 주고 검수 파일의 형식을 검사하는 도구 `scripts/chem_review_tool.py`(판정하지 않는다), 검수 결과로 저장된 화학 결과를 다시 세는 `scripts/chem_review_analysis.py`. 다시 셀 비교 다섯 가지는 검수 전에 그 스크립트와 안내에 적었다(커밋 `23a4329`).
+- **검수(소유자).** 논문 표 <!-- num:experiments/eval/chem_review_analysis.json:counts.chem_papers.questions -->62<!-- /num -->문항과 교과서 표 <!-- num:experiments/eval/chem_review_analysis.json:counts.chem_custom.questions -->32<!-- /num -->문항의 판정을 `data/chem_papers/custom_eval_review.jsonl`과 `data/chem/custom_eval_review.jsonl`에 적어 소유자 계정으로 커밋했다(`6930e2e`, PR #9). 본 것은 답이 하나로 정해지는가, 정답과 정답 셀이 맞는가, 단위가 맞는가, 질문이 자연스러운가, 답 없는 질문에 정말 답이 없는가다.
+- **판정.** 문제없음 <!-- num:experiments/eval/chem_review_analysis.json:counts.both_sets.ok -->80<!-- /num -->, 고쳐야 함 <!-- num:experiments/eval/chem_review_analysis.json:counts.both_sets.fix -->14<!-- /num -->(논문 표 <!-- num:experiments/eval/chem_review_analysis.json:counts.chem_papers.fix -->5<!-- /num -->, 교과서 표 <!-- num:experiments/eval/chem_review_analysis.json:counts.chem_custom.fix -->9<!-- /num -->), 빼야 함 <!-- num:experiments/eval/chem_review_analysis.json:counts.both_sets.drop -->0<!-- /num -->.
+
+### 32.1 지적된 문항
+
+| 무엇이 문제인가 | 문항 | 예 |
+|---|---|---|
+| 정답의 지수 표기가 깨졌다 | `chem_custom_16`, `21`, `22`, `28` | 정답이 `1.8 × 1010 kJ`로 적혀 있다(10의 10제곱). 표를 옮길 때 위 첨자가 사라졌다. 채점기는 `1.8 × 1010 kJ`, `3.96 × 10−4`, `8.59 × 10−5`를 수로 바르게 읽는다(확인했다). `chem_custom_22`의 대체 정답 `1.8 × 105 J mol−1`은 수로 읽지 못해 글자가 같을 때만 맞는다 |
+| 질문의 범위가 표와 다르다 | `chem_custom_24`, `25`, `26` | 표의 본문은 지각과 대기의 조성을 말하는데 질문은 "지구의 질량 가운데"라고 묻는다 |
+| "몇 배 큰가"가 모호하다 | `chem_paper_17`, `46` | "times larger"는 비율로도 증가분으로도 읽힌다 |
+| 표에 단위가 없다 | `chem_paper_48`, `49` | 물 분자의 에너지 표는 머리글과 캡션에 단위가 없다 |
+| 질문에 답이 드러나 있다 | `chem_paper_04` | 두 온도를 질문이 다 말해 줘서 표를 보지 않고도 차이를 계산할 수 있다 |
+| 정답에 다른 값이 붙어 있다 | `chem_custom_30` | 화학식을 묻는데 정답이 셀 전체인 `HOBr (8.7)`이다 |
+| 본문의 예에만 맞는다 | `chem_custom_15` | −10 °C에서 얼음 영역의 압력은 하나로 정해지지 않는다. 본문이 든 예가 50 kPa일 뿐이다 |
+
+AI 도구가 이 <!-- num:experiments/eval/chem_review_analysis.json:counts.both_sets.fix -->14<!-- /num -->건을 문항, 표, 본문과 대조했고 모두 사실과 맞다. 문항을 쓴 것이 AI 도구이므로 이것은 AI 도구가 낸 오류의 목록이기도 하다. 정답 값이 틀린 문항은 없었다. 지적은 표기, 질문의 범위와 표현, 빠진 단위에 관한 것이다.
+
+### 32.2 문항을 고치지 않고 빼고 다시 셌다
+
+문항 파일은 고치지 않았다. 저장된 평가 결과가 그 문항에 묶여 있기 때문이다(한국어 검수 때와 같다, §25). 대신 고쳐야 한다고 적힌 문항을 빼고 저장된 화학 결과를 다시 셌다.
+
+| 검수 전에 적어 둔 비교 | 전체 문항 | 고쳐야 할 문항을 뺀 뒤 | 결론 |
+|---|---|---|---|
+| 논문 표: 한국어와 화학을 함께 튜닝한 모델의 정답 수 | <!-- num:experiments/eval/chem_review_analysis.json:checks.1_paper_headline.all.correct -->46<!-- /num -->/<!-- num:experiments/eval/chem_review_analysis.json:checks.1_paper_headline.all.n -->62<!-- /num --> (<!-- num:experiments/eval/chem_review_analysis.json:checks.1_paper_headline.all.rate:pct -->74.2<!-- /num -->%) | <!-- num:experiments/eval/chem_review_analysis.json:checks.1_paper_headline.without_set_aside.correct -->43<!-- /num -->/<!-- num:experiments/eval/chem_review_analysis.json:checks.1_paper_headline.without_set_aside.n -->57<!-- /num --> (<!-- num:experiments/eval/chem_review_analysis.json:checks.1_paper_headline.without_set_aside.rate:pct -->75.4<!-- /num -->%) | 같다 |
+| 논문 표: 화학을 더한 모델 대 한국어 전용 모델 | <!-- num:experiments/eval/chem_review_analysis.json:checks.2_papers_korean_only_vs_chemistry.all.only_candidate -->7<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.2_papers_korean_only_vs_chemistry.all.only_reference -->3<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.2_papers_korean_only_vs_chemistry.all.p_display -->0.344<!-- /num -->) | <!-- num:experiments/eval/chem_review_analysis.json:checks.2_papers_korean_only_vs_chemistry.without_set_aside.only_candidate -->6<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.2_papers_korean_only_vs_chemistry.without_set_aside.only_reference -->2<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.2_papers_korean_only_vs_chemistry.without_set_aside.p_display -->0.289<!-- /num -->) | 같다(유의하지 않다) |
+| 논문 표: 한국어 전용 모델 대 튜닝하지 않은 모델 | <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_untuned_vs_korean_only.all.only_candidate -->30<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_untuned_vs_korean_only.all.only_reference -->3<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_untuned_vs_korean_only.all.p_display --><0.001<!-- /num -->) | <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_untuned_vs_korean_only.without_set_aside.only_candidate -->27<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_untuned_vs_korean_only.without_set_aside.only_reference -->3<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_untuned_vs_korean_only.without_set_aside.p_display --><0.001<!-- /num -->) | 같다 |
+| 논문 표: 한국어 전용 모델 대 휴리스틱 | <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_baseline_vs_korean_only.all.only_candidate -->24<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_baseline_vs_korean_only.all.only_reference -->9<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_baseline_vs_korean_only.all.p_display -->0.014<!-- /num -->) | <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_baseline_vs_korean_only.without_set_aside.only_candidate -->21<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_baseline_vs_korean_only.without_set_aside.only_reference -->8<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.3_papers_baseline_vs_korean_only.without_set_aside.p_display -->0.024<!-- /num -->) | 같다 |
+| 교과서 표: 화학을 더한 모델 대 한국어 전용 모델 | <!-- num:experiments/eval/chem_review_analysis.json:checks.4_textbook_korean_only_vs_chemistry.all.only_candidate -->5<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.4_textbook_korean_only_vs_chemistry.all.only_reference -->0<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.4_textbook_korean_only_vs_chemistry.all.p_display -->0.062<!-- /num -->) | <!-- num:experiments/eval/chem_review_analysis.json:checks.4_textbook_korean_only_vs_chemistry.without_set_aside.only_candidate -->3<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.4_textbook_korean_only_vs_chemistry.without_set_aside.only_reference -->0<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.4_textbook_korean_only_vs_chemistry.without_set_aside.p_display -->0.250<!-- /num -->) | 같다(유의하지 않다) |
+| 답 없는 질문(세 세트): 다시 학습한 모델 대 한국어 전용 모델 | <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.all.only_candidate -->10<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.all.only_reference -->0<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.all.p_display -->0.002<!-- /num -->) | <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.without_set_aside.only_candidate -->9<!-- /num --> 대 <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.without_set_aside.only_reference -->0<!-- /num --> (p <!-- num:experiments/eval/chem_review_analysis.json:checks.5_unanswerable_repeat_vs_korean_only.without_set_aside.p_display -->0.004<!-- /num -->) | 같다 |
+
+쌍 비교는 왼쪽만 맞힌 문항 수 대 오른쪽만 맞힌 문항 수이고 p는 정확한 부호 검정(양측)이다. "같다"는 방향(어느 쪽이 더 맞혔나)과 유의성(p < 0.05인가)이 둘 다 그대로라는 뜻이다. 화학 두 세트의 저장된 실행 <!-- num:experiments/eval/chem_review_analysis.json:n_runs -->24<!-- /num -->건을 모두 다시 셌고(`runs`), 논문 표에서 순서가 바뀐 쌍은 <!-- num:experiments/eval/chem_review_analysis.json:paper_runs_whose_order_reverses -->1<!-- /num -->개다. 같은 명령으로 두 번 학습한 화학 추가 모델 둘이 <!-- num:experiments/eval/chem_review_analysis.json:runs.exaone_kochem2_vllm_chem_papers.all.correct -->46<!-- /num -->개와 <!-- num:experiments/eval/chem_review_analysis.json:runs.exaone_kochem3_vllm_chem_papers.all.correct -->47<!-- /num -->개에서 <!-- num:experiments/eval/chem_review_analysis.json:runs.exaone_kochem2_vllm_chem_papers.without_set_aside.correct -->43<!-- /num -->개와 <!-- num:experiments/eval/chem_review_analysis.json:runs.exaone_kochem3_vllm_chem_papers.without_set_aside.correct -->42<!-- /num -->개가 됐다. 원래 한 문항 차이였고 두 모델은 같은 조건의 반복이라, 이 뒤바뀜은 어떤 결론에도 닿지 않는다.
+
+**대표 수치는 바꾸지 않는다.** 논문 표의 수치는 계속 전체 문항의 <!-- num:experiments/eval/chem_review_analysis.json:checks.1_paper_headline.all.rate:pct -->74.2<!-- /num -->%를 쓴다. 뺀 뒤의 수치(<!-- num:experiments/eval/chem_review_analysis.json:checks.1_paper_headline.without_set_aside.rate:pct -->75.4<!-- /num -->%)는 "문제 문항을 빼도 결론이 같다"는 확인으로만 쓴다. "검수 뒤 정답률이 올랐다"고 쓰지 않는다.
+
+### 32.3 한계와 역할
+
+- 검수자는 소유자 한 사람이다. 판정자 사이의 일치도 같은 것은 없다.
+- 검수한 것은 저장소에 있는 표, 캡션, 본문과 문항이 서로 맞는지다. 표가 원 논문과 교과서에서 바르게 옮겨졌는지는 범위 밖이다.
+- 합성 문항(학습용 820, 개발용 80)은 검수하지 않았다. 답 없는 질문의 비교(§29.8)에는 검수하지 않은 합성 문항 16개가 그대로 들어 있다.
+- 문제없음으로 판정된 문항에 문제가 없다는 보장은 아니다. 한 사람이 한 번 본 결과다.
+- 데모는 화학 문항에도 "검수: 고쳐야 함" 표시를 붙인다(`scripts/make_recorded_runs.py`).
+- 역할. 판정은 소유자가 했다. 도구, 다시 세는 분석, 이 절은 AI 도구가 썼다. 소유자는 판정 근거를 정리한 표도 따로 만들었는데 저장소에는 넣지 않았다.

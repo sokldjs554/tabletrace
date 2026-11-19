@@ -27,11 +27,11 @@ pytest -q -k heuristic                      # 이름에 heuristic이 든 테스�
 
 | 설치 | 결과 | 어디서 확인했나 |
 |---|---|---|
-| `[dev]`만 | 530 passed, 41 skipped (1분 42초) | GitHub Actions CI, 같은 커밋 |
-| `[dev]` + `[model]` (맥북처럼 모델 파일 없음) | 560 passed, 26 skipped (2분 50초쯤) | AI 작업 환경에서 `models/` 폴더를 치우고 잰 값 |
-| 모델 파일까지 있는 AI 작업 환경 | 566 passed, 20 skipped | `experiments/tests/summary.json` |
+| `[dev]`만 | 532 passed, 41 skipped (2분 안쪽) | GitHub Actions CI |
+| `[dev]` + `[model]` (맥북처럼 모델 파일 없음) | 562 passed, 26 skipped (3분쯤) | AI 작업 환경에서 `models/` 폴더를 치우고 잰 값에, 그 뒤에 더한 테스트 2개를 더했다 |
+| 모델 파일까지 있는 AI 작업 환경 | 568 passed, 20 skipped | `experiments/tests/summary.json` |
 
-건너뛰는(skipped) 테스트는 실패가 아니다. 까닭은 넷이다.
+테스트는 계속 늘어나므로 통과 수는 이보다 많을 수 있다. 볼 것은 failed가 없는지다. 건너뛰는(skipped) 테스트는 실패가 아니다. 까닭은 넷이다.
 
 - 결함 40·41을 고치기 전에는 그 테스트 19개를 건너뛴다(`docs/rewrite/09_numbers_fix.md`). 고치면 켜진다.
 - 저장소에 없는 파일이 필요한 테스트 6개: 변환한 mT5 토크나이저(`models/mt5-small-base`), 튜닝한 mT5 모델, EXAONE 토크나이저 폴더. `[model]`을 설치해도 건너뛴다.
@@ -130,7 +130,7 @@ python scripts/replay_check.py --session ownloop --tokenizer LGAI-EXAONE/EXAONE-
 
 ```bash
 python scripts/check_data.py               # 정답과 표, 분할이 서로 맞는가. 마지막 줄에 "errors": 0
-python scripts/check_numbers.py --strict   # README·보고서·전달 문서의 수치 4,535개가 결과 파일과 같은가. "0 mismatches"
+python scripts/check_numbers.py --strict   # README·보고서·한 장 요약의 수치 4,600여 개가 결과 파일과 같은가. "0 mismatches"
 python scripts/render_results.py --check   # 결과 표가 최신인가. "0 stale"
 ```
 

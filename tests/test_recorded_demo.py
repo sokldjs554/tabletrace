@@ -27,7 +27,8 @@ def test_the_demo_lists_every_question_of_each_evaluation_file():
 
 
 def test_the_owners_review_is_carried_to_the_questions_it_flags():
-    review = {r["qid"]: r["verdict"] for r in read_jsonl(ROOT / "data/ko/custom_eval_review.jsonl")}
+    review = {r["qid"]: r["verdict"] for f in ("data/ko/custom_eval_review.jsonl", "data/chem/custom_eval_review.jsonl", "data/chem_papers/custom_eval_review.jsonl")
+              for r in read_jsonl(ROOT / f)}
     flagged = {i for i, v in review.items() if v != "ok"}
     assert flagged and {e["id"] for e in DATA["examples"] if e.get("review", {}).get("verdict", "ok") != "ok"} == flagged
 

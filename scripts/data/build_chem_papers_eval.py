@@ -1,7 +1,7 @@
 """Hand-written questions on the chemistry-paper tables (data/chem_papers/documents.jsonl).
 
-The questions below were written by reading each table (by the AI coding tool, not by a chemist, and not reviewed by a
-second person). Only the question, the operation and the gold cells are written by hand. The answer is filled in here
+The questions below were written by reading each table (by the AI coding tool, not by a chemist; the repository
+owner reviewed them afterwards, on 2026-11-19: data/chem_papers/custom_eval_review.jsonl). Only the question, the operation and the gold cells are written by hand. The answer is filled in here
 from the table (lookup) or from the project's calculator (diff, sum, avg, ratio, pct_change), so a typo in a cell
 reference shows up as a wrong-looking answer instead of passing silently, and `check` fails when a referenced cell
 does not exist. Abstention questions ask for something the table does not have: a row that is absent, or a cell the
