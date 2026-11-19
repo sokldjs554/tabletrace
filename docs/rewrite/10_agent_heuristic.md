@@ -93,16 +93,16 @@ ruff check src tests scripts
 ```bash
 git switch main && git pull
 git switch -c rewrite/10-heuristic
-git mv src/tabletrace/agent/heuristic.py src/tabletrace/agent/_ref_heuristic.py   # 참고용으로 치운다. 먼저 명세와 테스트만 보고 써 본다
-# src/tabletrace/agent/heuristic.py 를 새로 쓴다
-pytest tests/test_agent_heuristic.py -q
-python scripts/rewrite_parity.py heuristic
+# src/tabletrace/agent/heuristic.py 를 열어 내용을 모두 지우고, 이 명세와 테스트만 보고 새로 쓴다
+pytest tests/test_agent_heuristic.py -q            # 50개 통과
+python scripts/rewrite_parity.py heuristic         # "0 differ". 1분쯤
 pytest -q && ruff check src tests scripts
-git rm -f src/tabletrace/agent/_ref_heuristic.py
 git add src/tabletrace/agent/heuristic.py
 git commit -m "rewrite: agent/heuristic.py (owner)"       # AI 공동 작성 표식(Co-Authored-By)을 넣지 않는다
 git push -u origin rewrite/10-heuristic
 ```
+
+원본을 옆으로 치우는 단계(`git mv`, 끝의 `git rm`)는 뺐다. 7단계에서 그 단계가 헷갈렸기 때문이다. 파일을 그 자리에서 새로 써도 원본은 git에 남아 있다. 다 쓴 뒤에 견주어 보고 싶으면 `git show origin/main:src/tabletrace/agent/heuristic.py`로 본다. 쓰는 동안에는 보지 않는다.
 
 동작 비교 스크립트는 원본을 `origin/main`에서 가져오므로 `main`에 합치기 전에는 비교가 된다. 이 스크립트와 테스트가 잡는지 미리 확인했다. 계산 낱말 순서를 바꾸거나, 구절 가산점을 2.0에서 1.0으로, 합계의 행 수를 3에서 2로, 숫자 열 기준을 60%에서 50%로 바꾼 판 네 가지를 넣어 보았고, 동작 비교와 테스트 모두 넷 다 잡았다.
 
