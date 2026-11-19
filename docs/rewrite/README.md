@@ -24,6 +24,8 @@
 | 8 | `tools/registry.py`, `agent/graph.py` | 94 + 177 | `tests/test_api.py` | 도구 등록과 LangGraph 그래프 |
 | 9 | `service/jobs.py`, `service/app.py` | 96 + 220 | `tests/test_api.py` | 비동기 작업 러너와 FastAPI |
 
+**F (결함 고치기, 준비됨: 2026-11-19)**: 1단계에서 찾고 기록만 해 둔 원래 코드의 결함 두 개(이슈 40: 아주 작은 값을 `0`으로 씀, 이슈 41: 괄호 안의 단위 아닌 말을 단위로 받음)를 본인이 쓴 `tools/numbers.py`에서 고친다. 명세는 `docs/rewrite/09_numbers_fix.md`, 테스트는 `tests/test_numbers_fix.py`(고치기 전에는 해당 테스트를 건너뜀), 데이터를 다시 만들고 영향을 세는 것은 `scripts/numbers_fix.py`다. 미리 잰 영향: 화학 학습 문항 10개의 정답만 바뀌고 저장된 출력 39,504건의 판정은 그대로다.
+
 **4b (추가 과제)**: 4단계에서 쓴 검증기에 "근거 복구 끄기" 옵션을 더한다. 명세는 `docs/rewrite/05_verifier_repair_option.md`, 테스트는 `tests/test_verifier_repair_option.py`(옵션이 생기기 전에는 건너뜀). 5단계보다 먼저 해도 된다.
 
 **T (학습 과제, 완료: 2026-11-12, PR #6)**: 학습 코드의 핵심 세 조각을 새 파일로 직접 쓴다. 강화학습 보상(`training/evidence_reward.py`), GRPO 이점·손실(`training/grpo.py`), 라벨 가리기·학습률 일정·학습 루프(`training/lm_loop.py`). 합쳐서 150줄 안팎이고 참고할 기존 파일이 없다. 명세는 `docs/rewrite/06_training_code.md`, 테스트는 `tests/test_owner_training_code.py`(35개, 파일이 생기기 전에는 건너뜀). 이 함수들을 불러 쓰는 스크립트(`scripts/train/exaone_grpo.py`, `scripts/train/exaone_lora_sft.py --loop owner`)는 이미 연결되어 있다. 5~9단계와 순서가 무관하다.
