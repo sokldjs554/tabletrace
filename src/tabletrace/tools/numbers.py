@@ -20,6 +20,13 @@ UNIT_TOKENS = [
 ]
 
 
+HEADER_ONLY_UNITS = {
+    "ft", "MT", "kW", "M", "amu", "mN/m", "J/K·mol", "J/g °C", "L/mol",
+    "mPa·s", "mPa s", "mol/L/s", "L/mol/s", "V", "Pa", "kJ mol^-1",
+    "Jm^5", "kcal / mol", "g / mol",
+}
+
+
 def normalize_minus(s: str) -> str:
     return s.replace("−", "-").replace("–", "-")
 
@@ -68,15 +75,17 @@ def header_unit(header: str) -> str | None:
     excluded = {"no", "no.", "approx", "approx.", "est", "est.", "n", "a", "b", "c", "d", "e", "x", "y", "z", "i", "ii", "iii"}
     if part.lower() in excluded or part.isdigit():
         return None
-    if part in UNIT_TOKENS or re.fullmatch(r"[A-Za-zµμ°Ω%/·⋅\-^0-9 ]{1,10}", part):
+    if part in UNIT_TOKENS or part in HEADER_ONLY_UNITS:
         return "°C" if part == "℃" else part
     return None
 
 
 def format_number(value: float) -> str:
     value = float(value)
+    if 0 < abs(value) < 1e-3:
+        return f"{value:.3e}"
     if abs(value) < 1e15 and abs(value - round(value)) < 1e-9:
         return f"{round(value):,}"
-    if abs(value) >= 1e5 or (value != 0 and abs(value) < 1e-3):
+    if abs(value) >= 1e5:
         return f"{value:.3e}"
     return f"{value:,.4f}".rstrip("0").rstrip(".")
