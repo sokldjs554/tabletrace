@@ -1,0 +1,62 @@
+{"qid": "chem_paper_01", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_02", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_03", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_04", "verdict": "fix", "comment": "질문에 두 온도가 모두 나온다. LJA 표에서 최고 온도와 최저 온도의 차이를 묻는 편이 낫다. 답은 49.04 K다."}
+{"qid": "chem_paper_05", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_06", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_07", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_08", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_09", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_10", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_11", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_12", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_13", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_14", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_15", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_16", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_17", "verdict": "fix", "comment": "‘times larger’는 증가분으로도 읽힌다. SA1의 예측값을 SA3의 예측값으로 나눈 비율이라고 쓰면 답은 약 18.0714다."}
+{"qid": "chem_paper_18", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_19", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_20", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_21", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_22", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_23", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_24", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_25", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_26", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_27", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_28", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_29", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_30", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_31", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_32", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_33", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_34", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_35", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_36", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_37", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_38", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_39", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_40", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_41", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_42", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_43", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_44", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_45", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_46", "verdict": "fix", "comment": "‘times longer’ 대신 30개 궤도와 25개 궤도의 SQD 시간 비율을 묻는다. 195.55 / 11.53은 약 16.9601이다."}
+{"qid": "chem_paper_47", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_48", "verdict": "fix", "comment": "물 표의 VPT2 값은 4614.235인데 단위가 빠져 있다. 원 논문에서 단위를 확인해 넣거나 표에 적힌 숫자만 묻는다."}
+{"qid": "chem_paper_49", "verdict": "fix", "comment": "물 표에서 두 값의 차이는 146.057이다. 에너지 단위를 묻는다면 원 논문에서 이 표의 단위부터 확인해야 한다."}
+{"qid": "chem_paper_50", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_51", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_52", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_53", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_54", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_55", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_56", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_57", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_58", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_59", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_60", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_61", "verdict": "ok", "comment": ""}
+{"qid": "chem_paper_62", "verdict": "ok", "comment": ""}
