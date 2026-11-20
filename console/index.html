@@ -16,10 +16,9 @@
     <span class="tagline">표·문서 근거 검증 워크벤치</span>
   </div>
   <nav class="topnav" aria-label="주요 화면">
-    <a href="#workbench" data-view="workbench" class="navlink is-active">워크벤치</a>
-    <a href="#matrix" data-view="matrix" class="navlink">문항별 결과</a>
+    <a href="#tour" data-view="tour" class="navlink">한눈에 보기</a>
+    <a href="#workbench" data-view="workbench" class="navlink">전체 문항 탐색</a>
     <a href="#research" data-view="research" class="navlink">연구 결과</a>
-    <a href="#about" data-view="about" class="navlink">작동 방식</a>
     <a id="apidocs" href="/docs" class="navlink" target="_blank" rel="noopener" hidden>API 문서</a>
     <a id="repolink" href="https://github.com/sokldjs554/tabletrace" class="navlink" target="_blank" rel="noopener">GitHub</a>
   </nav>
@@ -27,13 +26,6 @@
     <span class="dot"></span><span id="modetext">백엔드 확인 중…</span>
   </div>
 </header>
-
-<section class="intro" id="intro">
-  <div class="intro-text">
-    <strong>TableTrace는 답만 내놓지 않습니다.</strong> 모델이 <em>어느 셀과 어떤 계산</em>으로 답하는지 제안하면 도구가 그 계산을 다시 실행해 확인하고, 맞지 않으면 답을 보류합니다. 아래 결과에서 번호가 붙은 근거 셀을 눌러 보세요.
-  </div>
-  <button class="btn btn-quiet" id="introclose" aria-label="안내 닫기">닫기</button>
-</section>
 
 <div class="corpusbar">
   <div class="seg" role="tablist" aria-label="코퍼스">
@@ -45,12 +37,21 @@
     <button role="tab" class="mtab" data-pane="center">본문·표</button>
     <button role="tab" class="mtab" data-pane="right">질문·결과</button>
   </div>
+  <div class="seg subseg" role="tablist" aria-label="보는 방식">
+    <a role="tab" class="segbtn subbtn" data-sub="workbench" href="#workbench">한 문항씩</a>
+    <a role="tab" class="segbtn subbtn" data-sub="matrix" href="#matrix">표로 한꺼번에</a>
+  </div>
   <div class="notice" id="recordednotice" hidden>
     저장된 실행 결과입니다. 모델은 이 페이지에서 돌지 않고, 평가 문항 전체의 기록된 결과를 정답과 함께 보여 줍니다.
   </div>
 </div>
 
 <main id="main" class="layout" data-view="workbench">
+  <!-- ===== the first screen: one question at a time ===== -->
+  <section class="view view-tour" id="view-tour" hidden>
+    <div class="tour" id="tour"><p class="muted">불러오는 중…</p></div>
+  </section>
+
   <!-- ===== workbench ===== -->
   <section class="view view-workbench" id="view-workbench">
     <aside class="pane pane-left" id="pane-left" aria-label="문항 묶음과 문서">
@@ -143,6 +144,7 @@
   <!-- ===== about ===== -->
   <section class="view view-about" id="view-about" hidden>
     <div class="about">
+      <p><a href="#tour">← 한눈에 보기로</a></p>
       <h2>작동 방식</h2>
       <p>질문은 <b>LangGraph</b>로 짜인 그래프를 지납니다: <code>retrieve</code>(BM25로 표·문단 검색) → <code>propose</code>(모델이 <code>op / cells / answer</code> 프로그램을 제안. 모델은 CPU에서 도는 mT5-small이거나 vLLM·SGLang 서버의 EXAONE-4.0-1.2B LoRA이고, 모델이 없으면 어휘 겹침 휴리스틱) → <code>tool</code>(셀 조회·제한 산술 계산) → <code>verify</code>(셀 범위·답-셀 일치·재계산·단위·기간 검사) → 답변 또는 보류. 모델 출력이 해석되지 않거나 검증에 실패하면 휴리스틱으로 한 번 더 제안합니다.</p>
       <pre class="mermaid-src" id="graphsrc"></pre>
@@ -159,7 +161,7 @@
 </main>
 <footer class="foot">
   <span id="footrelease"></span>
-  <span>데이터: KorWikiTQ (LG AI연구원, CC BY-SA 4.0) · OpenStax Chemistry 2e (CC BY-NC-SA 4.0) · arXiv 화학 논문 12편의 표 (CC BY 4.0, 문서마다 저자와 출처 표시)</span>
+  <span>데이터: KorWikiTQ (LG AI연구원, CC BY-SA 4.0) · OpenStax Chemistry 2e (CC BY-NC-SA 4.0) · arXiv 화학 논문 12편의 표 (CC BY 4.0, 문서마다 저자와 출처 표시) · <a href="#about">작동 방식</a></span>
 </footer>
 <script src="charts.js"></script>
 <script src="live.js"></script>

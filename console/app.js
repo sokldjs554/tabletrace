@@ -30,9 +30,10 @@
     hold_ok: { sym: "✓", word: "보류", cls: "ok" }, hold_miss: { sym: "✗", word: "보류", cls: "ng" },
     answered_unanswerable: { sym: "✗", word: "답함", cls: "ng" },
   };
-  const VIEWS = ["workbench", "matrix", "research", "about"];
+  const VIEWS = ["tour", "workbench", "matrix", "research", "about"];
+  const NAV = { matrix: "workbench" };        // the per-question table sits under the same tab as the workbench
 
-  const state = { mode: null, corpus: "ko_tables", set: null, docs: [], doc: null, tableId: null, sets: [], marks: {}, examples: [], exById: {},
+  const state = { mode: null, home: "workbench", corpus: "ko_tables", set: null, docs: [], doc: null, tableId: null, sets: [], marks: {}, examples: [], exById: {},
     recorded: null, runs: {}, release: null, busy: false, timer: null, shown: null, chat: { session: null, turns: [] } };
 
   const markTitle = (m) => state.marks[m] || m;
@@ -73,8 +74,6 @@
 
   // ---------- boot ----------
   async function init() {
-    if (store.get("tt.intro") === "closed") $("#intro").hidden = true;
-    $("#introclose").addEventListener("click", () => { $("#intro").hidden = true; store.set("tt.intro", "closed"); });
     try {
       state.release = await fetchJSON("v1/release", {}, 3000);
       state.mode = "live";
@@ -90,6 +89,8 @@
       state.sets = ex.sets; state.marks = ex.marks; state.examples = ex.examples;
     } catch (e) { state.sets = []; state.examples = []; }
     state.exById = Object.fromEntries(state.examples.map((x) => [x.id, x]));
+    // The static demo opens on the walk through three stored results; with a backend the workbench, where questions run, comes first.
+    if (state.mode === "recorded" && state.recorded && state.recorded.tour) state.home = "tour";
     renderMode();
     bindUI();
     showPane(state.mode === "recorded" ? "right" : "left");
@@ -163,18 +164,23 @@
   }
 
   // "#workbench/<question id>/<planner>" opens one stored result, so a result can be linked to.
+  // "#tour/<n>" opens the n-th scene of the first screen.
   function parseHash() {
-    const parts = (location.hash || "#workbench").slice(1).split("/");
-    return { view: VIEWS.includes(parts[0]) ? parts[0] : "workbench", ex: parts[1] ? decodeURIComponent(parts[1]) : null, planner: parts[2] || null };
+    const parts = (location.hash || "#" + state.home).slice(1).split("/");
+    const view = VIEWS.includes(parts[0]) ? parts[0] : state.home;
+    return { view, ex: view === "workbench" && parts[1] ? decodeURIComponent(parts[1]) : null, planner: parts[2] || null,
+      scene: view === "tour" ? Math.max(1, parseInt(parts[1], 10) || 1) : 1 };
   }
   function route(first) {
     const h = parseHash();
     state.view = h.view;
-    $$(".navlink[data-view]").forEach((a) => a.classList.toggle("is-active", a.dataset.view === h.view));
+    $$(".navlink[data-view]").forEach((a) => a.classList.toggle("is-active", a.dataset.view === (NAV[h.view] || h.view)));
+    $$(".subbtn").forEach((a) => { const on = a.dataset.sub === h.view; a.classList.toggle("is-active", on); a.setAttribute("aria-selected", on); });
     $$(".view").forEach((v) => (v.hidden = v.id !== "view-" + h.view));
     $("#main").dataset.view = h.view;
     $(".corpusbar").hidden = !(h.view === "workbench" || h.view === "matrix");
     $(".mobiletabs").hidden = h.view !== "workbench";
+    if (h.view === "tour") renderTour(h.scene);
     if (h.view === "research") loadResearch();
     if (h.view === "about") loadGraph();
     if (h.view === "matrix") renderMatrix();
@@ -524,7 +530,7 @@
       const ans = r.status === "answered" ? esc(cut(r.answer, 28)) : `<span class="muted">보류 · ${esc(REASONS[r.verdict && r.verdict.reason] || "")}</span>`;
       return `<tr class="${k === meta.planner ? "is-current" : ""}"><td><button type="button" class="linkbtn" data-planner="${esc(k)}" title="${esc(state.recorded.planners[k].model_id || "휴리스틱 기준선")}">${esc(plannerShort(k))}</button></td><td class="ans">${ans}</td><td class="mk">${markHtml(run.mark)}</td></tr>`; }).join("");
     return `<div class="card"><div class="card-head"><span>같은 질문, 다른 플래너</span><span>정답 ${esc(cut(goldText(ex), 24))}</span></div><div class="card-body"><table class="cmp"><tbody>${rows}</tbody></table>
-      <p class="muted cmpnote">이름을 누르면 그 플래너의 근거와 검증을 봅니다. 문항 전체는 <a href="#matrix">문항별 결과</a>에 있습니다.</p></div></div>`;
+      <p class="muted cmpnote">이름을 누르면 그 플래너의 근거와 검증을 봅니다. 문항 전체는 <a href="#matrix">표로 한꺼번에</a> 볼 수 있습니다.</p></div></div>`;
   }
 
   // What the model proposed next to what the verifier let through. A difference is the verifier at work.
@@ -627,6 +633,93 @@
     else { const p = document.getElementById("p-" + target); if (p) p.scrollIntoView({ block: "center", behavior: "smooth" }); }
   }
 
+  // ---------- the first screen: three stored results, one question at a time ----------
+  // Which results are shown is decided when the results are recorded (scripts/make_recorded_runs.py, pick_tour), not here.
+  const TOUR = {
+    pass: { tab: "검증을 통과한 답", why: "왜 셀까지 보나" },
+    repair: { tab: "검증기가 셀을 고친 답", why: "답만 보면 맞은 문항입니다" },
+    hold: { tab: "내보내지 않은 답", why: "표에 없는 것을 물은 질문입니다" },
+  };
+  const rcOf = (c) => `r${c.row}c${c.col}`;
+  async function renderTour(n) {
+    const box = $("#tour");
+    try {
+      await loadRecorded();
+      if (!state.recordedDocs) state.recordedDocs = await fetchJSON("data/recorded/documents.json", {}, 15000);
+      if (!state.recorded.tour) throw new Error("no tour");
+    } catch (e) { box.innerHTML = '<p class="muted">저장된 실행 결과(data/recorded)가 없어 이 화면을 보여 줄 수 없습니다. <a href="#workbench">전체 문항 탐색</a>으로 가세요.</p>'; return; }
+    const t = state.recorded.tour, scenes = t.scenes, i = Math.min(scenes.length, n) - 1, sc = scenes[i];
+    const ex = state.exById[sc.id], run = state.runs[sc.planner][sc.id], res = run.result, p = firstProposal(res), meta = state.recorded.planners[sc.planner];
+    const doc = state.recordedDocs[ex.doc_id], table = doc.tables.find((x) => x.id === ex.table_id), text = (c) => table.rows[c.row][c.col];
+    const kept = res.evidence_cells || [], keptIds = cellIds(kept), cited = p.cells.filter((c) => !keptIds.includes(rcOf(c))), checks = res.verdict.checks, failed = checks.filter((c) => !c.passed);
+    const cell = (c, k) => `<span class="tv-ref tv-ref-${k}">${rcOf(c)}</span> <span class="tv-q">${esc(text(c))}</span>`;
+    // 1. what the model proposed
+    const proposed = `<dl class="tv-kv"><dt>연산</dt><dd>${esc(OPS[p.op] || p.op)}</dd><dt>셀</dt><dd>${p.cells.map((c) => cell(c, keptIds.includes(rcOf(c)) ? "ev" : "cited")).join("<br>")}</dd><dt>답</dt><dd><b>${esc(p.answer ?? "")}</b></dd></dl>`;
+    // 2. what the tool did with those cells
+    const calc = res.calculation, sym = { diff: " − ", sum: " + " }[calc && calc.op];
+    const tool = calc ? `그 셀을 다시 읽어 계산합니다. <b class="tv-expr">${esc(sym ? calc.inputs.map((x) => x.raw).join(sym) : calc.expression)} = ${esc(calc.formatted)}</b>`
+      : `그 셀을 다시 읽습니다. ${p.cells.map((c) => cell(c, keptIds.includes(rcOf(c)) ? "ev" : "cited")).join(", ")}`;
+    // 3. what the verifier decided
+    const where = cited.map(rcOf).join(", ");
+    const verdict = sc.kind === "pass" ? `<span class="tv-ok">✓</span> 검사 ${checks.length}개를 모두 통과했습니다. <span class="muted tv-small">${esc(checks.map((c) => CHECKS[c.name] || c.name).join(" · "))}</span>`
+      : sc.kind === "repair" ? `<span class="tv-ng">✗</span> 모델이 가리킨 셀(${esc(where)})에는 그 답이 없습니다. 답과 같은 셀이 표에 하나뿐이어서, 근거를 그 셀(${esc(keptIds.join(", "))})로 고쳤습니다.`
+      : `<span class="tv-ng">✗</span> 모델이 가리킨 셀(${esc(where)})에는 그 답이 없습니다. 답과 같은 셀이 표에 없어서 답을 내보내지 않았습니다. <span class="muted tv-small">걸린 검사: ${esc(failed.map((c) => CHECKS[c.name] || c.name).join(" · "))}</span>`;
+    const out = res.status === "answered" ? `<div class="tv-answer">${esc(res.answer)}</div>` : '<div class="tv-answer tv-held">답변을 보류했습니다</div>';
+    const why = sc.kind === "pass" ? (sc.twin ? `${esc(sc.twin.name)}의 ${esc(sc.twin.value)}를 골라도 답은 ${esc(res.answer)}입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모델이 고른 셀을 따로 확인합니다.` : "답과 함께 모델이 고른 셀을 따로 확인합니다.")
+      : sc.kind === "repair" ? "모델이 가리킨 셀은 틀렸습니다. 이 프로젝트는 답이 맞았는지와 셀이 맞았는지를 따로 셉니다."
+      : `모델은 답을 냈지만, 가리킨 셀에 그 값이 없어 걸러졌습니다.${t.missed ? ` 다 걸러지지는 않습니다. <a href="#workbench/${encodeURIComponent(t.missed.id)}/${esc(t.missed.planner)}">검증기가 놓친 문항 보기</a>` : ""}`;
+    const src = meta.source ? `${esc(meta.source.generated[ex.set])}에 ${esc(meta.source.where[ex.set])}에서 받아 저장한 출력` : "";
+    // the table, with the cells the steps name
+    const tag = (r, c) => { const id = `r${r}c${c}`, k = keptIds.indexOf(id);
+      if (k >= 0) return [" tv-ev", `<span class="tv-n">${k + 1}</span>`];
+      if (cited.some((x) => rcOf(x) === id)) return [" tv-cited", '<span class="tv-tag tv-tag-cited">모델</span>'];
+      if (sc.twin && sc.twin.cell === id) return [" tv-twin", '<span class="tv-tag tv-tag-twin">같은 값</span>'];
+      return ["", ""]; };
+    const rows = table.rows.map((r, ri) => `<tr><td class="rc">r${ri}</td>${r.map((v, ci) => { const [cls, badge] = tag(ri, ci); return `<td class="tv-cell${cls}${String(v).length > 14 ? " tv-long" : ""}" data-trc="r${ri}c${ci}">${esc(v)}${badge}</td>`; }).join("")}</tr>`).join("");
+    const legend = [kept.length ? '<span class="tv-n">1</span> 검증기가 확인한 근거 셀' : "", cited.length ? '<span class="tv-tag tv-tag-cited">모델</span> 모델이 가리켰지만 근거가 되지 못한 셀' : "",
+      sc.twin ? '<span class="tv-tag tv-tag-twin">같은 값</span> 골라도 답이 같아지는 셀' : ""].filter(Boolean).join(" · ");
+    const s0 = doc.source || {};
+    box.innerHTML = `
+      <header class="tour-hero">
+        <p class="tour-kicker">한국어 표 질의응답 · 저장된 실행 결과</p>
+        <h1>답이 맞으면, 근거로 고른 셀도 맞을까?</h1>
+        <p class="tour-lede">모델이 답과 함께 <b>어느 셀로 어떻게 계산했는지</b>를 내면, 도구가 그 셀을 다시 읽고 검증기가 확인합니다. 맞지 않으면 답을 내보내지 않습니다. 아래 세 문항은 저장된 모델 출력 그대로입니다.</p>
+      </header>
+      <nav class="tour-tabs" role="tablist" aria-label="장면">${scenes.map((x, k) => `<a role="tab" class="tour-tab${k === i ? " is-active" : ""}" aria-selected="${k === i}" href="#tour/${k + 1}"><b>${k + 1}</b>${esc(TOUR[x.kind].tab)}</a>`).join("")}</nav>
+      <div class="tour-grid" data-kind="${esc(sc.kind)}" data-ex="${esc(sc.id)}">
+        <section class="tour-card" aria-label="질문에서 답까지">
+          <p class="tour-q"><span class="tour-label">질문</span>${esc(ex.question)}</p>
+          <ol class="tour-steps">
+            <li><h2>모델의 제안</h2><p class="muted tv-small">${esc(meta.model_id || meta.short)}${src ? " · " + src : ""}</p>${proposed}</li>
+            <li><h2>도구</h2><p>${tool}</p></li>
+            <li><h2>검증기</h2><p>${verdict}</p></li>
+          </ol>
+          <div class="tour-out">${out}<p class="tour-gold"><b>정답</b> <span class="goldval">${esc(goldText(ex))}</span> ${markHtml(run.mark, true)}</p></div>
+          <p class="tour-why"><b>${esc(TOUR[sc.kind].why)}.</b> ${why}</p>
+          <p class="tour-actions"><a class="btn" href="#workbench/${encodeURIComponent(sc.id)}/${esc(sc.planner)}">이 문항의 검증 과정 전체 보기</a>${i + 1 < scenes.length ? ` <a class="btn btn-primary" href="#tour/${i + 2}">다음: ${esc(TOUR[scenes[i + 1].kind].tab)}</a>` : ' <a class="btn btn-primary" href="#workbench">전체 문항 탐색</a>'}</p>
+        </section>
+        <section class="tour-doc" aria-label="표">
+          <div class="tablecap"><span><b>${esc(doc.title)}</b> <span class="muted">· ${table.rows.length}행 × ${table.header.length}열</span></span><span class="muted">${esc(s0.name || "")} · ${esc(s0.license || "")}${s0.url ? ` · <a href="${esc(s0.url)}" target="_blank" rel="noopener">출처</a>` : ""}</span></div>
+          <div class="tablescroll"><table class="tt tourtable"><thead><tr><th class="rc">r\\c</th>${table.header.map((h, c) => `<th>${esc(h)} <span class="tv-col">c${c}</span></th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
+          <p class="legend">${legend}</p>
+        </section>
+      </div>
+      <section class="tour-more">
+        <div class="tour-find"><h2>이 프로젝트가 잰 것</h2><ul id="tourfind"><li class="muted">불러오는 중…</li></ul></div>
+        <div class="tour-next">
+          <a class="tour-link" href="#workbench"><b>전체 문항 탐색</b><span>평가 문항 ${state.recorded.counts.questions}개를 플래너 ${state.recorded.counts.planners}개가 어떻게 답했는지. 답, 근거, 검증 과정을 하나씩 봅니다.</span></a>
+          <a class="tour-link" href="#research"><b>연구 결과</b><span>결론과 그림, 그 아래 실험별 조건과 산출물 경로.</span></a>
+          <a class="tour-link" href="#about"><b>작동 방식</b><span>검색, 제안, 도구, 검증으로 이어지는 그래프와 신뢰 경계.</span></a>
+        </div>
+      </section>`;
+    // three conclusions from the research summary, in its own words (data/research.json)
+    try {
+      state.research = state.research || await fetchJSON("data/research.json", {}, 10000);
+      const pick = ["evidence", "verifier", "accuracy"].map((id) => state.research.highlights.find((h) => h.id === id)).filter(Boolean);
+      if ($("#tourfind")) $("#tourfind").innerHTML = pick.map((h) => `<li>${esc(h.title)}</li>`).join("") + '<li class="tour-all"><a href="#research">그림과 함께 보기</a></li>';
+    } catch (e) { if ($("#tourfind")) $("#tourfind").innerHTML = '<li><a href="#research">연구 결과 보기</a></li>'; }
+  }
+
   // ---------- per-question results: every question of a set against every stored planner ----------
   async function renderMatrix() {
     const box = $("#matrix");
@@ -646,7 +739,7 @@
         <h4>문항마다</h4><div class="tablescroll"><table class="res mx"><thead><tr><th>#</th><th>유형</th><th>질문</th><th>정답</th>${keys.map((k) => `<th title="${esc(r.planners[k].model_id || "휴리스틱 기준선")}">${esc(plannerShort(k))}<br><span class="muted">${r.planners[k].totals[s.key].right}/${r.planners[k].totals[s.key].n}</span></th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></section>`; }).join("");
     const notes = plannerKeys().map((k) => `<li><b>${esc(plannerShort(k))}</b> ${esc(r.planners[k].model_id || "")}. ${esc(r.planners[k].note)}${r.planners[k].source ? ` 출력을 받은 곳: ${esc([...new Set(Object.values(r.planners[k].source.where))].join(", "))}.` : ""}</li>`).join("");
     box.innerHTML = `<h2>문항별 결과 <span class="muted sub">기록 ${esc(r.generated_at)} · commit ${esc(r.commit)}</span></h2>
-      <p>평가 문항을 하나도 빼지 않고 플래너마다의 결과를 정답과 견줬습니다. 표시를 누르면 그 문항의 근거와 검증을 워크벤치에서 봅니다. 위쪽의 코퍼스 단추로 한국어 표와 영어 화학 문서를 바꿉니다.</p>
+      <p>평가 문항을 하나도 빼지 않고 플래너마다의 결과를 정답과 견줬습니다. 표시를 누르면 그 문항의 근거와 검증을 "한 문항씩" 화면에서 봅니다. 위쪽의 코퍼스 단추로 한국어 표와 영어 화학 문서를 바꿉니다.</p>
       <p class="legend"><b>표시</b> ${legend}. 앞의 ✓와 ✗는 시스템이 옳게 행동했는지이고, 뒤의 말은 무엇을 했는지입니다.</p>
       <p class="muted">${esc(r.settings.note)}</p>${parts}
       <section><h3>플래너</h3><ul class="plist">${notes}</ul></section>`;

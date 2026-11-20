@@ -224,6 +224,55 @@ def run_set(rt: AgentRuntime, examples: list[dict], mode: str, tables: dict, sto
     return runs
 
 
+def pick_tour(planners: dict, examples: list[dict], tables: dict, featured: str) -> dict:
+    """The first screen walks through three stored results, one question at a time. They are picked here by rule, not by
+    id, from the questions the owner wrote, so the page cannot show a hand-made example:
+
+      pass    the featured run: the full-data model, a calculation, every check passed
+      repair  a right answer of a stored EXAONE model whose cited cell did not hold the answer (same row, another column),
+              on the smallest table there is: the verifier moved the evidence
+      hold    the full-data model proposed an answer to an unanswerable question, a check failed, and nothing was sent
+      missed  what the verifier does not catch: the same model answered an unanswerable question and passed
+    """
+    by_id = {e["id"]: e for e in examples}
+    failed = lambda r: [c["name"] for c in r["result"]["verdict"]["checks"] if not c["passed"]]  # noqa: E731
+    proposal = lambda r: next(s["output"]["parsed"] for s in r["result"]["trace"] if s["step"] == "propose" and s["output"] and s["output"].get("parsed"))  # noqa: E731
+    owner = lambda r: by_id[r["id"]]["set"] == "ko_owner"  # noqa: E731
+    size = lambda r: len(tables[by_id[r["id"]]["table_id"]].rows) * len(tables[by_id[r["id"]]["table_id"]].header)  # noqa: E731
+
+    first = next(r for r in planners["exaone"]["runs"] if r["id"] == featured)
+    assert first["mark"] == "correct" and not failed(first) and owner(first)
+    scene_pass = {"kind": "pass", "id": first["id"], "planner": "exaone"}
+    # another row with the same value in the same column: choosing it gives the same answer (what scoring answers alone cannot see)
+    ex, table, ev = by_id[first["id"]], tables[by_id[first["id"]]["table_id"]], first["result"]["evidence_cells"]
+    rows = {c["row"] for c in ev}
+    name_col = next((c for c in range(len(table.header)) if all(table.rows[r][c] and table.rows[r][c] in ex["question"] for r in rows)), None)
+    twin = next((r for r in range(len(table.rows)) if r not in rows and table.rows[r][ev[0]["col"]] == table.rows[ev[0]["row"]][ev[0]["col"]]), None)
+    if name_col is not None and twin is not None:
+        scene_pass["twin"] = {"cell": f"r{twin}c{ev[0]['col']}", "name": table.rows[twin][name_col], "value": table.rows[twin][ev[0]["col"]]}
+
+    repairs = []
+    for k, p in planners.items():
+        for r in p["runs"] if "EXAONE" in (p["model_id"] or "") else []:
+            if not (owner(r) and r["mark"] == "correct" and "evidence_repaired" in failed(r)):
+                continue
+            cited, kept = proposal(r)["cells"], r["result"]["evidence_cells"]
+            if len(cited) == len(kept) == 1 and cited[0]["row"] == kept[0]["row"] and cited[0]["col"] != kept[0]["col"]:
+                repairs.append((size(r), list(planners).index(k), r["id"], k))
+    assert repairs, "no stored EXAONE answer whose evidence the verifier repaired"
+    _, _, rid, rk = min(repairs)
+    holds = [r for r in planners["exaone"]["runs"] if owner(r) and r["mark"] == "hold_ok" and failed(r) and proposal(r)["op"] != "abstain"]
+    assert holds, "no unanswerable question on which the verifier stopped the full-data model's answer"
+    same_table = [r for r in holds if by_id[r["id"]]["table_id"] == by_id[rid]["table_id"]]
+    hold = (same_table or holds)[0]
+    out = {"scenes": [scene_pass, {"kind": "repair", "id": rid, "planner": rk}, {"kind": "hold", "id": hold["id"], "planner": "exaone"}]}
+    missed = [r for r in planners["exaone"]["runs"] if owner(r) and r["mark"] == "answered_unanswerable"]
+    near = [r for r in missed if by_id[r["id"]]["table_id"] == ex["table_id"]]
+    if missed:
+        out["missed"] = {"id": (near or missed)[0]["id"], "planner": "exaone"}
+    return out
+
+
 def totals(runs: list[dict]) -> dict:
     out: dict[str, dict] = {}
     for r in runs:
@@ -278,7 +327,7 @@ def main() -> None:
                                   "긴 표는 평가 때처럼 입력 길이에 들어가는 앞쪽 행까지만 플래너에 보여 줬습니다. "
                                   "그래서 이 화면의 맞음·틀림은 보고서의 평가 수치와 문항마다 같습니다. 서비스의 기본 설정(주어 검사와 보완 시도를 켬)은 "
                                   "백엔드를 띄운 실시간 모드에서 볼 수 있습니다."},
-             "featured": first, "counts": {"questions": len(examples), "runs": sum(len(p["runs"]) for p in planners.values()), "planners": len(planners)},
+             "featured": first, "tour": pick_tour(planners, examples, tables, first), "counts": {"questions": len(examples), "runs": sum(len(p["runs"]) for p in planners.values()), "planners": len(planners)},
              "planner_order": [p["key"] for p in PLANNERS], "planners": planners}
     out = ROOT / a.out
     out.mkdir(parents=True, exist_ok=True)
@@ -288,7 +337,7 @@ def main() -> None:
     (ROOT / "console/data/examples.json").write_text(json.dumps({"sets": sets, "marks": MARKS, "examples": examples}, ensure_ascii=False, indent=1), encoding="utf-8")
     (out / "kiwi_tokens.json").write_text(json.dumps(kiwi_tokens(examples, docs), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (ROOT / "console/data/graph.json").write_text(json.dumps({"mermaid": AgentRuntime(indexes, None).mermaid()}), encoding="utf-8")
-    print("wrote", out, "featured", first, {f.name: f.stat().st_size for f in out.glob("*.json")})
+    print("wrote", out, "featured", first, "tour", json.dumps(index["tour"], ensure_ascii=False), {f.name: f.stat().st_size for f in out.glob("*.json")})
 
 
 if __name__ == "__main__":

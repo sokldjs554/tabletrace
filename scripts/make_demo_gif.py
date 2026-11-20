@@ -5,8 +5,8 @@
 
 Two steps because the capture needs Playwright and the assembly needs Pillow, and the project environment does not
 carry Pillow. Each frame is a real screen of the static build with a caption bar added at the bottom; nothing is drawn
-by hand. The frames replay stored results and, in the last two, run the verifier in the browser (the build must have
-been made with --live for those).
+by hand. The first three frames are the first screen's three scenes; the others replay stored results and, in the last
+two, run the verifier in the browser (the build must have been made with --live for those).
 """
 from __future__ import annotations
 
@@ -55,32 +55,26 @@ def capture(site: Path, frames: Path, chromium: str | None) -> None:
             page.goto(base + target, wait_until="networkidle")
             page.wait_for_timeout(600)
 
+        # the first screen: three stored results, one question at a time (which three is in index.tour)
         go("")
-        page.evaluate("document.getElementById('intro').hidden = true")
-        shot("들어가면 결과가 열려 있습니다. 답, 정답, 근거 셀 두 개.", 3.0)
-        go("#workbench/ko_owner_17/exaone")
-        page.evaluate("document.getElementById('intro').hidden = true; document.querySelector('.pv').scrollIntoView({block: 'center'})")
-        shot("모델이 적은 숫자와 도구가 다시 계산한 값이 다르면 계산한 값으로 답합니다.", 3.2)
+        page.wait_for_selector(".tour-q", timeout=15000)
+        shot("첫 화면은 문항 하나를 따라갑니다. 모델의 제안, 도구의 계산, 검증, 정답.", 3.4)
+        go("#tour/2")
+        shot("답은 맞았지만 모델이 가리킨 셀(붉은 점선)은 틀린 경우. 검증기가 근거 셀을 고칩니다.", 3.4)
+        go("#tour/3")
+        shot("표에 없는 것을 물으면 모델이 낸 답을 내보내지 않습니다.", 3.2)
         idx = json.loads((site / "data/recorded/index.json").read_text(encoding="utf-8"))
-        fixed = next((k, r["id"]) for k in idx["planner_order"] for r in idx["planners"][k]["runs"]
-                     if "EXAONE" in (idx["planners"][k]["model_id"] or "") and any(c["name"] == "evidence_repaired" for c in r["result"]["verdict"]["checks"]))
-        go(f"#workbench/{fixed[1]}/{fixed[0]}")
-        page.evaluate("document.getElementById('intro').hidden = true")
-        shot("모델이 인용한 셀(붉은 점선)과 검증기가 확인한 근거 셀(노랑)을 따로 표시합니다.", 3.2)
-        hold = next(r["id"] for r in idx["planners"]["exaone"]["runs"] if r["mark"] == "hold_ok")
-        go(f"#workbench/{hold}/exaone")
-        page.evaluate("document.getElementById('intro').hidden = true")
-        shot("답이 없는 질문은 보류하고, 어느 검사에서 걸렸는지 적습니다.", 3.0)
+        go("#workbench/ko_owner_17/exaone")
+        page.evaluate("document.querySelector('.pv').scrollIntoView({block: 'center'})")
+        shot("전체 문항 탐색: 모델이 적은 숫자와 도구가 다시 계산한 값이 다르면 계산한 값으로 답합니다.", 3.2)
         go("#matrix")
-        page.evaluate("document.getElementById('intro').hidden = true; window.scrollTo(0, 150)")
-        shot("문항별 결과: 소유자가 직접 쓴 30문항 전체를 플래너 일곱에 대해.", 3.2)
+        page.evaluate("window.scrollTo(0, 150)")
+        shot("표로 한꺼번에: 소유자가 직접 쓴 30문항 전체를 플래너 일곱에 대해.", 3.2)
         go("#research")
-        page.evaluate("document.getElementById('intro').hidden = true")
         shot("연구 결과: 결론 일곱 개와 그림. 실험 기록은 아래에 접혀 있습니다.", 3.2)
         if (site / "live" / "manifest.json").exists():
             ko = next(r for r in idx["planners"]["exaone"]["runs"] if r["set"] == "ko_owner" and r["mark"] == "correct" and "lookup" in r["result"]["planner"]["raw_output"])
             go(f"#workbench/{ko['id']}/exaone")
-            page.evaluate("document.getElementById('intro').hidden = true")
             page.click("#livebox summary")
             page.click("#liveload")
             page.wait_for_selector("#liveform:not([hidden])", timeout=180000)

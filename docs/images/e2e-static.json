@@ -4,12 +4,52 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 2026-11-19 14:47 UTC · commit 33585de"
+   "detail": "저장된 실행 결과 · 2026-11-20 18:51 UTC · commit 585f713"
   },
   {
-   "name": "desktop: first screen shows an answer with its gold answer, without a click",
+   "name": "desktop: the first screen walks through one question: the proposal, the tool, the verifier, the answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=497 of 900, '정답 2 ✓ 맞음'"
+   "detail": "answer '2' at y=690 of 900, cells ['r0c3', 'r2c3'], '정답 2 ✓ 맞음'"
+  },
+  {
+   "name": "desktop: it says why the cell is checked, with the cell that would give the same answer",
+   "ok": true,
+   "detail": "왜 셀까지 보나. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모델이 "
+  },
+  {
+   "name": "desktop: three tabs, and the first screen fits the width",
+   "ok": true,
+   "detail": "3 tabs, active '한눈에 보기', overflow 0px"
+  },
+  {
+   "name": "desktop: second scene: a right answer whose cited cell the verifier replaced",
+   "ok": true,
+   "detail": "cited ['r1c4'], evidence ['r1c1'], 'FM 103.1㎒'"
+  },
+  {
+   "name": "desktop: third scene: an answer to an unanswerable question that was not sent",
+   "ok": true,
+   "detail": "cited ['r4c0'], '정답 답 없음(보류가 맞음) ✓ 맞는 보류'"
+  },
+  {
+   "name": "desktop: the third scene links to a question the verifier let through",
+   "ok": true,
+   "detail": "{'id': 'ko_owner_27', 'planner': 'exaone'}"
+  },
+  {
+   "name": "desktop: the first screen quotes three conclusions of the research summary word for word",
+   "ok": true,
+   "detail": "약한 모델은 맞힌 답의 절반 이상에서 답이 없는 셀을  / 검증기를 거치면 틀린 답이 21.6%에서 12.0%로  / 전체 데이터로 튜닝한 12억 파라미터 EXAONE이 8"
+  },
+  {
+   "name": "desktop: a scene opens its question in the question browser",
+   "ok": true,
+   "detail": "workbench/ko_owner_30/exaone"
+  },
+  {
+   "name": "desktop: the question browser opens with an answer and its gold answer, without a click",
+   "ok": true,
+   "detail": "answer '2' at y=443 of 900, '정답 2 ✓ 맞음'"
   },
   {
    "name": "desktop: document + questions rendered",
@@ -117,9 +157,14 @@
    "detail": "workbench/ko_owner_01/exaone"
   },
   {
+   "name": "desktop: one tab holds both the one-question view and the table of every question",
+   "ok": true,
+   "detail": "[['workbench', True], ['matrix', False]]"
+  },
+  {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 4.1s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.7s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -159,7 +204,7 @@
   {
    "name": "desktop: research view leads with conclusions, each with a chart and a table of its values",
    "ok": true,
-   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 37, 'height': 3124, 'over': 0}"
+   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 37, 'height': 3070, 'over': 0}"
   },
   {
    "name": "desktop: every experiment is kept below, folded by topic",
@@ -169,7 +214,7 @@
   {
    "name": "desktop: research view fits the screen width and is short",
    "ok": true,
-   "detail": "height 3124px, overflow 0px"
+   "detail": "height 3070px, overflow 0px"
   },
   {
    "name": "desktop: a chart mark shows its value on focus",
@@ -184,12 +229,52 @@
   {
    "name": "mobile: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 2026-11-19"
+   "detail": "저장된 실행 결과 · 2026-11-20"
   },
   {
-   "name": "mobile: first screen shows an answer with its gold answer, without a click",
+   "name": "mobile: the first screen walks through one question: the proposal, the tool, the verifier, the answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=560 of 844, '정답 2 ✓ 맞음'"
+   "detail": "answer '2' at y=865 of 844, cells ['r0c3', 'r2c3'], '정답 2 ✓ 맞음'"
+  },
+  {
+   "name": "mobile: it says why the cell is checked, with the cell that would give the same answer",
+   "ok": true,
+   "detail": "왜 셀까지 보나. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모델이 "
+  },
+  {
+   "name": "mobile: three tabs, and the first screen fits the width",
+   "ok": true,
+   "detail": "3 tabs, active '한눈에 보기', overflow 0px"
+  },
+  {
+   "name": "mobile: second scene: a right answer whose cited cell the verifier replaced",
+   "ok": true,
+   "detail": "cited ['r1c4'], evidence ['r1c1'], 'FM 103.1㎒'"
+  },
+  {
+   "name": "mobile: third scene: an answer to an unanswerable question that was not sent",
+   "ok": true,
+   "detail": "cited ['r4c0'], '정답 답 없음(보류가 맞음) ✓ 맞는 보류'"
+  },
+  {
+   "name": "mobile: the third scene links to a question the verifier let through",
+   "ok": true,
+   "detail": "{'id': 'ko_owner_27', 'planner': 'exaone'}"
+  },
+  {
+   "name": "mobile: the first screen quotes three conclusions of the research summary word for word",
+   "ok": true,
+   "detail": "약한 모델은 맞힌 답의 절반 이상에서 답이 없는 셀을  / 검증기를 거치면 틀린 답이 21.6%에서 12.0%로  / 전체 데이터로 튜닝한 12억 파라미터 EXAONE이 8"
+  },
+  {
+   "name": "mobile: a scene opens its question in the question browser",
+   "ok": true,
+   "detail": "workbench/ko_owner_30/exaone"
+  },
+  {
+   "name": "mobile: the question browser opens with an answer and its gold answer, without a click",
+   "ok": true,
+   "detail": "answer '2' at y=609 of 844, '정답 2 ✓ 맞음'"
   },
   {
    "name": "mobile: document + questions rendered",
@@ -297,9 +382,14 @@
    "detail": "workbench/ko_owner_01/exaone"
   },
   {
+   "name": "mobile: one tab holds both the one-question view and the table of every question",
+   "ok": true,
+   "detail": "[['workbench', True], ['matrix', False]]"
+  },
+  {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.9s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.8s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",

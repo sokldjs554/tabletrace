@@ -112,15 +112,77 @@ def main() -> None:
                     page.wait_for_timeout(800)
                     badge = page.text_content("#modetext") or ""
                     check(f"{label}: mode badge", ("실시간" in badge) if tag == "live" else ("저장된" in badge), badge)
-                    page.screenshot(path=str(out / f"{tag}-{label}-01-home.png"), full_page=mobile)
                     data = page.evaluate("async () => (await (await fetch('data/examples.json')).json())")
                     examples = data["examples"]
                     if tag == "static":
-                        # the first screen already holds a result: an answer, its gold answer and a mark, with no click
+                        # The static demo opens on a walk through three stored results, one question at a time. Which three is decided
+                        # when the results are recorded (index.tour); here the page is held against those runs.
+                        page.wait_for_selector(".tour-q", timeout=15000)
+                        idx0 = page.evaluate("async () => (await (await fetch('data/recorded/index.json')).json())")
+                        scenes = idx0["tour"]["scenes"]
+
+                        def scene(page=page) -> dict:
+                            return page.evaluate("""() => { const g = document.querySelector('.tour-grid'), a = document.querySelector('.tv-answer');
+                                const cells = (c) => [...document.querySelectorAll('td.' + c)].map((e) => e.dataset.trc);
+                                return { kind: g.dataset.kind, ex: g.dataset.ex, answer: a.textContent, held: a.classList.contains('tv-held'), top: a.getBoundingClientRect().top,
+                                    gold: document.querySelector('.tour-gold').textContent, ev: cells('tv-ev'), cited: cells('tv-cited'), twin: cells('tv-twin'),
+                                    steps: document.querySelectorAll('.tour-steps > li').length, tabs: document.querySelectorAll('.navlink[data-view]').length,
+                                    active: (document.querySelector('.navlink.is-active') || {}).textContent || '', why: document.querySelector('.tour-why').textContent,
+                                    over: document.documentElement.scrollWidth - document.documentElement.clientWidth }; }""")
+
+                        def stored(i: int, idx0=idx0, scenes=scenes) -> dict:
+                            return next(r for r in idx0["planners"][scenes[i]["planner"]]["runs"] if r["id"] == scenes[i]["id"])["result"]
+
+                        def to_scene(n: int, kind: str, page=page) -> dict:
+                            page.locator(".tour-tab").nth(n).click()
+                            page.wait_for_function(f"() => document.querySelector('.tour-grid').dataset.kind === '{kind}'", timeout=15000)
+                            page.wait_for_timeout(200)
+                            return scene()
+
+                        ids = lambda cells: [f"r{c['row']}c{c['col']}" for c in cells]  # noqa: E731
+                        s1 = scene()
+                        check(f"{label}: the first screen walks through one question: the proposal, the tool, the verifier, the answer and its gold answer, without a click",
+                              s1["kind"] == "pass" and s1["ex"] == scenes[0]["id"] and s1["answer"] == stored(0)["answer"] and "정답" in s1["gold"] and "맞음" in s1["gold"]
+                              and s1["ev"] == ids(stored(0)["evidence_cells"]) and s1["steps"] == 3 and (mobile or 0 < s1["top"] < vp["height"]),
+                              f"answer {s1['answer']!r} at y={s1['top']:.0f} of {vp['height']}, cells {s1['ev']}, {s1['gold'][:20]!r}")
+                        twin = scenes[0].get("twin")
+                        check(f"{label}: it says why the cell is checked, with the cell that would give the same answer",
+                              bool(twin) and s1["twin"] == [twin["cell"]] and twin["name"] in s1["why"] and twin["cell"] not in s1["ev"], s1["why"][:60])
+                        check(f"{label}: three tabs, and the first screen fits the width", s1["tabs"] == 3 and "한눈에" in s1["active"] and s1["over"] <= 1,
+                              f"{s1['tabs']} tabs, active {s1['active']!r}, overflow {s1['over']}px")
+                        page.screenshot(path=str(out / f"{tag}-{label}-00-tour.png"), full_page=mobile)
+                        s2 = to_scene(1, "repair")
+                        check(f"{label}: second scene: a right answer whose cited cell the verifier replaced",
+                              s2["answer"] == stored(1)["answer"] and s2["ev"] == ids(stored(1)["evidence_cells"]) and bool(s2["cited"]) and not set(s2["cited"]) & set(s2["ev"])
+                              and "맞음" in s2["gold"], f"cited {s2['cited']}, evidence {s2['ev']}, {s2['answer']!r}")
+                        page.screenshot(path=str(out / f"{tag}-{label}-00-tour-2.png"), full_page=mobile)
+                        s3 = to_scene(2, "hold")
+                        check(f"{label}: third scene: an answer to an unanswerable question that was not sent", s3["held"] and stored(2)["status"] == "abstained" and not s3["ev"]
+                              and bool(s3["cited"]) and "보류" in s3["gold"] and "✓" in s3["gold"], f"cited {s3['cited']}, {s3['gold'][:30]!r}")
+                        page.screenshot(path=str(out / f"{tag}-{label}-00-tour-3.png"), full_page=mobile)
+                        missed = idx0["tour"].get("missed")
+                        check(f"{label}: the third scene links to a question the verifier let through", bool(missed)
+                              and page.locator(f".tour-why a[href='#workbench/{missed['id']}/{missed['planner']}']").count() == 1 if missed else False, str(missed))
+                        # the conclusions under the scenes are the research summary's own sentences
+                        page.wait_for_function("() => document.querySelectorAll('#tourfind li').length >= 3", timeout=15000)
+                        finds = page.eval_on_selector_all("#tourfind li", "els => els.map(e => e.textContent)")
+                        titles = {h["title"] for h in page.evaluate("async () => (await (await fetch('data/research.json')).json())")["highlights"]}
+                        check(f"{label}: the first screen quotes three conclusions of the research summary word for word", sum(f in titles for f in finds) == 3, " / ".join(f[:30] for f in finds[:3]))
+                        # from a scene to the full record of that question
+                        page.locator(".tour-actions a").nth(0).click()
+                        shown()
+                        check(f"{label}: a scene opens its question in the question browser", f"#workbench/{scenes[2]['id']}/{scenes[2]['planner']}" in page.url
+                              and page.locator(".badge-hold").count() > 0 and "전체 문항" in (page.text_content(".navlink.is-active") or ""), page.url.split("#")[-1])
+                        page.goto("about:blank")
+                        page.goto(base + "#workbench", wait_until="networkidle")          # a fresh load of the question browser
+                        page.wait_for_timeout(800)
+                    page.screenshot(path=str(out / f"{tag}-{label}-01-home.png"), full_page=mobile)
+                    if tag == "static":
+                        # the question browser already holds a result: an answer, its gold answer and a mark, with no click
                         first = page.evaluate("""() => ({ answer: (document.querySelector('.answer') || {}).textContent || '',
                             gold: (document.querySelector('.goldline') || {}).textContent || '', evidence: document.querySelectorAll('td.is-evidence').length,
                             top: document.querySelector('.answer') ? document.querySelector('.answer').getBoundingClientRect().top : -1 })""")
-                        check(f"{label}: first screen shows an answer with its gold answer, without a click",
+                        check(f"{label}: the question browser opens with an answer and its gold answer, without a click",
                               bool(first["answer"]) and "정답" in first["gold"] and "맞음" in first["gold"] and first["evidence"] >= 1 and 0 < first["top"] < vp["height"],
                               f"answer {first['answer']!r} at y={first['top']:.0f} of {vp['height']}, {first['gold'][:30]!r}")
                     # a document of the first question set is open, with its questions
@@ -251,6 +313,10 @@ def main() -> None:
                         page.locator("table.mx td.mk a").nth(0).click()
                         shown()
                         check(f"{label}: a mark opens that question in the workbench", "#workbench/" in page.url and page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0, page.url.split("#")[-1])
+                        # the two ways of looking at every question sit under one tab
+                        sub = page.eval_on_selector_all(".subbtn", "els => els.map(e => [e.dataset.sub, e.classList.contains('is-active')])")
+                        check(f"{label}: one tab holds both the one-question view and the table of every question", sub == [["workbench", True], ["matrix", False]]
+                              and "전체 문항" in (page.text_content(".navlink.is-active") or ""), str(sub))
                     if tag == "static" and (ROOT / a.static / "live" / "manifest.json").exists():
                         # "Run it here": the repository's verifier in this browser (Pyodide). Each result is held against the same
                         # call made here on the server with the real Korean tokenizer; they must agree in every field but the timings.
@@ -382,6 +448,11 @@ def main() -> None:
                         page.wait_for_timeout(300)
                         check("desktop: chemistry question produced a result", page.locator(".badge-ok, .badge-fix, .badge-hold").count() > 0)
                         page.screenshot(path=str(out / f"{tag}-{label}-06-chem.png"))
+                        # beside a running backend the walk-through is one tab away (it reads the stored results)
+                        page.goto(base + "#tour", wait_until="networkidle")
+                        page.wait_for_selector(".tour-q", timeout=15000)
+                        check("desktop: the walk-through of stored results is available beside a running backend", page.locator(".tour-tab").count() == 3
+                              and page.locator("td.tv-ev").count() >= 1 and "실시간" in (page.text_content("#modetext") or ""), (page.text_content(".tour-q") or "")[:50])
                     # research view
                     page.goto(base + "#research", wait_until="networkidle")
                     page.wait_for_timeout(800)

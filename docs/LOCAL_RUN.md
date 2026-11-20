@@ -29,7 +29,7 @@ pytest -q -k heuristic                      # 이름에 heuristic이 든 테스�
 |---|---|---|
 | `[dev]`만 | 552 passed, 22 skipped (2분 안쪽) | GitHub Actions CI와 같은 설치 |
 | `[dev]` + `[model]` (맥북처럼 모델 파일 없음) | 582 passed, 7 skipped (3~4분) | AI 작업 환경에서 모델 폴더 없이 잰 값 |
-| 모델 파일까지 있는 AI 작업 환경 | 602 passed, 1 skipped | `experiments/tests/summary.json` |
+| 모델 파일까지 있는 AI 작업 환경 | 605 passed, 1 skipped | `experiments/tests/summary.json` |
 
 테스트는 계속 늘어나므로 통과 수는 이보다 많을 수 있다. 볼 것은 failed가 없는지다. 건너뛰는(skipped) 테스트는 실패가 아니다. 까닭은 셋이다. (결함 40·41의 테스트 19개는 2026-11-20의 수정 뒤로 건너뛰지 않는다.)
 

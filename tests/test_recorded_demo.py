@@ -178,3 +178,66 @@ def test_a_repaired_answer_is_among_the_stored_runs():
         cited = {(c["row"], c["col"]) for c in first["output"]["parsed"]["cells"]}
         evidence = {(c["row"], c["col"]) for c in run["result"]["evidence_cells"]}
         assert cited and evidence and not cited & evidence
+
+
+# ---------------------------------------------------------------- the first screen: three stored results, one question at a time
+
+def _tour_run(scene: dict) -> dict:
+    return next(r for r in INDEX["planners"][scene["planner"]]["runs"] if r["id"] == scene["id"])
+
+
+def _proposal(run: dict) -> dict:
+    return next(s["output"]["parsed"] for s in run["result"]["trace"] if s["step"] == "propose" and s["output"] and s["output"].get("parsed"))
+
+
+def test_the_first_screen_shows_three_stored_results_picked_by_rule():
+    """The static demo opens on a walk through three results. They are stored runs on questions the owner wrote, chosen
+    when the results are recorded (scripts/make_recorded_runs.py, pick_tour), and each is what its tab says it is."""
+    tour = INDEX["tour"]
+    assert [s["kind"] for s in tour["scenes"]] == ["pass", "repair", "hold"]
+    runs = [_tour_run(s) for s in tour["scenes"]]
+    assert all(EXAMPLES[r["id"]]["set"] == "ko_owner" for r in runs)                       # the owner's questions
+    assert all("EXAONE" in INDEX["planners"][s["planner"]]["model_id"] for s in tour["scenes"])   # stored model outputs, not the baseline
+    failed = lambda r: [c["name"] for c in r["result"]["verdict"]["checks"] if not c["passed"]]  # noqa: E731
+    passed, repaired, held = runs
+    # 1. passed as proposed: the featured calculation, every check passed, the evidence is what the model cited
+    assert tour["scenes"][0]["id"] == INDEX["featured"] and passed["mark"] == "correct" and not failed(passed) and passed["result"]["calculation"]
+    assert [(c["row"], c["col"]) for c in _proposal(passed)["cells"]] == [(c["row"], c["col"]) for c in passed["result"]["evidence_cells"]]
+    # 2. a right answer whose cited cell did not hold it: same row, another column, and the verifier moved the evidence
+    cited, kept = _proposal(repaired)["cells"], repaired["result"]["evidence_cells"]
+    assert repaired["mark"] == "correct" and "evidence_repaired" in failed(repaired) and len(cited) == len(kept) == 1
+    assert cited[0]["row"] == kept[0]["row"] and cited[0]["col"] != kept[0]["col"]
+    # 3. the model answered an unanswerable question, a check failed, nothing was sent
+    assert held["mark"] == "hold_ok" and held["result"]["status"] == "abstained" and failed(held) and _proposal(held)["op"] != "abstain"
+    assert EXAMPLES[held["id"]]["gold"]["status"] == "abstained"
+    # and what the verifier does not catch is one link away: an unanswerable question that was answered and passed
+    missed = _tour_run(tour["missed"])
+    assert missed["mark"] == "answered_unanswerable" and missed["result"]["status"] == "answered"
+
+
+def test_the_cell_that_would_give_the_same_answer_is_read_from_the_table():
+    """The first scene says that another row holds the same value, so choosing it gives the same answer. That row and its
+    name come from the table, not from a sentence typed into the page."""
+    docs = json.loads((ROOT / "console" / "data" / "recorded" / "documents.json").read_text(encoding="utf-8"))
+    scene = INDEX["tour"]["scenes"][0]
+    ex, run, twin = EXAMPLES[scene["id"]], _tour_run(scene), scene["twin"]
+    table = next(t for t in docs[ex["doc_id"]]["tables"] if t["id"] == ex["table_id"])
+    ev = run["result"]["evidence_cells"]
+    r, c = (int(x) for x in twin["cell"][1:].split("c"))
+    assert c == ev[0]["col"] and r not in {x["row"] for x in ev}
+    assert table["rows"][r][c] == twin["value"] == table["rows"][ev[0]["row"]][ev[0]["col"]]
+    assert twin["name"] in table["rows"][r] and twin["name"] not in ex["question"]
+
+
+def test_the_page_has_three_tabs_and_keeps_every_earlier_view():
+    html = (ROOT / "console" / "index.html").read_text(encoding="utf-8")
+    js = (ROOT / "console" / "app.js").read_text(encoding="utf-8")
+    import re
+    tabs = re.findall(r'<a href="#(\w+)" data-view="\w+" class="navlink[^"]*">([^<]+)</a>', html)
+    assert tabs == [("tour", "한눈에 보기"), ("workbench", "전체 문항 탐색"), ("research", "연구 결과")]
+    for view in ("view-tour", "view-workbench", "view-matrix", "view-research", "view-about"):      # nothing was removed, two views moved one step back
+        assert f'id="{view}"' in html, view
+    assert 'data-sub="matrix"' in html and 'href="#about"' in html
+    assert 'const VIEWS = ["tour", "workbench", "matrix", "research", "about"]' in js and "state.recorded.tour" in js and "renderTour" in js
+    # the walk-through keeps its own class names, so the question browser's marks on a table cannot be mistaken for it
+    assert "tv-ev" in js and "tv-cited" in js and 'class="tv-cell' in js and "is-evidence" not in js[js.index("async function renderTour"):js.index("async function renderMatrix")]
