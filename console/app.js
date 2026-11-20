@@ -700,6 +700,7 @@
         </section>
         <section class="tour-doc" aria-label="표">
           <div class="tablecap"><span><b>${esc(doc.title)}</b> <span class="muted">· ${table.rows.length}행 × ${table.header.length}열</span></span><span class="muted">${esc(s0.name || "")} · ${esc(s0.license || "")}${s0.url ? ` · <a href="${esc(s0.url)}" target="_blank" rel="noopener">출처</a>` : ""}</span></div>
+          <p class="tv-side" hidden></p>
           <div class="tablescroll"><table class="tt tourtable"><thead><tr><th class="rc">r\\c</th>${table.header.map((h, c) => `<th>${esc(h)} <span class="tv-col">c${c}</span></th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
           <p class="legend">${legend}</p>
         </section>
@@ -712,6 +713,8 @@
           <a class="tour-link" href="#about"><b>작동 방식</b><span>검색, 제안, 도구, 검증으로 이어지는 그래프와 신뢰 경계.</span></a>
         </div>
       </section>`;
+    tourFit();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(tourFit);
     // three conclusions from the research summary, in its own words (data/research.json)
     try {
       state.research = state.research || await fetchJSON("data/research.json", {}, 10000);
@@ -719,6 +722,18 @@
       if ($("#tourfind")) $("#tourfind").innerHTML = pick.map((h) => `<li>${esc(h.title)}</li>`).join("") + '<li class="tour-all"><a href="#research">그림과 함께 보기</a></li>';
     } catch (e) { if ($("#tourfind")) $("#tourfind").innerHTML = '<li><a href="#research">연구 결과 보기</a></li>'; }
   }
+
+  // On a narrow screen the table is wider than its box and scrolls sideways. Say so, and say when a marked cell is out of view.
+  // (Under 20px only a cell's padding is cut: nothing more to see.)
+  function tourFit() {
+    const sc = $("#tour .tablescroll"), hint = $("#tour .tv-side");
+    if (!sc || !hint) return;
+    const over = sc.scrollWidth - sc.clientWidth > 20, edge = sc.getBoundingClientRect().right;
+    const out = over && [...sc.querySelectorAll("td.tv-ev, td.tv-cited, td.tv-twin")].some((td) => td.getBoundingClientRect().right > edge + 1);
+    hint.hidden = !over;
+    hint.textContent = out ? "표시한 셀 가운데 일부가 오른쪽에 있습니다. 표를 옆으로 밀어 보세요." : "표를 옆으로 밀면 나머지 열이 보입니다.";
+  }
+  window.addEventListener("resize", tourFit);
 
   // ---------- per-question results: every question of a set against every stored planner ----------
   async function renderMatrix() {

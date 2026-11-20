@@ -27,6 +27,11 @@
    "detail": "cited ['r1c4'], evidence ['r1c1'], 'FM 103.1㎒'"
   },
   {
+   "name": "desktop: a table wider than the screen says so, and says when a marked cell is out of view",
+   "ok": true,
+   "detail": "overflow 0px, 0 marked cell(s) out of view, no hint"
+  },
+  {
    "name": "desktop: third scene: an answer to an unanswerable question that was not sent",
    "ok": true,
    "detail": "cited ['r4c0'], '정답 답 없음(보류가 맞음) ✓ 맞는 보류'"
@@ -164,7 +169,7 @@
   {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.7s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.6s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -250,6 +255,11 @@
    "name": "mobile: second scene: a right answer whose cited cell the verifier replaced",
    "ok": true,
    "detail": "cited ['r1c4'], evidence ['r1c1'], 'FM 103.1㎒'"
+  },
+  {
+   "name": "mobile: a table wider than the screen says so, and says when a marked cell is out of view",
+   "ok": true,
+   "detail": "overflow 231px, 1 marked cell(s) out of view, hint '표시한 셀 가운데 일부가 오른쪽에 있습니다. 표'"
   },
   {
    "name": "mobile: third scene: an answer to an unanswerable question that was not sent",
@@ -389,7 +399,7 @@
   {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.8s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 4.1s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",

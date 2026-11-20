@@ -155,6 +155,12 @@ def main() -> None:
                         check(f"{label}: second scene: a right answer whose cited cell the verifier replaced",
                               s2["answer"] == stored(1)["answer"] and s2["ev"] == ids(stored(1)["evidence_cells"]) and bool(s2["cited"]) and not set(s2["cited"]) & set(s2["ev"])
                               and "맞음" in s2["gold"], f"cited {s2['cited']}, evidence {s2['ev']}, {s2['answer']!r}")
+                        side = page.evaluate("""() => { const sc = document.querySelector('.tour-doc .tablescroll'), h = document.querySelector('.tv-side'), edge = sc.getBoundingClientRect().right;
+                            return { over: sc.scrollWidth - sc.clientWidth, shown: !h.hidden, text: h.textContent,
+                                     out: [...sc.querySelectorAll('td.tv-ev, td.tv-cited, td.tv-twin')].filter(td => td.getBoundingClientRect().right > edge + 1).length }; }""")
+                        check(f"{label}: a table wider than the screen says so, and says when a marked cell is out of view",
+                              side["shown"] == (side["over"] > 20) and ((("오른쪽" in side["text"]) == (side["out"] > 0)) if side["shown"] else side["out"] == 0),
+                              f"overflow {side['over']}px, {side['out']} marked cell(s) out of view, " + (f"hint {side['text'][:26]!r}" if side["shown"] else "no hint"))
                         page.screenshot(path=str(out / f"{tag}-{label}-00-tour-2.png"), full_page=mobile)
                         s3 = to_scene(2, "hold")
                         check(f"{label}: third scene: an answer to an unanswerable question that was not sent", s3["held"] and stored(2)["status"] == "abstained" and not s3["ev"]

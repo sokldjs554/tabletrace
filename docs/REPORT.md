@@ -455,7 +455,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
 | 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->605<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
-| 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->36<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->91<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->91<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
+| 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->36<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->93<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->93<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
 | 추론 최적화 | 정밀도별 별도 프로세스, 워밍업 1 + 측정 2라운드, 양자화 모델의 정확도 평가 | §8. 첫 실행은 메모리 비교가 무효이고 측정 중 테스트를 돌려 오염되어 **폐기하고 재실행** |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 EXAONE-4.0-1.2B에는 소유자가 쓴 보상 함수와 GRPO 손실로 두 번 적용했다. 첫 실험은 효과가 없었고, 학습 스크립트의 프롬프트 잘림과 배치 구성을 고친 두 번째 실험에서 인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->43.8<!-- /num -->%, verified EM <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->55.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->59.4<!-- /num -->%(대응 검정 p <!-- num:experiments/eval/paired_tests.json:grpo2_vs_rlstart2_ko_test.p_display --><0.001<!-- /num -->, 1회). 배치 구성만 첫 실험처럼 되돌린 대조군에서는 인용 셀 정확도가 오르지 않았다(<!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.5<!-- /num -->%, 두 실험의 변화의 차이 p <!-- num:experiments/eval/rl2_control_analysis.json:main_minus_control.first_pass.cited_gold_cell_lookup.p_display --><0.001<!-- /num -->)(1회). 본 실험은 시작 모델을 달리해 한 번 더 돌렸고 같은 결과였다(인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2c_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->46.7<!-- /num -->%, §22.8) | `training/rl_grpo.py`, §7, §18, 이슈 23–24, §21.1, §22.1, §22.7, §22.8 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->605<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->36<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->91<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->91<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->605<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->36<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->93<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->93<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -935,7 +935,7 @@ AI 도구가 2026-11-10에 arXiv와 ACL Anthology에서 PDF 전문을 받아 읽
 3. **연구 결과 탭 갱신.** §19.1~§19.3의 세 표, EXAONE 행, vLLM·SGLang 벤치, 멀티 GPU 실측을 산출물에서 다시 생성했다(`scripts/build_research.py`).
 4. **모바일 배치 오류 수정.** 좁은 화면에서 푸터가 문서 목록 위에 겹쳐 아래쪽 문서를 누를 수 없었다. 페이지 높이를 화면에 고정한 규칙 때문이었고 이전 판에도 있던 문제다(이슈 45). E2E에 겹침 검사를 넣었다.
 
-E2E는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->36<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->91<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->91<!-- /num --> 통과다. 데모의 EXAONE 답 가운데에는 틀린 답도 있다. 본문에 답이 있는 질문에 표의 셀을 답한 것(수작업 평가의 본문 범주 0/5와 같은 현상)이 검증을 통과해 나온다. 데모는 이것을 숨기지 않는다.
+E2E는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->36<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->93<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->93<!-- /num --> 통과다. 데모의 EXAONE 답 가운데에는 틀린 답도 있다. 본문에 답이 있는 질문에 표의 셀을 답한 것(수작업 평가의 본문 범주 0/5와 같은 현상)이 검증을 통과해 나온다. 데모는 이것을 숨기지 않는다.
 
 ### 19.7 표 입력에 열 번호를 넣는 형식 — 300개 학습에서 근거 오류 65% → 3% (답 정확도는 그대로)
 
@@ -2141,7 +2141,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 | 무엇 | 결과 |
 |---|---|
 | 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->605<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->1<!-- /num -->개 건너뜀 |
-| 화면 검사 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed:int -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total:int -->36<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed:int -->91<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total:int -->91<!-- /num -->. 데스크톱 1440×900과 모바일 390×844, 헤드리스 Chromium |
+| 화면 검사 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed:int -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total:int -->36<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed:int -->93<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total:int -->93<!-- /num -->. 데스크톱 1440×900과 모바일 390×844, 헤드리스 Chromium |
 | 연구 결과 탭의 길이 | 예전 판은 1440px 폭에서 13,379px였다(2026-11-16의 화면 사진에서 잰 값). 지금은 화면 검사가 6,000px보다 짧은지 본다 |
 | 배포 | 실행 환경을 포함한 Pages 배포가 성공했다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/43999542432), 커밋 `edb5826`) |
 
@@ -2600,10 +2600,11 @@ AI 도구가 이 <!-- num:experiments/eval/chem_review_analysis.json:counts.both
 
 같은 값을 가진 다른 행도 표에서 찾는다(질문에 이름이 나오지 않는 행 가운데 근거 셀과 같은 열의 값이 같은 것). 이 규칙들과 화면의 구조는 `tests/test_recorded_demo.py`가 검사한다.
 
-**확인.** 화면 검사는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->36<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->91<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->91<!-- /num --> 통과다. 정적 검사에 더한 것은 다음과 같다. 첫 화면이 누르지 않아도 제안, 도구, 검증, 답과 정답을 보여 주는지. 세 장면의 답과 셀이 기록된 실행과 같은지. 같은 답을 내는 다른 셀이 표시되는지. 탭이 셋인지. 결론 세 문장이 연구 결과의 문장과 글자까지 같은지. 장면에서 그 문항의 전체 기록으로 가는지. README 맨 위의 움직이는 그림도 새 첫 화면부터 다시 찍었다.
+**확인.** 화면 검사는 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->36<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->36<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->93<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->93<!-- /num --> 통과다. 정적 검사에 더한 것은 다음과 같다. 첫 화면이 누르지 않아도 제안, 도구, 검증, 답과 정답을 보여 주는지. 세 장면의 답과 셀이 기록된 실행과 같은지. 같은 답을 내는 다른 셀이 표시되는지. 탭이 셋인지. 결론 세 문장이 연구 결과의 문장과 글자까지 같은지. 장면에서 그 문항의 전체 기록으로 가는지. 표가 화면보다 넓을 때 그렇다고 알리는지, 표시한 셀이 화면 밖에 있으면 그것도 알리는지. README 맨 위의 움직이는 그림도 새 첫 화면부터 다시 찍었다.
 
 **한계.**
 
 1. 세 장면은 한국어 표의 문항 셋이다. 화학 문서는 전체 문항 탐색에서 본다.
 2. 첫 화면은 검증기가 잘 한 경우 둘과 걸러 낸 경우 하나를 보여 준다. 놓친 경우는 링크 한 번 뒤에 있다. 검증을 거쳐도 틀린 답이 남는다는 수치(§19)는 장면 아래의 결론 문장에 있다.
-3. 검사는 헤드리스 Chromium 하나로 했다(데스크톱 1440×900, 모바일 390×844). 배포된 페이지를 사람이 브라우저에서 확인한 것은 아니다.
+3. 휴대폰 너비에서는 둘째와 셋째 장면의 표(6열)가 화면보다 넓다. 모델이 가리킨 셀이 화면 밖에 있을 수 있어 표 위에 "옆으로 밀어 보세요"라는 한 줄을 띄운다. 표를 줄이거나 열을 숨기지는 않았다.
+4. 검사는 헤드리스 Chromium 하나로 했다(데스크톱 1440×900, 모바일 390×844). 배포된 페이지를 사람이 브라우저에서 확인한 것은 아니다.

@@ -343,7 +343,7 @@ circle.vl-s1 { fill: var(--viz-accent); stroke: #fff; stroke-width: 2; } circle.
 .tour-tab:hover { border-color: var(--accent); }
 .tour-tab.is-active { border-color: var(--accent); background: var(--accent); color: #fff; }
 .tour-tab.is-active b { background: #fff; color: var(--accent); }
-.tour-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 14px; align-items: start; }
+.tour-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 5fr); gap: 14px; align-items: start; }
 .tour-card, .tour-doc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
 .tour-card { padding: 14px 16px; }
 .tour-q { margin: 0 0 14px; font-size: 17px; font-weight: 700; line-height: 1.45; }
@@ -377,10 +377,11 @@ circle.vl-s1 { fill: var(--viz-accent); stroke: #fff; stroke-width: 2; } circle.
 .tour-doc .tablecap { border-radius: 8px 8px 0 0; flex-wrap: wrap; }
 .tour-doc .tablescroll { padding: 10px 8px 2px 0; }           /* room for the tags that sit on a cell's corner */
 .tour-doc .legend { margin: 0; padding: 8px 10px; border-top: 1px solid var(--line); }
+.tv-side { margin: 0; padding: 6px 10px; font-size: 12px; color: var(--muted); background: #f7f8fa; border-bottom: 1px solid var(--line); }
 table.tourtable th { position: static; }
-table.tourtable td.tv-long { white-space: normal; word-break: keep-all; min-width: 150px; }      /* a long cell wraps between words, so the table stays in view */
+table.tourtable td.tv-long { white-space: normal; word-break: keep-all; min-width: 132px; }      /* a long cell wraps between words, so the table stays in view */
 table.tourtable td.tv-cell { position: relative; }
-table.tourtable td.tv-cited, table.tourtable td.tv-twin { padding-right: 52px; }
+table.tourtable td.tv-twin { padding-right: 52px; }
 table.tourtable td.tv-ev { background: var(--evidence); outline: 2px solid var(--evidence-line); outline-offset: -2px; }
 table.tourtable td.tv-cited { background: var(--err-soft); outline: 2px dashed var(--err); outline-offset: -2px; }
 table.tourtable td.tv-twin { outline: 2px dashed #7a8794; outline-offset: -2px; }
@@ -389,10 +390,10 @@ table.tourtable td.tv-twin { outline: 2px dashed #7a8794; outline-offset: -2px; 
 .tv-tag { padding: 0 4px; border-radius: 4px; }
 .tv-tag-cited { background: var(--err); }
 .tv-tag-twin { background: #7a8794; }
-table.tourtable td .tv-n { position: absolute; top: -8px; right: -6px; z-index: 1; }
-table.tourtable td .tv-tag { position: absolute; top: 50%; right: 5px; margin-top: -8px; }       /* a word tag sits inside its cell */
+table.tourtable td .tv-n, table.tourtable td .tv-tag-cited { position: absolute; top: -8px; right: -6px; z-index: 1; }
+table.tourtable td .tv-tag-twin { position: absolute; top: 50%; right: 5px; margin-top: -8px; }       /* sits inside its cell: the cells above and below carry numbers on their corners */
 .tv-col { color: #9aa4ae; font-family: var(--mono); font-size: 11px; font-weight: 400; margin-left: 2px; }
-.tour-more { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 14px; margin-top: 20px; align-items: start; }
+.tour-more { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 5fr); gap: 14px; margin-top: 20px; align-items: start; }
 .tour-find h2 { font-size: 15px; margin-bottom: 6px; }
 .tour-find ul { margin: 0; padding-left: 18px; }
 .tour-find li { margin: 4px 0; }
