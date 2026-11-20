@@ -18,7 +18,7 @@
 | 2 | `agent/program.py` | 85 | `tests/test_program_verifier.py`(파서 부분) | 프로그램 문법 `op ; cells ; answer` 파서 |
 | 3 | `tools/cells.py` | 62 | 간접(`pytest -q` 전체) + `rewrite_parity.py cells` | 셀 읽기·찾기, 질문과 행·열의 겹침 점수 |
 | 4 | `verify/verifier.py` | 289 | `tests/test_program_verifier.py` | 프로젝트의 핵심. 답·근거·계산 검증과 보류 결정, 개체 일치 검사 |
-| 5 | `agent/heuristic.py` | 113 | `tests/test_agent_heuristic.py`(50개) + `rewrite_parity.py heuristic` | 어휘 겹침 기준선. 보고하는 기준선 수치가 모두 여기서 나온다. **준비됨(2026-11-19)**: 명세 `10_agent_heuristic.md` |
+| 5 | `agent/heuristic.py` | 113 | `tests/test_agent_heuristic.py`(50개) + `rewrite_parity.py heuristic` | 어휘 겹침 기준선. 보고하는 기준선 수치가 모두 여기서 나온다. **완료(2026-11-20, PR #11)**: 명세 `10_agent_heuristic.md` |
 | 6 | `retrieval/tokenize.py`, `bm25.py`, `index.py` | 66 + 50 + 66 | `tests/test_retrieval.py` | 검색 |
 | 7 | `eval/metrics.py` | 71 | `tests/test_eval_metrics.py`(59개) + `rewrite_parity.py metrics` | 지표 계산. 모든 보고 수치가 여기서 나온다. **완료(2026-11-19, PR #8)**: 명세 `08_eval_metrics.md` |
 | 8 | `tools/registry.py`, `agent/graph.py` | 94 + 177 | `tests/test_api.py` | 도구 등록과 LangGraph 그래프 |
@@ -33,6 +33,8 @@
 **T (학습 과제, 완료: 2026-11-12, PR #6)**: 학습 코드의 핵심 세 조각을 새 파일로 직접 쓴다. 강화학습 보상(`training/evidence_reward.py`), GRPO 이점·손실(`training/grpo.py`), 라벨 가리기·학습률 일정·학습 루프(`training/lm_loop.py`). 합쳐서 150줄 안팎이고 참고할 기존 파일이 없다. 명세는 `docs/rewrite/06_training_code.md`, 테스트는 `tests/test_owner_training_code.py`(35개, 파일이 생기기 전에는 건너뜀). 이 함수들을 불러 쓰는 스크립트(`scripts/train/exaone_grpo.py`, `scripts/train/exaone_lora_sft.py --loop owner`)는 이미 연결되어 있다. 5~9단계와 순서가 무관하다.
 
 **E (평가 문항 과제, 완료: 2026-11-16, PR #7)**: 코드가 아니라 평가 문항이다. AI 도구가 쓴 한국어 수작업 30문항을 본인이 검수하고(`data/ko/custom_eval_review.jsonl`), 시험 표로 새 문항을 직접 쓴다(`data/ko/owner_eval.jsonl`). 안내는 `docs/rewrite/07_owner_eval_questions.md`, 도구는 `scripts/owner_eval_tool.py`(표를 보여 주고 파일을 검사할 뿐 질문은 쓰지 않는다), 검사는 `tests/test_owner_eval.py`와 `scripts/check_data.py`다. 끝나면 "평가 문항을 직접 썼다"가 그 파일에 한해 사실이 된다.
+
+**5단계(기준선)는 끝났다(2026-11-20, PR #11).** 6단계(검색)는 아직 하지 않았다.
 
 **7단계(지표)는 끝났다(2026-11-19, PR #8).** 명세는 `docs/rewrite/08_eval_metrics.md`, 테스트는 `tests/test_eval_metrics.py`(59개), 동작 비교는 `python scripts/rewrite_parity.py metrics`(저장된 평가 276건의 지표, 답 쌍과 셀 쌍 6만 2천여 개, 차이 0)다. 5·6단계는 순서를 건너뛰어 아직 하지 않았다.
 
