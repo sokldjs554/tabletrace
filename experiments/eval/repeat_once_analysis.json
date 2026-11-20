@@ -1,0 +1,251 @@
+{
+ "written_down_before_the_runs": "docs/REPORT.md §31 and this file, before section P ran",
+ "P1_korean_only": {
+  "run": true,
+  "1a_unanswerable_repeat_vs_new_korean_only": {
+   "only_candidate": 7,
+   "only_reference": 1,
+   "p_two_sided": 0.0703125,
+   "p_display": "0.070",
+   "n": 31,
+   "holds": false
+  },
+  "1b_papers_new_korean_only_vs_untuned": {
+   "only_candidate": 30,
+   "only_reference": 3,
+   "p_two_sided": 1.4011748135089874e-06,
+   "p_display": "<0.001",
+   "holds": true
+  },
+  "scores": {
+   "chem_custom": {
+    "new_korean_only": {
+     "n": 32,
+     "correct": 19,
+     "rate": 0.5938,
+     "ci95": {
+      "lo": 0.4226,
+      "hi": 0.7448
+     }
+    },
+    "first_korean_only": {
+     "n": 32,
+     "correct": 19,
+     "rate": 0.5938,
+     "ci95": {
+      "lo": 0.4226,
+      "hi": 0.7448
+     }
+    }
+   },
+   "chem_syndev": {
+    "new_korean_only": {
+     "n": 80,
+     "correct": 68,
+     "rate": 0.85,
+     "ci95": {
+      "lo": 0.7559,
+      "hi": 0.9121
+     }
+    },
+    "first_korean_only": {
+     "n": 80,
+     "correct": 66,
+     "rate": 0.825,
+     "ci95": {
+      "lo": 0.7274,
+      "hi": 0.8928
+     }
+    }
+   },
+   "chem_papers": {
+    "new_korean_only": {
+     "n": 62,
+     "correct": 42,
+     "rate": 0.6774,
+     "ci95": {
+      "lo": 0.5537,
+      "hi": 0.7805
+     }
+    },
+    "first_korean_only": {
+     "n": 62,
+     "correct": 42,
+     "rate": 0.6774,
+     "ci95": {
+      "lo": 0.5537,
+      "hi": 0.7805
+     }
+    }
+   },
+   "ko_test": {
+    "new_korean_only": {
+     "n": 699,
+     "correct": 610,
+     "rate": 0.8727,
+     "ci95": {
+      "lo": 0.8459,
+      "hi": 0.8954
+     }
+    },
+    "first_korean_only": {
+     "n": 699,
+     "correct": 604,
+     "rate": 0.8641,
+     "ci95": {
+      "lo": 0.8367,
+      "hi": 0.8875
+     }
+    }
+   }
+  },
+  "papers_new_vs_first_korean_only": {
+   "only_candidate": 4,
+   "only_reference": 4,
+   "p_two_sided": 1.0,
+   "p_display": "1.000"
+  },
+  "unanswerable_first_training_vs_new_korean_only": {
+   "only_candidate": 9,
+   "only_reference": 0,
+   "p_two_sided": 0.00390625,
+   "p_display": "0.004"
+  },
+  "ko_test_new_vs_first_korean_only": {
+   "only_candidate": 27,
+   "only_reference": 21,
+   "p_two_sided": 0.4708790136217118,
+   "p_display": "0.471"
+  },
+  "ko_test_earlier_full_data_trainings": {
+   "n": 8,
+   "lowest": 0.8426,
+   "highest": 0.8712,
+   "inside": false,
+   "above": true
+  },
+  "training": {
+   "examples": 3587,
+   "steps": 224,
+   "minutes": 32.7,
+   "gpu": "Tesla T4",
+   "targets_cut_short": 0,
+   "args_that_differ_from_the_first_training": [
+    "out"
+   ],
+   "notebook_commit": "6aabfce"
+  },
+  "added_after_the_run": {
+   "withheld_right": {
+    "kochem2": 28,
+    "kochem3": 25,
+    "koonly": 15,
+    "koonly2": 19
+   },
+   "unanswerable_n": 31,
+   "answerable_n": 143,
+   "pairs": {
+    "kochem2_vs_koonly": {
+     "unanswerable": {
+      "only_candidate": 13,
+      "only_reference": 0,
+      "p_two_sided": 0.000244140625,
+      "p_display": "<0.001"
+     },
+     "answerable": {
+      "only_candidate": 8,
+      "only_reference": 5,
+      "p_two_sided": 0.5810546875,
+      "p_display": "0.581"
+     },
+     "unanswerable_without_set_aside": {
+      "only_candidate": 12,
+      "only_reference": 0,
+      "p_two_sided": 0.00048828125,
+      "p_display": "<0.001"
+     }
+    },
+    "kochem2_vs_koonly2": {
+     "unanswerable": {
+      "only_candidate": 9,
+      "only_reference": 0,
+      "p_two_sided": 0.00390625,
+      "p_display": "0.004"
+     },
+     "answerable": {
+      "only_candidate": 9,
+      "only_reference": 4,
+      "p_two_sided": 0.266845703125,
+      "p_display": "0.267"
+     },
+     "unanswerable_without_set_aside": {
+      "only_candidate": 8,
+      "only_reference": 0,
+      "p_two_sided": 0.0078125,
+      "p_display": "0.008"
+     }
+    },
+    "kochem3_vs_koonly": {
+     "unanswerable": {
+      "only_candidate": 10,
+      "only_reference": 0,
+      "p_two_sided": 0.001953125,
+      "p_display": "0.002"
+     },
+     "answerable": {
+      "only_candidate": 8,
+      "only_reference": 3,
+      "p_two_sided": 0.2265625,
+      "p_display": "0.227"
+     },
+     "unanswerable_without_set_aside": {
+      "only_candidate": 9,
+      "only_reference": 0,
+      "p_two_sided": 0.00390625,
+      "p_display": "0.004"
+     }
+    },
+    "kochem3_vs_koonly2": {
+     "unanswerable": {
+      "only_candidate": 7,
+      "only_reference": 1,
+      "p_two_sided": 0.0703125,
+      "p_display": "0.070"
+     },
+     "answerable": {
+      "only_candidate": 12,
+      "only_reference": 5,
+      "p_two_sided": 0.143463134765625,
+      "p_display": "0.143"
+     },
+     "unanswerable_without_set_aside": {
+      "only_candidate": 6,
+      "only_reference": 1,
+      "p_two_sided": 0.125,
+      "p_display": "0.125"
+     }
+    }
+   },
+   "unanswerable_n_without_set_aside": 30,
+   "korean_only_runs_on_unanswerable": {
+    "only_candidate": 5,
+    "only_reference": 1,
+    "p_two_sided": 0.21875,
+    "p_display": "0.219"
+   },
+   "chemistry_runs_on_unanswerable": {
+    "only_candidate": 0,
+    "only_reference": 3,
+    "p_two_sided": 0.25,
+    "p_display": "0.250"
+   }
+  }
+ },
+ "P2_rl_from_full_data": {
+  "run": false,
+  "start_model_evaluated": false
+ },
+ "P3_owner_loop": {
+  "run": false
+ }
+}

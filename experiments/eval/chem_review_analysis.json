@@ -252,6 +252,48 @@
    },
    "rate_change": -0.0213
   },
+  "exaone_koonly2_vllm_chem_custom": {
+   "all": {
+    "n": 32,
+    "correct": 19,
+    "rate": 0.5938,
+    "ci95": {
+     "lo": 0.4226,
+     "hi": 0.7448
+    }
+   },
+   "without_set_aside": {
+    "n": 23,
+    "correct": 16,
+    "rate": 0.6957,
+    "ci95": {
+     "lo": 0.4913,
+     "hi": 0.844
+    }
+   },
+   "rate_change": 0.1019
+  },
+  "exaone_koonly2_vllm_chem_papers": {
+   "all": {
+    "n": 62,
+    "correct": 42,
+    "rate": 0.6774,
+    "ci95": {
+     "lo": 0.5537,
+     "hi": 0.7805
+    }
+   },
+   "without_set_aside": {
+    "n": 57,
+    "correct": 39,
+    "rate": 0.6842,
+    "ci95": {
+     "lo": 0.5552,
+     "hi": 0.79
+    }
+   },
+   "rate_change": 0.0068
+  },
   "exaone_koonly_vllm_chem_custom": {
    "all": {
     "n": 32,
@@ -755,7 +797,7 @@
    "same_conclusion": true
   }
  },
- "n_runs": 24,
+ "n_runs": 26,
  "paper_runs_whose_order_reverses": 1,
  "every_conclusion_same": true
 }

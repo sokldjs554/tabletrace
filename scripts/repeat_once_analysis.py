@@ -60,7 +60,49 @@ def p1() -> dict:
             "scores": {s: {"new_korean_only": cr.right(rl2.load(f"{new}_{s}")), "first_korean_only": cr.right(rl2.load(f"exaone_koonly_vllm_{s}"))}
                        for s in (*cr.CHEM_SETS, "ko_test")},
             "papers_new_vs_first_korean_only": cr.paired(rl2.load("exaone_koonly_vllm_chem_papers"), rl2.load(f"{new}_chem_papers")),
-            "unanswerable_first_training_vs_new_korean_only": cr.paired(unanswerable(new), unanswerable("exaone_kochem2_vllm"))}
+            "unanswerable_first_training_vs_new_korean_only": cr.paired(unanswerable(new), unanswerable("exaone_kochem2_vllm")),
+            "ko_test_new_vs_first_korean_only": cr.paired(rl2.load("exaone_koonly_vllm_ko_test"), rl2.load(f"{new}_ko_test")),
+            "ko_test_earlier_full_data_trainings": earlier_range(cr.right(rl2.load(f"{new}_ko_test"))["rate"]),
+            "training": training("exaone_lora_koonly2", "exaone_lora_koonly"),
+            "added_after_the_run": four_pairs(new)}
+
+
+def earlier_range(rate: float) -> dict:
+    """Where a new Korean test score sits among the full-data Korean-only trainings before section P."""
+    rates = [cr.right(rl2.load(r))["rate"] for r in KO_ONLY_TRAININGS]
+    return {"n": len(rates), "lowest": min(rates), "highest": max(rates), "inside": min(rates) <= rate <= max(rates), "above": rate > max(rates)}
+
+
+def training(new: str, first: str) -> dict:
+    """The training record of the repeat, and whether its command differs from the first training's in anything but the output path."""
+    a, b = (json.loads((ROOT / "experiments" / d / "train_info.json").read_text(encoding="utf-8")) for d in (first, new))
+    differ = sorted(k for k in set(a["args"]) | set(b["args"]) if a["args"].get(k) != b["args"].get(k))
+    return {"examples": b["n_examples"], "steps": b["steps"], "minutes": round(b["wall_s"] / 60, 1), "gpu": b["gpu"],
+            "targets_cut_short": b["targets_cut_short"], "args_that_differ_from_the_first_training": differ,
+            "notebook_commit": json.loads((ROOT / "experiments" / "run_info_2_koonly2.json").read_text(encoding="utf-8"))["commit"]}
+
+
+def four_pairs(new: str) -> dict:
+    """Not written down before the run: every Korean-and-chemistry training against every Korean-only training, on the
+    31 unanswerable and the 143 answerable chemistry questions, and how many of the 31 each model withheld rightly. The
+    unanswerable comparison is also given without the questions the owner's review set aside (§32), as §32 did for 1a."""
+    models = {"kochem2": "exaone_kochem2_vllm", "kochem3": "exaone_kochem3_vllm", "koonly": "exaone_koonly_vllm", "koonly2": new}
+
+    def rows(model: str, keep) -> dict:
+        return {f"{s}/{q}": r for s in cr.CHEM_SETS for q, r in rl2.load(f"{model}_{s}").items() if keep(cr.kind(r) == "unanswerable")}
+    un = {k: rows(m, bool) for k, m in models.items()}
+    ans = {k: rows(m, lambda u: not u) for k, m in models.items()}
+    review = ROOT / "experiments" / "eval" / "chem_review_analysis.json"
+    set_aside = set(json.loads(review.read_text(encoding="utf-8"))["set_aside"])     # the owner's review of 2026-11-19 (§32)
+    kept = {k: {q: r for q, r in v.items() if q.split("/")[-1] not in set_aside} for k, v in un.items()}
+    return {"withheld_right": {k: sum(bool(r["verified_correct"]) for r in v.values()) for k, v in un.items()},
+            "unanswerable_n": len(un["koonly"]), "answerable_n": len(ans["koonly"]),
+            "pairs": {f"{c}_vs_{k}": {"unanswerable": cr.paired(un[k], un[c]), "answerable": cr.paired(ans[k], ans[c]),
+                                       "unanswerable_without_set_aside": cr.paired(kept[k], kept[c])}
+                      for c in ("kochem2", "kochem3") for k in ("koonly", "koonly2")},
+            "unanswerable_n_without_set_aside": len(kept["koonly"]),
+            "korean_only_runs_on_unanswerable": cr.paired(un["koonly"], un["koonly2"]),
+            "chemistry_runs_on_unanswerable": cr.paired(un["kochem2"], un["kochem3"])}
 
 
 def p2() -> dict:

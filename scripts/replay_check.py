@@ -14,6 +14,7 @@ repository. If the outcome of any question differs, the stored numbers do not be
   python scripts/replay_check.py --session chem --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B       # -> experiments/eval/replay_check_chem.json (section N, run on 2026-11-17)
   python scripts/replay_check.py --session share --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B      # -> experiments/eval/replay_check_share.json (section O, run on 2026-11-17)
   python scripts/replay_check.py --session chemrepeat --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B # -> experiments/eval/replay_check_chemrepeat.json (section O's repeat, run on 2026-11-18)
+  python scripts/replay_check.py --session koonly2 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B    # -> experiments/eval/replay_check_koonly2.json (section P, the Korean-only repeat, run on 2026-11-20)
 """
 from __future__ import annotations
 
@@ -62,6 +63,10 @@ SESSIONS = {                   # all were evaluated with an input budget of 672 
     "chemrepeat": [            # section O with RUN_KOCHEM_REPEAT: section N's training once more, in a session of its own (2026-11-18, Colab)
         "exaone_kochem3_vllm_chem_custom", "exaone_kochem3_vllm_chem_syndev", "exaone_kochem3_vllm_chem_papers",
         "exaone_kochem3_vllm_ko_test", "exaone_kochem3_vllm_ko_custom", "exaone_kochem3_vllm_ko_owner",
+    ],
+    "koonly2": [               # section P with P_KOONLY: section O's Korean-only training once more (2026-11-20, Colab)
+        "exaone_koonly2_vllm_chem_custom", "exaone_koonly2_vllm_chem_syndev", "exaone_koonly2_vllm_chem_papers",
+        "exaone_koonly2_vllm_ko_test", "exaone_koonly2_vllm_ko_custom", "exaone_koonly2_vllm_ko_owner",
     ],
 }
 FIELDS = ("pred_status", "pred_answer", "pred_cells", "verified_correct", "evidence_repaired")

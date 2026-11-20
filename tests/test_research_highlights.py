@@ -31,9 +31,9 @@ def test_every_highlight_has_a_chart_form_a_caption_and_one_experiment_record_to
 def test_the_headline_is_the_lowest_of_the_full_data_trainings():
     """The bar the first chart accents is the first, lowest training; the other trainings are given as a range."""
     row = next(r for r in DATA["highlights"][0]["rows"] if r.get("emphasis"))
-    assert row["value"] == _em("exaone_full_vllm_ko_test") and len(row["ticks"]) == 7 and min(row["ticks"]) >= row["value"]      # eight full-data trainings, the eighth from section O
-    assert f"{100 * row['value']:.1f}%" in DATA["highlights"][0]["title"]
-    assert sorted(row["ticks"])[-1] == _em("exaone_full_vllm_ko_test_run2")
+    assert row["value"] == _em("exaone_full_vllm_ko_test") and len(row["ticks"]) == 8 and min(row["ticks"]) >= row["value"]      # nine full-data trainings, the ninth from section P
+    assert f"{100 * row['value']:.1f}%" in DATA["highlights"][0]["title"] and "같은 설정으로 9번 학습했다" in DATA["highlights"][0]["caption"]
+    assert sorted(row["ticks"])[-1] == _em("exaone_koonly2_vllm_ko_test") > _em("exaone_full_vllm_ko_test_run2")       # the repeat of 2026-11-20 is the highest
 
 
 def test_the_chemistry_conclusion_sets_the_korean_only_model_beside_the_one_that_saw_chemistry():
@@ -48,9 +48,16 @@ def test_the_chemistry_conclusion_sets_the_korean_only_model_beside_the_one_that
     assert rows["EXAONE 1.2B, 튜닝 없음 (화학 예시 6개)"] == _em("ref_1p2b_chem_papers")
     assert rows["휴리스틱 기준선 (모델 아님)"] == _em("heuristic_chem_papers") and rows["mT5-small 최종"] == _em("rl_v3_chem_papers") and len(rows) == 5
     assert h["title"].index(f"{100 * ko:.1f}%") < h["title"].index(f"{100 * both:.1f}%") and "한국어 표만으로" in h["title"]
-    for needle in ("화학 문항을 한 번도 보지 않았다", "차이가 유의하지 않다", "답 없는 질문에서 갈린다", "결과를 본 뒤에 찾은 것이라", "미리 적어 두고",
-                   "한국어 전용 모델은 한 번만 학습했고", "소유자가 검수했다", "결론은 모두 같다"):
+    for needle in ("화학 문항을 한 번도 보지 않았다", "차이가 유의하지 않다", "차이는 답 없는 질문에서 났다", "결과를 본 뒤에 찾은 것이라", "미리 적어 두고",
+                   "두 학습을 한 번씩 더 했다", "미리 정한 기준(p < 0.05)에 못 미쳤다", "보류라고 단정하지 않는다", "소유자가 검수했다", "결론은 모두 같다"):
         assert needle in h["caption"], needle
+    assert "갈린다" not in h["caption"] and "한 번만 학습" not in h["caption"]        # the claims the repeat of 2026-11-20 did not keep
+    # the Korean-only training once more (2026-11-20): the check written down before it that did not hold is quoted, with its numbers
+    again = json.loads((ROOT / "experiments/eval/repeat_once_analysis.json").read_text(encoding="utf-8"))["P1_korean_only"]
+    a1 = again["1a_unanswerable_repeat_vs_new_korean_only"]
+    assert not a1["holds"] and f"{a1['only_candidate']} 대 {a1['only_reference']}, p {a1['p_display']}" in h["caption"]
+    ko_bar = next(r for r in h["rows"] if r["label"] == "EXAONE 1.2B LoRA, 한국어만 튜닝")
+    assert ko_bar["ticks"] == [_em("exaone_koonly2_vllm_chem_papers")]
     # the repeat of the Korean-and-chemistry training is drawn as a tick on that bar, and the check written down before it is quoted
     repeat = json.loads((ROOT / "experiments/eval/chem_repeat_analysis.json").read_text(encoding="utf-8"))
     bar = next(r for r in h["rows"] if r["label"] == "EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝")

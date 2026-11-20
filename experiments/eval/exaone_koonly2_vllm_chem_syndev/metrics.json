@@ -1,0 +1,66 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "engine:planner",
+  "data": [
+   "data/chem/synthetic_dev.jsonl"
+  ],
+  "corpus": [
+   "data/chem/documents.jsonl"
+  ],
+  "n": 80,
+  "wall_s": 9.5,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "max_in": 672,
+  "tokenizer": "/content/tabletrace/experiments/exaone_lora_koonly2/merged",
+  "evidence_repair": true,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-20T03:41:39",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 80,
+  "n_answerable": 64,
+  "n_gold_abstain": 16,
+  "n_calc": 24,
+  "n_lookup": 40,
+  "verified_em": 0.85,
+  "answer_em_answerable": 0.8594,
+  "raw_answer_em_answerable": 0.6719,
+  "evidence_cells_exact": 0.8281,
+  "evidence_cells_exact_raw": 0.8281,
+  "evidence_repaired_rate": 0.0156,
+  "evidence_cells_overlap": 0.8281,
+  "op_acc": 0.9375,
+  "lookup_em": 0.925,
+  "calc_em": 0.75,
+  "calc_result_correct": 0.75,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 0.8125,
+  "false_abstain_rate": 0.0469,
+  "abstain_precision": 0.8125,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.2969,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.85,
+  "mean_ms_per_example": 1807.3,
+  "by_source": {
+   "synthetic": {
+    "n": 80,
+    "verified_em": 0.85
+   }
+  },
+  "gold_subject_fail_rate": 0.0,
+  "entity_check": false
+ }
+}

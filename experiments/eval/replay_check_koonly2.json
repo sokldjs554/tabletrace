@@ -1,0 +1,105 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "max_in": 672,
+ "runs": {
+  "exaone_koonly2_vllm_chem_custom": {
+   "first_pass": {
+    "questions": 32,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5938,
+    "verified_em_replayed": 0.5938
+   },
+   "subject_check": {
+    "questions": 32,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.5938,
+    "verified_em_replayed": 0.5938
+   }
+  },
+  "exaone_koonly2_vllm_chem_syndev": {
+   "first_pass": {
+    "questions": 80,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.85,
+    "verified_em_replayed": 0.85
+   },
+   "subject_check": {
+    "questions": 80,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.875,
+    "verified_em_replayed": 0.875
+   }
+  },
+  "exaone_koonly2_vllm_chem_papers": {
+   "first_pass": {
+    "questions": 62,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6774,
+    "verified_em_replayed": 0.6774
+   },
+   "subject_check": {
+    "questions": 62,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7258,
+    "verified_em_replayed": 0.7258
+   }
+  },
+  "exaone_koonly2_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8727,
+    "verified_em_replayed": 0.8727
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8426,
+    "verified_em_replayed": 0.8426
+   }
+  },
+  "exaone_koonly2_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6667,
+    "verified_em_replayed": 0.6667
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6667,
+    "verified_em_replayed": 0.6667
+   }
+  },
+  "exaone_koonly2_vllm_ko_owner": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7333,
+    "verified_em_replayed": 0.7333
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.7,
+    "verified_em_replayed": 0.7
+   }
+  }
+ },
+ "replays": 12,
+ "questions_checked": 1866,
+ "questions_that_differ": 0
+}

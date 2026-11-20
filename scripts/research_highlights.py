@@ -34,12 +34,12 @@ def p1(x: float) -> str:
 
 
 def accuracy() -> dict:
-    """Korean test: the planners side by side. The full-data model was trained eight times (the eighth is section O's
-    Korean-only model, the same command as exaone_full4); the bar is the first (lowest) training, which is the number
-    the documents lead with, and the other seven are drawn as ticks."""
+    """Korean test: the planners side by side. The full-data model was trained nine times (the eighth is section O's
+    Korean-only model, the same command as exaone_full4, and the ninth its repeat in section P); the bar is the first
+    (lowest) training, which is the number the documents lead with, and the other eight are drawn as ticks."""
     full = [_em("exaone_full_vllm_ko_test"), _em("exaone_full_vllm_ko_test_run2"), _em("exaone_full2old_vllm_ko_test"),
             _em("exaone_full2_vllm_ko_test"), _em("exaone_full3_vllm_ko_test"), _em("exaone_full4_vllm_ko_test"),
-            _em("exaone_ownloop_vllm_ko_test"), _em("exaone_koonly_vllm_ko_test")]
+            _em("exaone_ownloop_vllm_ko_test"), _em("exaone_koonly_vllm_ko_test"), _em("exaone_koonly2_vllm_ko_test")]
     small = [_em("exaone_vllm_ko_test_run1"), _em("exaone_vllm_ko_test_run2"), _em("exaone_vllm_ko_test")]
     b32 = _load("experiments/gpu2_2026-11-14/recovered.json")["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"]["verified_em"]
     rows = [
@@ -138,16 +138,21 @@ def chem() -> dict:
     chemistry (notebook 2, sections N and O; both runs kept per-question predictions)."""
     a, sh, rp = _load("experiments/eval/chem_rerun_analysis.json"), _load("experiments/eval/chem_share_analysis.json"), _load("experiments/eval/chem_repeat_analysis.json")
     p, q, before = a["chemistry"]["chem_papers"], sh["chemistry"]["chem_papers"], a["earlier_run_without_predictions"]["chem_papers"]
+    again = _load("experiments/eval/repeat_once_analysis.json")["P1_korean_only"]       # the Korean-only training once more (2026-11-20)
     both, plain, ko = p["tuned"], p["untuned_six_examples"], q["korean_only"]
     kinds = sh["chemistry_three_sets_by_kind"]
     apart, hold, rest = q["with_chemistry_vs_korean_only"], kinds["with_chemistry_vs_korean_only"]["unanswerable"], kinds["with_chemistry_vs_korean_only_on_answerable_questions"]
     rows = [{"label": "휴리스틱 기준선 (모델 아님)", "value": p["heuristic"]["rate"]},
             {"label": "mT5-small 최종", "value": p["mt5_small_final"]["rate"]},
             {"label": "EXAONE 1.2B, 튜닝 없음 (화학 예시 6개)", "value": plain["rate"]},
-            {"label": "EXAONE 1.2B LoRA, 한국어만 튜닝", "value": ko["rate"], "emphasis": True},
+            {"label": "EXAONE 1.2B LoRA, 한국어만 튜닝", "value": ko["rate"], "emphasis": True,
+             "ticks": [again["scores"]["chem_papers"]["new_korean_only"]["rate"]]},
             {"label": "EXAONE 1.2B LoRA, 한국어와 화학을 함께 튜닝", "value": both["rate"], "emphasis": True,
              "ticks": [rp["chemistry"]["chem_papers"]["repeat"]["rate"]]}]
     rev = _load("experiments/eval/chem_review_analysis.json")      # the owner's review of the questions (2026-11-19)
+    a1, four = again["1a_unanswerable_repeat_vs_new_korean_only"], again["added_after_the_run"]["pairs"]
+    assert not a1["holds"] and a1["only_candidate"] > a1["only_reference"] and again["1b_papers_new_korean_only_vs_untuned"]["holds"]
+    assert all(x["unanswerable"]["only_candidate"] > x["unanswerable"]["only_reference"] for x in four.values())
     flagged, head = len(rev["set_aside"]), rev["checks"]["1_paper_headline"]["without_set_aside"]
     assert rev["every_conclusion_same"] and head["n"] == both["n"] - len(rev["review"]["chem_papers"]["fix"]) - len(rev["review"]["chem_papers"]["drop"])
     check = rp["checks"]["unanswerable"]
@@ -171,10 +176,12 @@ def chem() -> dict:
             "caption": f"공개 논문의 표에 대한 {n}문항의 정답률(verified EM, 주어 검사 없이). 논문 표는 어떤 학습에도 쓰지 않았다. 한국어만 튜닝한 모델은 화학 문항을 한 번도 보지 않았다. "
                        f"튜닝하지 않은 모델({p1(plain['rate'])})과의 차이는 대부분 한국어 문항으로 튜닝한 데서 나온다. 화학 합성 문항을 더한 모델과 한국어만 튜닝한 모델은 "
                        f"같은 문항에서 한쪽만 맞힌 것이 {apart['only_candidate']}개와 {apart['only_reference']}개로, 이 세트에서는 차이가 유의하지 않다(p {apart['p_display']}). "
-                       f"화학 세 세트를 합쳐 보면 두 모델은 답 없는 질문에서 갈린다({hold['only_candidate']} 대 {hold['only_reference']}). 답할 수 있는 질문에서는 {rest['only_candidate']}개와 {rest['only_reference']}개다. "
-                       f"이 나눔은 결과를 본 뒤에 찾은 것이라, 무엇을 볼지 미리 적어 두고 화학 문항을 더한 학습을 한 번 더 했다. 다시 학습한 모델도 답 없는 질문에서 한국어 전용 모델과 갈렸다"
+                       f"화학 세 세트를 합쳐 보면 차이는 답 없는 질문에서 났다({hold['only_candidate']} 대 {hold['only_reference']}). 답할 수 있는 질문에서는 {rest['only_candidate']}개와 {rest['only_reference']}개다. "
+                       f"이 나눔은 결과를 본 뒤에 찾은 것이라, 무엇을 볼지 미리 적어 두고 두 학습을 한 번씩 더 했다. 화학 문항을 더한 학습을 다시 했을 때는 처음 한국어 전용 모델과 답 없는 질문에서 갈렸다"
                        f"({check['repeat_vs_korean_only']['only_candidate']} 대 {check['repeat_vs_korean_only']['only_reference']}, p {check['repeat_vs_korean_only']['p_display']}). "
-                       f"다시 학습한 모델은 논문 표에서 {p1(rp['chemistry']['chem_papers']['repeat']['rate'])}다(막대 끝의 가는 선). 한국어 전용 모델은 한 번만 학습했고, 문항은 그대로다. "
+                       f"한국어 전용 학습을 다시 하자 두 반복 모델 사이는 {a1['only_candidate']} 대 {a1['only_reference']}, p {a1['p_display']}로 미리 정한 기준(p < 0.05)에 못 미쳤다. "
+                       "방향은 네 쌍 모두 같지만, 화학 문항이 보탠 것이 보류라고 단정하지 않는다. "
+                       f"다시 학습한 두 모델은 논문 표에서 {p1(rp['chemistry']['chem_papers']['repeat']['rate'])}와 {p1(again['scores']['chem_papers']['new_korean_only']['rate'])}다(막대 끝의 가는 선). "
                        f"문항은 AI 도구가 썼고 소유자가 검수했다. 고쳐야 한다고 적은 {flagged}문항(화학 세 세트 가운데 수작업 두 세트)을 빼고 세어도 "
                        f"화학 문항을 더한 모델은 논문 표에서 {head['correct']}/{head['n']}({p1(head['rate'])})이고, 미리 정해 둔 비교의 결론은 모두 같다. "
                        f"결과 파일이 남지 않은 예전 실행에서는 화학 문항을 더한 모델이 {p1(before['verified_em'])}였다.",

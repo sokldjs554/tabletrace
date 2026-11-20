@@ -1,0 +1,71 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "engine:planner",
+  "data": [
+   "data/ko/test.jsonl",
+   "data/ko/synthetic_test.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 699,
+  "wall_s": 117.4,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "max_in": 672,
+  "tokenizer": "/content/tabletrace/experiments/exaone_lora_koonly2/merged",
+  "evidence_repair": true,
+  "entity_check": false,
+  "column_check": false,
+  "replay_from": null,
+  "finished": "2026-11-20T03:44:12",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 699,
+  "n_answerable": 649,
+  "n_gold_abstain": 50,
+  "n_calc": 110,
+  "n_lookup": 539,
+  "verified_em": 0.8727,
+  "answer_em_answerable": 0.869,
+  "raw_answer_em_answerable": 0.8213,
+  "evidence_cells_exact": 0.8675,
+  "evidence_cells_exact_raw": 0.8737,
+  "evidence_repaired_rate": 0.0108,
+  "evidence_cells_overlap": 0.8829,
+  "op_acc": 0.9928,
+  "lookup_em": 0.8646,
+  "calc_em": 0.8909,
+  "calc_result_correct": 0.8909,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 0.92,
+  "false_abstain_rate": 0.02,
+  "abstain_precision": 0.7797,
+  "parse_fail_rate": 0.0,
+  "verifier_corrections": 0.0817,
+  "truncated_gold_rate": 0.0343,
+  "verified_em_untruncated": 0.9022,
+  "mean_ms_per_example": 2544.0,
+  "by_source": {
+   "korwikitq": {
+    "n": 539,
+    "verified_em": 0.8646
+   },
+   "synthetic": {
+    "n": 160,
+    "verified_em": 0.9
+   }
+  },
+  "gold_subject_fail_rate": 0.0431,
+  "entity_check": false
+ }
+}

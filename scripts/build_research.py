@@ -566,7 +566,8 @@ def gpu3_cards() -> list[dict]:
                 f"화학 문항을 더한 모델은 {three['korean_and_chemistry']['unanswerable']['correct']}개를 보류했다(한쪽만 맞힌 문항 {hold['only_candidate']} 대 {hold['only_reference']}, p {hold['p_display']}). "
                 f"답할 수 있는 질문 {rest['n']}개에서는 한쪽만 맞힌 문항이 {rest['only_candidate']}개와 {rest['only_reference']}개다(p {rest['p_display']}). 이 나눔은 세트마다의 결과를 본 뒤에 한 것이다.",
                 "읽는 법. 답할 수 있는 질문에서는 두 모델 사이에 검출되는 차이가 없다. 표를 읽고 프로그램을 쓰는 것은 한국어 문항으로 튜닝한 것만으로 영어 화학 표에서도 되었다. "
-                "화학 합성 문항이 보탠 것으로 보이는 것은 화학 표에서 답이 없을 때 보류하는 것이다. 두 모델은 다른 세션에서 한 번씩 학습했다(화학 문항을 더한 학습의 반복은 아래)."]
+                "이 결과에서는 화학 합성 문항이 보탠 것이 화학 표에서 답이 없을 때 보류하는 것으로 보였다. 두 모델은 다른 세션에서 한 번씩 학습했다. "
+                "두 학습을 한 번씩 더 한 결과는 아래에 있고, 이 읽기는 거기서 고쳤다."]
             assert hw["planned_before_the_result"] is False and all(sc[s]["with_chemistry_vs_korean_only"]["p_two_sided"] > 0.05 for s in sets)
             assert all(sc[s]["with_chemistry_vs_korean_only"]["only_candidate"] > sc[s]["with_chemistry_vs_korean_only"]["only_reference"] for s in sets) and rest["p_two_sided"] > 0.05
             share_files = (f" 한국어만 튜닝한 모델: experiments/eval/exaone_koonly_vllm_*/, experiments/eval/chem_share_analysis.json, experiments/exaone_lora_koonly/train_info.json"
@@ -591,9 +592,31 @@ def gpu3_cards() -> list[dict]:
                 f"다시 학습한 모델의 세트마다 짝 비교. 한국어 전용 모델과는 {pairs('repeat_vs_korean_only')}. 처음 학습과는 {pairs('repeat_vs_first_training')}. "
                 f"논문 표의 맞힌 수는 화학 문항을 더한 학습 세 번에서 {ptab['earlier_run_without_files']}개(결과 파일 없음), {ptab['first_run_with_files']}개, {ptab['repeat']}개다. 대표 수치는 미리 적어 둔 대로 {ptab['first_run_with_files']}개를 둔다. "
                 f"한국어 test는 {cell(kr['repeat'])}로 지금까지 가장 높지만 처음 학습과 {kr['repeat_vs_first_training']['only_candidate']} 대 {kr['repeat_vs_first_training']['only_reference']}(p {kr['repeat_vs_first_training']['p_display']})다.",
-                "이 확인이 말하는 것은 화학 문항을 더한 학습을 다시 해도 답 없는 질문에서 같은 차이가 났다는 것까지다. 한국어 전용 모델은 한 번만 학습했고 문항은 그대로다."]
+                "이 확인이 말하는 것은 화학 문항을 더한 학습을 다시 해도 처음 한국어 전용 모델과의 사이에서 같은 차이가 났다는 것까지다."]
             share_files += (f" 다시 학습한 모델: experiments/eval/exaone_kochem3_vllm_*/, experiments/eval/chem_repeat_analysis.json, experiments/exaone_lora_kochem3/train_info.json"
                             f"(2026-11-18 Colab T4 한 장, 학습 {rpt['training']['minutes']}분. 평가 {rpr['replays']}건, {rpr['questions_checked']:,}문항을 다시 검증해 다른 판정 {rpr['questions_that_differ']}개)")
+            # the Korean-only training once more (2026-11-20, section P), with what to look at written down before it (docs/REPORT.md §31)
+            ro, rpk = load(EXP / "eval" / "repeat_once_analysis.json"), load(EXP / "eval" / "replay_check_koonly2.json")
+            p1 = (ro or {}).get("P1_korean_only", {})
+            if p1.get("run") and rpk:
+                a, b, sc2, more = p1["1a_unanswerable_repeat_vs_new_korean_only"], p1["1b_papers_new_korean_only_vs_untuned"], p1["scores"], p1["added_after_the_run"]
+                assert not a["holds"] and a["only_candidate"] > a["only_reference"] and b["holds"]         # what the notes below say
+                rows.insert(3, ["EXAONE 1.2B LoRA, 한국어만 튜닝, 같은 설정으로 다시 학습 (2026-11-20)"] + [cell(sc2[s]["new_korean_only"]) for s in sets])
+                four = [more["pairs"][f"{c}_vs_{k}"]["unanswerable"] for c in ("kochem2", "kochem3") for k in ("koonly", "koonly2")]
+                held, pap = more["withheld_right"], p1["papers_new_vs_first_korean_only"]
+                assert all(x["only_candidate"] > x["only_reference"] for x in four) and sum(x["p_two_sided"] < 0.05 for x in four) == 3
+                assert all(more["pairs"][k]["answerable"]["p_two_sided"] > 0.05 for k in more["pairs"])
+                share_notes += [
+                    f"한국어 전용 학습도 같은 명령으로 한 번 더 했다(2026-11-20). 무엇을 볼지는 실행 전에 적어 두었다(커밋 847cb10, 보고서 §31). 미리 정한 확인 가운데 하나는 남지 않았다. "
+                    f"화학 세 세트의 답 없는 질문 {a['n']}개에서 화학을 더한 반복 모델만 맞힌 문항과 새 한국어 전용 모델만 맞힌 문항은 {a['only_candidate']} 대 {a['only_reference']}(p {a['p_display']})로, "
+                    f"정해 둔 기준(p < 0.05)에 못 미쳤다. 다른 하나는 남았다. 논문 표에서 새 한국어 전용 모델은 튜닝하지 않은 모델과 {b['only_candidate']} 대 {b['only_reference']}(p {b['p_display']})다.",
+                    "결과를 본 뒤에 더 본 것. 화학을 더한 학습 둘과 한국어 전용 학습 둘을 짝지은 네 쌍은 답 없는 질문에서 "
+                    + ", ".join(f"{x['only_candidate']} 대 {x['only_reference']}" for x in four)
+                    + f"로 방향이 모두 같고 셋이 유의하다. 바르게 보류한 수는 화학을 더한 모델이 {held['kochem2']}개와 {held['kochem3']}개, 한국어 전용 모델이 {held['koonly']}개와 {held['koonly2']}개다. "
+                    "같은 명령으로 다시 학습하는 것만으로 보류한 수가 몇 개씩 움직였다. 그래서 화학 문항이 보탠 것이 답 없는 질문의 보류라고 단정하지 않고, 네 쌍 모두 그 방향이었다고만 적는다. "
+                    f"새 한국어 전용 모델은 논문 표에서 {cell(sc2['chem_papers']['new_korean_only'])}로 처음과 같고, 한쪽만 맞힌 문항은 {pap['only_candidate']} 대 {pap['only_reference']}다."]
+                share_files += (f" 다시 학습한 한국어 전용 모델: experiments/eval/exaone_koonly2_vllm_*/, experiments/eval/repeat_once_analysis.json, experiments/exaone_lora_koonly2/train_info.json"
+                                f"(2026-11-20 Colab T4 한 장, 학습 {p1['training']['minutes']}분. 평가 {rpk['replays']}건, {rpk['questions_checked']:,}문항을 다시 검증해 다른 판정 {rpk['questions_that_differ']}개)")
         pp, pc = ch["chem_papers"], ch["chem_custom"]
         kinds, book, plain = pp["tuned"]["by_kind"], pc["tuned"]["by_kind"], pp["untuned_six_examples"]["by_kind"]
         others_text = [pc[k]["by_kind"]["text"]["correct"] for k in ("untuned_six_examples", "heuristic", "mt5_small_final")]
@@ -602,7 +625,7 @@ def gpu3_cards() -> list[dict]:
         out.append({"title": "영어 화학에서의 EXAONE — 문항별 예측을 남긴 실행 (2026-11-17)", "status": "done",
                     "description": f"한국어 학습 문항 {tr['korean_examples_in_the_full_data_training']:,}개에 화학 합성 문항 {tr['chemistry_examples_added']}개를 더해 EXAONE 1.2B를 튜닝하고 화학 세 세트로 쟀다. "
                                    "같은 문항을 튜닝하지 않은 1.2B에도 물었다(프롬프트의 예시 6개는 화학 합성 학습 문항에서 골랐다). 2026-11-14의 같은 실험은 결과 파일이 남지 않아 "
-                                   "실행 화면의 출력에서 수치만 되살렸었다. 이번에는 문항별 예측이 남아서 문항 단위로 견줄 수 있다. 같은 날 한국어만 튜닝한 모델도 같은 문항으로 쟀고, 다음 날 화학 문항을 더한 학습을 한 번 더 했다. 검증기 v1, 주어 검사 없이.",
+                                   "실행 화면의 출력에서 수치만 되살렸었다. 이번에는 문항별 예측이 남아서 문항 단위로 견줄 수 있다. 같은 날 한국어만 튜닝한 모델도 같은 문항으로 쟀고, 다음 날 화학 문항을 더한 학습을, 2026-11-20에는 한국어 전용 학습을 한 번 더 했다. 검증기 v1, 주어 검사 없이.",
                     "columns": ["플래너", f"논문 표 ({pp['tuned']['n']}문항)", f"교과서 표 수작업 ({pc['tuned']['n']}문항)", f"화학 합성 개발 ({ch['chem_syndev']['tuned']['n']}문항)"], "rows": rows,
                     "notes": [*share_notes,
                               f"논문 표에서 한국어와 화학을 함께 튜닝한 모델만 맞힌 문항이 {pp['tuned_vs_untuned']['only_candidate']}개, 튜닝하지 않은 모델만 맞힌 문항이 {pp['tuned_vs_untuned']['only_reference']}개다"
@@ -623,7 +646,7 @@ def gpu3_cards() -> list[dict]:
                               f"예전 실행의 되살린 수치와 견주면 논문 표는 {pct(old['chem_papers']['verified_em'])}에서 {pct(pp['tuned']['rate'])}로 {-old['chem_papers']['this_run_minus_earlier_in_questions']}문항 낮고, "
                               f"교과서 표 수작업은 {old['chem_custom']['this_run_minus_earlier_in_questions']}문항 높다. 예전 실행은 문항별 파일이 없어 짝 검정을 할 수 없다. "
                               "두 실행은 길이 설정이 다르고 학습도 따로 했다. 차이가 설정 때문인지 학습마다의 흔들림인지는 가릴 수 없다.",
-                              f"한계. 모델마다 학습 한 번이다. 논문 표 {pp['tuned']['n']}문항과 교과서 표 {pc['tuned']['n']}문항은 AI 도구가 썼다. 소유자가 2026-11-19에 검수했고 결과는 다음 항목에 있다. "
+                              f"한계. 모든 튜닝 모델은 다른 세션에서 학습했고, 같은 세션에서 나란히 학습한 비교는 없다. 논문 표 {pp['tuned']['n']}문항과 교과서 표 {pc['tuned']['n']}문항은 AI 도구가 썼다. 소유자가 2026-11-19에 검수했고 결과는 다음 항목에 있다. "
                               f"화학 합성 학습 문항 {tr['chemistry_questions_in_the_file']}개 가운데 정답 행이 입력 길이에 들어가지 않는 {tr['chemistry_questions_left_out']}개는 학습에서 빠졌다."],
                     "artifact": f"experiments/eval/exaone_kochem2_vllm_*/, experiments/eval/ref_1p2b_chem_*/, experiments/eval/chem_rerun_analysis.json, experiments/exaone_lora_kochem2/train_info.json. "
                                 f"소유자가 Colab T4 한 장에서 실행(학습 {tr['minutes']}분). 평가 {rpc['replays']}건을 다시 검증했고({rpc['questions_checked']:,}문항) 판정이 다른 문항은 {rpc['questions_that_differ']}개다." + share_files})

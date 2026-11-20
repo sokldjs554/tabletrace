@@ -92,7 +92,7 @@ def test_the_documents_use_the_run_that_kept_its_files_and_say_it_came_out_lower
     assert "§29" in earlier_sec and "결과 파일이 남지 않은 실행" in earlier_sec
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sec = readme[readme.index("### 9.14 화학 문항에서의 EXAONE"):readme.index("## 10. 추론 최적화")]
-    for needle in ("예전 실행의 수치보다 낮습니다", "한국어 전용 모델은 학습 한 번입니다", "소유자가 2026-11-19에 검수했습니다"):
+    for needle in ("예전 실행의 수치보다 낮습니다", "한국어 전용 모델은 학습 한 번이었습니다(2026-11-20에 다시 학습했고", "소유자가 2026-11-19에 검수했습니다"):
         assert needle in sec, needle
     # wherever the earlier number is still quoted, the same line says where it comes from
     for name in ("README.md", "docs/ONE_PAGE.md"):
@@ -188,7 +188,7 @@ def test_the_documents_report_the_repeat_as_written_down_before_it():
     before = report[report.index("**반복 학습을 돌리기 전에 적어 둔다 (2026-11-17).**"):report.index("### 29.8")]
     assert "대표 수치는" in before and "새 값이 높든 낮든 바꾸지 않는다" in before and "유의하게 더 많이 보류한다" in before      # the plan is kept as it was written
     sec = report[report.index("### 29.8"):]
-    for needle in ("미리 적어 둔 네 가지", "성립했다", "예상대로 유의한 차이가 없다", "대표 수치는 문항별 파일이 있는 첫 실행의", "한국어 전용 모델은 한 번만 학습했다", "다른 문항이나 다른 분야에서도 성립하는지는 모른다"):
+    for needle in ("미리 적어 둔 네 가지", "성립했다", "예상대로 유의한 차이가 없다", "대표 수치는 문항별 파일이 있는 첫 실행의", "한국어 전용 모델은 한 번만 학습했다(2026-11-20에 다시 학습했다. §31.1)", "다른 문항이나 다른 분야에서도 성립하는지는 모른다"):
         assert needle in sec, needle
     t = REPEAT["checks"]["unanswerable"]["repeat_vs_korean_only"]
     assert f">{t['only_candidate']}<" in sec and f">{t['p_display']}<" in sec

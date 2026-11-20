@@ -1,0 +1,88 @@
+{
+ "meta": {
+  "planner": "engine",
+  "model": "replay of experiments/eval/exaone_koonly2_vllm_ko_owner",
+  "data": [
+   "data/ko/owner_eval.jsonl"
+  ],
+  "corpus": [
+   "data/ko/documents.jsonl"
+  ],
+  "n": 30,
+  "wall_s": 4.2,
+  "hardware": "x86_64",
+  "label": "Tesla_T4",
+  "table_format": "plain",
+  "row_select": "first",
+  "max_in": 672,
+  "tokenizer": "/content/tabletrace/experiments/exaone_lora_koonly2/merged",
+  "evidence_repair": true,
+  "entity_check": true,
+  "column_check": false,
+  "replay_from": "experiments/eval/exaone_koonly2_vllm_ko_owner",
+  "finished": "2026-11-20T03:45:08",
+  "quantize": false,
+  "quantize_scope": null,
+  "confidence": true,
+  "few_shot": null,
+  "sample": null,
+  "tool_calling": false
+ },
+ "metrics": {
+  "n": 30,
+  "n_answerable": 26,
+  "n_gold_abstain": 4,
+  "n_calc": 10,
+  "n_lookup": 16,
+  "verified_em": 0.7,
+  "answer_em_answerable": 0.7308,
+  "raw_answer_em_answerable": 0.7308,
+  "evidence_cells_exact": 0.7308,
+  "evidence_cells_exact_raw": 0.7692,
+  "evidence_repaired_rate": 0.0385,
+  "evidence_cells_overlap": 0.7308,
+  "op_acc": 0.7667,
+  "lookup_em": 0.9375,
+  "calc_em": 0.4,
+  "calc_result_correct": 0.4,
+  "unit_error_rate": 0.0,
+  "abstain_recall": 0.5,
+  "false_abstain_rate": 0.0769,
+  "abstain_precision": 0.5,
+  "parse_fail_rate": 0.0333,
+  "verifier_corrections": 0.1154,
+  "truncated_gold_rate": 0.0,
+  "verified_em_untruncated": 0.7,
+  "mean_ms_per_example": 2303.8,
+  "by_source": {
+   "owner": {
+    "n": 30,
+    "verified_em": 0.7
+   }
+  },
+  "by_category": {
+   "abstain": {
+    "n": 4,
+    "verified_em": 0.5
+   },
+   "calc": {
+    "n": 6,
+    "verified_em": 0.6667
+   },
+   "cell": {
+    "n": 12,
+    "verified_em": 1.0
+   },
+   "text_table": {
+    "n": 4,
+    "verified_em": 0.0
+   },
+   "unit_period": {
+    "n": 4,
+    "verified_em": 0.75
+   }
+  },
+  "gold_subject_fail_rate": 0.0385,
+  "entity_check": true
+ }
+}
