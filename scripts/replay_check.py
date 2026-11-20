@@ -16,6 +16,7 @@ repository. If the outcome of any question differs, the stored numbers do not be
   python scripts/replay_check.py --session chemrepeat --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B # -> experiments/eval/replay_check_chemrepeat.json (section O's repeat, run on 2026-11-18)
   python scripts/replay_check.py --session koonly2 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B    # -> experiments/eval/replay_check_koonly2.json (section P, the Korean-only repeat, run on 2026-11-20)
   python scripts/replay_check.py --session rl4 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B        # -> experiments/eval/replay_check_rl4.json (section P, RL from a full-data model once more, run on 2026-11-20)
+  python scripts/replay_check.py --session ownloop2 --tokenizer LGAI-EXAONE/EXAONE-4.0-1.2B   # -> experiments/eval/replay_check_ownloop2.json (section P, the owner's loop once more, run on 2026-11-20)
 """
 from __future__ import annotations
 
@@ -71,6 +72,9 @@ SESSIONS = {                   # all were evaluated with an input budget of 672 
     ],
     "rl4": [                   # section P with P_RL: section J's start model and RL from it once more (2026-11-20, Colab)
         "exaone_full5_vllm_ko_test", "exaone_full5_vllm_ko_custom", "exaone_grpo4_vllm_ko_test", "exaone_grpo4_vllm_ko_custom",
+    ],
+    "ownloop2": [              # section P with P_OWNLOOP: section M's training with the owner's loop once more (2026-11-20, Colab)
+        "exaone_ownloop2_vllm_ko_test", "exaone_ownloop2_vllm_ko_custom", "exaone_ownloop2_vllm_ko_owner",
     ],
 }
 FIELDS = ("pred_status", "pred_answer", "pred_cells", "verified_correct", "evidence_repaired")

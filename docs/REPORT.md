@@ -454,7 +454,7 @@ dev verified EM(n=245): step 0: 28.2% → step 20: 30.2% → step 40: 30.6% → 
 | 데이터 출처·라이선스 | 저장소 LICENSE·README를 직접 확인, docs/research/datasets.md | 1회 기록 |
 | 데이터 분할·누수 | `scripts/check_data.py`: 표·문서 공유 0, 수작업·합성 정답의 자동 검수 | 데이터를 만들 때마다 실행, 마지막 실행 오류 0 |
 | 평가 재현성 | 모든 평가가 `tabletrace.eval.run`으로 metrics.json + predictions.jsonl 생성. 평가 코드 수정 후 **모든 모델을 같은 코드로 다시 평가**(`scripts/train/finalize.sh`) | 플래너·모델 8종(기준선·미튜닝·SFT 3·RL 2·int8)을 한국어 test·한국어 수작업·화학 수작업 평가셋에서 재평가 |
-| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->599<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
+| 단위·API 테스트 | `pytest -q tests`: 숫자·계산기·문법·검증기·휴리스틱·검색·API·엔진·학습 데이터·RL 보상·모델 | 최종 <!-- num:experiments/tests/summary.json:passed -->602<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped -->1<!-- /num -->개 skip, <!-- num:experiments/tests/summary.json:failed -->0<!-- /num -->개 실패. skip 하나는 소유자가 쓴 학습 루프 파일이 없을 때의 안내를 확인하는 테스트이고, 파일이 생긴 뒤에는 건너뛴다. 소유자가 직접 쓴 학습 코드의 테스트 35개(§20.7)는 통과에 들어 있다. 모델 가중치가 없으면 모델 테스트도 skip |
 | 콘솔 E2E | Playwright, 데스크톱 1440×900·모바일 390×844 × 실시간/정적 모드 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num --> 검사 통과 (`docs/images/e2e-*.json`). 이전 실행에서 실패 2회→수정→재실행 |
 | Docker | 이미지 빌드 + 컨테이너 smoke(health, release, corpora, ask, 콘솔) | 빌드가 여러 번 실패(데몬 미실행, Docker Hub·ECR 429, 프록시 CA TLS 오류)한 뒤 성공, smoke 통과 |
 | 학습 전후 비교 | 동일 test·custom 세트에서 미튜닝/SFT1/SFT2/RL v1/RL v2/화학 SFT/int8 평가 | §5–§8 |
@@ -573,7 +573,7 @@ tabletrace serve                                  # models/mt5-small-tabletrace 
 | 강화학습 | GRPO 방식 정책 경사를 직접 구현. 3회 실행: 보상 편법 발견(v1), 수정 후 개선 없음(v2), 본문·보류 프롬프트 추가(v3). v3는 본문 근거 없음 문항에서 모델의 직접 보류를 학습했으나(짝지어 비교 p=<!-- num:experiments/eval/paired_tests.json:rl_v3_vs_chem2_text2_test.p_display -->0.020<!-- /num -->) ko test 전체 점수는 그대로. 시드 1개 EXAONE-4.0-1.2B에는 소유자가 쓴 보상 함수와 GRPO 손실로 두 번 적용했다. 첫 실험은 효과가 없었고, 학습 스크립트의 프롬프트 잘림과 배치 구성을 고친 두 번째 실험에서 인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->43.8<!-- /num -->%, verified EM <!-- num:experiments/eval/exaone_rlstart2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->55.2<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2_vllm_ko_test/metrics.json:metrics.verified_em:pct -->59.4<!-- /num -->%(대응 검정 p <!-- num:experiments/eval/paired_tests.json:grpo2_vs_rlstart2_ko_test.p_display --><0.001<!-- /num -->, 1회). 배치 구성만 첫 실험처럼 되돌린 대조군에서는 인용 셀 정확도가 오르지 않았다(<!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->26.5<!-- /num -->%, 두 실험의 변화의 차이 p <!-- num:experiments/eval/rl2_control_analysis.json:main_minus_control.first_pass.cited_gold_cell_lookup.p_display --><0.001<!-- /num -->)(1회). 본 실험은 시작 모델을 달리해 한 번 더 돌렸고 같은 결과였다(인용 셀 정확도 <!-- num:experiments/eval/exaone_rlstart2b_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->25.7<!-- /num -->% → <!-- num:experiments/eval/exaone_grpo2c_vllm_ko_test/metrics.json:metrics.evidence_cells_exact_raw:pct -->46.7<!-- /num -->%, §22.8) | `training/rl_grpo.py`, §7, §18, 이슈 23–24, §21.1, §22.1, §22.7, §22.8 |
 | 추론 | KV 캐시·배치·int8을 정밀도별 별도 프로세스로 측정. 모든 층 int8은 속도를 얻는 대신 정확도를 잃지만(<!-- num:experiments/eval/rl_v3_ko_test/metrics.json:metrics.verified_em:pct -->32.8<!-- /num -->% → <!-- num:experiments/eval/final_int8_all_ko_test/metrics.json:metrics.verified_em:pct -->21.2<!-- /num -->%), 범위를 나눠 확인하니 `lm_head`만 int8이면 ko test 손실이 검출되지 않고 처리량이 약 1.5배 | §8, §18.2 |
 | 서비스 | FastAPI + LangGraph + 타입 검증 도구 + 비동기 작업 러너(큐·동시성·타임아웃), 임의 코드 실행 없음(계산기는 AST 평가기) | `service/`, `agent/`, `tools/` |
-| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->599<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
+| 검증 | 테스트 <!-- num:experiments/tests/summary.json:passed -->602<!-- /num -->개 통과, E2E 검사 실시간 <!-- num:docs/images/e2e-summary.json:live.passed -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total -->35<!-- /num -->·정적 <!-- num:docs/images/e2e-summary.json:static.passed -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total -->73<!-- /num -->, Docker 이미지 빌드·smoke | `experiments/tests/`, `docs/images/` |
 | 병렬(CPU) | 2-스테이지 파이프라인으로 모델을 두 프로세스에 분할하고 출력이 단일 프로세스와 일치함을 확인(속도 이득 없음) | §9 |
 
 ### 주장하면 안 되는 것 (이 프로젝트가 보여 주지 못한 것)
@@ -1942,10 +1942,10 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 | `ko_custom_28` (조회) | 표의 연도는 뮤직비디오 목록의 것이고, 앨범 발매 연도라는 근거가 없다 | 맞다. 표는 뮤직비디오 목록이다 |
 | `ko_custom_29` (답 없음) | 2017년 행이 없다는 것만으로 그해에 발매된 앨범이 없다고 할 수 없다 | 맞다. 같은 표의 같은 문제다 |
 
-**문항은 고치지 않고 그대로 둔다.** 저장된 모델 출력은 그 질문 문장에 대한 답이라서, 문장을 바꾸면 지금까지의 평가와 이어지지 않는다. 대신 이 문항 세트의 저장된 평가 <!-- num:experiments/eval/owner_eval_analysis.json:review.stored_runs -->76<!-- /num -->건을 지적된 네 문항 없이 다시 채점했다(`scripts/owner_eval_analysis.py`).
+**문항은 고치지 않고 그대로 둔다.** 저장된 모델 출력은 그 질문 문장에 대한 답이라서, 문장을 바꾸면 지금까지의 평가와 이어지지 않는다. 대신 이 문항 세트의 저장된 평가 <!-- num:experiments/eval/owner_eval_analysis.json:review.stored_runs -->78<!-- /num -->건을 지적된 네 문항 없이 다시 채점했다(`scripts/owner_eval_analysis.py`).
 
 - 네 문항을 빼면 verified EM이 가장 많이 오른 평가가 <!-- num:experiments/eval/owner_eval_analysis.json:review.largest_rate_gain_without_flagged:pct -->4.6<!-- /num -->%p, 가장 많이 내린 평가가 <!-- num:experiments/eval/owner_eval_analysis.json:review.largest_rate_loss_without_flagged:pct -->-4.6<!-- /num -->%p 움직인다. 30문항에서 한 문항이 3.3%p이므로 한두 문항의 차이다.
-- 두 평가의 순서가 뒤집히는 경우는 <!-- num:experiments/eval/owner_eval_analysis.json:review.pairs_of_runs_ranked_strictly -->2,610<!-- /num -->쌍 가운데 <!-- num:experiments/eval/owner_eval_analysis.json:review.pairs_whose_order_reverses_without_flagged -->7<!-- /num -->쌍이다.
+- 두 평가의 순서가 뒤집히는 경우는 <!-- num:experiments/eval/owner_eval_analysis.json:review.pairs_of_runs_ranked_strictly -->2,730<!-- /num -->쌍 가운데 <!-- num:experiments/eval/owner_eval_analysis.json:review.pairs_whose_order_reverses_without_flagged -->7<!-- /num -->쌍이다.
 - 대표적인 값. 전체 데이터 EXAONE(1회째) <!-- num:experiments/eval/owner_eval_analysis.json:runs_on_the_ai_written_set.exaone_full_vllm_ko_custom.all.rate:pct -->66.7<!-- /num -->%가 26문항에서는 <!-- num:experiments/eval/owner_eval_analysis.json:runs_on_the_ai_written_set.exaone_full_vllm_ko_custom.without_flagged.rate:pct -->69.2<!-- /num -->%, 휴리스틱 <!-- num:experiments/eval/owner_eval_analysis.json:runs_on_the_ai_written_set.heuristic_ko_custom.all.rate:pct -->50.0<!-- /num -->%가 <!-- num:experiments/eval/owner_eval_analysis.json:runs_on_the_ai_written_set.heuristic_ko_custom.without_flagged.rate:pct -->50.0<!-- /num -->%, mT5-small 최종 <!-- num:experiments/eval/owner_eval_analysis.json:runs_on_the_ai_written_set.rl_v3_ko_custom.all.rate:pct -->13.3<!-- /num -->%가 <!-- num:experiments/eval/owner_eval_analysis.json:runs_on_the_ai_written_set.rl_v3_ko_custom.without_flagged.rate:pct -->11.5<!-- /num -->%다.
 - 이 보고서에서 수작업 30문항의 수치는 줄곧 "표본이 작아 한두 문항의 차이는 뜻이 없다"는 단서와 함께 썼다. 그 읽기는 달라지지 않는다. 달라지는 것은 "30문항 가운데 4문항은 질문이나 정답 표기에 문제가 있다"는 사실이 기록됐다는 점이다.
 
@@ -2073,7 +2073,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 ### 27.3 읽는 법과 한계
 
-1. **한 번의 실행이다.** 시드 하나, Colab의 T4 한 장이다. 지난 여섯 번은 Kaggle과 Colab에서 돌았고 GPU는 모두 T4다.
+1. **한 번의 실행이다.** 시드 하나, Colab의 T4 한 장이다. 지난 여섯 번은 Kaggle과 Colab에서 돌았고 GPU는 모두 T4다. (2026-11-20 덧붙임: 같은 명령으로 한 번 더 했다. 87.6%로 이 범위보다 높았고, 미리 적어 둔 두 확인은 남았다. §31.3)
 2. **두 루프가 같다는 시험이 아니다.** 소유자의 루프는 학습률을 선형으로 줄이고 들어 있는 루프는 일정하게 둔다. 세션도 다르다. 이 결과가 말하는 것은 "소유자의 루프로 학습해도 같은 범위의 모델이 나왔다"까지다. 학습률 일정의 효과를 가르려면 같은 세션에서 두 루프를 나란히 돌려야 하고, 하지 않았다.
 3. **"직접 썼다"의 범위는 그 <!-- num:experiments/eval/owner_loop_analysis.json:owner_written_lines -->68<!-- /num -->줄이다.** 명세와 테스트는 AI 도구가 썼고, 그 루프를 불러 쓰는 학습 스크립트도 AI 도구가 썼다.
 4. **다른 결과의 모델들은 그대로다.** 대표 수치(<!-- num:experiments/eval/owner_loop_analysis.json:test.verified_em_built_in.old_cap_run1:pct -->84.3<!-- /num -->%)의 모델, 강화학습의 시작 모델들, 10,587문항 모델, 열 번호 형식 모델, 화학 모델은 모두 들어 있는 루프로 학습됐다. "모든 미세조정을 직접 쓴 루프로 했다"는 틀린 말이다.
@@ -2140,7 +2140,7 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 
 | 무엇 | 결과 |
 |---|---|
-| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->599<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->1<!-- /num -->개 건너뜀 |
+| 테스트 | <!-- num:experiments/tests/summary.json:passed:int -->602<!-- /num -->개 통과, <!-- num:experiments/tests/summary.json:skipped:int -->1<!-- /num -->개 건너뜀 |
 | 화면 검사 | 실시간 <!-- num:docs/images/e2e-summary.json:live.passed:int -->35<!-- /num -->/<!-- num:docs/images/e2e-summary.json:live.total:int -->35<!-- /num -->, 정적 <!-- num:docs/images/e2e-summary.json:static.passed:int -->73<!-- /num -->/<!-- num:docs/images/e2e-summary.json:static.total:int -->73<!-- /num -->. 데스크톱 1440×900과 모바일 390×844, 헤드리스 Chromium |
 | 연구 결과 탭의 길이 | 예전 판은 1440px 폭에서 13,379px였다(2026-11-16의 화면 사진에서 잰 값). 지금은 화면 검사가 6,000px보다 짧은지 본다 |
 | 배포 | 실행 환경을 포함한 Pages 배포가 성공했다([실행 기록](https://github.com/sokldjs554/tabletrace/actions/runs/43999542432), 커밋 `edb5826`) |
@@ -2442,6 +2442,46 @@ test에서 <!-- num:experiments/gpu2_2026-11-14/recovered.json:derived.vs_first_
 - 그래서 §24의 "확신도는 나빠졌다"는 "이 실행에서 그랬다"에서 "같은 명령으로 두 번 해서 두 번 다 그랬다"가 된다. 다만 미리 정한 확인은 아니고, 두 번 모두 같은 시드다. 왜 그런지(보상이 확신의 크기를 보지 않는 것 등)는 여전히 재지 않았다.
 
 **결론.** 바꾸는 결론은 없다. "전체 데이터 모델에서 시작한 강화학습은 정답률을 바꾸지 못했다"는 다시 해도 남았다. 문서에는 반복 결과를 옆에 함께 적었다(README §9.11, §9.16, 전달 문서 9.1e, 데모의 연구 결과 탭).
+
+### 31.3 P3의 결과: 직접 쓴 학습 루프로 다시 학습했다 (2026-11-20, Colab)
+
+소유자가 P절을 `P_OWNLOOP = True`로 Colab(T4 한 장)에서 돌렸다(`experiments/run_info_2_ownloop2.json`. P2와 같은 세션이라 노트북은 커밋 `<!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.training.notebook_commit -->d0343e9<!-- /num -->`이다). 학습 명령은 M절의 학습과 출력 경로만 다르고, 학습 기록의 `loop`는 `tabletrace.training.lm_loop (owner-written)`이다. 학습 예제 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.training.examples -->3,587<!-- /num -->개, <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.training.steps -->224<!-- /num -->걸음, <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.training.minutes -->32.5<!-- /num -->분이고 정답이 잘린 예제는 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.training.targets_cut_short -->0<!-- /num -->개다. 받은 결과는 평가 <!-- num:experiments/eval/replay_check_ownloop2.json:replays -->6<!-- /num -->건, <!-- num:experiments/eval/replay_check_ownloop2.json:questions_checked -->1,518<!-- /num -->문항을 다시 검증했고 판정이 다른 문항은 <!-- num:experiments/eval/replay_check_ownloop2.json:questions_that_differ -->0<!-- /num -->개다(`scripts/replay_check.py --session ownloop2`).
+
+**미리 적어 둔 두 확인.**
+
+1. **(3a) 남았다.** 직접 쓴 루프로 한 두 학습을 한국어 시험에서 견주면 새 학습만 맞힌 문항과 처음 학습만 맞힌 문항이 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.3a_new_vs_first_owner_loop.only_candidate -->20<!-- /num --> 대 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.3a_new_vs_first_owner_loop.only_reference -->9<!-- /num -->(p <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.3a_new_vs_first_owner_loop.p_display -->0.061<!-- /num -->)다.
+2. **(3b) 남았다.** 같은 명령을 스크립트의 루프로 한 학습(`exaone_full4`)과 견주면 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.3b_new_owner_loop_vs_builtin_loop_same_command.only_candidate -->31<!-- /num --> 대 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.3b_new_owner_loop_vs_builtin_loop_same_command.only_reference -->17<!-- /num -->(p <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.3b_new_owner_loop_vs_builtin_loop_same_command.p_display -->0.059<!-- /num -->)다.
+
+둘 다 기준(p ≥ 0.05)을 넘지만 경계에 가깝고, 둘 다 새 학습이 더 맞힌 쪽이다. "구별되지 않았다"는 "같다"가 아니다. 이번 학습이 처음보다 높게 나왔고, 그 차이가 이 문항 수로는 검출되지 않았다는 뜻이다.
+
+| 한국어 test 699문항 | verified EM |
+|---|---:|
+| 직접 쓴 루프, 처음 (§27, `exaone_ownloop`) | <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.first_owner_loop_score.rate:pct -->86.0<!-- /num -->% (<!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.first_owner_loop_score.correct -->601<!-- /num -->/<!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.first_owner_loop_score.n -->699<!-- /num -->) |
+| **직접 쓴 루프, 다시 (이 절, `exaone_ownloop2`)** | **<!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.score.rate:pct -->87.5<!-- /num -->% (<!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.score.correct -->612<!-- /num -->/<!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.score.n -->699<!-- /num -->)** |
+| 스크립트의 루프, 같은 명령 (`exaone_full4`) | <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.earlier_full_data_korean_only_trainings.exaone_full4_vllm_ko_test:pct -->85.5<!-- /num -->% |
+
+**숫자로만 함께 적는 것: 범위.** 실행 전에 "지금까지의 한국어 전용 전체 데이터 학습 여덟 번의 범위(84.3%~87.1%) 안에 드는지"를 적기로 했다. **들지 않는다.** <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.score.rate:pct -->87.5<!-- /num -->%로 그 범위보다 높고, 지금까지의 전체 데이터 학습 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.all_full_data_trainings.n -->11<!-- /num -->번 가운데 가장 높다. 대표 수치(84.3%)는 그대로 둔다.
+
+**결과를 본 뒤에 더 본 것: P절의 세 학습이 모두 높게 나왔다.** P절에서 학습한 세 모델은 한국어 test에서 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.section_p_trainings.exaone_koonly2_vllm_ko_test:pct -->87.3<!-- /num -->%, <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.section_p_trainings.exaone_full5_vllm_ko_test:pct -->87.3<!-- /num -->%, <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.section_p_trainings.exaone_ownloop2_vllm_ko_test:pct -->87.5<!-- /num -->%로, 셋 다 그전 여덟 번의 가장 높은 값(<!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.earlier_full_data_korean_only_trainings.exaone_full_vllm_ko_test_run2:pct -->87.1<!-- /num -->%)보다 높다. 무엇이 바뀌었는지 두 가지를 확인했다.
+
+- **학습 입력은 같다.** 그 사이 저장소에서 바뀐 것 가운데 한국어 학습에 닿을 수 있는 것은 2026-11-20의 결함 수정(§33)으로 한국어 표 4개의 단위가 바뀐 것이다. 수정 전 커밋(`<!-- num:experiments/eval/training_inputs_check.json:before.commit -->4fdbbd8<!-- /num -->`)과 지금 저장소에서 같은 명령의 학습 예제(입력과 정답 문장)를 만들어 견주니 <!-- num:experiments/eval/training_inputs_check.json:now.examples -->3,587<!-- /num -->개가 글자까지 같다(`scripts/training_inputs_check.py`, `experiments/eval/training_inputs_check.json`).
+- **서버(vLLM) 판은 11-17부터 같다.** 저장된 서버 기록(`experiments/run_logs/`)의 소스 줄 번호로 보면 판이 2026-11-16과 11-17 사이에 바뀌었고 그 뒤로는 같다. 11-17에 같은 판으로 평가한 한국어 전용 모델(§29.7)은 86.4%였다. 학습 쪽 라이브러리(PyTorch, Transformers, PEFT)의 판은 기록하지 않아 모른다.
+
+그래서 이 차이의 원인은 찾지 못했다. 학습마다의 흔들림일 수도 있고, 기록하지 않은 라이브러리 판의 차이일 수도 있다. 같은 명령의 전체 데이터 학습 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.all_full_data_trainings.n -->11<!-- /num -->번은 이제 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.all_full_data_trainings.lowest:pct -->84.3<!-- /num -->%에서 <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.all_full_data_trainings.highest:pct -->87.5<!-- /num -->%까지다.
+
+**결론.** 바꾸는 결론은 없다. "직접 쓴 루프로 학습해도 스크립트의 루프와 구별되는 모델이 나오지 않았다"는 두 번째 학습에서도 남았다. 다만 "직접 쓴 루프로 한 학습은 스크립트 루프 학습들의 범위 안"이라는 문장은 첫 학습에만 맞으므로, 두 번째 학습의 값과 범위 밖이라는 것을 함께 적었다(README §9.13, §9.16, 전달 문서 9.1g, 한 장 요약).
+
+### 31.4 P절의 정리
+
+| 확인 | 결과 | 문서에서 |
+|---|---|---|
+| (1a) 답 없는 화학 문항: 화학을 더한 모델 대 한국어 전용 모델 | 남지 않았다 (<!-- num:experiments/eval/repeat_once_analysis.json:P1_korean_only.1a_unanswerable_repeat_vs_new_korean_only.only_candidate -->7<!-- /num --> 대 <!-- num:experiments/eval/repeat_once_analysis.json:P1_korean_only.1a_unanswerable_repeat_vs_new_korean_only.only_reference -->1<!-- /num -->, p <!-- num:experiments/eval/repeat_once_analysis.json:P1_korean_only.1a_unanswerable_repeat_vs_new_korean_only.p_display -->0.070<!-- /num -->) | 결론을 고쳤다(§31.1) |
+| (1b) 논문 표: 한국어 전용 모델 대 튜닝 없음 | 남았다 | 그대로 |
+| (2) 전체 데이터 모델의 강화학습 전후 | 남았다 (<!-- num:experiments/eval/repeat_once_analysis.json:P2_rl_from_full_data.2_rl_vs_start_on_the_korean_test.only_candidate -->9<!-- /num --> 대 <!-- num:experiments/eval/repeat_once_analysis.json:P2_rl_from_full_data.2_rl_vs_start_on_the_korean_test.only_reference -->9<!-- /num -->) | 그대로, 반복 결과를 함께 적었다(§31.2) |
+| (3a) 직접 쓴 루프 두 번 | 남았다, 경계에 가깝다 (p <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.3a_new_vs_first_owner_loop.p_display -->0.061<!-- /num -->) | 그대로, 반복 결과를 함께 적었다 |
+| (3b) 직접 쓴 루프 대 스크립트의 루프 | 남았다, 경계에 가깝다 (p <!-- num:experiments/eval/repeat_once_analysis.json:P3_owner_loop.3b_new_owner_loop_vs_builtin_loop_same_command.p_display -->0.059<!-- /num -->) | 그대로, 반복 결과를 함께 적었다 |
+
+다섯 확인 가운데 넷이 남았고 하나가 남지 않았다. 남지 않은 하나는 결과를 본 뒤에 찾은 나눔에서 나온 결론이었다. 미리 적어 두고 다시 돌린 것이 그 결론을 걸러 냈다.
 
 ## 32. 화학 평가 문항을 소유자가 검수했다 (2026-11-19)
 

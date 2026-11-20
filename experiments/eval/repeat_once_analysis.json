@@ -392,6 +392,72 @@
   }
  },
  "P3_owner_loop": {
-  "run": false
+  "run": true,
+  "3a_new_vs_first_owner_loop": {
+   "only_candidate": 20,
+   "only_reference": 9,
+   "p_two_sided": 0.06142834573984146,
+   "p_display": "0.061",
+   "holds": true
+  },
+  "3b_new_owner_loop_vs_builtin_loop_same_command": {
+   "only_candidate": 31,
+   "only_reference": 17,
+   "p_two_sided": 0.05946337525377032,
+   "p_display": "0.059",
+   "holds": true
+  },
+  "score": {
+   "n": 699,
+   "correct": 612,
+   "rate": 0.8755,
+   "ci95": {
+    "lo": 0.849,
+    "hi": 0.898
+   }
+  },
+  "earlier_full_data_korean_only_trainings": {
+   "exaone_full_vllm_ko_test": 0.8426,
+   "exaone_full_vllm_ko_test_run2": 0.8712,
+   "exaone_full2old_vllm_ko_test": 0.8698,
+   "exaone_full2_vllm_ko_test": 0.8641,
+   "exaone_full3_vllm_ko_test": 0.8598,
+   "exaone_full4_vllm_ko_test": 0.8555,
+   "exaone_ownloop_vllm_ko_test": 0.8598,
+   "exaone_koonly_vllm_ko_test": 0.8641
+  },
+  "inside_their_range": false,
+  "above_their_range": true,
+  "first_owner_loop_score": {
+   "n": 699,
+   "correct": 601,
+   "rate": 0.8598,
+   "ci95": {
+    "lo": 0.8321,
+    "hi": 0.8836
+   }
+  },
+  "section_p_trainings": {
+   "exaone_koonly2_vllm_ko_test": 0.8727,
+   "exaone_full5_vllm_ko_test": 0.8727,
+   "exaone_ownloop2_vllm_ko_test": 0.8755
+  },
+  "all_full_data_trainings": {
+   "n": 11,
+   "lowest": 0.8426,
+   "highest": 0.8755
+  },
+  "training": {
+   "examples": 3587,
+   "steps": 224,
+   "minutes": 32.5,
+   "loop": "tabletrace.training.lm_loop (owner-written)",
+   "targets_cut_short": 0,
+   "first_minutes": 30.2,
+   "args_that_differ_from_the_first_time": [
+    "out"
+   ],
+   "notebook_commit": "d0343e9"
+  }
  }
 }

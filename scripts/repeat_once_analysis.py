@@ -151,10 +151,21 @@ def p3() -> dict:
     a = cr.paired(rl2.load("exaone_ownloop_vllm_ko_test"), n)
     b = cr.paired(rl2.load("exaone_full4_vllm_ko_test"), n)
     rates = {r: cr.right(rl2.load(r))["rate"] for r in KO_ONLY_TRAININGS}
+    later = {r: cr.right(rl2.load(r))["rate"] for r in ("exaone_koonly2_vllm_ko_test", "exaone_full5_vllm_ko_test", new)}
+    read = lambda d: json.loads((ROOT / "experiments" / d / "train_info.json").read_text(encoding="utf-8"))  # noqa: E731
+    first, again = read("exaone_lora_ownloop"), read("exaone_lora_ownloop2")
     return {"run": True, "3a_new_vs_first_owner_loop": {**a, "holds": holds_no_difference(a)},
             "3b_new_owner_loop_vs_builtin_loop_same_command": {**b, "holds": holds_no_difference(b)},
             "score": cr.right(n), "earlier_full_data_korean_only_trainings": rates,
-            "inside_their_range": min(rates.values()) <= cr.right(n)["rate"] <= max(rates.values())}
+            "inside_their_range": min(rates.values()) <= cr.right(n)["rate"] <= max(rates.values()),
+            "above_their_range": cr.right(n)["rate"] > max(rates.values()),
+            "first_owner_loop_score": cr.right(rl2.load("exaone_ownloop_vllm_ko_test")),
+            "section_p_trainings": later, "all_full_data_trainings": {"n": len(rates) + len(later), "lowest": min([*rates.values(), *later.values()]),
+                                                      "highest": max([*rates.values(), *later.values()])},
+            "training": {"examples": again["n_examples"], "steps": again["steps"], "minutes": round(again["wall_s"] / 60, 1), "loop": again["loop"],
+                         "targets_cut_short": again["targets_cut_short"], "first_minutes": round(first["wall_s"] / 60, 1),
+                         "args_that_differ_from_the_first_time": sorted(k for k in set(first["args"]) | set(again["args"]) if first["args"].get(k) != again["args"].get(k)),
+                         "notebook_commit": json.loads((ROOT / "experiments" / "run_info_2_ownloop2.json").read_text(encoding="utf-8"))["commit"]}}
 
 
 def analyse() -> dict:

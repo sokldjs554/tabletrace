@@ -80,7 +80,8 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                p2 = ("full5", "grpo4")                  # section P with P_RL (2026-11-20, Colab): the last results that came in
+                p3 = ("ownloop2",)                       # section P with P_OWNLOOP (2026-11-20, Colab): the last results that came in
+                p2 = ("full5", "grpo4", *p3)             # section P with P_RL (2026-11-20, Colab)
                 p1 = ("koonly2", *p2)                    # section P with P_KOONLY (2026-11-20, Colab)
                 again = ("kochem3", *p1)                 # section O's optional repeat (2026-11-18, Colab)
                 share = ("koonly", *again)               # section O (2026-11-17, Colab)
@@ -90,7 +91,8 @@ class DryRun:
                 later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3", *owner), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3", *owner),
                          "before the full-data rerun": ("full2", "full3", "grpo3", *owner), "before RL on the full-data model": ("full3", "grpo3", *owner),
                          "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop, "before the chemistry run": chem, "before the Korean-only run": share, "before the chemistry repeat run": again,
-                         "before the Korean-only repeat": p1, "before the RL repeat": p2}.get(cloned_results, ())
+                         "before the Korean-only repeat": p1, "before the RL repeat": p2,
+                         "before the owner-loop repeat": p3}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -933,11 +935,11 @@ def test_the_recorded_repeat_matches_what_the_notebook_does(tmp_path, monkeypatc
         assert meta["tokenizer"] == same["tokenizer"].replace("kochem2", "kochem3")             # each model's own merged weights
 
 
-def test_the_notebook_says_what_section_o_gave_and_that_only_section_p_is_left_to_run():
+def test_the_notebook_says_what_section_o_gave_and_that_nothing_is_left_to_run():
     cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
     intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## O."))
     row = next(line for line in intro.split("\n") if line.startswith("| O |"))
-    assert "지금 돌릴 것은 P절뿐입니다" in intro and "2026-11-17에 Colab에서 끝남" in row and "아직 돌리지 않" not in row + section
+    assert "계획한 실험은 모두 끝났습니다" in intro and "지금 돌릴 것은 없습니다" in intro and "2026-11-17에 Colab에서 끝남" in row and "아직 돌리지 않" not in row + section
     assert "반복 학습은 2026-11-18에 끝남" in row and "반복 학습의 결과" in section and "돌리지 않았습니다" not in section
     rerun = json.loads((ROOT / "experiments/eval/chem_rerun_analysis.json").read_text())["chemistry"]["chem_papers"]
     assert f"{100 * rerun['tuned']['rate']:.1f}%" in section and f"{100 * rerun['untuned_six_examples']['rate']:.1f}%" in section      # the numbers the section set out from
@@ -984,6 +986,7 @@ def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_
 P_CELL = "KOONLY2_DIR"        # the cell of section P: three experiments that ran once, run once more
 BEFORE_P1 = "before the Korean-only repeat"      # main as it was on 2026-11-20 before P_KOONLY ran
 BEFORE_P2 = "before the RL repeat"               # main as it was on 2026-11-20 before P_RL ran (P1's results in it)
+BEFORE_P3 = "before the owner-loop repeat"       # the same session after P_RL: P1's and P2's results in it
 
 
 def _with(run, *flags: str) -> None:
@@ -1040,7 +1043,7 @@ def test_section_p_repeats_rl_from_a_full_data_model_with_section_j_command(tmp_
 
 
 def test_section_p_repeats_the_owner_loop_with_section_m_command(tmp_path, monkeypatch):
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_P3)
     _with(run, "P_OWNLOOP")
     counts = run.run_all(only=P_CELL)
     assert counts["train"] == 1 and counts["grpo"] == 0 and counts["eval"] == 6
@@ -1115,20 +1118,44 @@ def test_the_recorded_rl_repeat_matches_what_the_notebook_does_and_only_p3_is_le
         for key in ("row_select", "max_in", "entity_check", "few_shot", "corpus", "data", "table_format", "confidence"):
             assert key not in same or meta.get(key) == same[key], (out, key)        # section J's records predate some meta keys
         assert meta["max_in"] == 672 and meta["corpus"] == ["data/ko/documents.jsonl"]
+    later = DryRun(tmp_path / "later", monkeypatch, cloned_results=BEFORE_P3)          # then P_OWNLOOP, with the other two left on
+    _with(later, "P_KOONLY", "P_RL", "P_OWNLOOP")
+    counts = later.run_all(only=P_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 0 and all("ownloop2" in o for o in later.outputs())
+
+
+def test_the_recorded_owner_loop_repeat_matches_what_the_notebook_does_and_section_p_is_finished(tmp_path, monkeypatch):
+    """P_OWNLOOP was run on 2026-11-20 on Colab in the session of P_RL. The training record is section M's command with
+    another output path and the owner's loop; the stored evaluations are those the notebook plans, with section M's
+    settings. With every result in the repository, section P starts nothing with all three switches on."""
+    first = json.loads((ROOT / "experiments/exaone_lora_ownloop/train_info.json").read_text())
+    info = json.loads((ROOT / "experiments/exaone_lora_ownloop2/train_info.json").read_text())
+    assert {k for k in set(info["args"]) | set(first["args"]) if info["args"].get(k) != first["args"].get(k)} == {"out"}
+    assert info["args"]["loop"] == "owner" and info["loop"] == first["loop"] == "tabletrace.training.lm_loop (owner-written)"
+    assert (info["n_examples"], info["steps"], info["targets_cut_short"]) == (first["n_examples"], first["steps"], 0)
+    run_info = json.loads((ROOT / "experiments/run_info_2_ownloop2.json").read_text())
+    assert run_info["platform"] == "colab" and run_info["gpus"] == ["Tesla T4"] and run_info["finished"].startswith("2026-11-20")
+    planned = DryRun(tmp_path / "before", monkeypatch, cloned_results=BEFORE_P3)
+    _with(planned, "P_OWNLOOP")
+    planned.run_all(only=P_CELL)
+    outs = [o for o in planned.outputs() if o.startswith("experiments/eval/")]
+    assert sorted(outs) == sorted(str(d.relative_to(ROOT)) for d in (ROOT / "experiments/eval").glob("exaone_ownloop2_vllm_*"))
+    for out in outs:
+        meta = json.loads((ROOT / out / "metrics.json").read_text())["meta"]
+        same = json.loads((ROOT / out.replace("ownloop2", "ownloop") / "metrics.json").read_text())["meta"]
+        for key in ("row_select", "max_in", "entity_check", "few_shot", "corpus", "data", "table_format", "confidence"):
+            assert key not in same or meta.get(key) == same[key], (out, key)
     now = DryRun(tmp_path / "now", monkeypatch, cloned_results=True)
-    _with(now, "P_KOONLY", "P_RL")
+    _with(now, "P_KOONLY", "P_RL", "P_OWNLOOP")
     assert now.run_all(only=P_CELL) == collections.Counter()
-    _with(now, "P_OWNLOOP")
-    counts = now.run_all(only=P_CELL)
-    assert counts["train"] == 1 and counts["grpo"] == 0 and all("ownloop2" in o for o in now.outputs())
 
 
 def test_the_notebook_says_what_p1_gave_and_what_is_left():
     cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
     intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## P."))
     row = next(line for line in intro.split("\n") if line.startswith("| P |"))
-    assert "P1과 P2는 2026-11-20에 Colab에서 끝남" in row and "P3은 남음" in row and "아직 돌리지 않" not in row
-    assert "남은 것은 P3(`P_OWNLOOP`)입니다" in intro
+    assert "셋 다 2026-11-20에 Colab에서 끝남" in row and "남음" not in row and "아직 돌리지 않" not in row
+    assert "O절, P절은 결과가 저장소에 있어서" in intro
     p1 = json.loads((ROOT / "experiments/eval/repeat_once_analysis.json").read_text())["P1_korean_only"]
     a, b = p1["1a_unanswerable_repeat_vs_new_korean_only"], p1["1b_papers_new_korean_only_vs_untuned"]
     assert not a["holds"] and b["holds"]
@@ -1137,6 +1164,10 @@ def test_the_notebook_says_what_p1_gave_and_what_is_left():
     p2 = json.loads((ROOT / "experiments/eval/repeat_once_analysis.json").read_text())["P2_rl_from_full_data"]
     c = p2["2_rl_vs_start_on_the_korean_test"]
     assert c["holds"] and "P2의 결과" in section and "(2)는 남았습니다" in section and f"{c['only_candidate']} 대 {c['only_reference']}(p {c['p_display']})" in section
+    p3 = json.loads((ROOT / "experiments/eval/repeat_once_analysis.json").read_text())["P3_owner_loop"]
+    a3, b3 = p3["3a_new_vs_first_owner_loop"], p3["3b_new_owner_loop_vs_builtin_loop_same_command"]
+    assert a3["holds"] and b3["holds"] and "P3의 결과" in section and "(3a)와 (3b)는 남았습니다" in section
+    assert f"{a3['only_candidate']} 대 {a3['only_reference']}(p {a3['p_display']})" in section and f"{b3['only_candidate']} 대 {b3['only_reference']}(p {b3['p_display']})" in section
 
 
 def test_what_section_p_is_checked_for_was_written_down_before_it_ran():

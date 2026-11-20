@@ -34,14 +34,14 @@ def p1(x: float) -> str:
 
 
 def accuracy() -> dict:
-    """Korean test: the planners side by side. The full-data model was trained ten times (the eighth is section O's
-    Korean-only model, the same command as exaone_full4; the ninth and tenth come from section P: the Korean-only repeat
-    and the start model of the RL repeat); the bar is the first (lowest) training, which is the number the documents
-    lead with, and the other nine are drawn as ticks."""
+    """Korean test: the planners side by side. The full-data model was trained eleven times with the same command (the
+    eighth is section O's Korean-only model; the ninth to eleventh come from section P: the Korean-only repeat, the start
+    model of the RL repeat and the owner-loop repeat); the bar is the first (lowest) training, which is the number the
+    documents lead with, and the other ten are drawn as ticks."""
     full = [_em("exaone_full_vllm_ko_test"), _em("exaone_full_vllm_ko_test_run2"), _em("exaone_full2old_vllm_ko_test"),
             _em("exaone_full2_vllm_ko_test"), _em("exaone_full3_vllm_ko_test"), _em("exaone_full4_vllm_ko_test"),
             _em("exaone_ownloop_vllm_ko_test"), _em("exaone_koonly_vllm_ko_test"), _em("exaone_koonly2_vllm_ko_test"),
-            _em("exaone_full5_vllm_ko_test")]
+            _em("exaone_full5_vllm_ko_test"), _em("exaone_ownloop2_vllm_ko_test")]
     small = [_em("exaone_vllm_ko_test_run1"), _em("exaone_vllm_ko_test_run2"), _em("exaone_vllm_ko_test")]
     b32 = _load("experiments/gpu2_2026-11-14/recovered.json")["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"]["verified_em"]
     rows = [

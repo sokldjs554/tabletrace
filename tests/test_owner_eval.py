@@ -213,12 +213,12 @@ def test_the_exaone_results_on_the_owner_questions_follow_from_the_stored_predic
 
 def test_the_documents_say_exactly_which_trainings_used_the_owner_written_loop():
     """The owner wrote three training files. Reward and GRPO loss were used in the RL runs. The fine-tuning loop trained
-    one stored model (2026-11-16, section M of notebook 2); every other stored EXAONE fine-tuning ran with the loop built
-    into the script. The documents may say "fine-tuned with the loop I wrote" for that one run and must not stretch it
-    to the others, nor call the two loops equal."""
+    two stored models (2026-11-16, section M of notebook 2, and its repeat in section P on 2026-11-20); every other
+    stored EXAONE fine-tuning ran with the loop built into the script. The documents may say "fine-tuned with the loop I
+    wrote" for those two runs and must not stretch it to the others, nor call the two loops equal."""
     infos = {p.parent.name: json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_lora_*/train_info.json"))}
     owner_runs = sorted(k for k, t in infos.items() if "owner" in str(t.get("loop")))
-    assert owner_runs == ["exaone_lora_ownloop"]                                        # exactly one, and the documents count it as one
+    assert owner_runs == ["exaone_lora_ownloop", "exaone_lora_ownloop2"]               # exactly two, and the documents count them as two
     assert all(t.get("loop") in (None, "builtin") for k, t in infos.items() if k not in owner_runs)
     assert infos["exaone_lora_full"].get("loop") in (None, "builtin")                    # the headline model was trained with the built-in loop
     rl = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "experiments").glob("exaone_grpo*/train_info.json"))]
@@ -239,12 +239,12 @@ def test_the_documents_say_exactly_which_trainings_used_the_owner_written_loop()
         assert needle in sec, needle
     handoff = (ROOT / "docs" / "HANDOFF.md").read_text(encoding="utf-8")
     sec = handoff[handoff.index("### 9.1g"):handoff.index("### 9.2 ")]
-    for needle in ('"모든 미세조정을 직접 쓴 루프로 했다"', '"학습 스크립트를 직접 짰다"', "두 루프가 같다는 시험이 아니다", "한 번의 실행이다"):
+    for needle in ('"모든 미세조정을 직접 쓴 루프로 했다"(두 번이다.', '"학습 스크립트를 직접 짰다"', "두 루프가 같다는 시험이 아니다", "두 번 했다(위 줄)"):
         assert needle in sec, needle
     assert "GPU 학습에 쓰인 적이 없다**: 저장된" not in handoff                            # the statement from before the run is gone
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sec = readme[readme.index("### 9.13 소유자가 쓴 학습 루프로"):readme.index("## 10. 추론 최적화")]
-    assert "한 번의 실행입니다" in sec and "두 루프는 같은 절차가 아닙니다" in sec and "들어 있는 루프로 학습됐습니다" in sec
+    assert "이 절을 쓸 때는 한 번의 실행이었습니다" in sec and "두 루프는 같은 절차가 아닙니다" in sec and "들어 있는 루프로 학습됐습니다" in sec
     assert "GPU 학습에는 쓰이지 않았다" not in (ROOT / "docs" / "ONE_PAGE.md").read_text(encoding="utf-8")
     w = json.loads((EVAL / "owner_eval_analysis.json").read_text(encoding="utf-8"))["calc_wording"]
     assert w["ko_owner"]["wording_names_the_right_operation"] < w["ko_ai_written"]["wording_names_the_right_operation"]
