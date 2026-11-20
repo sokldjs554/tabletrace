@@ -74,7 +74,7 @@ def test_analysis_says_what_did_not_improve():
     assert all(v["unparsable"] == 0 for v in t["dev"].values())
 
 
-@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8), ("repeat", 4), ("full2", 8), ("rl3", 8), ("owner", 10), ("ownloop", 6), ("chem", 18), ("share", 12), ("chemrepeat", 12), ("koonly2", 12)])
+@pytest.mark.parametrize("session, replays", [("gpu3", 22), ("control", 8), ("repeat", 4), ("full2", 8), ("rl3", 8), ("owner", 10), ("ownloop", 6), ("chem", 18), ("share", 12), ("chemrepeat", 12), ("koonly2", 12), ("rl4", 8)])
 def test_replay_record_covers_every_run_of_the_session(session, replays):
     d = json.loads((EVAL / f"replay_check_{session}.json").read_text(encoding="utf-8"))
     assert d["replays"] == 2 * len(d["runs"]) == replays and d["questions_that_differ"] == 0
@@ -243,7 +243,7 @@ def test_rl_on_the_full_data_model_changed_no_accuracy_and_the_documents_say_so(
         assert needle in sec, needle
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sec = readme[readme.index("### 9.11 전체 데이터 모델에서 시작한 강화학습"):readme.index("## 10. 추론 최적화")]
-    for needle in ("정답률에 검출되는 차이가 없습니다", "한 번의 실행이고 시드를 바꾸지 않았습니다", "결과를 본 뒤에 찾은 것입니다"):
+    for needle in ("정답률에 검출되는 차이가 없습니다", "시드를 바꾸지 않았습니다", "결과를 본 뒤에 찾은 것입니다", "2026-11-20에 같은 명령으로 한 번 더 했고"):
         assert needle in sec, needle
     handoff = (ROOT / "docs" / "HANDOFF.md").read_text(encoding="utf-8")
     assert '"미세조정한 모델에 강화학습을 더해 더 좋아졌다"도 틀린 말이다' in handoff and '"강화학습이 모델의 확신도를 망친다"' in handoff

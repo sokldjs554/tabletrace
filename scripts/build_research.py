@@ -454,6 +454,23 @@ def gpu3_cards() -> list[dict]:
                     "artifact": f"experiments/eval/length_fix_analysis.json (scripts/length_fix_analysis.py), experiments/exaone_lora_full2*/train_info.json. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rpf['replays']}건을 다시 검증했고({rpf['questions_checked']:,}문항) 판정이 다른 문항은 {rpf['questions_that_differ']}개다"})
     r3 = load(EXP / "eval" / "rl3_analysis.json")
     rp3 = load(EXP / "eval" / "replay_check_rl3.json")
+
+    def rl_repeat_notes() -> list[str]:
+        """The same experiment once more (2026-11-20, section P with P_RL): what was written down before it, and what came out."""
+        p2, rpk = (load(EXP / "eval" / "repeat_once_analysis.json") or {}).get("P2_rl_from_full_data", {}), load(EXP / "eval" / "replay_check_rl4.json")
+        if not (p2.get("run") and rpk):
+            return ["한계. 한 번의 실행이다."]
+        c, a, t, cc = p2["2_rl_vs_start_on_the_korean_test"], p2["added_after_the_run"]["confidence"]["auroc"], p2["training"], p2["cited_gold_cell"]
+
+        def ro(x: float) -> str:          # the particle after a number read aloud: 0.690으로, 0.758로
+            return "으로" if f"{x:.3f}"[-1] in "036" else "로"
+        assert c["holds"] and a["ci95_hi"] < 0 and t["rl"]["args_that_differ_from_the_first_time"] == ["adapter", "out"]
+        return [f"같은 명령으로 한 번 더 했다(2026-11-20, Colab T4 한 장). 정답률에 차이가 없을 것이라고 실행 전에 적어 두었고(보고서 §31) 그대로였다. "
+                f"시작 모델 {pct(p2['scores']['start']['rate'])}, 강화학습 뒤 {pct(p2['scores']['after_rl']['rate'])}, 한쪽만 맞힌 문항 {c['only_candidate']} 대 {c['only_reference']}(p {c['p_display']}). "
+                f"조회 {cc['start']['lookup_questions']}문항에서 인용한 셀이 정답 셀인 문항은 {cc['start']['cited_gold_cell']}개에서 {cc['after_rl']['cited_gold_cell']}개다.",
+                f"확신도는 다시 해도 같은 방향이었다. 실행 전에 적지 않은 비교다. AUROC가 {a['start']:.3f}에서 {a['rl']:.3f}{ro(a['rl'])} 내려갔고 차이의 95% 구간은 {a['ci95_lo']:.3f} ~ {a['ci95_hi']:.3f}다. "
+                f"200걸음 가운데 {t['rl']['updates_applied']}걸음이 가중치를 바꿨다(처음 {t['rl']['first_time']['updates_applied']}걸음). "
+                f"평가 {rpk['replays']}건, {rpk['questions_checked']:,}문항을 다시 검증해 다른 판정 {rpk['questions_that_differ']}개."]
     if r3 and rp3:
         fp, sig, sig2, conf, tr3 = r3["first_pass"], r3["signal"]["from_full_data_model"], r3["signal"]["second_experiment"], r3["confidence"]["sum_logprob"], r3["training"]
         st, rl = fp["outcomes"]["start"], fp["outcomes"]["rl"]
@@ -472,7 +489,8 @@ def gpu3_cards() -> list[dict]:
         ]
         out.append({"title": "전체 데이터 모델에서 시작한 강화학습 — 정답률은 그대로이고 확신도는 나빠졌다 (2026-11-16)", "status": "done",
                     "description": "300문항 모델이 아니라 전체 데이터로 미세조정한 모델에 같은 강화학습을 더했다. 시작 모델은 그 세션에서 고친 설정으로 다시 학습했고, "
-                                   "강화학습의 옵션은 두 번째 실험과 시작 모델만 다르다. 실행 전에 \"효과가 없을 가능성이 크다\"고 적어 두었다. 한국어 test 699문항.",
+                                   "강화학습의 옵션은 두 번째 실험과 시작 모델만 다르다. 실행 전에 \"효과가 없을 가능성이 크다\"고 적어 두었다. 한국어 test 699문항. "
+                                   "2026-11-20에 같은 명령으로 한 번 더 했다(아래 메모).",
                     "columns": ["지표", "시작 모델 (전체 데이터 미세조정)", "강화학습 뒤", "같은 문항에서 한쪽만"], "rows": rows,
                     "notes": [f"정답률에 검출되는 차이가 없다. 같은 문항에서 강화학습 뒤만 맞힌 문항 {va['only_rl']}, 시작 모델만 맞힌 문항 {va['only_start']}.",
                               f"배울 신호가 드물었다. 학습 중 표본의 {pct(sig['samples_correct_rate'])}가 이미 정답이었고, 표본 8개의 점수가 모두 같은 프롬프트가 {pct(sig['groups_with_equal_rewards'])}였다"
@@ -481,7 +499,8 @@ def gpu3_cards() -> list[dict]:
                               f"같은 설정으로 미세조정을 한 번 더 하면 {pct(r3['retraining']['outputs']['same_raw_output_rate'])}만 같다.",
                               f"개발 {tr3['dev_first']['n']}문항에서는 정답이 {tr3['dev_first']['correct']}개에서 {tr3['dev_kept']['correct']}개로 늘었지만 test에는 나타나지 않았다. 저장할 걸음을 그 개발셋으로 골랐다.",
                               "확신도가 맞은 답과 틀린 답을 가르는 힘은 줄었다. 예상하지 않았던 것이고 결과를 본 뒤에 찾았다. 구간은 문항을 다시 뽑은 것이라 학습을 다시 했을 때의 흔들림은 담지 않는다.",
-                              "한계. 한 번의 실행이고 시드를 바꾸지 않았다. 모델이 틀리는 프롬프트만 골라 학습하는 방식과 확신도를 보는 보상은 해 보지 않았다."],
+                              *rl_repeat_notes(),
+                              "한계. 시드를 바꾸지 않았다. 모델이 틀리는 프롬프트만 골라 학습하는 방식과 확신도를 보는 보상은 해 보지 않았다."],
                     "artifact": f"experiments/eval/rl3_analysis.json (scripts/rl3_analysis.py), experiments/exaone_grpo3/, experiments/exaone_lora_full3/train_info.json. 소유자가 Kaggle T4 두 장에서 실행. 평가 {rp3['replays']}건을 다시 검증했고({rp3['questions_checked']:,}문항) 판정이 다른 문항은 {rp3['questions_that_differ']}개다"})
     oe = load(EXP / "eval" / "owner_eval_analysis.json")
     if oe:

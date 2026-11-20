@@ -9,6 +9,7 @@ first commit). A repeat that has not come back yet is reported as not run.
       1b  on the 62 paper-table questions, the new Korean-only model still beats the untuned model, p < 0.05 (30 to 3)
   P2  reinforcement learning from a full-data model (exaone_full5 -> exaone_grpo4, section J's command once more)
       2   on the Korean test, no detectable change in verified EM from RL: p >= 0.05 (first time 86.0% and 86.1%, 8 to 7)
+      (added after the run, not a check: the confidence measure of the first time, AUROC 0.757 -> 0.690)
   P3  fine-tuning with the loop the owner wrote (exaone_ownloop2, section M's command once more)
       3a  the two trainings with the owner's loop cannot be told apart on the Korean test: p >= 0.05
       3b  the new one cannot be told apart from the same command with the built-in loop (exaone_full4): p >= 0.05
@@ -114,7 +115,32 @@ def p2() -> dict:
     return {"run": True, "2_rl_vs_start_on_the_korean_test": {**p, "holds": holds_no_difference(p)},
             "scores": {"start": cr.right(s), "after_rl": cr.right(r)}, "cited_gold_cell": {"start": cr.cited(s), "after_rl": cr.cited(r)},
             "first_time": {"start": cr.right(rl2.load("exaone_full3_vllm_ko_test")), "after_rl": cr.right(rl2.load("exaone_grpo3_vllm_ko_test")),
-                           "rl_vs_start": cr.paired(rl2.load("exaone_full3_vllm_ko_test"), rl2.load("exaone_grpo3_vllm_ko_test"))}}
+                           "rl_vs_start": cr.paired(rl2.load("exaone_full3_vllm_ko_test"), rl2.load("exaone_grpo3_vllm_ko_test"))},
+            "start_model_vs_the_first_start_model": cr.paired(rl2.load("exaone_full3_vllm_ko_test"), s),
+            "start_model_earlier_full_data_trainings": earlier_range(cr.right(s)["rate"]),
+            "training": rl_training(),
+            "added_after_the_run": {"confidence": rl_confidence(s, r), "confidence_first_time": rl_confidence(rl2.load("exaone_full3_vllm_ko_test"), rl2.load("exaone_grpo3_vllm_ko_test"))}}
+
+
+def rl_training() -> dict:
+    """The two training records of the repeat, and how their commands differ from the first time (section J)."""
+    read = lambda d: json.loads((ROOT / "experiments" / d / "train_info.json").read_text(encoding="utf-8"))  # noqa: E731
+    f3, f5, g3, g4 = read("exaone_lora_full3"), read("exaone_lora_full5"), read("exaone_grpo3"), read("exaone_grpo4")
+    differ = lambda a, b: sorted(k for k in set(a["args"]) | set(b["args"]) if a["args"].get(k) != b["args"].get(k))  # noqa: E731
+    return {"start_model": {"examples": f5["n_examples"], "steps": f5["steps"], "minutes": round(f5["wall_s"] / 60, 1), "targets_cut_short": f5["targets_cut_short"],
+                            "args_that_differ_from_the_first_time": differ(f3, f5)},
+            "rl": {"steps": g4["steps"], "updates_applied": g4["updates_applied"], "kept_step": g4["kept_step"], "minutes": round(g4["wall_s"] / 60, 1),
+                   "args_that_differ_from_the_first_time": differ(g3, g4),
+                   "first_time": {"updates_applied": g3["updates_applied"], "kept_step": g3["kept_step"], "minutes": round(g3["wall_s"] / 60, 1)}},
+            "notebook_commit": json.loads((ROOT / "experiments" / "run_info_2_rl4.json").read_text(encoding="utf-8"))["commit"]}
+
+
+def rl_confidence(start: dict, rl: dict) -> dict:
+    """Not written down before the run: the first time, RL made the model's own confidence a worse filter of the verifier's
+    answers (AUROC of the summed log-probability). The same measure, with rl3_analysis's paired bootstrap."""
+    import rl3_analysis as rl3
+    c = rl3.confidence(start, rl)["sum_logprob"]
+    return {"auroc": c["auroc"], "aurc": c["aurc"], "bootstrap_resamples": rl3.BOOTSTRAP}
 
 
 def p3() -> dict:

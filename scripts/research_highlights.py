@@ -34,12 +34,14 @@ def p1(x: float) -> str:
 
 
 def accuracy() -> dict:
-    """Korean test: the planners side by side. The full-data model was trained nine times (the eighth is section O's
-    Korean-only model, the same command as exaone_full4, and the ninth its repeat in section P); the bar is the first
-    (lowest) training, which is the number the documents lead with, and the other eight are drawn as ticks."""
+    """Korean test: the planners side by side. The full-data model was trained ten times (the eighth is section O's
+    Korean-only model, the same command as exaone_full4; the ninth and tenth come from section P: the Korean-only repeat
+    and the start model of the RL repeat); the bar is the first (lowest) training, which is the number the documents
+    lead with, and the other nine are drawn as ticks."""
     full = [_em("exaone_full_vllm_ko_test"), _em("exaone_full_vllm_ko_test_run2"), _em("exaone_full2old_vllm_ko_test"),
             _em("exaone_full2_vllm_ko_test"), _em("exaone_full3_vllm_ko_test"), _em("exaone_full4_vllm_ko_test"),
-            _em("exaone_ownloop_vllm_ko_test"), _em("exaone_koonly_vllm_ko_test"), _em("exaone_koonly2_vllm_ko_test")]
+            _em("exaone_ownloop_vllm_ko_test"), _em("exaone_koonly_vllm_ko_test"), _em("exaone_koonly2_vllm_ko_test"),
+            _em("exaone_full5_vllm_ko_test")]
     small = [_em("exaone_vllm_ko_test_run1"), _em("exaone_vllm_ko_test_run2"), _em("exaone_vllm_ko_test")]
     b32 = _load("experiments/gpu2_2026-11-14/recovered.json")["evals"]["ref_32b_awq_ko_test"]["v1"]["metrics"]["verified_em"]
     rows = [
@@ -101,16 +103,18 @@ def rl() -> dict:
     pairs = [("두 번째 실험 (300문항 모델에서 시작)", "exaone_rlstart2_vllm_ko_test", "exaone_grpo2_vllm_ko_test"),
              ("같은 실험을 한 번 더", "exaone_rlstart2b_vllm_ko_test", "exaone_grpo2c_vllm_ko_test"),
              ("대조군: 배치 구성만 첫 실험처럼", "exaone_rlstart2b_vllm_ko_test", "exaone_grpo2b_vllm_ko_test"),
-             ("전체 데이터 모델에서 시작", "exaone_full3_vllm_ko_test", "exaone_grpo3_vllm_ko_test")]
+             ("전체 데이터 모델에서 시작", "exaone_full3_vllm_ko_test", "exaone_grpo3_vllm_ko_test"),
+             ("같은 실험을 한 번 더 (2026-11-20)", "exaone_full5_vllm_ko_test", "exaone_grpo4_vllm_ko_test")]
     rows = [{"label": lab, "before": _metric(a, key), "after": _metric(b, key)} for lab, a, b in pairs]
     for r in rows:
         r["text"] = f"{p1(r['before'])} → {p1(r['after'])}"
     assert rows[0]["after"] - rows[0]["before"] > 0.1 and rows[1]["after"] - rows[1]["before"] > 0.1
-    assert abs(rows[2]["after"] - rows[2]["before"]) < 0.03 and abs(rows[3]["after"] - rows[3]["before"]) < 0.03
+    assert all(abs(r["after"] - r["before"]) < 0.03 for r in rows[2:])
     return {"id": "rl", "kind": "dumbbell", "max": 1.0, "rows": rows, "before_label": "강화학습 전", "after_label": "강화학습 뒤",
             "title": "강화학습은 약한 시작 모델의 인용 셀 정확도만 올렸다",
             "caption": f"한국어 test {_n('exaone_grpo2_vllm_ko_test')}문항에서 모델이 인용한 셀이 정답 셀과 같은 비율(검증기가 손대기 전). 보상과 손실은 저장소 소유자가 직접 쓴 코드다. "
-                       "배치 구성만 첫 실험처럼 되돌린 대조군에서는 오르지 않았고, 이미 인용 셀이 정확한 전체 데이터 모델에서는 더 오를 자리가 없었다. 알고리즘 하나, 시드 하나의 결과다.",
+                       "배치 구성만 첫 실험처럼 되돌린 대조군에서는 오르지 않았고, 이미 인용 셀이 정확한 전체 데이터 모델에서는 더 오를 자리가 없었다. "
+                       "전체 데이터 모델에서 시작한 실험은 같은 명령으로 한 번 더 했고 같았다. 알고리즘 하나, 시드 하나의 결과다.",
             "more": "EXAONE 강화학습, 두 번째 실험"}
 
 
@@ -210,13 +214,16 @@ def unexpected() -> list[dict]:
     """Results that went against what was hoped for, said as plainly as the others."""
     rl3 = _load("experiments/eval/rl3_analysis.json")
     conf = rl3["confidence"]["sum_logprob"]["auroc"]       # the signal the documents report
+    p2 = _load("experiments/eval/repeat_once_analysis.json")["P2_rl_from_full_data"]       # the same run once more (2026-11-20)
+    again = p2["added_after_the_run"]["confidence"]["auroc"]
     own = _load("console/data/recorded/index.json")["planners"]["exaone"]["runs"]
     text = [r for r in own if r["set"] == "ko_owner" and r["id"] in _text_ids()]
     out = [
         {"text": f"mT5-small은 미세조정과 강화학습을 다 거치고도 {p1(_em('rl_v3_ko_test'))}로, 휴리스틱 기준선 {p1(_em('heuristic_ko_test'))}를 넘지 못했다.",
          "more": "한국어 표 QA — 독립 test"},
         {"text": f"전체 데이터 모델에서 시작한 강화학습은 정답률을 바꾸지 못했다({p1(_em('exaone_full3_vllm_ko_test'))}와 {p1(_em('exaone_grpo3_vllm_ko_test'))}). "
-                 f"확신도가 맞는 답과 틀린 답을 가르는 정도(AUROC)는 {conf['start']:.3f}에서 {conf['rl']:.3f}으로 나빠졌다.",
+                 f"확신도가 맞는 답과 틀린 답을 가르는 정도(AUROC)는 {conf['start']:.3f}에서 {conf['rl']:.3f}으로 나빠졌다. "
+                 f"같은 명령으로 다시 해도 같았다(정답률 {p1(p2['scores']['start']['rate'])}와 {p1(p2['scores']['after_rl']['rate'])}, AUROC {again['start']:.3f}에서 {again['rl']:.3f}).",
          "more": "전체 데이터 모델에서 시작한 강화학습"},
         {"text": f"튜닝하지 않은 1.2B 모델에게 도구를 스스로 고르게 하면 {p1(_em('tools_1p2b_ko_test'))}로, 프로그램을 한 번에 제안하게 할 때({p1(_em('ref_1p2b_ko_test'))})보다 낮았다.",
          "more": "튜닝하지 않은 EXAONE, 크기별"},
@@ -224,6 +231,7 @@ def unexpected() -> list[dict]:
          "more": "소유자가 쓴 30문항에서의 EXAONE"},
     ]
     assert _em("rl_v3_ko_test") < _em("heuristic_ko_test") and conf["rl"] < conf["start"]
+    assert p2["2_rl_vs_start_on_the_korean_test"]["holds"] and again["rl"] < again["start"] and again["ci95_hi"] < 0      # "the same"
     assert _em("tools_1p2b_ko_test") < _em("ref_1p2b_ko_test")
     return out
 

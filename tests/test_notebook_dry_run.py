@@ -80,7 +80,8 @@ class DryRun:
         monkeypatch.chdir(repo)
         if cloned_results:                # a fresh clone of main: it holds the result files of earlier sessions, and no weights
             for f in [*(ROOT / "experiments").glob("eval/*/metrics.json"), *(ROOT / "experiments").glob("*/train_info.json"), ROOT / "experiments/run_info_2.json"]:
-                p1 = ("koonly2",)                        # section P with P_KOONLY (2026-11-20, Colab): the last results that came in
+                p2 = ("full5", "grpo4")                  # section P with P_RL (2026-11-20, Colab): the last results that came in
+                p1 = ("koonly2", *p2)                    # section P with P_KOONLY (2026-11-20, Colab)
                 again = ("kochem3", *p1)                 # section O's optional repeat (2026-11-18, Colab)
                 share = ("koonly", *again)               # section O (2026-11-17, Colab)
                 chem = ("kochem2", "ref_1p2b_chem", *share)   # section N (2026-11-17, Colab): the last results that came in
@@ -89,7 +90,7 @@ class DryRun:
                 later = {"before the control run": ("rlstart2b", "grpo2b", "grpo2c", "full2", "full3", "grpo3", *owner), "before the repeat run": ("grpo2c", "full2", "full3", "grpo3", *owner),
                          "before the full-data rerun": ("full2", "full3", "grpo3", *owner), "before RL on the full-data model": ("full3", "grpo3", *owner),
                          "before EXAONE on the owner's questions": owner, "before the owner-loop run": loop, "before the chemistry run": chem, "before the Korean-only run": share, "before the chemistry repeat run": again,
-                         "before the Korean-only repeat": p1}.get(cloned_results, ())
+                         "before the Korean-only repeat": p1, "before the RL repeat": p2}.get(cloned_results, ())
                 if any(x in str(f) for x in later):
                     continue              # the repository as it was when the owner ran that experiment
                 dest = repo / f.relative_to(ROOT)
@@ -982,6 +983,7 @@ def test_setup_cell_updates_a_stale_clone_even_when_old_result_files_are_in_the_
 
 P_CELL = "KOONLY2_DIR"        # the cell of section P: three experiments that ran once, run once more
 BEFORE_P1 = "before the Korean-only repeat"      # main as it was on 2026-11-20 before P_KOONLY ran
+BEFORE_P2 = "before the RL repeat"               # main as it was on 2026-11-20 before P_RL ran (P1's results in it)
 
 
 def _with(run, *flags: str) -> None:
@@ -1019,7 +1021,7 @@ def test_section_p_repeats_the_korean_only_model_with_section_o_command(tmp_path
 
 
 def test_section_p_repeats_rl_from_a_full_data_model_with_section_j_command(tmp_path, monkeypatch):
-    run = DryRun(tmp_path, monkeypatch, cloned_results=True)
+    run = DryRun(tmp_path, monkeypatch, cloned_results=BEFORE_P2)
     _with(run, "P_RL")
     counts = run.run_all(only=P_CELL)
     assert counts["train"] == 1 and counts["grpo"] == 1 and counts["eval"] == 8
@@ -1080,25 +1082,61 @@ def test_the_recorded_korean_only_repeat_matches_what_the_notebook_does_and_is_n
         for key in ("row_select", "max_in", "entity_check", "few_shot", "corpus", "data", "table_format", "confidence"):
             assert meta.get(key) == same.get(key), (out, key)
         assert meta["tokenizer"] == same["tokenizer"].replace("koonly", "koonly2")              # each model's own merged weights
+    later = DryRun(tmp_path / "later", monkeypatch, cloned_results=BEFORE_P2)          # the same day, P_RL asked for with P_KOONLY left on
+    _with(later, "P_KOONLY", "P_RL")
+    counts = later.run_all(only=P_CELL)
+    assert counts["train"] == 1 and counts["grpo"] == 1 and "koonly2" not in " ".join(c for _, c in later.calls)
     now = DryRun(tmp_path / "now", monkeypatch, cloned_results=True)
     _with(now, "P_KOONLY")
     assert now.run_all(only=P_CELL) == collections.Counter()
-    _with(now, "P_RL", "P_OWNLOOP")
+
+
+def test_the_recorded_rl_repeat_matches_what_the_notebook_does_and_only_p3_is_left(tmp_path, monkeypatch):
+    """P_RL was run on 2026-11-20 on Colab with one T4, after P_KOONLY's results were merged. Both training records are
+    section J's commands with other output paths (and the new start adapter); the stored evaluations are those the
+    notebook plans, with the settings of section J's. With the results in the repository only P_OWNLOOP still runs."""
+    read = lambda d: json.loads((ROOT / "experiments" / d / "train_info.json").read_text())  # noqa: E731
+    differ = lambda a, b: {k for k in set(a["args"]) | set(b["args"]) if a["args"].get(k) != b["args"].get(k)}  # noqa: E731
+    f3, f5, g3, g4 = read("exaone_lora_full3"), read("exaone_lora_full5"), read("exaone_grpo3"), read("exaone_grpo4")
+    assert differ(f3, f5) == {"out"} and differ(g3, g4) == {"adapter", "out"} and g4["args"]["adapter"] == "experiments/exaone_lora_full5"
+    assert (f5["n_examples"], f5["steps"], f5["loop"], f5["targets_cut_short"]) == (f3["n_examples"], f3["steps"], "builtin", 0)
+    assert g4["steps"] == 200 and g4["reward"] == g3["reward"]
+    run_info = json.loads((ROOT / "experiments/run_info_2_rl4.json").read_text())
+    assert run_info["platform"] == "colab" and run_info["gpus"] == ["Tesla T4"] and run_info["commit"] == "d0343e9" and run_info["finished"].startswith("2026-11-20")
+    planned = DryRun(tmp_path / "before", monkeypatch, cloned_results=BEFORE_P2)
+    _with(planned, "P_RL")
+    planned.run_all(only=P_CELL)
+    outs = [o for o in planned.outputs() if o.startswith("experiments/eval/")]
+    stored = sorted(str(d.relative_to(ROOT)) for n in ("exaone_full5", "exaone_grpo4") for d in (ROOT / "experiments/eval").glob(f"{n}_vllm_*"))
+    assert sorted(outs) == stored
+    for out in outs:
+        meta = json.loads((ROOT / out / "metrics.json").read_text())["meta"]
+        same = json.loads((ROOT / out.replace("full5", "full3").replace("grpo4", "grpo3") / "metrics.json").read_text())["meta"]
+        for key in ("row_select", "max_in", "entity_check", "few_shot", "corpus", "data", "table_format", "confidence"):
+            assert key not in same or meta.get(key) == same[key], (out, key)        # section J's records predate some meta keys
+        assert meta["max_in"] == 672 and meta["corpus"] == ["data/ko/documents.jsonl"]
+    now = DryRun(tmp_path / "now", monkeypatch, cloned_results=True)
+    _with(now, "P_KOONLY", "P_RL")
+    assert now.run_all(only=P_CELL) == collections.Counter()
+    _with(now, "P_OWNLOOP")
     counts = now.run_all(only=P_CELL)
-    assert counts["train"] == 2 and counts["grpo"] == 1 and "koonly2" not in " ".join(c for _, c in now.calls)
+    assert counts["train"] == 1 and counts["grpo"] == 0 and all("ownloop2" in o for o in now.outputs())
 
 
 def test_the_notebook_says_what_p1_gave_and_what_is_left():
     cells = json.loads((ROOT / "notebooks/gpu_experiments_2.ipynb").read_text(encoding="utf-8"))["cells"]
     intro, section = "".join(cells[0]["source"]), next("".join(c["source"]) for c in cells if "".join(c["source"]).startswith("## P."))
     row = next(line for line in intro.split("\n") if line.startswith("| P |"))
-    assert "P1은 2026-11-20에 Colab에서 끝남" in row and "P2와 P3은 남음" in row and "아직 돌리지 않" not in row
-    assert "남은 것은 P2(`P_RL`)와 P3(`P_OWNLOOP`)입니다" in intro
+    assert "P1과 P2는 2026-11-20에 Colab에서 끝남" in row and "P3은 남음" in row and "아직 돌리지 않" not in row
+    assert "남은 것은 P3(`P_OWNLOOP`)입니다" in intro
     p1 = json.loads((ROOT / "experiments/eval/repeat_once_analysis.json").read_text())["P1_korean_only"]
     a, b = p1["1a_unanswerable_repeat_vs_new_korean_only"], p1["1b_papers_new_korean_only_vs_untuned"]
     assert not a["holds"] and b["holds"]
     assert "P1의 결과" in section and "(1a)는 **남지 않았습니다**" in section and "(1b)는 남았습니다" in section
     assert f"{a['only_candidate']} 대 {a['only_reference']}(p {a['p_display']})" in section and f"{b['only_candidate']} 대 {b['only_reference']}(p {b['p_display']})" in section
+    p2 = json.loads((ROOT / "experiments/eval/repeat_once_analysis.json").read_text())["P2_rl_from_full_data"]
+    c = p2["2_rl_vs_start_on_the_korean_test"]
+    assert c["holds"] and "P2의 결과" in section and "(2)는 남았습니다" in section and f"{c['only_candidate']} 대 {c['only_reference']}(p {c['p_display']})" in section
 
 
 def test_what_section_p_is_checked_for_was_written_down_before_it_ran():

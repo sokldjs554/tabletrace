@@ -1,0 +1,73 @@
+{
+ "tokenizer": "LGAI-EXAONE/EXAONE-4.0-1.2B",
+ "max_in": 672,
+ "runs": {
+  "exaone_full5_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8727,
+    "verified_em_replayed": 0.8727
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8441,
+    "verified_em_replayed": 0.8441
+   }
+  },
+  "exaone_full5_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6333,
+    "verified_em_replayed": 0.6333
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6667,
+    "verified_em_replayed": 0.6667
+   }
+  },
+  "exaone_grpo4_vllm_ko_test": {
+   "first_pass": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8727,
+    "verified_em_replayed": 0.8727
+   },
+   "subject_check": {
+    "questions": 699,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.8441,
+    "verified_em_replayed": 0.8441
+   }
+  },
+  "exaone_grpo4_vllm_ko_custom": {
+   "first_pass": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6333,
+    "verified_em_replayed": 0.6333
+   },
+   "subject_check": {
+    "questions": 30,
+    "questions_that_differ": 0,
+    "examples": [],
+    "verified_em_stored": 0.6667,
+    "verified_em_replayed": 0.6667
+   }
+  }
+ },
+ "replays": 8,
+ "questions_checked": 2916,
+ "questions_that_differ": 0
+}
