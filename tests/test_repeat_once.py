@@ -68,7 +68,7 @@ def test_the_documents_report_p3_and_the_whole_of_section_p():
                    "### 31.4 P절의 정리", "다섯 확인 가운데 넷이 남았고 하나가 남지 않았다"):
         assert needle in sec, needle
     assert f">{a['p_display']}<" in sec and f">{b['p_display']}<" in sec
-    assert "87.6%로 이 범위보다 높았고" in report                                             # the dated note in §27.3
+    assert "87.5%로 이 범위보다 높았고" in report                                             # the dated note in §27.3
     readme = _read("README.md")
     sec = readme[readme.index("### 9.16 한 번씩만 돌린 실험의 반복"):readme.index("## 10. 추론 최적화")]
     assert "**P3." in sec and "**범위 밖입니다.**" in sec and "셋 다 돌렸습니다(2026-11-20)" in sec and "아직입니다" not in sec
