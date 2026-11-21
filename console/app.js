@@ -636,9 +636,9 @@
   // ---------- the first screen: three stored results, one question at a time ----------
   // Which results are shown is decided when the results are recorded (scripts/make_recorded_runs.py, pick_tour), not here.
   const TOUR = {
-    pass: { tab: "검증을 통과한 답", why: "왜 셀까지 보나" },
-    repair: { tab: "검증기가 셀을 고친 답", why: "답만 보면 맞은 문항입니다" },
-    hold: { tab: "내보내지 않은 답", why: "표에 없는 것을 물은 질문입니다" },
+    pass: { tab: "검증을 통과한 답", why: "셀까지 확인하는 이유" },
+    repair: { tab: "검증기가 셀을 고친 답", why: "답만 보면 맞은 문항" },
+    hold: { tab: "내보내지 않은 답", why: "표에 없는 것을 물은 질문" },
   };
   const rcOf = (c) => `r${c.row}c${c.col}`;
   async function renderTour(n) {
@@ -681,8 +681,8 @@
     const s0 = doc.source || {};
     box.innerHTML = `
       <header class="tour-hero">
-        <p class="tour-kicker">한국어 표 질의응답 · 저장된 실행 결과</p>
-        <h1>답이 맞으면, 근거로 고른 셀도 맞을까?</h1>
+        <p class="tour-kicker">한국어 표 · 저장된 실행 결과</p>
+        <h1>근거 셀까지 검증하는 표 질의응답</h1>
         <p class="tour-lede">모델이 답과 함께 <b>어느 셀로 어떻게 계산했는지</b>를 내면, 도구가 그 셀을 다시 읽고 검증기가 확인합니다. 맞지 않으면 답을 내보내지 않습니다. 아래 세 문항은 저장된 모델 출력 그대로입니다.</p>
       </header>
       <nav class="tour-tabs" role="tablist" aria-label="장면">${scenes.map((x, k) => `<a role="tab" class="tour-tab${k === i ? " is-active" : ""}" aria-selected="${k === i}" href="#tour/${k + 1}"><b>${k + 1}</b>${esc(TOUR[x.kind].tab)}</a>`).join("")}</nav>

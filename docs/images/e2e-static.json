@@ -14,7 +14,7 @@
   {
    "name": "desktop: it says why the cell is checked, with the cell that would give the same answer",
    "ok": true,
-   "detail": "왜 셀까지 보나. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모델이 "
+   "detail": "셀까지 확인하는 이유. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모"
   },
   {
    "name": "desktop: two tabs, and the first screen fits the width",
@@ -169,7 +169,7 @@
   {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.9s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.8s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -244,12 +244,12 @@
   {
    "name": "mobile: the first screen walks through one question: the proposal, the tool, the verifier, the answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=865 of 844, cells ['r0c3', 'r2c3'], '정답 2 ✓ 맞음'"
+   "detail": "answer '2' at y=836 of 844, cells ['r0c3', 'r2c3'], '정답 2 ✓ 맞음'"
   },
   {
    "name": "mobile: it says why the cell is checked, with the cell that would give the same answer",
    "ok": true,
-   "detail": "왜 셀까지 보나. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모델이 "
+   "detail": "셀까지 확인하는 이유. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모"
   },
   {
    "name": "mobile: two tabs, and the first screen fits the width",
@@ -404,7 +404,7 @@
   {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.7s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.9s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",
