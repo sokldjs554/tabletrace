@@ -1,13 +1,13 @@
 {
  "command": "pytest -q tests",
- "result_line": "605 passed, 1 skipped in 293.31s (0:04:53)",
+ "result_line": "605 passed, 1 skipped in 333.76s (0:05:33)",
  "passed": 605,
  "failed": 0,
  "skipped": 1,
  "errors": 0,
  "failed_tests": [],
  "test_files": 40,
- "wall_s": 297.0,
+ "wall_s": 337.5,
  "exit_code": 0,
- "finished": "2026-11-20T19:20:46"
+ "finished": "2026-11-21T13:10:10"
 }

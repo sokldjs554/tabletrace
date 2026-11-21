@@ -229,15 +229,21 @@ def test_the_cell_that_would_give_the_same_answer_is_read_from_the_table():
     assert twin["name"] in table["rows"][r] and twin["name"] not in ex["question"]
 
 
-def test_the_page_has_three_tabs_and_keeps_every_earlier_view():
+def test_the_page_has_two_tabs_and_keeps_every_earlier_view():
+    """The tabs are the two screens a visitor operates. The research summary repeats the portfolio and the README, so it
+    is a link at the foot of the page (2026-11-21); its address and its content are unchanged."""
     html = (ROOT / "console" / "index.html").read_text(encoding="utf-8")
     js = (ROOT / "console" / "app.js").read_text(encoding="utf-8")
     import re
     tabs = re.findall(r'<a href="#(\w+)" data-view="\w+" class="navlink[^"]*">([^<]+)</a>', html)
-    assert tabs == [("tour", "한눈에 보기"), ("workbench", "전체 문항 탐색"), ("research", "연구 결과")]
-    for view in ("view-tour", "view-workbench", "view-matrix", "view-research", "view-about"):      # nothing was removed, two views moved one step back
+    assert tabs == [("tour", "한눈에 보기"), ("workbench", "전체 문항 탐색")]
+    for view in ("view-tour", "view-workbench", "view-matrix", "view-research", "view-about"):      # nothing was removed, three views moved one step back
         assert f'id="{view}"' in html, view
     assert 'data-sub="matrix"' in html and 'href="#about"' in html
+    foot = html[html.index('<footer class="foot">'):html.index("</footer>")]
+    assert 'href="#research"' in foot and 'href="#about"' in foot
+    tour = js[js.index("async function renderTour"):js.index("function tourFit")]
+    assert "#research" not in tour and "research.json" not in tour                              # the first screen does not repeat the summary
     assert 'const VIEWS = ["tour", "workbench", "matrix", "research", "about"]' in js and "state.recorded.tour" in js and "renderTour" in js
     # the walk-through keeps its own class names, so the question browser's marks on a table cannot be mistaken for it
     assert "tv-ev" in js and "tv-cited" in js and 'class="tv-cell' in js and "is-evidence" not in js[js.index("async function renderTour"):js.index("async function renderMatrix")]

@@ -17,9 +17,9 @@
    "detail": "왜 셀까지 보나. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모델이 "
   },
   {
-   "name": "desktop: three tabs, and the first screen fits the width",
+   "name": "desktop: two tabs, and the first screen fits the width",
    "ok": true,
-   "detail": "3 tabs, active '한눈에 보기', overflow 0px"
+   "detail": "2 tabs, active '한눈에 보기', overflow 0px"
   },
   {
    "name": "desktop: second scene: a right answer whose cited cell the verifier replaced",
@@ -42,9 +42,9 @@
    "detail": "{'id': 'ko_owner_27', 'planner': 'exaone'}"
   },
   {
-   "name": "desktop: the first screen quotes three conclusions of the research summary word for word",
+   "name": "desktop: the research summary is a link at the foot of the page, not a tab, and the first screen ends with its scene",
    "ok": true,
-   "detail": "약한 모델은 맞힌 답의 절반 이상에서 답이 없는 셀을  / 검증기를 거치면 틀린 답이 21.6%에서 12.0%로  / 전체 데이터로 튜닝한 12억 파라미터 EXAONE이 8"
+   "detail": "{'tabs': ['tour', 'workbench'], 'link': '연구 결과 요약', 'inTour': 0, 'tourEnds': 'tour-grid'}"
   },
   {
    "name": "desktop: a scene opens its question in the question browser",
@@ -169,7 +169,7 @@
   {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.6s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.9s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -205,6 +205,11 @@
    "name": "desktop: research view renders",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "desktop: the link at the foot opens the research summary, with no tab lit",
+   "ok": true,
+   "detail": "#research"
   },
   {
    "name": "desktop: research view leads with conclusions, each with a chart and a table of its values",
@@ -247,9 +252,9 @@
    "detail": "왜 셀까지 보나. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모델이 "
   },
   {
-   "name": "mobile: three tabs, and the first screen fits the width",
+   "name": "mobile: two tabs, and the first screen fits the width",
    "ok": true,
-   "detail": "3 tabs, active '한눈에 보기', overflow 0px"
+   "detail": "2 tabs, active '한눈에 보기', overflow 0px"
   },
   {
    "name": "mobile: second scene: a right answer whose cited cell the verifier replaced",
@@ -272,9 +277,9 @@
    "detail": "{'id': 'ko_owner_27', 'planner': 'exaone'}"
   },
   {
-   "name": "mobile: the first screen quotes three conclusions of the research summary word for word",
+   "name": "mobile: the research summary is a link at the foot of the page, not a tab, and the first screen ends with its scene",
    "ok": true,
-   "detail": "약한 모델은 맞힌 답의 절반 이상에서 답이 없는 셀을  / 검증기를 거치면 틀린 답이 21.6%에서 12.0%로  / 전체 데이터로 튜닝한 12억 파라미터 EXAONE이 8"
+   "detail": "{'tabs': ['tour', 'workbench'], 'link': '연구 결과 요약', 'inTour': 0, 'tourEnds': 'tour-grid'}"
   },
   {
    "name": "mobile: a scene opens its question in the question browser",
@@ -399,7 +404,7 @@
   {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 4.1s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.7s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",
@@ -437,9 +442,14 @@
    "detail": ""
   },
   {
+   "name": "mobile: the link at the foot opens the research summary, with no tab lit",
+   "ok": true,
+   "detail": "#research"
+  },
+  {
    "name": "mobile: research view leads with conclusions, each with a chart and a table of its values",
    "ok": true,
-   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 37, 'height': 5497, 'over': 0}"
+   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 37, 'height': 5515, 'over': 0}"
   },
   {
    "name": "mobile: every experiment is kept below, folded by topic",
@@ -449,7 +459,7 @@
   {
    "name": "mobile: research view fits the screen width and is short",
    "ok": true,
-   "detail": "height 5497px, overflow 0px"
+   "detail": "height 5515px, overflow 0px"
   },
   {
    "name": "mobile: a chart mark shows its value on focus",

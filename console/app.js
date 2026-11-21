@@ -704,23 +704,9 @@
           <div class="tablescroll"><table class="tt tourtable"><thead><tr><th class="rc">r\\c</th>${table.header.map((h, c) => `<th>${esc(h)} <span class="tv-col">c${c}</span></th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
           <p class="legend">${legend}</p>
         </section>
-      </div>
-      <section class="tour-more">
-        <div class="tour-find"><h2>이 프로젝트가 잰 것</h2><ul id="tourfind"><li class="muted">불러오는 중…</li></ul></div>
-        <div class="tour-next">
-          <a class="tour-link" href="#workbench"><b>전체 문항 탐색</b><span>평가 문항 ${state.recorded.counts.questions}개를 플래너 ${state.recorded.counts.planners}개가 어떻게 답했는지. 답, 근거, 검증 과정을 하나씩 봅니다.</span></a>
-          <a class="tour-link" href="#research"><b>연구 결과</b><span>결론과 그림, 그 아래 실험별 조건과 산출물 경로.</span></a>
-          <a class="tour-link" href="#about"><b>작동 방식</b><span>검색, 제안, 도구, 검증으로 이어지는 그래프와 신뢰 경계.</span></a>
-        </div>
-      </section>`;
+      </div>`;
     tourFit();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(tourFit);
-    // three conclusions from the research summary, in its own words (data/research.json)
-    try {
-      state.research = state.research || await fetchJSON("data/research.json", {}, 10000);
-      const pick = ["evidence", "verifier", "accuracy"].map((id) => state.research.highlights.find((h) => h.id === id)).filter(Boolean);
-      if ($("#tourfind")) $("#tourfind").innerHTML = pick.map((h) => `<li>${esc(h.title)}</li>`).join("") + '<li class="tour-all"><a href="#research">그림과 함께 보기</a></li>';
-    } catch (e) { if ($("#tourfind")) $("#tourfind").innerHTML = '<li><a href="#research">연구 결과 보기</a></li>'; }
   }
 
   // On a narrow screen the table is wider than its box and scrolls sideways. Say so, and say when a marked cell is out of view.

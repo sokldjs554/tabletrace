@@ -148,7 +148,7 @@ def main() -> None:
                         twin = scenes[0].get("twin")
                         check(f"{label}: it says why the cell is checked, with the cell that would give the same answer",
                               bool(twin) and s1["twin"] == [twin["cell"]] and twin["name"] in s1["why"] and twin["cell"] not in s1["ev"], s1["why"][:60])
-                        check(f"{label}: three tabs, and the first screen fits the width", s1["tabs"] == 3 and "한눈에" in s1["active"] and s1["over"] <= 1,
+                        check(f"{label}: two tabs, and the first screen fits the width", s1["tabs"] == 2 and "한눈에" in s1["active"] and s1["over"] <= 1,
                               f"{s1['tabs']} tabs, active {s1['active']!r}, overflow {s1['over']}px")
                         page.screenshot(path=str(out / f"{tag}-{label}-00-tour.png"), full_page=mobile)
                         s2 = to_scene(1, "repair")
@@ -169,11 +169,12 @@ def main() -> None:
                         missed = idx0["tour"].get("missed")
                         check(f"{label}: the third scene links to a question the verifier let through", bool(missed)
                               and page.locator(f".tour-why a[href='#workbench/{missed['id']}/{missed['planner']}']").count() == 1 if missed else False, str(missed))
-                        # the conclusions under the scenes are the research summary's own sentences
-                        page.wait_for_function("() => document.querySelectorAll('#tourfind li').length >= 3", timeout=15000)
-                        finds = page.eval_on_selector_all("#tourfind li", "els => els.map(e => e.textContent)")
-                        titles = {h["title"] for h in page.evaluate("async () => (await (await fetch('data/research.json')).json())")["highlights"]}
-                        check(f"{label}: the first screen quotes three conclusions of the research summary word for word", sum(f in titles for f in finds) == 3, " / ".join(f[:30] for f in finds[:3]))
+                        # The research summary is not a tab and the first screen does not repeat it: one link at the foot of the page leads there.
+                        foot = page.evaluate("""() => ({ tabs: [...document.querySelectorAll('.navlink[data-view]')].map(a => a.dataset.view),
+                            link: (document.querySelector('.foot a[href="#research"]') || {}).textContent || '', inTour: document.querySelectorAll('#tour a[href="#research"]').length,
+                            tourEnds: (document.querySelector('#tour').lastElementChild || {}).className || '' })""")
+                        check(f"{label}: the research summary is a link at the foot of the page, not a tab, and the first screen ends with its scene",
+                              foot["tabs"] == ["tour", "workbench"] and "연구 결과" in foot["link"] and foot["inTour"] == 0 and foot["tourEnds"] == "tour-grid", str(foot))
                         # from a scene to the full record of that question
                         page.locator(".tour-actions a").nth(0).click()
                         shown()
@@ -463,6 +464,13 @@ def main() -> None:
                     page.goto(base + "#research", wait_until="networkidle")
                     page.wait_for_timeout(800)
                     check(f"{label}: research view renders", "연구 결과" in (page.text_content("#research") or ""))
+                    if a.static:
+                        page.goto(base, wait_until="networkidle")
+                        page.wait_for_selector(".tour-q", timeout=15000)
+                        page.locator('.foot a[href="#research"]').click()
+                        page.wait_for_selector("#research article.hl", timeout=15000)
+                        check(f"{label}: the link at the foot opens the research summary, with no tab lit", page.url.endswith("#research")
+                              and page.locator(".navlink.is-active").count() == 0 and page.locator("#view-research:not([hidden])").count() == 1, page.url.split("/")[-1])
                     # the view opens with a few conclusions, each with a chart and the same values as a table; the detail is folded
                     top = page.evaluate("""() => { const hl = [...document.querySelectorAll('.hl')];
                         return { cards: hl.length, charts: hl.filter((c) => c.querySelector('.viz')).length, tables: hl.filter((c) => c.querySelector('.viz-table tbody tr')).length,

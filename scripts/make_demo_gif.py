@@ -70,8 +70,6 @@ def capture(site: Path, frames: Path, chromium: str | None) -> None:
         go("#matrix")
         page.evaluate("window.scrollTo(0, 150)")
         shot("표로 한꺼번에: 소유자가 직접 쓴 30문항 전체를 플래너 일곱에 대해.", 3.2)
-        go("#research")
-        shot("연구 결과: 결론 일곱 개와 그림. 실험 기록은 아래에 접혀 있습니다.", 3.2)
         if (site / "live" / "manifest.json").exists():
             ko = next(r for r in idx["planners"]["exaone"]["runs"] if r["set"] == "ko_owner" and r["mark"] == "correct" and "lookup" in r["result"]["planner"]["raw_output"])
             go(f"#workbench/{ko['id']}/exaone")
