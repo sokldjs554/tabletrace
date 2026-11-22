@@ -169,7 +169,7 @@
   {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.5s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.6s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -235,6 +235,16 @@
    "name": "desktop: a conclusion links to its experiment record",
    "ok": true,
    "detail": "한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160) 실행·측정 완료"
+  },
+  {
+   "name": "desktop: the page's own files and its data are asked for under the build's stamp",
+   "ok": true,
+   "detail": "build testbld, ['styles.css?v=testbld', 'charts.js?v=testbld', 'live.js?v=testbld', 'app.js?v=testbld'], data ['research.json?v=testbld']"
+  },
+  {
+   "name": "desktop: a newer build reloads an open page once, not in a loop",
+   "ok": true,
+   "detail": "1 reload(s) after BUILD.txt changed"
   },
   {
    "name": "mobile: mode badge",
@@ -404,7 +414,7 @@
   {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 4.2s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.5s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",
@@ -470,6 +480,16 @@
    "name": "mobile: a conclusion links to its experiment record",
    "ok": true,
    "detail": "한국어 표 QA — 독립 test (KorWikiTQ 표 단위 분할 539 + 합성 160) 실행·측정 완료"
+  },
+  {
+   "name": "mobile: the page's own files and its data are asked for under the build's stamp",
+   "ok": true,
+   "detail": "build testbld, ['styles.css?v=testbld', 'charts.js?v=testbld', 'live.js?v=testbld', 'app.js?v=testbld'], data ['research.json?v=testbld']"
+  },
+  {
+   "name": "mobile: a newer build reloads an open page once, not in a loop",
+   "ok": true,
+   "detail": "1 reload(s) after BUILD.txt changed"
   },
   {
    "name": "no browser console errors",

@@ -497,6 +497,37 @@ def main() -> None:
                     page.wait_for_timeout(600)
                     check(f"{label}: a conclusion links to its experiment record", page.locator("details.grp[open] section.is-target").count() == 1,
                           (page.text_content("details.grp[open] section.is-target h3") or "")[:60])
+                    if tag == "static":
+                        # A browser must not keep an earlier build. The page's own files and its data carry the build's stamp; and when a
+                        # newer build is published while the tab is open, the page reloads once on coming back to the front.
+                        build_file = ROOT / a.static / "BUILD.txt"
+                        was = build_file.read_text()
+                        page.goto(base, wait_until="networkidle")
+                        page.wait_for_selector(".tour-q", timeout=15000)
+                        asked: list[str] = []
+                        page.on("request", lambda r, asked=asked: asked.append(r.url))
+                        stamp = page.evaluate("""() => ({ build: (document.querySelector('meta[name="tt-build"]') || {}).content || '',
+                            own: [...document.querySelectorAll('script[src], link[rel=stylesheet]')].map(e => e.getAttribute('src') || e.getAttribute('href')) })""")
+                        page.goto(base + "#research", wait_until="networkidle")            # a data file asked for after the page is up
+                        page.wait_for_selector("#research article.hl", timeout=15000)
+                        data = [u.split("/")[-1] for u in asked if "/data/" in u]
+                        check(f"{label}: the page's own files and its data are asked for under the build's stamp",
+                              stamp["build"] == was.split()[-1] and len(stamp["own"]) == 4 and all(u.endswith("?v=" + stamp["build"]) for u in stamp["own"])
+                              and bool(data) and all(u.endswith("?v=" + stamp["build"]) for u in data), f"build {stamp['build']}, {stamp['own']}, data {data}")
+                        loads: list[str] = []
+                        page.on("load", lambda _p, loads=loads: loads.append("load"))
+                        try:
+                            build_file.write_text("commit newer00\n")
+                            page.evaluate("document.dispatchEvent(new Event('visibilitychange'))")
+                            page.wait_for_function("() => sessionStorage.getItem('tt-build-reload') === 'newer00'", timeout=15000)
+                            page.wait_for_load_state("networkidle")
+                            page.wait_for_timeout(2500)                                     # time for a second reload, if there were one
+                            page.evaluate("document.dispatchEvent(new Event('visibilitychange'))")
+                            page.wait_for_timeout(1500)
+                        finally:
+                            build_file.write_text(was)
+                        check(f"{label}: a newer build reloads an open page once, not in a loop", len(loads) == 1 and page.locator("#research article.hl").count() > 0,
+                              f"{len(loads)} reload(s) after BUILD.txt changed")
                     page.close()
                 except Exception as e:  # a crash must show up as a FAILED check, never as a missing report
                     check(f"{label}: unexpected error", False, f"{type(e).__name__}: {str(e)[:240]}")

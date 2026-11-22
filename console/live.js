@@ -5,11 +5,13 @@
 (function () {
   "use strict";
   const BASE = "live/";
+  // the build's stamp (scripts/build_static_site.py): this site's own files are asked for under it, so they are never taken from an earlier build
+  const V = ((b) => (b ? "?v=" + encodeURIComponent(b) : ""))(((document.querySelector('meta[name="tt-build"]') || {}).content || "").trim());
   let manifest = null, py = null, loading = null, runFn = null;
 
   async function available() {
     if (manifest) return manifest;
-    try { const r = await fetch(BASE + "manifest.json"); if (!r.ok) return null; manifest = await r.json(); return manifest; } catch (e) { return null; }
+    try { const r = await fetch(BASE + "manifest.json" + V); if (!r.ok) return null; manifest = await r.json(); return manifest; } catch (e) { return null; }
   }
   function loadScript(src) {
     return new Promise((resolve, reject) => { const s = document.createElement("script"); s.src = src; s.onload = resolve;
@@ -26,10 +28,10 @@
       say("pydantic을 불러오는 중…");
       await p.loadPackage(m.wheels.map((w) => new URL(BASE + "wheels/" + w, location.href).href), { messageCallback: () => {} });
       say("이 저장소의 검증기와 도구를 불러오는 중…");
-      p.unpackArchive(await (await fetch(BASE + m.own)).arrayBuffer(), "zip", { extractDir: "/tt" });
+      p.unpackArchive(await (await fetch(BASE + m.own + V)).arrayBuffer(), "zip", { extractDir: "/tt" });
       p.runPython("import sys; sys.path.insert(0, '/tt')");
       const mod = p.pyimport("tt_browser");
-      const tok = await fetch("data/recorded/kiwi_tokens.json");       // Korean tokens recorded with the real tokenizer
+      const tok = await fetch("data/recorded/kiwi_tokens.json" + V);       // Korean tokens recorded with the real tokenizer
       if (tok.ok) mod.load_tokens(await tok.text());
       runFn = mod.run_json; py = p;
     })();

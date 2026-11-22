@@ -161,5 +161,28 @@ def test_a_build_without_the_runtime_offers_no_run_it_here(tmp_path):
     subprocess.run([sys.executable, str(ROOT / "scripts/build_static_site.py"), "--out", str(out), "--commit", "test"], check=True, capture_output=True)
     assert not (out / "live" / "manifest.json").exists() and not list((out / "live").glob("*.py"))
     html = (out / "index.html").read_text(encoding="utf-8")
-    assert '<details class="chatbox" id="livebox" hidden>' in html and '<script src="live.js"></script>' in html
+    assert '<details class="chatbox" id="livebox" hidden>' in html and '<script src="live.js?v=test"></script>' in html
     assert "TTLive.available()" in (out / "app.js").read_text(encoding="utf-8")
+
+
+def test_a_build_stamps_the_page_so_a_browser_does_not_keep_an_earlier_one(tmp_path):
+    """GitHub Pages lets a browser reuse a file for ten minutes and an open tab keeps what it loaded. The owner saw an
+    earlier build after a deploy (2026-11-22). The built page names its own files with ?v=<commit>, asks for its data
+    under the same stamp, and reads BUILD.txt past the cache to learn of a newer build; the page in the repository,
+    which a backend serves, carries no stamp."""
+    import re
+
+    out = tmp_path / "site"
+    subprocess.run([sys.executable, str(ROOT / "scripts/build_static_site.py"), "--out", str(out), "--commit", "abc1234"], check=True, capture_output=True)
+    html = (out / "index.html").read_text(encoding="utf-8")
+    assert '<meta name="tt-build" content="abc1234">' in html and (out / "BUILD.txt").read_text() == "commit abc1234\n"
+    own = re.findall(r'(?:src|href)="([^":]+\.(?:js|css)[^"]*)"', html)
+    assert sorted(own) == ["app.js?v=abc1234", "charts.js?v=abc1234", "live.js?v=abc1234", "styles.css?v=abc1234"]
+    source = (ROOT / "console" / "index.html").read_text(encoding="utf-8")
+    assert "tt-build" not in source and "?v=" not in source
+    js = (ROOT / "console" / "app.js").read_text(encoding="utf-8")
+    assert "fetch(stamped(url)," in js and 'fetch(`BUILD.txt?t=${Date.now()}`, { cache: "no-store" })' in js and "location.reload()" in js
+    assert 'sessionStorage.getItem("tt-build-reload") === now' in js                      # one reload per build, never a loop
+    assert js.count("fetch(") == 2                                                         # every other request goes through fetchJSON
+    live = (ROOT / "console" / "live.js").read_text(encoding="utf-8")
+    assert live.count(" + V)") == 3 and "tt-build" in live

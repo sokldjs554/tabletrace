@@ -56,11 +56,29 @@
     return run ? { run, key, set: state.recorded.planners[key] } : null;
   }
 
+  // A static build stamps the page with its commit (scripts/build_static_site.py). The page asks for its data files under
+  // that stamp, so files of two builds are never mixed, and it reads BUILD.txt past the cache when it opens and when its
+  // tab comes back to the front: if a newer build has been published it reloads, once per build.
+  const BUILD = ((document.querySelector('meta[name="tt-build"]') || {}).content || "").trim();
+  const stamped = (url) => (BUILD && /^data\//.test(url) ? `${url}${url.includes("?") ? "&" : "?"}v=${encodeURIComponent(BUILD)}` : url);
+  async function checkBuild() {
+    if (!BUILD) return;
+    try {
+      const r = await fetch(`BUILD.txt?t=${Date.now()}`, { cache: "no-store" });
+      if (!r.ok) return;
+      const now = (await r.text()).replace(/^commit\s+/, "").trim();
+      if (!now || now === BUILD || sessionStorage.getItem("tt-build-reload") === now) return;
+      sessionStorage.setItem("tt-build-reload", now);          // if storage is blocked this throws and the page stays as it is
+      location.reload();
+    } catch (e) { /* offline, storage blocked, or a host without BUILD.txt: keep the page */ }
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) checkBuild(); });
+
   async function fetchJSON(url, opts = {}, timeoutMs = 8000) {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
-      const r = await fetch(url, { ...opts, signal: ctrl.signal, headers: { "content-type": "application/json", ...(opts.headers || {}) } });
+      const r = await fetch(stamped(url), { ...opts, signal: ctrl.signal, headers: { "content-type": "application/json", ...(opts.headers || {}) } });
       const body = await r.json().catch(() => null);
       if (!r.ok) { const e = new Error((body && (body.detail || body.error)) || `HTTP ${r.status}`); e.status = r.status; e.body = body; throw e; }
       return body;
@@ -74,6 +92,7 @@
 
   // ---------- boot ----------
   async function init() {
+    checkBuild();
     try {
       state.release = await fetchJSON("v1/release", {}, 3000);
       state.mode = "live";

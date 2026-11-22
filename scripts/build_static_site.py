@@ -23,6 +23,16 @@ def main() -> None:
     shutil.copytree(ROOT / "console", out, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     (out / ".nojekyll").write_text("")
     (out / "BUILD.txt").write_text(f"commit {a.commit}\n")
+    # Stamp the page with this build. GitHub Pages lets a browser reuse a file for ten minutes and an open tab keeps what it
+    # loaded, so a visitor could see an earlier build, or files of two builds mixed. The addresses of the page's own files
+    # carry ?v=<commit>, the page asks for its data under the same stamp, and it looks at BUILD.txt to learn of a newer build
+    # (console/app.js, checkBuild).
+    html = (out / "index.html").read_text(encoding="utf-8")
+    for name in ("styles.css", "charts.js", "live.js", "app.js"):
+        assert html.count(f'"{name}"') == 1, name
+        html = html.replace(f'"{name}"', f'"{name}?v={a.commit}"')
+    assert html.count("<head>") == 1
+    (out / "index.html").write_text(html.replace("<head>", f'<head>\n<meta name="tt-build" content="{a.commit}">'), encoding="utf-8")
     if a.live:
         # A failed download must not take the demo down: without the runtime the page simply does not offer "run it here".
         r = subprocess.run([sys.executable, str(ROOT / "scripts" / "fetch_live_runtime.py"), "--out", str(out / "live")])
