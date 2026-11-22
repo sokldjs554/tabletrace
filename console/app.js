@@ -646,12 +646,23 @@
       const t = $(".ptext", p); const txt = t.textContent;
       if (s.start >= 0 && s.end <= txt.length && txt.slice(s.start, s.end) === s.text) t.innerHTML = `${esc(txt.slice(0, s.start))}<mark class="span">${esc(s.text)}</mark>${esc(txt.slice(s.end))}`;
     });
-    const first = (res.evidence_cells || [])[0]; if (first) { const td = findCell(first); if (td && window.innerWidth > 1000) td.scrollIntoView({ block: "center", behavior: "smooth" }); }
+    const first = (res.evidence_cells || [])[0]; if (first) { const td = findCell(first); if (td && window.innerWidth > 1000) reveal(td); }
+  }
+  // Bring an element to the middle of the boxes that scroll around it, and leave the page where it is. scrollIntoView also
+  // scrolls the window, which pushed the header off the screen whenever a question opened.
+  function reveal(el) {
+    if (window.innerWidth <= 1000) { el.scrollIntoView({ block: "center", behavior: "smooth" }); return; }      // one column: the page itself scrolls
+    for (let box = el.parentElement; box && box !== document.body && box !== document.documentElement; box = box.parentElement) {
+      const st = getComputedStyle(box), r = el.getBoundingClientRect(), b = box.getBoundingClientRect(), to = {};
+      if (/auto|scroll/.test(st.overflowY) && box.scrollHeight > box.clientHeight + 1) to.top = box.scrollTop + (r.top - b.top) - (box.clientHeight - r.height) / 2;
+      if (/auto|scroll/.test(st.overflowX) && box.scrollWidth > box.clientWidth + 1) to.left = box.scrollLeft + (r.left - b.left) - (box.clientWidth - r.width) / 2;
+      if ("top" in to || "left" in to) box.scrollTo({ ...to, behavior: "smooth" });
+    }
   }
   function focusEvidence(target, kind) {
     if (window.innerWidth <= 1000) showPane("center");
-    if (kind === "cell") { const [tid, rc] = target.split("|"); const td = document.querySelector(`#t-${CSS.escape(tid)} td[data-rc="${rc}"]`); if (td) { $$("td.is-focus").forEach((x) => x.classList.remove("is-focus")); td.classList.add("is-focus"); td.scrollIntoView({ block: "center", behavior: "smooth" }); } }
-    else { const p = document.getElementById("p-" + target); if (p) p.scrollIntoView({ block: "center", behavior: "smooth" }); }
+    if (kind === "cell") { const [tid, rc] = target.split("|"); const td = document.querySelector(`#t-${CSS.escape(tid)} td[data-rc="${rc}"]`); if (td) { $$("td.is-focus").forEach((x) => x.classList.remove("is-focus")); td.classList.add("is-focus"); reveal(td); } }
+    else { const p = document.getElementById("p-" + target); if (p) reveal(p); }
   }
 
   // ---------- the first screen: three stored results, one question at a time ----------

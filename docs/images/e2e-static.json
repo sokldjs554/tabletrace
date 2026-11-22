@@ -9,7 +9,7 @@
   {
    "name": "desktop: the first screen walks through one question: the proposal, the tool, the verifier, the answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '289.55 km2' at y=654 of 900, cells ['r0c1', 'r14c1'], '정답 289.55 km2 ✓ 맞음'"
+   "detail": "answer '289.55 km2' at y=690 of 900, cells ['r0c1', 'r14c1'], '정답 289.55 km2 ✓ 맞음'"
   },
   {
    "name": "desktop: first scene: the number the model wrote is struck out and the tool's value is the answer",
@@ -54,7 +54,7 @@
   {
    "name": "desktop: the question browser opens with an answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '289.55 km2' at y=336 of 900, '정답 289.55 km2 ✓ 맞음'"
+   "detail": "answer '289.55 km2' at y=372 of 900, '정답 289.55 km2 ✓ 맞음'"
   },
   {
    "name": "desktop: document + questions rendered",
@@ -80,6 +80,11 @@
    "name": "desktop: evidence highlighted in table",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "desktop: opening a question leaves the header on the screen and still brings the evidence cell into view",
+   "ok": true,
+   "detail": "{'y': 0, 'head': 0, 'cell': True}"
   },
   {
    "name": "desktop: the result reads in order, with its source and its trace folded, and the left pane numbers its three steps",
@@ -424,7 +429,7 @@
   {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.3s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 4.5s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",

@@ -1,12 +1,12 @@
 {
  "live": {
-  "total": 38,
-  "passed": 38,
+  "total": 39,
+  "passed": 39,
   "failed": []
  },
  "static": {
-  "total": 101,
-  "passed": 101,
+  "total": 102,
+  "passed": 102,
   "failed": []
  }
 }

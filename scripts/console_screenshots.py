@@ -231,6 +231,11 @@ def main() -> None:
                             prov: !!(document.querySelector('#result .provbox') || {}).open, trace: !!(document.querySelector('#result details.card.fold') || {}).open,
                             steps: [...document.querySelectorAll('#pane-left .stepno')].map(e => e.textContent), notice: document.querySelectorAll('#recordednotice').length })""")
                         want = [h for h in ("답변", "근거", "계산", "모델의 제안과 검증 결과", "같은 질문, 다른 플래너", "실행 추적") if h in order["heads"]]
+                        if not mobile:
+                            page.wait_for_timeout(700)                                  # the smooth scroll to the evidence cell
+                            top = page.evaluate("() => ({ y: window.scrollY, head: document.querySelector('header').getBoundingClientRect().top, cell: (() => { const td = document.querySelector('td.is-evidence'), r = td.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; })() })")
+                            check(f"{label}: opening a question leaves the header on the screen and still brings the evidence cell into view",
+                                  top["y"] == 0 and top["head"] == 0 and top["cell"], str(top))
                         check(f"{label}: the result reads in order, with its source and its trace folded, and the left pane numbers its three steps",
                               order["heads"] == want and want[0] == "답변" and want[-1] == "실행 추적" and order["chips"] == 0 and not order["prov"] and not order["trace"]
                               and order["steps"] == ["1", "2", "3"] and order["notice"] == 0, f"{order['heads']}, steps {order['steps']}")
