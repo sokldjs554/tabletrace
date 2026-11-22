@@ -137,8 +137,10 @@ def test_a_long_table_is_shown_to_the_planner_as_the_evaluation_showed_it():
 
 
 def test_the_first_result_a_visitor_sees_is_a_right_calculation_on_the_owners_questions():
+    """The question browser opens on the same question as the first screen."""
     run = next(r for r in INDEX["planners"]["exaone"]["runs"] if r["id"] == INDEX["featured"])
     assert EXAMPLES[run["id"]]["set"] == "ko_owner" and run["mark"] == "correct" and run["result"]["calculation"]
+    assert INDEX["featured"] == INDEX["tour"]["scenes"][0]["id"]
 
 
 def test_evidence_cells_carry_how_the_number_parser_read_them():
@@ -191,18 +193,23 @@ def _proposal(run: dict) -> dict:
 
 
 def test_the_first_screen_shows_three_stored_results_picked_by_rule():
-    """The static demo opens on a walk through three results. They are stored runs on questions the owner wrote, chosen
-    when the results are recorded (scripts/make_recorded_runs.py, pick_tour), and each is what its tab says it is."""
+    """The static demo opens on a walk through three results. They are stored runs on questions the owner wrote, found
+    when the results are recorded (scripts/make_recorded_runs.py, pick_tour), and each is what its tab says it is. What
+    the first scene is about was the owner's choice among three candidates (2026-11-22); which run fits it is a rule."""
     tour = INDEX["tour"]
-    assert [s["kind"] for s in tour["scenes"]] == ["pass", "repair", "hold"]
+    assert [s["kind"] for s in tour["scenes"]] == ["recalc", "repair", "hold"]
     runs = [_tour_run(s) for s in tour["scenes"]]
     assert all(EXAMPLES[r["id"]]["set"] == "ko_owner" for r in runs)                       # the owner's questions
     assert all("EXAONE" in INDEX["planners"][s["planner"]]["model_id"] for s in tour["scenes"])   # stored model outputs, not the baseline
     failed = lambda r: [c["name"] for c in r["result"]["verdict"]["checks"] if not c["passed"]]  # noqa: E731
-    passed, repaired, held = runs
-    # 1. passed as proposed: the featured calculation, every check passed, the evidence is what the model cited
-    assert tour["scenes"][0]["id"] == INDEX["featured"] and passed["mark"] == "correct" and not failed(passed) and passed["result"]["calculation"]
-    assert [(c["row"], c["col"]) for c in _proposal(passed)["cells"]] == [(c["row"], c["col"]) for c in passed["result"]["evidence_cells"]]
+    recalc, repaired, held = runs
+    # 1. the model cited the gold cells and wrote a number that is not their result: only that check failed, and the
+    #    answer sent is the value the tool computed, which is the gold answer
+    ids = lambda cs: sorted(f"r{c['row']}c{c['col']}" for c in cs)  # noqa: E731
+    assert recalc["mark"] == "correct" and failed(recalc) == ["answer_matches_calc"] and recalc["result"]["calculation"]
+    assert ids(_proposal(recalc)["cells"]) == ids(recalc["result"]["evidence_cells"]) == sorted(EXAMPLES[recalc["id"]]["gold"]["cells"])
+    assert recalc["result"]["answer"] == recalc["result"]["calculation"]["formatted"] != _proposal(recalc)["answer"]
+    assert recalc["result"]["answer"] in EXAMPLES[recalc["id"]]["gold"]["answers"]
     # 2. a right answer whose cited cell did not hold it: same row, another column, and the verifier moved the evidence
     cited, kept = _proposal(repaired)["cells"], repaired["result"]["evidence_cells"]
     assert repaired["mark"] == "correct" and "evidence_repaired" in failed(repaired) and len(cited) == len(kept) == 1
@@ -215,18 +222,20 @@ def test_the_first_screen_shows_three_stored_results_picked_by_rule():
     assert missed["mark"] == "answered_unanswerable" and missed["result"]["status"] == "answered"
 
 
-def test_the_cell_that_would_give_the_same_answer_is_read_from_the_table():
-    """The first scene says that another row holds the same value, so choosing it gives the same answer. That row and its
-    name come from the table, not from a sentence typed into the page."""
-    docs = json.loads((ROOT / "console" / "data" / "recorded" / "documents.json").read_text(encoding="utf-8"))
-    scene = INDEX["tour"]["scenes"][0]
-    ex, run, twin = EXAMPLES[scene["id"]], _tour_run(scene), scene["twin"]
-    table = next(t for t in docs[ex["doc_id"]]["tables"] if t["id"] == ex["table_id"])
-    ev = run["result"]["evidence_cells"]
-    r, c = (int(x) for x in twin["cell"][1:].split("c"))
-    assert c == ev[0]["col"] and r not in {x["row"] for x in ev}
-    assert table["rows"][r][c] == twin["value"] == table["rows"][ev[0]["row"]][ev[0]["col"]]
-    assert twin["name"] in table["rows"][r] and twin["name"] not in ex["question"]
+def test_the_first_screen_does_not_open_on_the_table_the_owner_set_aside():
+    """The owner asked (2026-11-22) that the page not open on the 2002 K-League table. No scene, nor the question the
+    third scene links to, nor the question the browser opens on, is on a table listed in TOUR_AVOID_TABLES; and the rule
+    for the first scene finds one run, so the choice of a kind of scene did not hide a choice between runs."""
+    import sys
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import make_recorded_runs as m
+
+    tour = INDEX["tour"]
+    shown = [s["id"] for s in tour["scenes"]] + [tour["missed"]["id"], INDEX["featured"]]
+    assert m.TOUR_AVOID_TABLES and not {EXAMPLES[i]["table_id"] for i in shown} & m.TOUR_AVOID_TABLES
+    failed = lambda r: [c["name"] for c in r["result"]["verdict"]["checks"] if not c["passed"]]  # noqa: E731
+    fits = [r["id"] for r in INDEX["planners"]["exaone"]["runs"] if EXAMPLES[r["id"]]["set"] == "ko_owner" and r["mark"] == "correct" and failed(r) == ["answer_matches_calc"]]
+    assert fits == [tour["scenes"][0]["id"]]
 
 
 def test_the_page_has_two_tabs_and_keeps_every_earlier_view():

@@ -125,7 +125,8 @@ def main() -> None:
                             return page.evaluate("""() => { const g = document.querySelector('.tour-grid'), a = document.querySelector('.tv-answer');
                                 const cells = (c) => [...document.querySelectorAll('td.' + c)].map((e) => e.dataset.trc);
                                 return { kind: g.dataset.kind, ex: g.dataset.ex, answer: a.textContent, held: a.classList.contains('tv-held'), top: a.getBoundingClientRect().top,
-                                    gold: document.querySelector('.tour-gold').textContent, ev: cells('tv-ev'), cited: cells('tv-cited'), twin: cells('tv-twin'),
+                                    gold: document.querySelector('.tour-gold').textContent, ev: cells('tv-ev'), cited: cells('tv-cited'), written: (document.querySelector('.tv-kv .tv-off') || {}).textContent || '',
+                                    verdict: document.querySelector('.tour-steps > li:nth-child(3)').textContent, tool: document.querySelector('.tour-steps > li:nth-child(2)').textContent,
                                     steps: document.querySelectorAll('.tour-steps > li').length, tabs: document.querySelectorAll('.navlink[data-view]').length,
                                     active: (document.querySelector('.navlink.is-active') || {}).textContent || '', why: document.querySelector('.tour-why').textContent,
                                     over: document.documentElement.scrollWidth - document.documentElement.clientWidth }; }""")
@@ -142,12 +143,15 @@ def main() -> None:
                         ids = lambda cells: [f"r{c['row']}c{c['col']}" for c in cells]  # noqa: E731
                         s1 = scene()
                         check(f"{label}: the first screen walks through one question: the proposal, the tool, the verifier, the answer and its gold answer, without a click",
-                              s1["kind"] == "pass" and s1["ex"] == scenes[0]["id"] and s1["answer"] == stored(0)["answer"] and "정답" in s1["gold"] and "맞음" in s1["gold"]
-                              and s1["ev"] == ids(stored(0)["evidence_cells"]) and s1["steps"] == 3 and (mobile or 0 < s1["top"] < vp["height"]),
+                              s1["kind"] == "recalc" and s1["ex"] == scenes[0]["id"] and s1["answer"] == stored(0)["answer"] and "정답" in s1["gold"] and "맞음" in s1["gold"]
+                              and sorted(s1["ev"]) == sorted(ids(stored(0)["evidence_cells"])) and s1["steps"] == 3 and (mobile or 0 < s1["top"] < vp["height"]),
                               f"answer {s1['answer']!r} at y={s1['top']:.0f} of {vp['height']}, cells {s1['ev']}, {s1['gold'][:20]!r}")
-                        twin = scenes[0].get("twin")
-                        check(f"{label}: it says why the cell is checked, with the cell that would give the same answer",
-                              bool(twin) and s1["twin"] == [twin["cell"]] and twin["name"] in s1["why"] and twin["cell"] not in s1["ev"], s1["why"][:60])
+                        # the first scene: the model wrote a number that is not what its two cells give; the answer shown is the tool's value
+                        wrote = next(t["output"]["parsed"]["answer"] for t in stored(0)["trace"] if t["step"] == "propose" and t["output"] and t["output"].get("parsed"))
+                        computed = stored(0)["calculation"]["formatted"]
+                        check(f"{label}: first scene: the number the model wrote is struck out and the tool's value is the answer",
+                              s1["written"] == wrote != computed == s1["answer"] and wrote in s1["verdict"] and computed in s1["verdict"] and computed in s1["tool"]
+                              and not s1["cited"], f"model wrote {s1['written']!r}, tool {computed!r}, answer {s1['answer']!r}")
                         check(f"{label}: two tabs, and the first screen fits the width", s1["tabs"] == 2 and "한눈에" in s1["active"] and s1["over"] <= 1,
                               f"{s1['tabs']} tabs, active {s1['active']!r}, overflow {s1['over']}px")
                         page.screenshot(path=str(out / f"{tag}-{label}-00-tour.png"), full_page=mobile)
@@ -157,7 +161,7 @@ def main() -> None:
                               and "맞음" in s2["gold"], f"cited {s2['cited']}, evidence {s2['ev']}, {s2['answer']!r}")
                         side = page.evaluate("""() => { const sc = document.querySelector('.tour-doc .tablescroll'), h = document.querySelector('.tv-side'), edge = sc.getBoundingClientRect().right;
                             return { over: sc.scrollWidth - sc.clientWidth, shown: !h.hidden, text: h.textContent,
-                                     out: [...sc.querySelectorAll('td.tv-ev, td.tv-cited, td.tv-twin')].filter(td => td.getBoundingClientRect().right > edge + 1).length }; }""")
+                                     out: [...sc.querySelectorAll('td.tv-ev, td.tv-cited')].filter(td => td.getBoundingClientRect().right > edge + 1).length }; }""")
                         check(f"{label}: a table wider than the screen says so, and says when a marked cell is out of view",
                               side["shown"] == (side["over"] > 20) and ((("오른쪽" in side["text"]) == (side["out"] > 0)) if side["shown"] else side["out"] == 0),
                               f"overflow {side['over']}px, {side['out']} marked cell(s) out of view, " + (f"hint {side['text'][:26]!r}" if side["shown"] else "no hint"))

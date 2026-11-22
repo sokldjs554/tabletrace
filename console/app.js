@@ -636,7 +636,7 @@
   // ---------- the first screen: three stored results, one question at a time ----------
   // Which results are shown is decided when the results are recorded (scripts/make_recorded_runs.py, pick_tour), not here.
   const TOUR = {
-    pass: { tab: "검증을 통과한 답", why: "셀까지 확인하는 이유" },
+    recalc: { tab: "도구가 계산을 고친 답", why: "모델이 적은 숫자를 쓰지 않는 이유" },
     repair: { tab: "검증기가 셀을 고친 답", why: "답만 보면 맞은 문항" },
     hold: { tab: "내보내지 않은 답", why: "표에 없는 것을 물은 질문" },
   };
@@ -654,18 +654,18 @@
     const kept = res.evidence_cells || [], keptIds = cellIds(kept), cited = p.cells.filter((c) => !keptIds.includes(rcOf(c))), checks = res.verdict.checks, failed = checks.filter((c) => !c.passed);
     const cell = (c, k) => `<span class="tv-ref tv-ref-${k}">${rcOf(c)}</span> <span class="tv-q">${esc(text(c))}</span>`;
     // 1. what the model proposed
-    const proposed = `<dl class="tv-kv"><dt>연산</dt><dd>${esc(OPS[p.op] || p.op)}</dd><dt>셀</dt><dd>${p.cells.map((c) => cell(c, keptIds.includes(rcOf(c)) ? "ev" : "cited")).join("<br>")}</dd><dt>답</dt><dd><b>${esc(p.answer ?? "")}</b></dd></dl>`;
+    const proposed = `<dl class="tv-kv"><dt>연산</dt><dd>${esc(OPS[p.op] || p.op)}</dd><dt>셀</dt><dd>${p.cells.map((c) => cell(c, keptIds.includes(rcOf(c)) ? "ev" : "cited")).join("<br>")}</dd><dt>답</dt><dd><b${sc.kind === "recalc" ? ' class="tv-off"' : ""}>${esc(p.answer ?? "")}</b></dd></dl>`;
     // 2. what the tool did with those cells
     const calc = res.calculation, sym = { diff: " − ", sum: " + " }[calc && calc.op];
     const tool = calc ? `그 셀을 다시 읽어 계산합니다. <b class="tv-expr">${esc(sym ? calc.inputs.map((x) => x.raw).join(sym) : calc.expression)} = ${esc(calc.formatted)}</b>`
       : `그 셀을 다시 읽습니다. ${p.cells.map((c) => cell(c, keptIds.includes(rcOf(c)) ? "ev" : "cited")).join(", ")}`;
     // 3. what the verifier decided
     const where = cited.map(rcOf).join(", ");
-    const verdict = sc.kind === "pass" ? `<span class="tv-ok">✓</span> 검사 ${checks.length}개를 모두 통과했습니다. <span class="muted tv-small">${esc(checks.map((c) => CHECKS[c.name] || c.name).join(" · "))}</span>`
+    const verdict = sc.kind === "recalc" ? `<span class="tv-ng">✗</span> 모델이 적은 숫자(${esc(p.answer ?? "")})가 도구가 계산한 값(${esc(calc.formatted)})과 다릅니다. 계산한 값으로 답했습니다. <span class="muted tv-small">걸린 검사: ${esc(failed.map((c) => CHECKS[c.name] || c.name).join(" · "))} · 나머지 ${checks.length - failed.length}개 통과</span>`
       : sc.kind === "repair" ? `<span class="tv-ng">✗</span> 모델이 가리킨 셀(${esc(where)})에는 그 답이 없습니다. 답과 같은 셀이 표에 하나뿐이어서, 근거를 그 셀(${esc(keptIds.join(", "))})로 고쳤습니다.`
       : `<span class="tv-ng">✗</span> 모델이 가리킨 셀(${esc(where)})에는 그 답이 없습니다. 답과 같은 셀이 표에 없어서 답을 내보내지 않았습니다. <span class="muted tv-small">걸린 검사: ${esc(failed.map((c) => CHECKS[c.name] || c.name).join(" · "))}</span>`;
     const out = res.status === "answered" ? `<div class="tv-answer">${esc(res.answer)}</div>` : '<div class="tv-answer tv-held">답변을 보류했습니다</div>';
-    const why = sc.kind === "pass" ? (sc.twin ? `${esc(sc.twin.name)}의 ${esc(sc.twin.value)}를 골라도 답은 ${esc(res.answer)}입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모델이 고른 셀을 따로 확인합니다.` : "답과 함께 모델이 고른 셀을 따로 확인합니다.")
+    const why = sc.kind === "recalc" ? "모델은 맞는 셀을 골랐지만 적어 낸 숫자가 계산과 달랐습니다. 답에는 모델이 적은 숫자가 아니라, 도구가 그 셀로 다시 계산한 값을 씁니다."
       : sc.kind === "repair" ? "모델이 가리킨 셀은 틀렸습니다. 이 프로젝트는 답이 맞았는지와 셀이 맞았는지를 따로 셉니다."
       : `모델은 답을 냈지만, 가리킨 셀에 그 값이 없어 걸러졌습니다.${t.missed ? ` 다 걸러지지는 않습니다. <a href="#workbench/${encodeURIComponent(t.missed.id)}/${esc(t.missed.planner)}">검증기가 놓친 문항 보기</a>` : ""}`;
     const src = meta.source ? `${esc(meta.source.generated[ex.set])}에 ${esc(meta.source.where[ex.set])}에서 받아 저장한 출력` : "";
@@ -673,11 +673,9 @@
     const tag = (r, c) => { const id = `r${r}c${c}`, k = keptIds.indexOf(id);
       if (k >= 0) return [" tv-ev", `<span class="tv-n">${k + 1}</span>`];
       if (cited.some((x) => rcOf(x) === id)) return [" tv-cited", '<span class="tv-tag tv-tag-cited">모델</span>'];
-      if (sc.twin && sc.twin.cell === id) return [" tv-twin", '<span class="tv-tag tv-tag-twin">같은 값</span>'];
       return ["", ""]; };
     const rows = table.rows.map((r, ri) => `<tr><td class="rc">r${ri}</td>${r.map((v, ci) => { const [cls, badge] = tag(ri, ci); return `<td class="tv-cell${cls}${String(v).length > 14 ? " tv-long" : ""}" data-trc="r${ri}c${ci}">${esc(v)}${badge}</td>`; }).join("")}</tr>`).join("");
-    const legend = [kept.length ? '<span class="tv-n">1</span> 검증기가 확인한 근거 셀' : "", cited.length ? '<span class="tv-tag tv-tag-cited">모델</span> 모델이 가리켰지만 근거가 되지 못한 셀' : "",
-      sc.twin ? '<span class="tv-tag tv-tag-twin">같은 값</span> 골라도 답이 같아지는 셀' : ""].filter(Boolean).join(" · ");
+    const legend = [kept.length ? '<span class="tv-n">1</span> 검증기가 확인한 근거 셀' : "", cited.length ? '<span class="tv-tag tv-tag-cited">모델</span> 모델이 가리켰지만 근거가 되지 못한 셀' : ""].filter(Boolean).join(" · ");
     const s0 = doc.source || {};
     box.innerHTML = `
       <header class="tour-hero">
@@ -715,7 +713,7 @@
     const sc = $("#tour .tablescroll"), hint = $("#tour .tv-side");
     if (!sc || !hint) return;
     const over = sc.scrollWidth - sc.clientWidth > 20, edge = sc.getBoundingClientRect().right;
-    const out = over && [...sc.querySelectorAll("td.tv-ev, td.tv-cited, td.tv-twin")].some((td) => td.getBoundingClientRect().right > edge + 1);
+    const out = over && [...sc.querySelectorAll("td.tv-ev, td.tv-cited")].some((td) => td.getBoundingClientRect().right > edge + 1);
     hint.hidden = !over;
     hint.textContent = out ? "표시한 셀 가운데 일부가 오른쪽에 있습니다. 표를 옆으로 밀어 보세요." : "표를 옆으로 밀면 나머지 열이 보입니다.";
   }

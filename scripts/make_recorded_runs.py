@@ -224,11 +224,19 @@ def run_set(rt: AgentRuntime, examples: list[dict], mode: str, tables: dict, sto
     return runs
 
 
-def pick_tour(planners: dict, examples: list[dict], tables: dict, featured: str) -> dict:
-    """The first screen walks through three stored results, one question at a time. They are picked here by rule, not by
-    id, from the questions the owner wrote, so the page cannot show a hand-made example:
+# The owner chose what the first screen opens with (2026-11-22): of three candidates, the question on which the model's
+# written number was wrong and the tool's computed value went out; and the page is not to open on the 2002 K-League table.
+# These two lines are that choice. Which runs fit it, and the other scenes, are found by rule below.
+TOUR_OPENS_WITH = "recalc"
+TOUR_AVOID_TABLES = {"ko_9cd1edd12e"}          # 2002년 K리그 기록 도움 순위
 
-      pass    the featured run: the full-data model, a calculation, every check passed
+
+def pick_tour(planners: dict, examples: list[dict], tables: dict) -> dict:
+    """The first screen walks through three stored results, one question at a time. They are found here by rule, not by
+    id, among the questions the owner wrote, so the page cannot show a hand-made example:
+
+      recalc  the full-data model cited the gold cells of a calculation and wrote a number that is not their result; the
+              only failed check is that one, and the answer sent is the value the tool computed, which is right
       repair  a right answer of a stored EXAONE model whose cited cell did not hold the answer (same row, another column),
               on the smallest table there is: the verifier moved the evidence
       hold    the full-data model proposed an answer to an unanswerable question, a check failed, and nothing was sent
@@ -239,17 +247,14 @@ def pick_tour(planners: dict, examples: list[dict], tables: dict, featured: str)
     proposal = lambda r: next(s["output"]["parsed"] for s in r["result"]["trace"] if s["step"] == "propose" and s["output"] and s["output"].get("parsed"))  # noqa: E731
     owner = lambda r: by_id[r["id"]]["set"] == "ko_owner"  # noqa: E731
     size = lambda r: len(tables[by_id[r["id"]]["table_id"]].rows) * len(tables[by_id[r["id"]]["table_id"]].header)  # noqa: E731
+    allowed = lambda r: by_id[r["id"]]["table_id"] not in TOUR_AVOID_TABLES  # noqa: E731
+    cells = lambda cs: sorted(f"r{c['row']}c{c['col']}" for c in cs)  # noqa: E731
 
-    first = next(r for r in planners["exaone"]["runs"] if r["id"] == featured)
-    assert first["mark"] == "correct" and not failed(first) and owner(first)
-    scene_pass = {"kind": "pass", "id": first["id"], "planner": "exaone"}
-    # another row with the same value in the same column: choosing it gives the same answer (what scoring answers alone cannot see)
-    ex, table, ev = by_id[first["id"]], tables[by_id[first["id"]]["table_id"]], first["result"]["evidence_cells"]
-    rows = {c["row"] for c in ev}
-    name_col = next((c for c in range(len(table.header)) if all(table.rows[r][c] and table.rows[r][c] in ex["question"] for r in rows)), None)
-    twin = next((r for r in range(len(table.rows)) if r not in rows and table.rows[r][ev[0]["col"]] == table.rows[ev[0]["row"]][ev[0]["col"]]), None)
-    if name_col is not None and twin is not None:
-        scene_pass["twin"] = {"cell": f"r{twin}c{ev[0]['col']}", "name": table.rows[twin][name_col], "value": table.rows[twin][ev[0]["col"]]}
+    recalc = [r for r in planners["exaone"]["runs"] if owner(r) and allowed(r) and r["mark"] == "correct" and r["result"]["calculation"]
+              and failed(r) == ["answer_matches_calc"] and cells(proposal(r)["cells"]) == cells(r["result"]["evidence_cells"]) == sorted(by_id[r["id"]]["gold"]["cells"])
+              and r["result"]["answer"] == r["result"]["calculation"]["formatted"] != proposal(r)["answer"]]
+    assert recalc, "no stored answer of the full-data model in which the tool's number replaced the model's"
+    first = recalc[0]
 
     repairs = []
     for k, p in planners.items():
@@ -265,9 +270,9 @@ def pick_tour(planners: dict, examples: list[dict], tables: dict, featured: str)
     assert holds, "no unanswerable question on which the verifier stopped the full-data model's answer"
     same_table = [r for r in holds if by_id[r["id"]]["table_id"] == by_id[rid]["table_id"]]
     hold = (same_table or holds)[0]
-    out = {"scenes": [scene_pass, {"kind": "repair", "id": rid, "planner": rk}, {"kind": "hold", "id": hold["id"], "planner": "exaone"}]}
-    missed = [r for r in planners["exaone"]["runs"] if owner(r) and r["mark"] == "answered_unanswerable"]
-    near = [r for r in missed if by_id[r["id"]]["table_id"] == ex["table_id"]]
+    out = {"scenes": [{"kind": TOUR_OPENS_WITH, "id": first["id"], "planner": "exaone"}, {"kind": "repair", "id": rid, "planner": rk}, {"kind": "hold", "id": hold["id"], "planner": "exaone"}]}
+    missed = [r for r in planners["exaone"]["runs"] if owner(r) and allowed(r) and r["mark"] == "answered_unanswerable"]
+    near = [r for r in missed if by_id[r["id"]]["table_id"] in {by_id[x["id"]]["table_id"] for x in out["scenes"]}]
     if missed:
         out["missed"] = {"id": (near or missed)[0]["id"], "planner": "exaone"}
     return out
@@ -318,8 +323,9 @@ def main() -> None:
         commit = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, text=True).strip()
     except Exception:
         commit = "unknown"
-    # the first thing a visitor sees: the first calculation among the owner's questions that the strongest planner gets right
-    first = next((r["id"] for r in planners["exaone"]["runs"] if r["mark"] == "correct" and r["result"]["calculation"]), examples[0]["id"])
+    # the first thing a visitor sees, on the first screen and in the question browser: the first scene of the walk-through
+    tour = pick_tour(planners, examples, tables)
+    first = tour["scenes"][0]["id"]
     index = {"generated_at": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "commit": commit, "version": __version__,
              "hardware": "4 vCPU Intel Xeon 2.10GHz, no GPU (session container)",
              "settings": {**SETTINGS,
@@ -327,7 +333,7 @@ def main() -> None:
                                   "긴 표는 평가 때처럼 입력 길이에 들어가는 앞쪽 행까지만 플래너에 보여 줬습니다. "
                                   "그래서 이 화면의 맞음·틀림은 보고서의 평가 수치와 문항마다 같습니다. 서비스의 기본 설정(주어 검사와 보완 시도를 켬)은 "
                                   "백엔드를 띄운 실시간 모드에서 볼 수 있습니다."},
-             "featured": first, "tour": pick_tour(planners, examples, tables, first), "counts": {"questions": len(examples), "runs": sum(len(p["runs"]) for p in planners.values()), "planners": len(planners)},
+             "featured": first, "tour": tour, "counts": {"questions": len(examples), "runs": sum(len(p["runs"]) for p in planners.values()), "planners": len(planners)},
              "planner_order": [p["key"] for p in PLANNERS], "planners": planners}
     out = ROOT / a.out
     out.mkdir(parents=True, exist_ok=True)

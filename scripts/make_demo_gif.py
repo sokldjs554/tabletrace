@@ -64,9 +64,14 @@ def capture(site: Path, frames: Path, chromium: str | None) -> None:
         go("#tour/3")
         shot("표에 없는 것을 물으면 모델이 낸 답을 내보내지 않습니다.", 3.2)
         idx = json.loads((site / "data/recorded/index.json").read_text(encoding="utf-8"))
-        go("#workbench/ko_owner_17/exaone")
-        page.evaluate("document.querySelector('.pv').scrollIntoView({block: 'center'})")
-        shot("전체 문항 탐색: 모델이 적은 숫자와 도구가 다시 계산한 값이 다르면 계산한 값으로 답합니다.", 3.2)
+        # the question browser, on the other corpus: the first right calculation of the Korean-and-chemistry EXAONE on a paper table
+        # that was shown whole, among the questions the owner's review left as they are
+        ex = json.loads((site / "data/examples.json").read_text(encoding="utf-8"))
+        review = {e["id"]: (e.get("review") or {}).get("verdict") for e in (ex["examples"] if isinstance(ex, dict) else ex)}
+        chem = next(r for r in idx["planners"]["kochem"]["runs"] if r["set"] == "chem_papers" and r["mark"] == "correct" and r["result"]["calculation"]
+                    and "rows_shown" not in r and review[r["id"]] == "ok")
+        go(f"#workbench/{chem['id']}/kochem")
+        shot("전체 문항 탐색: 영어 화학 논문 표의 문항도 같은 방식으로 답, 정답, 근거 셀을 봅니다.", 3.2)
         go("#matrix")
         page.evaluate("window.scrollTo(0, 150)")
         shot("표로 한꺼번에: 소유자가 직접 쓴 30문항 전체를 플래너 일곱에 대해.", 3.2)

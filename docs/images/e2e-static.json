@@ -4,17 +4,17 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 2026-11-20 18:51 UTC · commit 585f713"
+   "detail": "저장된 실행 결과 · 2026-11-22 07:21 UTC · commit 9afeb27"
   },
   {
    "name": "desktop: the first screen walks through one question: the proposal, the tool, the verifier, the answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=690 of 900, cells ['r0c3', 'r2c3'], '정답 2 ✓ 맞음'"
+   "detail": "answer '289.55 km2' at y=654 of 900, cells ['r0c1', 'r14c1'], '정답 289.55 km2 ✓ 맞음'"
   },
   {
-   "name": "desktop: it says why the cell is checked, with the cell that would give the same answer",
+   "name": "desktop: first scene: the number the model wrote is struck out and the tool's value is the answer",
    "ok": true,
-   "detail": "셀까지 확인하는 이유. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모"
+   "detail": "model wrote '189.55 km2', tool '289.55 km2', answer '289.55 km2'"
   },
   {
    "name": "desktop: two tabs, and the first screen fits the width",
@@ -39,7 +39,7 @@
   {
    "name": "desktop: the third scene links to a question the verifier let through",
    "ok": true,
-   "detail": "{'id': 'ko_owner_27', 'planner': 'exaone'}"
+   "detail": "{'id': 'ko_owner_28', 'planner': 'exaone'}"
   },
   {
    "name": "desktop: the research summary is a link at the foot of the page, not a tab, and the first screen ends with its scene",
@@ -54,7 +54,7 @@
   {
    "name": "desktop: the question browser opens with an answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=443 of 900, '정답 2 ✓ 맞음'"
+   "detail": "answer '289.55 km2' at y=407 of 900, '정답 289.55 km2 ✓ 맞음'"
   },
   {
    "name": "desktop: document + questions rendered",
@@ -69,7 +69,7 @@
   {
    "name": "desktop: the result states the gold answer",
    "ok": true,
-   "detail": "정답 포항 스틸러스 ✓ 맞음"
+   "detail": "정답 스카버러 ✓ 맞음"
   },
   {
    "name": "desktop: an answer with an evidence cell is among the first questions",
@@ -169,7 +169,7 @@
   {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.8s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.5s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -239,17 +239,17 @@
   {
    "name": "mobile: mode badge",
    "ok": true,
-   "detail": "저장된 실행 결과 · 2026-11-20"
+   "detail": "저장된 실행 결과 · 2026-11-22"
   },
   {
    "name": "mobile: the first screen walks through one question: the proposal, the tool, the verifier, the answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=836 of 844, cells ['r0c3', 'r2c3'], '정답 2 ✓ 맞음'"
+   "detail": "answer '289.55 km2' at y=857 of 844, cells ['r0c1', 'r14c1'], '정답 289.55 km2 ✓ 맞음'"
   },
   {
-   "name": "mobile: it says why the cell is checked, with the cell that would give the same answer",
+   "name": "mobile: first scene: the number the model wrote is struck out and the tool's value is the answer",
    "ok": true,
-   "detail": "셀까지 확인하는 이유. 김대의의 9를 골라도 답은 2입니다. 답만 채점하면 두 경우를 구별할 수 없어서, 모"
+   "detail": "model wrote '189.55 km2', tool '289.55 km2', answer '289.55 km2'"
   },
   {
    "name": "mobile: two tabs, and the first screen fits the width",
@@ -264,7 +264,7 @@
   {
    "name": "mobile: a table wider than the screen says so, and says when a marked cell is out of view",
    "ok": true,
-   "detail": "overflow 231px, 1 marked cell(s) out of view, hint '표시한 셀 가운데 일부가 오른쪽에 있습니다. 표'"
+   "detail": "overflow 195px, 1 marked cell(s) out of view, hint '표시한 셀 가운데 일부가 오른쪽에 있습니다. 표'"
   },
   {
    "name": "mobile: third scene: an answer to an unanswerable question that was not sent",
@@ -274,7 +274,7 @@
   {
    "name": "mobile: the third scene links to a question the verifier let through",
    "ok": true,
-   "detail": "{'id': 'ko_owner_27', 'planner': 'exaone'}"
+   "detail": "{'id': 'ko_owner_28', 'planner': 'exaone'}"
   },
   {
    "name": "mobile: the research summary is a link at the foot of the page, not a tab, and the first screen ends with its scene",
@@ -289,7 +289,7 @@
   {
    "name": "mobile: the question browser opens with an answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '2' at y=609 of 844, '정답 2 ✓ 맞음'"
+   "detail": "answer '289.55 km2' at y=609 of 844, '정답 289.55 km2 ✓ 맞음'"
   },
   {
    "name": "mobile: document + questions rendered",
@@ -304,7 +304,7 @@
   {
    "name": "mobile: the result states the gold answer",
    "ok": true,
-   "detail": "정답 포항 스틸러스 ✓ 맞음"
+   "detail": "정답 스카버러 ✓ 맞음"
   },
   {
    "name": "mobile: an answer with an evidence cell is among the first questions",
@@ -404,7 +404,7 @@
   {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.9s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 4.2s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",
