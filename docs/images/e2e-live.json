@@ -4,7 +4,7 @@
   {
    "name": "desktop: mode badge",
    "ok": true,
-   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (b36ef91)"
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (f0d2693)"
   },
   {
    "name": "desktop: document + questions rendered",
@@ -14,7 +14,7 @@
   {
    "name": "desktop: first question produced a result",
    "ok": true,
-   "detail": "완료 · 8 ms · 작업 52d53500f495"
+   "detail": "완료 · 7 ms · 작업 11dfcb448f55"
   },
   {
    "name": "desktop: the result states the gold answer",
@@ -30,6 +30,11 @@
    "name": "desktop: evidence highlighted in table",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "desktop: the result reads in order, with its source and its trace folded, and the left pane numbers its three steps",
+   "ok": true,
+   "detail": "['답변', '근거', '모델의 제안과 검증 결과', '실행 추적'], steps ['1', '2', '3']"
   },
   {
    "name": "desktop: abstain state renders 답변 보류 with its reason (heuristic planner)",
@@ -49,7 +54,7 @@
   {
    "name": "desktop: typed question executed",
    "ok": true,
-   "detail": "완료 · 10 ms · 작업 96b2793d4492"
+   "detail": "완료 · 9 ms · 작업 23fc26324e39"
   },
   {
    "name": "desktop: conversation keeps three turns",
@@ -84,7 +89,7 @@
   {
    "name": "desktop: research view leads with conclusions, each with a chart and a table of its values",
    "ok": true,
-   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 37, 'height': 3042, 'over': 0}"
+   "detail": "{'cards': 7, 'charts': 7, 'tables': 7, 'titles': 5, 'groups': 7, 'open': 0, 'sections': 37, 'height': 3070, 'over': 0}"
   },
   {
    "name": "desktop: every experiment is kept below, folded by topic",
@@ -94,7 +99,7 @@
   {
    "name": "desktop: research view fits the screen width and is short",
    "ok": true,
-   "detail": "height 3042px, overflow 0px"
+   "detail": "height 3070px, overflow 0px"
   },
   {
    "name": "desktop: a chart mark shows its value on focus",
@@ -109,7 +114,7 @@
   {
    "name": "mobile: mode badge",
    "ok": true,
-   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (b36ef91)"
+   "detail": "실시간 실행 · 휴리스틱 플래너 · 0.1.0 (f0d2693)"
   },
   {
    "name": "mobile: document + questions rendered",
@@ -119,7 +124,7 @@
   {
    "name": "mobile: first question produced a result",
    "ok": true,
-   "detail": "완료 · 9 ms · 작업 c14d9b3d219d"
+   "detail": "완료 · 9 ms · 작업 ca694a32cbee"
   },
   {
    "name": "mobile: the result states the gold answer",
@@ -135,6 +140,11 @@
    "name": "mobile: evidence highlighted in table",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "mobile: the result reads in order, with its source and its trace folded, and the left pane numbers its three steps",
+   "ok": true,
+   "detail": "['답변', '근거', '모델의 제안과 검증 결과', '실행 추적'], steps ['1', '2', '3']"
   },
   {
    "name": "mobile: abstain state renders 답변 보류 with its reason (heuristic planner)",

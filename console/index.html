@@ -40,9 +40,6 @@
     <a role="tab" class="segbtn subbtn" data-sub="workbench" href="#workbench">한 문항씩</a>
     <a role="tab" class="segbtn subbtn" data-sub="matrix" href="#matrix">표로 한꺼번에</a>
   </div>
-  <div class="notice" id="recordednotice" hidden>
-    저장된 실행 결과입니다. 모델은 이 페이지에서 돌지 않고, 평가 문항 전체의 기록된 결과를 정답과 함께 보여 줍니다.
-  </div>
 </div>
 
 <main id="main" class="layout" data-view="workbench">
@@ -54,16 +51,16 @@
   <!-- ===== workbench ===== -->
   <section class="view view-workbench" id="view-workbench">
     <aside class="pane pane-left" id="pane-left" aria-label="문항 묶음과 문서">
-      <div class="pane-head"><h2>문항 묶음</h2></div>
+      <div class="pane-head"><h2><span class="stepno">1</span>문항 묶음</h2></div>
       <select id="setsel" class="select" aria-label="문항 묶음"></select>
       <p class="setnote muted" id="setnote"></p>
       <div class="pane-head">
-        <h2>문서</h2>
+        <h2><span class="stepno">2</span>문서</h2>
         <span class="count" id="doccount"></span>
       </div>
       <input type="search" id="docfilter" class="input" placeholder="제목으로 찾기" aria-label="문서 제목으로 찾기" autocomplete="off">
       <ul class="doclist" id="doclist" role="listbox" aria-label="문서" tabindex="0"></ul>
-      <div class="pane-head"><h2>이 문서의 질문</h2><span class="count" id="excount"></span></div>
+      <div class="pane-head"><h2><span class="stepno">3</span>이 문서의 질문</h2><span class="count" id="excount"></span></div>
       <div class="examples" id="examples"><p class="muted">문서를 고르면 그 문서의 질문이 나옵니다.</p></div>
     </aside>
 
@@ -104,7 +101,7 @@
         <ol class="transcript" id="transcript" aria-live="polite"></ol>
       </details>
       <details class="chatbox" id="livebox" hidden>
-        <summary>직접 실행해 보기 <span class="muted">저장소의 검증기가 이 브라우저 안에서 실행됩니다. 모델은 돌지 않습니다</span></summary>
+        <summary>직접 실행해 보기 <span class="muted">검증기를 이 브라우저에서 실행 (모델은 돌지 않음)</span></summary>
         <div id="liveintro">
           <p class="muted chathelp">저장된 결과는 기록입니다. 여기서는 이 저장소의 검증기·도구·휴리스틱 플래너 코드를 이 브라우저에 불러와 실제로 실행합니다. 서버로 보내는 것은 없습니다.</p>
           <button type="button" class="btn" id="liveload">실행 환경 불러오기</button> <span class="muted" id="livesize"></span>

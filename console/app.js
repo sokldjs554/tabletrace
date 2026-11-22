@@ -144,7 +144,6 @@
       t.textContent = window.innerWidth <= 480 ? `저장된 실행 결과 · ${r.generated_at.slice(0, 10)}` : `저장된 실행 결과 · ${r.generated_at} · commit ${r.commit}`;
       t.title = `commit ${r.commit} · ` + plannerKeys().map(plannerShort).join(" / ");
       sel.innerHTML = '<option value="auto">자동(가장 많이 맞힌 플래너)</option>' + plannerKeys().map((k) => `<option value="${esc(k)}" title="${esc(r.planners[k].model_id || "")}">${esc(r.planners[k].short)}</option>`).join("");
-      $("#recordednotice").hidden = false;
       $("#footrelease").textContent = `정적 데모: 저장된 모델 출력을 저장소의 파이프라인에 넣어 ${r.generated_at}에 기록한 결과입니다. 평가와 같은 설정이라 맞음·틀림이 보고서의 수치와 같습니다.`;
       $("#chatbox").hidden = true; $("#askbtn").hidden = true;      // nothing can be asked without a backend: no dead controls
     } else {
@@ -262,6 +261,7 @@
     const list = $("#doclist");
     const docs = setDocs().filter((d) => !q || d.title.toLowerCase().includes(q));
     $("#doccount").textContent = `${docs.length}개`;
+    $("#docfilter").hidden = !q && docs.length <= 20;                   // a short list needs no search box
     list.innerHTML = docs.slice(0, 400).map((d) => { const n = docExamples(d.id).length;
       return `<li role="option" data-id="${esc(d.id)}" aria-selected="${!!state.doc && state.doc.id === d.id}" title="${esc(d.title)}">
         <span class="title">${esc(d.title)}</span><span class="ntab">${n ? "질문 " + n : "표 " + d.n_tables}</span></li>`; }).join("") || '<li class="muted">문서 없음</li>';
@@ -292,7 +292,8 @@
     $("#docempty").hidden = true; $("#docview").hidden = false;
     $("#doctitle").textContent = doc.title;
     const src = doc.source || {};
-    $("#docmeta").innerHTML = `${esc(src.name || "")} · ${esc(src.license || "")}${src.url ? ` · <a href="${esc(src.url)}" target="_blank" rel="noopener">출처</a>` : ""} · 문단 ${doc.passages.length} · 표 ${doc.tables.length}${src.note ? `<br><span class="srcnote">출처 메모: ${esc(src.note)}</span>` : ""}`;
+    $("#docmeta").innerHTML = `${esc(src.name || "")} · ${esc(src.license || "")}${src.url ? ` · <a href="${esc(src.url)}" target="_blank" rel="noopener">출처</a>` : ""} · 문단 ${doc.passages.length} · 표 ${doc.tables.length}`;
+    $("#docmeta").title = src.note ? `출처 메모: ${src.note}` : "";
     const body = $("#docbody");
     const parts = [];
     const maxP = Math.min(doc.passages.length, 60);
@@ -515,19 +516,20 @@
     const checks = ordered.length ? `<ul class="checks">${ordered.map((c) => `<li><span class="${c.passed ? "ok" : "ng"}">${c.passed ? "✓" : "✗"}</span><span><b>${esc(CHECKS[c.name] || c.name)}</b><br><span class="d">${esc(c.detail)}</span></span></li>`).join("")}</ul>` : '<p class="muted">검사 없음</p>';
     const trace = (res.trace || []).map((s) => `<li><details><summary><b>${esc(s.step)}</b>${s.tool ? ` <span class="muted">${esc(s.tool)}</span>` : ""}${s.status !== "ok" ? ` <span class="badge badge-err">${esc(s.status)}</span>` : ""}<span class="ms">${fmtMs(s.ms || 0)}</span></summary><pre>${esc(JSON.stringify({ input: s.input, output: s.output }, null, 1))}</pre></details></li>`).join("");
     box.innerHTML = `
-      <div class="card"><div class="card-head"><span>답변 ${modeBadge} ${plannerBadge}</span>${head}</div><div class="card-body">${bodyHtml}${gold}
+      <div class="card card-answer"><div class="card-head"><span>답변</span>${head}</div><div class="card-body">${bodyHtml}${gold}
         ${meta.kind === "live" ? `<p class="muted qline">질문: ${esc(res.question)} · 표 ${esc(res.table_id || "-")} · ${fmtMs(res.elapsed_ms || 0)}</p>` : ""}
         ${meta.chat && (meta.chat.memory.notes.length || meta.chat.question !== meta.chat.message) ? `<p class="memline"><b>기억에서 채운 것</b> ${esc(meta.chat.memory.notes.join(" "))}<br>파이프라인에 보낸 질문: ${esc(meta.chat.question)}</p>` : ""}
+        <details class="provbox"><summary>${modeBadge} ${plannerBadge}</summary>
         ${meta.source ? `<p class="muted provenance">모델 출력은 ${esc(meta.source.generated)}에 ${esc(meta.source.where)}에서 받아 저장한 것입니다${meta.source.ms ? `(그때의 응답 시간 ${fmtMs(meta.source.ms)})` : ""}. 검증·근거·실행 추적은 그 출력을 같은 파이프라인에 다시 넣은 결과입니다.</p>`
           : meta.kind === "recorded" ? `<p class="muted provenance">모델이 아닌 휴리스틱 기준선입니다. ${esc(meta.at)}에 이 저장소의 파이프라인으로 실행해 기록했습니다.</p>`
-          : meta.kind === "browser" ? `<p class="muted provenance">지금 이 브라우저에서 저장소의 검증기와 도구를 실행한 결과입니다. 모델은 실행하지 않았습니다. ${res.planner.mode === "visitor" ? "제안은 위 칸에 적힌 것입니다." : "제안은 휴리스틱 플래너가 냈습니다."} 설정: 주어 검사 ${meta.settings && meta.settings.entity_check ? "켬" : "끔"}, 근거 복구 켬, 다시 시도 없음, 표 전체.</p>` : ""}
+          : meta.kind === "browser" ? `<p class="muted provenance">지금 이 브라우저에서 저장소의 검증기와 도구를 실행한 결과입니다. 모델은 실행하지 않았습니다. ${res.planner.mode === "visitor" ? "제안은 위 칸에 적힌 것입니다." : "제안은 휴리스틱 플래너가 냈습니다."} 설정: 주어 검사 ${meta.settings && meta.settings.entity_check ? "켬" : "끔"}, 근거 복구 켬, 다시 시도 없음, 표 전체.</p>` : ""}</details>
         ${run && run.rows_shown ? `<p class="muted provenance unseennote">이 표는 ${run.rows_shown[1]}행인데, 평가 때 입력 길이 한도 때문에 플래너에는 ${run.rows_shown[0]}행만 보여 줬습니다(${run.rows_list ? "질문과 겹치는 행을 골라서" : "앞에서부터"}). 표에서 흐린 행은 플래너가 보지 못한 행입니다.</p>` : ""}</div></div>
-      ${renderCompare(ex, meta)}
       <div class="card"><div class="card-head"><span>근거</span><span>${res.evidence_cells.length}개 셀 · ${res.evidence_spans.length}개 문장</span></div><div class="card-body">${evidence}</div></div>
       ${calc ? `<div class="card"><div class="card-head"><span>계산</span><span>제한 계산기(사칙연산, 단위 검사)</span></div><div class="card-body calc">${calc}</div></div>` : ""}
       <div class="card"><div class="card-head"><span>모델의 제안과 검증 결과</span><span>${checksAll.length ? checksAll.filter((c) => c.passed).length + "/" + checksAll.length + " 통과" : ""}</span></div><div class="card-body">${renderProposal(res)}${checks}</div></div>
-      <div class="card"><div class="card-head"><span>실행 추적</span><span>LangGraph 노드 · 도구 호출</span></div><div class="card-body"><ul class="trace">${trace}</ul>
-        ${res.planner && res.planner.raw_output ? `<details class="rawbox"><summary class="muted">플래너 원문 출력</summary><div class="raw">${esc(res.planner.raw_output)}</div></details>` : ""}</div></div>`;
+      ${renderCompare(ex, meta)}
+      <details class="card fold"><summary class="card-head"><span>실행 추적</span><span>LangGraph 노드 · 도구 호출</span></summary><div class="card-body"><ul class="trace">${trace}</ul>
+        ${res.planner && res.planner.raw_output ? `<details class="rawbox"><summary class="muted">플래너 원문 출력</summary><div class="raw">${esc(res.planner.raw_output)}</div></details>` : ""}</div></details>`;
     $$(".evbtn", box).forEach((b) => b.addEventListener("click", () => focusEvidence(b.dataset.target, b.dataset.kind)));
     $$(".cmp button[data-planner]", box).forEach((b) => b.addEventListener("click", () => { $("#planner").value = b.dataset.planner; renderExamples(); showRecorded(ex.id); }));
     highlightEvidence(res, ex);
@@ -759,7 +761,7 @@
     box.innerHTML = `<h2>문항별 결과 <span class="muted sub">기록 ${esc(r.generated_at)} · commit ${esc(r.commit)}</span></h2>
       <p>평가 문항을 하나도 빼지 않고 플래너마다의 결과를 정답과 견줬습니다. 표시를 누르면 그 문항의 근거와 검증을 "한 문항씩" 화면에서 봅니다. 위쪽의 코퍼스 단추로 한국어 표와 영어 화학 문서를 바꿉니다.</p>
       <p class="legend"><b>표시</b> ${legend}. 앞의 ✓와 ✗는 시스템이 옳게 행동했는지이고, 뒤의 말은 무엇을 했는지입니다.</p>
-      <p class="muted">${esc(r.settings.note)}</p>${parts}
+      <details class="mnote"><summary class="muted">기록할 때의 설정</summary><p class="muted">${esc(r.settings.note)}</p></details>${parts}
       <section><h3>플래너</h3><ul class="plist">${notes}</ul></section>`;
   }
 

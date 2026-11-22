@@ -397,3 +397,20 @@ table.tourtable td .tv-n, table.tourtable td .tv-tag-cited { position: absolute;
   .tour-grid { grid-template-columns: minmax(0, 1fr); }
   .tour-tab { padding: 6px 10px; font-size: 13px; }
 }
+
+/* ---------- the question browser, tidied (2026-11-22): a reading order instead of boxes of equal weight ---------- */
+.stepno { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-family: var(--mono); font-weight: 700; vertical-align: 1px; }
+.card-answer .answer { font-size: 24px; }
+.provbox { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+.provbox > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.provbox > summary::-webkit-details-marker { display: none; }
+.provbox > summary::after { content: "출처 보기"; margin-left: auto; font-size: 11px; color: var(--muted); text-decoration: underline; }
+.provbox[open] > summary::after { content: "접기"; }
+.provbox .provenance { margin: 8px 0 0; }
+details.card.fold > summary.card-head { cursor: pointer; list-style: none; }
+details.card.fold > summary.card-head::-webkit-details-marker { display: none; }
+details.card.fold > summary.card-head > span:first-child::before { content: "▸ "; color: var(--muted); }
+details.card.fold[open] > summary.card-head > span:first-child::before { content: "▾ "; }
+details.card.fold:not([open]) > summary.card-head { border-bottom: 0; }
+.mnote { margin: 4px 0 14px; }
+.mnote > summary { cursor: pointer; font-size: 12px; }

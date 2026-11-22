@@ -224,6 +224,16 @@ def main() -> None:
                         ev.nth(0).click()
                         page.wait_for_timeout(500)
                         check(f"{label}: evidence highlighted in table", page.locator("td.is-evidence").count() >= 1)
+                        # The right pane is read top to bottom: this answer first (verdict, answer, gold answer), then why (evidence,
+                        # calculation, proposal and checks), then the other planners; where the result comes from and the trace are folded.
+                        order = page.evaluate("""() => ({ heads: [...document.querySelectorAll('#result > .card > .card-head > span:first-child')].map(e => e.textContent.trim()),
+                            chips: document.querySelectorAll('#result .card-answer > .card-head .badge-rec, #result .card-answer > .card-head .badge-live, #result .card-answer > .card-head .badge-mode').length,
+                            prov: !!(document.querySelector('#result .provbox') || {}).open, trace: !!(document.querySelector('#result details.card.fold') || {}).open,
+                            steps: [...document.querySelectorAll('#pane-left .stepno')].map(e => e.textContent), notice: document.querySelectorAll('#recordednotice').length })""")
+                        want = [h for h in ("답변", "근거", "계산", "모델의 제안과 검증 결과", "같은 질문, 다른 플래너", "실행 추적") if h in order["heads"]]
+                        check(f"{label}: the result reads in order, with its source and its trace folded, and the left pane numbers its three steps",
+                              order["heads"] == want and want[0] == "답변" and want[-1] == "실행 추적" and order["chips"] == 0 and not order["prov"] and not order["trace"]
+                              and order["steps"] == ["1", "2", "3"] and order["notice"] == 0, f"{order['heads']}, steps {order['steps']}")
                         pane("right")
                     if tag == "static":
                         # the same question under the other stored planners; a name switches to that planner's result

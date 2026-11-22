@@ -54,7 +54,7 @@
   {
    "name": "desktop: the question browser opens with an answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '289.55 km2' at y=407 of 900, '정답 289.55 km2 ✓ 맞음'"
+   "detail": "answer '289.55 km2' at y=336 of 900, '정답 289.55 km2 ✓ 맞음'"
   },
   {
    "name": "desktop: document + questions rendered",
@@ -80,6 +80,11 @@
    "name": "desktop: evidence highlighted in table",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "desktop: the result reads in order, with its source and its trace folded, and the left pane numbers its three steps",
+   "ok": true,
+   "detail": "['답변', '근거', '모델의 제안과 검증 결과', '같은 질문, 다른 플래너', '실행 추적'], steps ['1', '2', '3']"
   },
   {
    "name": "desktop: planners are compared on the same question",
@@ -169,7 +174,7 @@
   {
    "name": "desktop: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.6s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.5s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "desktop: a changed proposal is verified in the browser as on a server",
@@ -299,7 +304,7 @@
   {
    "name": "mobile: the question browser opens with an answer and its gold answer, without a click",
    "ok": true,
-   "detail": "answer '289.55 km2' at y=609 of 844, '정답 289.55 km2 ✓ 맞음'"
+   "detail": "answer '289.55 km2' at y=558 of 844, '정답 289.55 km2 ✓ 맞음'"
   },
   {
    "name": "mobile: document + questions rendered",
@@ -325,6 +330,11 @@
    "name": "mobile: evidence highlighted in table",
    "ok": true,
    "detail": ""
+  },
+  {
+   "name": "mobile: the result reads in order, with its source and its trace folded, and the left pane numbers its three steps",
+   "ok": true,
+   "detail": "['답변', '근거', '모델의 제안과 검증 결과', '같은 질문, 다른 플래너', '실행 추적'], steps ['1', '2', '3']"
   },
   {
    "name": "mobile: planners are compared on the same question",
@@ -414,7 +424,7 @@
   {
    "name": "mobile: the verifier loads into the browser",
    "ok": true,
-   "detail": "loaded in 3.5s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
+   "detail": "loaded in 3.3s; proposal 'op: lookup ; cells: r5c2 ; answer: 무한도전'"
   },
   {
    "name": "mobile: a changed proposal is verified in the browser as on a server",
