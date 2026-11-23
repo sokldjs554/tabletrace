@@ -32,7 +32,7 @@ def test_the_headline_is_the_lowest_of_the_full_data_trainings():
     """The bar the first chart accents is the first, lowest training; the other trainings are given as a range."""
     row = next(r for r in DATA["highlights"][0]["rows"] if r.get("emphasis"))
     assert row["value"] == _em("exaone_full_vllm_ko_test") and len(row["ticks"]) == 10 and min(row["ticks"]) >= row["value"]      # eleven full-data trainings, the last three from section P
-    assert f"{100 * row['value']:.1f}%" in DATA["highlights"][0]["title"] and "같은 설정으로 11번 학습했다" in DATA["highlights"][0]["caption"]
+    assert f"{100 * row['value']:.1f}%" in DATA["highlights"][0]["title"] and "11번 학습했다. 설정이 모두 같지는 않다" in DATA["highlights"][0]["caption"]
     assert sorted(row["ticks"])[-1] == _em("exaone_ownloop2_vllm_ko_test") > _em("exaone_koonly2_vllm_ko_test") > _em("exaone_full_vllm_ko_test_run2")       # section P's are the highest
 
 

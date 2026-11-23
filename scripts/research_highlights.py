@@ -34,9 +34,10 @@ def p1(x: float) -> str:
 
 
 def accuracy() -> dict:
-    """Korean test: the planners side by side. The full-data model was trained eleven times with the same command (the
+    """Korean test: the planners side by side. The full-data model was trained eleven times, not all with the same
+    setting: before and after the fix of the answer-length cap (§23), and two with the owner's own training loop. The
     eighth is section O's Korean-only model; the ninth to eleventh come from section P: the Korean-only repeat, the start
-    model of the RL repeat and the owner-loop repeat); the bar is the first (lowest) training, which is the number the
+    model of the RL repeat and the owner-loop repeat. The bar is the first (lowest) training, which is the number the
     documents lead with, and the other ten are drawn as ticks."""
     full = [_em("exaone_full_vllm_ko_test"), _em("exaone_full_vllm_ko_test_run2"), _em("exaone_full2old_vllm_ko_test"),
             _em("exaone_full2_vllm_ko_test"), _em("exaone_full3_vllm_ko_test"), _em("exaone_full4_vllm_ko_test"),
@@ -58,10 +59,10 @@ def accuracy() -> dict:
         r["text"] = p1(r["value"])
     return {"id": "accuracy", "kind": "bars", "max": 1.0, "rows": rows,
             "title": f"전체 데이터로 튜닝한 12억 파라미터 EXAONE이 {p1(min(full))}로, 튜닝하지 않은 32B({p1(b32)})보다 높다",
-            "caption": f"한국어 test {_n('exaone_full_vllm_ko_test')}문항의 정답률(verified EM, 주어 검사 없이). 전체 데이터 튜닝은 같은 설정으로 {len(full)}번 학습했다. "
+            "caption": f"한국어 test {_n('exaone_full_vllm_ko_test')}문항의 정답률(verified EM, 주어 검사 없이). 전체 데이터 튜닝은 {len(full)}번 학습했다. 설정이 모두 같지는 않다(정답 길이 상한을 고치기 전과 후, 직접 쓴 학습 루프로 한 두 번). "
                        f"막대는 가장 낮은 첫 학습이고, 나머지 {len(full) - 1}번은 {p1(sorted(full)[1])}~{p1(max(full))}이다. 300문항 튜닝은 {len(small)}번이고 막대는 가장 낮은 값이다. "
                        "튜닝 없는 모델은 프롬프트에 예시를 몇 개 넣었다.",
-            "more": "한국어 표 QA — 독립 test", "tick_label": "같은 설정의 다른 학습"}
+            "more": "한국어 표 QA — 독립 test", "tick_label": "전체 데이터 튜닝의 다른 학습"}
 
 
 def evidence() -> dict:
